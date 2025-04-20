@@ -17,6 +17,11 @@ serve(async (req) => {
   try {
     const { jobDescription, resumeContent } = await req.json()
 
+    // Validate inputs
+    if (!jobDescription || !resumeContent) {
+      throw new Error('Job description and resume content are required')
+    }
+
     const openAiKey = Deno.env.get('OPENAI_API_KEY')
     if (!openAiKey) {
       throw new Error('OpenAI API key not found')
@@ -24,6 +29,8 @@ serve(async (req) => {
 
     const configuration = new Configuration({ apiKey: openAiKey })
     const openai = new OpenAIApi(configuration)
+
+    console.log('Sending request to OpenAI...')
 
     const prompt = `
     As an expert ATS (Applicant Tracking System) optimization specialist and professional resume writer, 
@@ -43,7 +50,7 @@ serve(async (req) => {
     Please provide the optimized resume content maintaining professional formatting.`
 
     const completion = await openai.createChatCompletion({
-      model: "gpt-4",
+      model: "gpt-4o-mini", // Updated to a supported model
       messages: [
         {
           role: "system",
@@ -60,6 +67,12 @@ serve(async (req) => {
 
     const optimizedResume = completion.data.choices[0].message?.content
 
+    if (!optimizedResume) {
+      throw new Error('Failed to generate optimized resume')
+    }
+
+    console.log('Successfully generated optimized resume')
+
     return new Response(
       JSON.stringify({ optimizedResume }),
       {
@@ -68,8 +81,13 @@ serve(async (req) => {
       },
     )
   } catch (error) {
+    console.error('Error in optimize-resume function:', error)
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message || 'An unexpected error occurred',
+        details: error.toString()
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
