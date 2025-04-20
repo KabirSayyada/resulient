@@ -1,7 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Configuration, OpenAIApi } from "https://esm.sh/openai@3.1.0"
+import OpenAI from "https://esm.sh/openai@4.20.1"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,8 +26,10 @@ serve(async (req) => {
       throw new Error('OpenAI API key not found')
     }
 
-    const configuration = new Configuration({ apiKey: openAiKey })
-    const openai = new OpenAIApi(configuration)
+    // Create OpenAI client using the new version
+    const openai = new OpenAI({
+      apiKey: openAiKey,
+    })
 
     console.log('Sending request to OpenAI...')
 
@@ -49,8 +50,9 @@ serve(async (req) => {
 
     Please provide the optimized resume content maintaining professional formatting.`
 
-    const completion = await openai.createChatCompletion({
-      model: "gpt-4o-mini", // Updated to a supported model
+    // Use the correct method for the new OpenAI version
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -65,7 +67,7 @@ serve(async (req) => {
       max_tokens: 2000
     })
 
-    const optimizedResume = completion.data.choices[0].message?.content
+    const optimizedResume = completion.choices[0].message.content
 
     if (!optimizedResume) {
       throw new Error('Failed to generate optimized resume')
