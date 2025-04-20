@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { UserMenu } from "@/components/auth/UserMenu";
@@ -7,16 +7,76 @@ import { Button } from "@/components/ui/button";
 import { JobDescriptionInput } from "@/components/resume/JobDescriptionInput";
 import { FileUploadSection } from "@/components/resume/FileUploadSection";
 import { OptimizedResumeDisplay } from "@/components/resume/OptimizedResumeDisplay";
+import { useToast } from "@/hooks/use-toast";
+import { useSupabaseFunction } from "@/hooks/useSupabaseFunction";
 
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  const [jobDescription, setJobDescription] = useState("");
+  const [resumeContent, setResumeContent] = useState("");
+  const [optimizedResume, setOptimizedResume] = useState("");
+  const [optimizing, setOptimizing] = useState(false);
+  
+  // Hook to call the Supabase function
+  const { callFunction, loading: functionLoading, error: functionError } = useSupabaseFunction();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
     }
   }, [user, loading, navigate]);
+
+  const handleOptimizeResume = async () => {
+    if (!resumeContent) {
+      toast({
+        title: "Missing Content",
+        description: "Please upload or paste your resume content.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!jobDescription) {
+      toast({
+        title: "Missing Job Description",
+        description: "Please paste the job description to optimize against.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setOptimizing(true);
+    
+    try {
+      const response = await callFunction("optimize-resume", {
+        jobDescription,
+        resumeContent,
+      });
+      
+      if (response?.error) {
+        throw new Error(response.error);
+      }
+      
+      setOptimizedResume(response.optimizedResume);
+      
+      toast({
+        title: "Resume Optimized",
+        description: "Your resume has been successfully optimized for ATS.",
+      });
+    } catch (error) {
+      console.error("Error optimizing resume:", error);
+      toast({
+        title: "Optimization Failed",
+        description: error instanceof Error ? error.message : "Failed to optimize resume",
+        variant: "destructive",
+      });
+    } finally {
+      setOptimizing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -42,9 +102,33 @@ const Index = () => {
         </div>
 
         <div className="space-y-6">
-          <JobDescriptionInput />
-          <FileUploadSection />
-          <OptimizedResumeDisplay />
+          <JobDescriptionInput 
+            jobDescription={jobDescription} 
+            setJobDescription={setJobDescription} 
+          />
+          
+          <FileUploadSection 
+            resumeContent={resumeContent} 
+            setResumeContent={setResumeContent} 
+          />
+          
+          <div className="flex justify-center">
+            <Button 
+              onClick={handleOptimizeResume} 
+              disabled={optimizing || !resumeContent || !jobDescription}
+              className="px-6 py-2 text-lg"
+            >
+              {optimizing ? "Optimizing..." : "Optimize Resume"}
+            </Button>
+          </div>
+          
+          {optimizedResume && (
+            <OptimizedResumeDisplay 
+              optimizedResume={optimizedResume}
+              jobDescription={jobDescription}
+              originalResume={resumeContent}
+            />
+          )}
         </div>
       </div>
     </div>
