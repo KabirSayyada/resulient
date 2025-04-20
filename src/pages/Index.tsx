@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -68,7 +69,7 @@ const Index = () => {
         const textContent = await page.getTextContent();
         const pageText = textContent.items
           .filter(item => 'str' in item)
-          .map(item => (item as pdfjsLib.TextItem).str)
+          .map(item => item.str)
           .join(" ");
         fullText += pageText + "\n";
       }
