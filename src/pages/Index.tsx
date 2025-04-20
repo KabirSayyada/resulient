@@ -7,8 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { FileText, Upload } from "lucide-react";
 import * as pdfjsLib from "pdfjs-dist";
 
-// Set the PDF.js worker source
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.worker.min.js`;
+// Set the PDF.js worker source to match the pdfjs-dist version we're using
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 const Index = () => {
   const [jobDescription, setJobDescription] = useState("");
