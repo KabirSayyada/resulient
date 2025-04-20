@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -67,7 +66,10 @@ const Index = () => {
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        const pageText = textContent.items.map(item => item.str).join(" ");
+        const pageText = textContent.items
+          .filter(item => 'str' in item)
+          .map(item => (item as pdfjsLib.TextItem).str)
+          .join(" ");
         fullText += pageText + "\n";
       }
       
@@ -101,7 +103,6 @@ const Index = () => {
       } else if (file.type === "text/plain") {
         text = await extractTextFromTxt(file);
       } else {
-        // For other formats, we'll just show a message that they're not supported
         throw new Error("File format not supported. Please upload a PDF or TXT file.");
       }
       
