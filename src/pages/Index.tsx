@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [jobDescription, setJobDescription] = useState("");
@@ -23,24 +24,15 @@ const Index = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        "https://lovable.dev/supabase-edge-function-url/optimize-resume",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            jobDescription,
-            resumeContent,
-          }),
+      const { data, error } = await supabase.functions.invoke("optimize-resume", {
+        body: {
+          jobDescription,
+          resumeContent,
         }
-      );
+      });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to optimize resume");
+      if (error) {
+        throw new Error(error.message || "Failed to optimize resume");
       }
 
       setOptimizedResume(data.optimizedResume);

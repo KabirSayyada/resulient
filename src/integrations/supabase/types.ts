@@ -30,68 +30,6 @@ export type Database = {
         }
         Relationships: []
       }
-      job_applications: {
-        Row: {
-          cover_letter: string | null
-          created_at: string | null
-          id: string
-          job_description: string
-          resume_id: string
-          user_id: string
-        }
-        Insert: {
-          cover_letter?: string | null
-          created_at?: string | null
-          id?: string
-          job_description: string
-          resume_id: string
-          user_id: string
-        }
-        Update: {
-          cover_letter?: string | null
-          created_at?: string | null
-          id?: string
-          job_description?: string
-          resume_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "job_applications_resume_id_fkey"
-            columns: ["resume_id"]
-            isOneToOne: false
-            referencedRelation: "resumes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      resumes: {
-        Row: {
-          created_at: string | null
-          id: string
-          optimized_text: string | null
-          original_text: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          optimized_text?: string | null
-          original_text: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          optimized_text?: string | null
-          original_text?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
