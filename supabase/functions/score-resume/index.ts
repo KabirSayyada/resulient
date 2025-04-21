@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.29.0";
 import OpenAI from "https://esm.sh/openai@4.17.0";
@@ -63,9 +62,8 @@ Format your response ONLY as a valid JSON object with these fields:
   "eliteIndicatorsFound": string[]
 }`;
 
-    // Using chat completions API instead of completions API
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
         { 
           role: "system", 
