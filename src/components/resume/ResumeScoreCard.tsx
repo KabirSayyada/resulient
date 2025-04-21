@@ -1,8 +1,8 @@
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScoreData } from "@/pages/ResumeScoring";
 import { Award, Star, Medal, BookOpen, Trophy, TrendingUp, BarChart, AlertTriangle } from "lucide-react";
-import BenchmarkGraph from "./BenchmarkGraph";
 
 interface ResumeScoreCardProps {
   scoreData: ScoreData;
@@ -102,11 +102,6 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
             </div>
           </div>
         )}
-        {scoreData.scoringMode === "resumeOnly" && (
-          <div className="w-full mt-2">
-            <BenchmarkGraph percentile={percentile} numSimilar={numSimilar} />
-          </div>
-        )}
         <div className="grid grid-cols-2 gap-x-8 gap-y-2 w-full mt-2">
           <ScoreMetric
             icon={<Star className="w-4 h-4 text-yellow-500" />}
@@ -146,8 +141,8 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
           <ScoreMetric
             icon={<BarChart className="w-4 h-4 text-pink-500" />}
             label="ATS Compatibility"
-            value={scoreData.atsReadiness}
-            maxValue={100}
+            value={Math.floor(scoreData.atsReadiness / 10)}
+            maxValue={10}
             missing={!scoreData.atsReadiness || scoreData.atsReadiness < 50}
           />
         </div>
@@ -200,3 +195,4 @@ const ScoreMetric = ({
 );
 
 export default ResumeScoreCard;
+
