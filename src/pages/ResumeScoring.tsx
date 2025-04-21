@@ -1,18 +1,16 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { UserMenu } from "@/components/auth/UserMenu";
-import { JobDescriptionInput } from "@/components/resume/JobDescriptionInput";
-import { FileUploadSection } from "@/components/resume/FileUploadSection";
 import { ScoreBreakdown } from "@/components/resume/ScoreBreakdown";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
 import { useSupabaseFunction } from "@/hooks/useSupabaseFunction";
 import { supabase } from "@/integrations/supabase/client";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, BarChart2 } from "lucide-react";
+import { BarChart2 } from "lucide-react";
 import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 
@@ -144,6 +142,7 @@ const ResumeScoring = () => {
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
       
+      // Fixed database insert operation to match the database schema
       const { error } = await supabase
         .from("resume_scores")
         .insert({
@@ -155,12 +154,11 @@ const ResumeScoring = () => {
           keyword_relevance: newScoreData.keywordRelevance,
           industry: newScoreData.Industry,
           percentile: newScoreData.percentile,
-          num_similar_resumes: newScoreData.numSimilarResumes,
-          suggested_skills: newScoreData.suggestedSkills,
           resume_content: resumeContent,
-          elite_indicators: newScoreData.eliteIndicatorsFound,
-          scoring_mode: scoringMode,
-          ats_readiness: 0
+          suggested_skills: newScoreData.suggestedSkills,
+          job_description: '', // Empty string since we're only doing resume-only scoring
+          ats_readiness: 0, // Required field with default value
+          scoring_mode: scoringMode
         });
       
       if (error) {
