@@ -1,17 +1,18 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useResumeScoring } from "@/hooks/useResumeScoring";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart2 } from "lucide-react";
+import { BarChart2, ArrowLeft } from "lucide-react";
 import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { supabase } from "@/integrations/supabase/client";
 import { ScoreData } from "@/types/resume";
+import { Button } from "@/components/ui/button";
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
@@ -97,9 +98,16 @@ const ResumeScoring = () => {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between mb-8 items-center">
           <div>
-            <h1 className="text-4xl font-extrabold text-indigo-700 mb-2 tracking-tight drop-shadow-md">
-              🚀 Resume Score Analyzer
-            </h1>
+            <div className="flex items-center gap-2 mb-2">
+              <Link to="/">
+                <Button variant="ghost" size="icon" className="rounded-full" aria-label="Back to Resume Optimizer">
+                  <ArrowLeft className="h-5 w-5 text-indigo-700" />
+                </Button>
+              </Link>
+              <h1 className="text-4xl font-extrabold text-indigo-700 tracking-tight drop-shadow-md">
+                🚀 Resume Score Analyzer
+              </h1>
+            </div>
             <p className="text-indigo-600 font-medium">
               Get visually stunning insights about your resume, see your career growth and beat the competition!
             </p>
