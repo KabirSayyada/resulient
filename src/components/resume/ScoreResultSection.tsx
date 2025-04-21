@@ -97,7 +97,7 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
 
   // Check if this was a cached result by examining the id
   // If it was reused, the ID would be an existing UUID from the database
-  // rather than a newly generated one
+  // rather than a newly generated one that has "newly-generated" prefix
   const isCachedResult = scoreData.id && !scoreData.id.includes("newly-generated");
 
   return (

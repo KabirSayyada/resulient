@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -72,15 +71,15 @@ const ResumeScoring = () => {
         setScoreHistory(
           data.map((item: any) => ({
             overallScore: item.overall_score,
-            skillsAlignment: item.skills_alignment || item.skills_breadth,
-            WorkExperience: item.work_experience || item.experience_duration,
+            skillsAlignment: item.skills_breadth || 0,
+            WorkExperience: item.experience_duration || 0,
             Achievements: item.achievements || 0,
             EducationQuality: item.education_quality || 0,
             Certifications: item.certifications || 0,
-            ContentStructure: item.content_structure,
-            keywordRelevance: item.keyword_relevance,
-            Industry: item.industry,
-            percentile: item.percentile,
+            ContentStructure: item.content_structure || 0,
+            keywordRelevance: item.keyword_relevance || 0,
+            Industry: item.industry || "",
+            percentile: item.percentile || 50,
             numSimilarResumes: item.num_similar_resumes || 12000,
             suggestedSkills: item.suggested_skills || [],
             eliteIndicatorsFound: item.elite_indicators || [],
@@ -101,12 +100,10 @@ const ResumeScoring = () => {
     }
   };
 
-  // New function to find an existing score with the same resume content
   const findExistingScore = async (content: string) => {
     if (!user) return null;
     
     try {
-      // Query the database for a score with the exact same resume content for this user
       const { data, error } = await supabase
         .from("resume_scores")
         .select("*")
@@ -121,7 +118,6 @@ const ResumeScoring = () => {
         return null;
       }
       
-      // If we found a match, return the first (most recent) matching score
       if (data && data.length > 0) {
         return data[0];
       }
@@ -146,31 +142,29 @@ const ResumeScoring = () => {
     setIsScoring(true);
     
     try {
-      // First, check if we already have a score for this exact resume content
       const existingScore = await findExistingScore(resumeContent);
       
       if (existingScore) {
-        // If we found an existing score, use it instead of calling the AI
         console.log("Found existing score for this resume, reusing results");
         
         const cachedScoreData: ScoreData = {
           overallScore: existingScore.overall_score,
-          skillsAlignment: existingScore.skills_alignment || existingScore.skills_breadth,
-          WorkExperience: existingScore.work_experience || existingScore.experience_duration,
+          skillsAlignment: existingScore.skills_breadth || 0,
+          WorkExperience: existingScore.experience_duration || 0,
           Achievements: existingScore.achievements || 0,
           EducationQuality: existingScore.education_quality || 0,
           Certifications: existingScore.certifications || 0,
-          ContentStructure: existingScore.content_structure,
-          keywordRelevance: existingScore.keyword_relevance,
-          Industry: existingScore.industry,
-          percentile: existingScore.percentile,
+          ContentStructure: existingScore.content_structure || 0,
+          keywordRelevance: existingScore.keyword_relevance || 0,
+          Industry: existingScore.industry || "",
+          percentile: existingScore.percentile || 50,
           numSimilarResumes: existingScore.num_similar_resumes || 12000,
           suggestedSkills: existingScore.suggested_skills || [],
           eliteIndicatorsFound: existingScore.elite_indicators || [],
           improvementTips: existingScore.improvement_tips || [],
-          timestamp: new Date().toLocaleString(), // Update timestamp to show it was reused now
+          timestamp: new Date().toLocaleString(),
           id: existingScore.id,
-          scoringMode: existingScore.scoring_mode || "resumeOnly",
+          scoringMode: existingScore.scoring_mode as "resumeOnly" || "resumeOnly",
         };
         
         setScoreData(cachedScoreData);
@@ -183,7 +177,6 @@ const ResumeScoring = () => {
         return;
       }
       
-      // If no existing score was found, proceed with AI scoring
       const payload = {
         resumeContent,
         scoringMode,
@@ -211,14 +204,13 @@ const ResumeScoring = () => {
         eliteIndicatorsFound: response.eliteIndicatorsFound || [],
         improvementTips: response.improvementTips || [],
         timestamp: new Date().toLocaleString(),
-        id: crypto.randomUUID(),
+        id: "newly-generated-" + crypto.randomUUID(),
         scoringMode,
       };
       
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
       
-      // Insert the score into the database using the correct schema
       const { error } = await supabase
         .from("resume_scores")
         .insert({
@@ -226,14 +218,20 @@ const ResumeScoring = () => {
           overall_score: newScoreData.overallScore,
           skills_breadth: newScoreData.skillsAlignment,
           experience_duration: newScoreData.WorkExperience,
+          achievements: newScoreData.Achievements,
+          education_quality: newScoreData.EducationQuality,
+          certifications: newScoreData.Certifications,
           content_structure: newScoreData.ContentStructure,
           keyword_relevance: newScoreData.keywordRelevance,
           industry: newScoreData.Industry,
           percentile: newScoreData.percentile,
-          resume_content: resumeContent,
+          num_similar_resumes: newScoreData.numSimilarResumes,
           suggested_skills: newScoreData.suggestedSkills,
-          job_description: '', // Empty string since we're only doing resume-only scoring
-          ats_readiness: 0, // Required field with default value
+          elite_indicators: newScoreData.eliteIndicatorsFound,
+          improvement_tips: newScoreData.improvementTips,
+          resume_content: resumeContent,
+          job_description: '',
+          ats_readiness: 0,
           scoring_mode: scoringMode
         });
       
