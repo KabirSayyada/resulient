@@ -1,7 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreData } from "@/pages/ResumeScoring";
-import { Star, Medal, BookOpen, Trophy, TrendingUp, BarChart } from "lucide-react";
+import { Star, Medal, BookOpen, Trophy, TrendingUp, BarChart, Shield } from "lucide-react";
 import { ScoreMetric } from "./components/ScoreMetric";
 import { ResumeWarnings } from "./components/ResumeWarnings";
 import { ScoreHeader } from "./components/ScoreHeader";
@@ -113,6 +113,15 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
             value={scoreData.ContentStructure}
             maxValue={5}
             missing={!scoreData.ContentStructure || scoreData.ContentStructure < 2}
+          />
+          {/* Add ATS Compatibility metric with correct scoring scale (out of 10) */}
+          <ScoreMetric
+            icon={<Shield className="w-4 h-4 text-indigo-600" />}
+            label="ATS Compatibility"
+            value={scoreData.atsReadiness}
+            maxValue={10}
+            missing={!scoreData.atsReadiness || scoreData.atsReadiness < 4}
+            isAtsScore={true} // Flag this as an ATS score for proper indicator display
           />
         </div>
 
