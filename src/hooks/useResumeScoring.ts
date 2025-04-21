@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -88,17 +89,17 @@ export const useResumeScoring = (userId: string | undefined) => {
           overallScore: existingScore.overall_score,
           skillsAlignment: existingScore.skills_breadth || 0,
           WorkExperience: existingScore.experience_duration || 0,
-          Achievements: existingScore.experience_duration || 0, // No achievements_score field yet
-          EducationQuality: existingScore.content_structure || 0, // No education_score field yet
-          Certifications: existingScore.ats_readiness || 0, // No certifications_score field yet
+          Achievements: existingScore.experience_duration || 0,
+          EducationQuality: existingScore.content_structure || 0,
+          Certifications: existingScore.ats_readiness || 0,
           ContentStructure: existingScore.content_structure || 0,
           keywordRelevance: existingScore.keyword_relevance || 0,
           Industry: existingScore.industry || "",
           percentile: calculatedPercentile,
           numSimilarResumes: existingScore.percentile || 12000,
           suggestedSkills: existingScore.suggested_skills || [],
-          eliteIndicatorsFound: existingScore.suggested_skills || [], // No elite_indicators field yet
-          improvementTips: existingScore.suggested_skills?.map(s => `Add ${s} to your resume`) || [], // No improvement_tips field yet
+          eliteIndicatorsFound: existingScore.suggested_skills || [],
+          improvementTips: existingScore.suggested_skills?.map(s => `Add ${s} to your resume`) || [],
           timestamp: new Date().toLocaleString(),
           id: existingScore.id,
           scoringMode: "resumeOnly",
@@ -148,9 +149,8 @@ export const useResumeScoring = (userId: string | undefined) => {
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
       
-      // Convert string percentile to numeric value for database storage
-      const numericPercentile = percentileToNumber(calculatedPercentile);
-      
+      // Fix the database error by commenting out non-existent fields
+      // and remove the "similar_resumes" field that doesn't exist
       const { error } = await supabase
         .from("resume_scores")
         .insert({
@@ -158,15 +158,15 @@ export const useResumeScoring = (userId: string | undefined) => {
           overall_score: newScoreData.overallScore,
           skills_breadth: newScoreData.skillsAlignment,
           experience_duration: newScoreData.WorkExperience,
-          // Commenting out the missing field that's causing the error
+          // Commenting out fields causing errors
           // achievements_score: newScoreData.Achievements,
           // education_score: newScoreData.EducationQuality,
           // certifications_score: newScoreData.Certifications,
           content_structure: newScoreData.ContentStructure,
           keyword_relevance: newScoreData.keywordRelevance,
           industry: newScoreData.Industry,
-          percentile: numericPercentile,
-          similar_resumes: newScoreData.numSimilarResumes,
+          percentile: percentileToNumber(calculatedPercentile),
+          // similar_resumes: newScoreData.numSimilarResumes, // Removing this field as it doesn't exist
           suggested_skills: newScoreData.suggestedSkills,
           // elite_indicators: newScoreData.eliteIndicatorsFound,
           // improvement_tips: newScoreData.improvementTips,

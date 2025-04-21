@@ -55,8 +55,8 @@ export const ScoreBreakdown = ({ scoreData }: { scoreData: ScoreData }) => {
             <span className="font-medium">{scoreData.Industry}</span>
           </div>
           <div className="bg-white px-4 py-2 rounded-md border border-gray-200 mt-2 text-center">
-            <span className="text-sm text-gray-500">Ranking: </span>
-            <span className="font-medium">Top {scoreData.percentile}%</span>
+            <span className="text-sm text-gray-500">Standing: </span>
+            <span className="font-medium">{scoreData.percentile}</span>
           </div>
         </div>
       </div>

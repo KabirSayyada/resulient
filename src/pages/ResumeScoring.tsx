@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -39,6 +40,7 @@ const ResumeScoring = () => {
 
       if (data) {
         const formattedHistory: ScoreData[] = data.map((item) => {
+          // Format percentile without prefixes/suffixes
           const percentileString = (() => {
             const percentile = item.percentile || 50;
             if (percentile >= 99) return "1";

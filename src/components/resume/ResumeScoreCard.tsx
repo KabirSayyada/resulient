@@ -46,25 +46,16 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
 
   const getPercentileNumeric = (percentile: string): number => {
     switch(percentile) {
-      case "Top 1%": return 1;
-      case "Top 5%": return 5;
-      case "Top 10%": return 10;
-      case "Top 25%": return 25;
+      case "1": return 1;
+      case "5": return 5;
+      case "10": return 10;
+      case "25": return 25;
       case "Above Average": return 50;
       case "Average": return 50;
       case "Below Average": return 75;
-      case "Bottom 25%": return 90;
+      case "Bottom 25": return 90;
       default: return 50;
     }
-  };
-
-  const displayPercentile = () => {
-    let cleanedPercentile = scoreData.percentile
-      .replace(/^(Top\s+)+/gi, 'Top ')
-      .replace(/%+/g, '%')
-      .trim();
-
-    return cleanedPercentile;
   };
 
   return (
@@ -145,7 +136,7 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
 
         <div className="rounded-md text-xs text-gray-600 bg-indigo-50 p-2 font-medium w-full">
           {scoreData.scoringMode === "resumeOnly"
-            ? `Benchmarked vs. others in "${scoreData.Industry}" — ${displayPercentile()}`
+            ? `Benchmarked vs. others in "${scoreData.Industry}" — ${scoreData.percentile}`
             : "Compared against your target job description"}
         </div>
 
