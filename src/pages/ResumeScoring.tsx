@@ -101,6 +101,38 @@ const ResumeScoring = () => {
     }
   };
 
+  // New function to find an existing score with the same resume content
+  const findExistingScore = async (content: string) => {
+    if (!user) return null;
+    
+    try {
+      // Query the database for a score with the exact same resume content for this user
+      const { data, error } = await supabase
+        .from("resume_scores")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("resume_content", content)
+        .eq("scoring_mode", scoringMode)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      
+      if (error) {
+        console.error("Error checking for existing score:", error);
+        return null;
+      }
+      
+      // If we found a match, return the first (most recent) matching score
+      if (data && data.length > 0) {
+        return data[0];
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Error checking for existing score:", error);
+      return null;
+    }
+  };
+
   const handleScoreResume = async () => {
     if (!resumeContent) {
       toast({
@@ -110,16 +142,59 @@ const ResumeScoring = () => {
       });
       return;
     }
+    
     setIsScoring(true);
+    
     try {
+      // First, check if we already have a score for this exact resume content
+      const existingScore = await findExistingScore(resumeContent);
+      
+      if (existingScore) {
+        // If we found an existing score, use it instead of calling the AI
+        console.log("Found existing score for this resume, reusing results");
+        
+        const cachedScoreData: ScoreData = {
+          overallScore: existingScore.overall_score,
+          skillsAlignment: existingScore.skills_alignment || existingScore.skills_breadth,
+          WorkExperience: existingScore.work_experience || existingScore.experience_duration,
+          Achievements: existingScore.achievements || 0,
+          EducationQuality: existingScore.education_quality || 0,
+          Certifications: existingScore.certifications || 0,
+          ContentStructure: existingScore.content_structure,
+          keywordRelevance: existingScore.keyword_relevance,
+          Industry: existingScore.industry,
+          percentile: existingScore.percentile,
+          numSimilarResumes: existingScore.num_similar_resumes || 12000,
+          suggestedSkills: existingScore.suggested_skills || [],
+          eliteIndicatorsFound: existingScore.elite_indicators || [],
+          improvementTips: existingScore.improvement_tips || [],
+          timestamp: new Date().toLocaleString(), // Update timestamp to show it was reused now
+          id: existingScore.id,
+          scoringMode: existingScore.scoring_mode || "resumeOnly",
+        };
+        
+        setScoreData(cachedScoreData);
+        
+        toast({
+          title: "Results Retrieved",
+          description: "We found existing results for this resume.",
+        });
+        
+        return;
+      }
+      
+      // If no existing score was found, proceed with AI scoring
       const payload = {
         resumeContent,
         scoringMode,
       };
+      
       const response = await callFunction("score-resume", payload);
+      
       if (response?.error) {
         throw new Error(response.error);
       }
+      
       const newScoreData: ScoreData = {
         overallScore: response.overallScore,
         skillsAlignment: response.skillsAlignment,
@@ -139,6 +214,7 @@ const ResumeScoring = () => {
         id: crypto.randomUUID(),
         scoringMode,
       };
+      
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
       
@@ -164,6 +240,7 @@ const ResumeScoring = () => {
       if (error) {
         console.error("Error saving score:", error);
       }
+      
       toast({
         title: "Resume Benchmarked",
         description: "Your resume has been benchmarked for your target industry.",

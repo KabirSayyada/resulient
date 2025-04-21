@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
@@ -8,7 +7,7 @@ import ResumeScoreCard from "./ResumeScoreCard";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { useRef } from "react";
-import { Facebook, Linkedin, Twitter, Download, Share } from "lucide-react";
+import { Facebook, Linkedin, Twitter, Download, Share, History } from "lucide-react";
 
 interface ScoreResultSectionProps {
   scoreData: ScoreData;
@@ -96,8 +95,20 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
     window.open(shareUrl, "_blank");
   };
 
+  // Check if this was a cached result by examining the id
+  // If it was reused, the ID would be an existing UUID from the database
+  // rather than a newly generated one
+  const isCachedResult = scoreData.id && !scoreData.id.includes("newly-generated");
+
   return (
     <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in">
+      {isCachedResult && (
+        <div className="absolute top-0 left-0 m-4 z-10 flex gap-2 items-center">
+          <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold flex items-center">
+            <History className="w-3 h-3 mr-1" /> Cached Result
+          </div>
+        </div>
+      )}
       <div className="absolute top-0 right-0 m-4 z-10 flex gap-2 items-center">
         <Button 
           variant="secondary" 
