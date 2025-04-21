@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -26,13 +27,15 @@ export interface ScoreData {
   suggestedSkills: string[];
   timestamp: string;
   id: string;
+  scoringMode?: "jobDescription" | "resumeOnly";
 }
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
+  const [scoringMode, setScoringMode] = useState<"jobDescription" | "resumeOnly">("jobDescription");
   const [jobDescription, setJobDescription] = useState("");
   const [resumeContent, setResumeContent] = useState("");
   const [scoreData, setScoreData] = useState<ScoreData | null>(null);
@@ -98,7 +101,7 @@ const ResumeScoring = () => {
       });
       return;
     }
-    if (!jobDescription) {
+    if (scoringMode === "jobDescription" && !jobDescription) {
       toast({
         title: "Missing Job Description",
         description: "Please paste the job description to score against.",
@@ -108,10 +111,12 @@ const ResumeScoring = () => {
     }
     setIsScoring(true);
     try {
-      const response = await callFunction("score-resume", {
-        jobDescription,
+      const payload = {
         resumeContent,
-      });
+        ...(scoringMode === "jobDescription" ? { jobDescription } : {}),
+        scoringMode, // tell backend which mode we're scoring
+      };
+      const response = await callFunction("score-resume", payload);
       if (response?.error) {
         throw new Error(response.error);
       }
@@ -127,6 +132,7 @@ const ResumeScoring = () => {
         suggestedSkills: response.suggestedSkills || [],
         timestamp: new Date().toLocaleString(),
         id: crypto.randomUUID(),
+        scoringMode,
       };
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
@@ -144,14 +150,16 @@ const ResumeScoring = () => {
           percentile: newScoreData.percentile,
           suggested_skills: newScoreData.suggestedSkills,
           resume_content: resumeContent,
-          job_description: jobDescription,
+          job_description: scoringMode === "jobDescription" ? jobDescription : "",
         });
       if (error) {
         console.error("Error saving score:", error);
       }
       toast({
-        title: "Resume Scored",
-        description: "Your resume has been analyzed for ATS compatibility.",
+        title: scoringMode === "jobDescription" ? "Resume Scored" : "Resume Benchmarked",
+        description: scoringMode === "jobDescription"
+          ? "Your resume has been analyzed for ATS compatibility."
+          : "Your resume has been benchmarked for your target industry.",
       });
     } catch (error) {
       console.error("Error scoring resume:", error);
@@ -240,14 +248,39 @@ const ResumeScoring = () => {
               <CardHeader>
                 <CardTitle className="font-bold text-2xl text-indigo-800">Submit Your Resume</CardTitle>
                 <CardDescription className="text-indigo-600 font-medium">
-                  Upload your resume and the job description, then get a breathtaking score breakdown!
+                  Upload your resume and choose how to analyze it!
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
-                <JobDescriptionInput 
-                  jobDescription={jobDescription} 
-                  setJobDescription={setJobDescription} 
-                />
+                {/* Mode selector */}
+                <div className="flex flex-wrap gap-4 mb-4">
+                  <button
+                    onClick={() => setScoringMode("jobDescription")}
+                    className={`px-6 py-2 rounded-full font-bold border transition-all shadow-sm
+                      ${scoringMode === "jobDescription"
+                        ? "bg-indigo-600 text-white border-indigo-700"
+                        : "bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50"}
+                    `}
+                  >
+                    Score with Job Description
+                  </button>
+                  <button
+                    onClick={() => setScoringMode("resumeOnly")}
+                    className={`px-6 py-2 rounded-full font-bold border transition-all shadow-sm
+                      ${scoringMode === "resumeOnly"
+                        ? "bg-fuchsia-500 text-white border-fuchsia-600"
+                        : "bg-white text-fuchsia-600 border-fuchsia-200 hover:bg-fuchsia-50"}
+                    `}
+                  >
+                    Score Resume Only
+                  </button>
+                </div>
+                {scoringMode === "jobDescription" && (
+                  <JobDescriptionInput 
+                    jobDescription={jobDescription} 
+                    setJobDescription={setJobDescription} 
+                  />
+                )}
                 <FileUploadSection 
                   resumeContent={resumeContent} 
                   setResumeContent={setResumeContent} 
@@ -255,12 +288,23 @@ const ResumeScoring = () => {
                 <div className="flex justify-center">
                   <Button 
                     onClick={handleScoreResume} 
-                    disabled={isScoring || !resumeContent || !jobDescription}
-                    className="px-10 py-3 text-lg font-bold rounded-full shadow bg-gradient-to-r from-indigo-600 to-fuchsia-500 hover:from-indigo-700 hover:to-fuchsia-600 transition-all"
+                    disabled={isScoring || !resumeContent || (scoringMode === "jobDescription" && !jobDescription)}
+                    className={`px-10 py-3 text-lg font-bold rounded-full shadow transition-all ${
+                      scoringMode === "resumeOnly"
+                        ? "bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500"
+                        : "bg-gradient-to-r from-indigo-600 to-fuchsia-500 hover:from-indigo-700 hover:to-fuchsia-600"
+                    }`}
                   >
-                    {isScoring ? "Analyzing..." : "✨ Analyze Resume"}
+                    {isScoring ? "Analyzing..." : (
+                      scoringMode === "resumeOnly" ? "🕹️ Benchmark Resume" : "✨ Analyze Resume"
+                    )}
                   </Button>
                 </div>
+                {scoringMode === "resumeOnly" && (
+                  <div className="text-xs text-fuchsia-600 mt-2 font-medium border-l-4 border-fuchsia-400 pl-2">
+                    In <span className="font-bold">Resume Only</span> mode, your resume will be analyzed against estimated industry standards—no job description needed! You’ll see where you stand versus your competition and get skills to pursue.
+                  </div>
+                )}
               </CardContent>
             </Card>
             {scoreData && (
@@ -277,12 +321,17 @@ const ResumeScoring = () => {
                         Resume Score Results
                       </CardTitle>
                       <CardDescription className="text-indigo-600 font-medium">
-                        Analyzed on {scoreData.timestamp}
+                        Analyzed on {scoreData.timestamp} ({scoreData.scoringMode === "resumeOnly" ? "Resume Only" : "Job Description"})
                       </CardDescription>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <ScoreBreakdown scoreData={scoreData} />
+                    {scoreData.scoringMode === "resumeOnly" && (
+                      <div className="mt-8 text-center text-fuchsia-600 text-sm font-semibold">
+                        You are in the top <span className="font-bold">{scoreData.percentile}%</span> of resumes for <span className="font-bold">{scoreData.industry}</span>! Compete and improve to climb higher!
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -310,3 +359,4 @@ const ResumeScoring = () => {
 };
 
 export default ResumeScoring;
+
