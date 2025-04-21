@@ -190,7 +190,7 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
         <ScoreBreakdown scoreData={scoreData} />
         {scoreData.scoringMode === "resumeOnly" && (
           <div className="mt-8 text-center text-fuchsia-600 text-sm font-semibold">
-            You are in the {cleanPercentile(scoreData.percentile)} of resumes for <span className="font-bold">{scoreData.Industry}</span>! Compete and improve to climb higher!
+            {scoreData.Industry} industry
           </div>
         )}
       </CardContent>
