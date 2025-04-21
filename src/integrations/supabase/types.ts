@@ -67,6 +67,7 @@ export type Database = {
           overall_score: number
           percentile: number
           resume_content: string
+          scoring_mode: string | null
           skills_breadth: number
           suggested_skills: string[] | null
           user_id: string
@@ -83,6 +84,7 @@ export type Database = {
           overall_score: number
           percentile: number
           resume_content: string
+          scoring_mode?: string | null
           skills_breadth: number
           suggested_skills?: string[] | null
           user_id: string
@@ -99,6 +101,7 @@ export type Database = {
           overall_score?: number
           percentile?: number
           resume_content?: string
+          scoring_mode?: string | null
           skills_breadth?: number
           suggested_skills?: string[] | null
           user_id?: string

@@ -142,7 +142,7 @@ const ResumeScoring = () => {
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
       
-      // Fixed database insert operation to match the database schema
+      // Insert the score into the database using the correct schema
       const { error } = await supabase
         .from("resume_scores")
         .insert({
