@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +16,8 @@ interface FileUploadSectionProps {
 
 export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploadSectionProps) => {
   const [uploadStatus, setUploadStatus] = useState("");
+  const [showUploadSuccess, setShowUploadSuccess] = useState(false);
+  const [inputMode, setInputMode] = useState<"pasted" | "uploaded" | "idle">("idle");
   const { toast } = useToast();
 
   const extractTextFromPdf = async (file: File) => {
@@ -27,21 +30,16 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        
-        // Advanced text extraction with improved spacing and format detection
         let lastY = null;
         let lastX = null;
         let currentLine = "";
         let pageLines: string[] = [];
         let isBulletPoint = false;
         
-        // First pass - gather text by position
         textContent.items.forEach(item => {
           if ('str' in item && item.str.trim()) {
             const currentX = (item as any).transform[4];
             const currentY = (item as any).transform[5];
-            
-            // Check for bullet point indicators
             if (item.str.trim().match(/^[•\-–—*]/) || 
                 (lastX !== null && currentX > lastX + 10 && currentLine.trim().length < 3)) {
               if (currentLine.trim()) {
@@ -50,43 +48,29 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
               isBulletPoint = true;
               currentLine = "• " + item.str.trim().replace(/^[•\-–—*]\s*/, '') + " ";
             } 
-            // Significant Y position change indicates a new paragraph or section
             else if (lastY !== null && Math.abs(currentY - lastY) > 5) {
               if (currentLine.trim()) {
                 pageLines.push(currentLine.trim());
-                
-                // Add extra blank line for significant spacing (likely a section break)
                 if (Math.abs(currentY - lastY) > 12) {
                   pageLines.push("");
                 }
               }
-              
               currentLine = item.str + " ";
               isBulletPoint = false;
             } 
-            // Continuing the same line
             else {
               currentLine += item.str + " ";
             }
-            
             lastY = currentY;
             lastX = currentX;
           }
         });
-        
-        // Add the last line if not empty
         if (currentLine.trim()) {
           pageLines.push(currentLine.trim());
         }
-        
-        // Join the lines for this page with proper formatting
         const pageText = pageLines.join("\n");
-        
-        // Add double line breaks between pages for better section separation
         fullText += pageText + "\n\n";
       }
-      
-      // Post-process to detect and format sections
       fullText = improveTextFormatting(fullText);
       return fullText;
     } catch (error) {
@@ -96,75 +80,51 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
   };
 
   const improveTextFormatting = (text: string): string => {
-    // 1. Split into lines
     const lines = text.split('\n');
     let formattedText = "";
-    let inSection = false;
     let previousLineWasBullet = false;
-    
-    // Common section header indicators with stronger matching
     const sectionHeaders = [
       /^(EDUCATION|EXPERIENCE|SKILLS|SUMMARY|OBJECTIVE|PROJECTS|CERTIFICATIONS|AWARDS|PUBLICATIONS|REFERENCES|WORK EXPERIENCE|PROFESSIONAL EXPERIENCE|EMPLOYMENT|QUALIFICATIONS|VOLUNTEER|LEADERSHIP|ACTIVITIES|INTERESTS)(?:\s|:|$)/i
     ];
-    
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
-      
-      // Skip empty lines but maintain some spacing between sections
       if (!line) {
         if (formattedText && !formattedText.endsWith("\n\n")) {
           formattedText += "\n";
         }
         continue;
       }
-      
-      // Check if this is a section header
       const isHeader = sectionHeaders.some(regex => regex.test(line));
       const isBullet = line.startsWith('•') || line.startsWith('-') || line.startsWith('*');
-      
       if (isHeader) {
-        // Add extra spacing before new sections
         if (formattedText && !formattedText.endsWith("\n\n\n")) {
           formattedText += "\n\n";
         }
-        
-        // Format the header (uppercase for visibility)
         formattedText += line.toUpperCase() + "\n";
-        inSection = true;
         previousLineWasBullet = false;
       } else if (isBullet) {
-        // For bullet points, preserve the bullet formatting
         if (!previousLineWasBullet && formattedText && !formattedText.endsWith("\n")) {
           formattedText += "\n";
         }
         formattedText += line + "\n";
         previousLineWasBullet = true;
       } else {
-        // Regular text - don't add bullets to normal text
         if (previousLineWasBullet) {
-          formattedText += "\n";  // Add extra spacing after bullet lists
+          formattedText += "\n";
         }
         formattedText += line + "\n";
         previousLineWasBullet = false;
       }
     }
-    
-    // Final cleanup
     formattedText = formattedText
-      // Remove excessive newlines (more than 3)
       .replace(/\n{4,}/g, "\n\n\n")
-      // Ensure proper spacing after colons in fields like "Email: example@email.com"
-      .replace(/(\w+):([\w@])/g, "$1: $2")
-      // Keep original bullet formatting without making everything a bullet
-      .replace(/^[\s•\-–—*]+([^•\-–—*])/gm, "• $1");
-      
+      .replace(/(\w+):([\w@])/g, "$1: $2");
     return formattedText;
   };
 
   const extractTextFromTxt = async (file: File) => {
     try {
       const text = await file.text();
-      // Apply the same formatting improvements to text files
       return improveTextFormatting(text);
     } catch (error) {
       console.error("Error extracting text from TXT:", error);
@@ -175,11 +135,9 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     try {
       setUploadStatus("Processing file...");
       let text = "";
-      
       if (file.type === "application/pdf") {
         text = await extractTextFromPdf(file);
       } else if (file.type === "text/plain") {
@@ -187,9 +145,10 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
       } else {
         throw new Error("File format not supported. Please upload a PDF or TXT file.");
       }
-      
       if (text) {
         setResumeContent(text);
+        setInputMode("uploaded");
+        setShowUploadSuccess(true);
         setUploadStatus("");
         toast({
           title: "File Processed",
@@ -199,6 +158,8 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
     } catch (error) {
       console.error("Error processing file:", error);
       setUploadStatus("");
+      setShowUploadSuccess(false);
+      setInputMode("idle");
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to process file",
@@ -207,19 +168,50 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
     }
   };
 
+  // Handle textarea input -- for pasted resumes
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setResumeContent(e.target.value);
+    setInputMode("pasted");
+    setShowUploadSuccess(false);
+  };
+
+  // If the user manually clears or changes content, reset upload state
+  const handleTextareaFocus = () => {
+    if (inputMode === "uploaded") {
+      setInputMode("pasted");
+      setShowUploadSuccess(false);
+      setResumeContent(""); // clear the parsed text if user is trying to type/paste
+    }
+  };
+
+  // Optionally, add a method to fully reset the upload state
+  const resetUploadState = () => {
+    setShowUploadSuccess(false);
+    setInputMode("idle");
+    setResumeContent("");
+  };
+
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Your Resume
       </label>
+      {/* PASTED resume tip */}
+      <div className="mb-3">
+        <div className="text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-3 py-2 mb-0">
+          <span className="font-semibold">Tip:</span> If you paste your resume, add extra blank lines (press Enter twice) between sections like <b>EDUCATION</b>, <b>EXPERIENCE</b>, etc. This helps group information for best analysis.
+        </div>
+      </div>
       <Textarea
         placeholder="Paste your current resume content here or upload a file..."
         className="min-h-[200px] font-mono text-sm"
-        value={resumeContent}
-        onChange={(e) => setResumeContent(e.target.value)}
+        value={inputMode === "uploaded" ? "" : resumeContent}
+        onChange={handleTextareaChange}
+        onFocus={handleTextareaFocus}
+        readOnly={inputMode === "uploaded"}
       />
-      
-      <div className="mt-4 flex items-center">
+
+      <div className="mt-4 flex items-center gap-4 flex-wrap">
         <label className="flex items-center px-4 py-2 bg-white text-blue-500 rounded-md shadow cursor-pointer hover:bg-gray-50 border border-gray-200">
           <Upload className="mr-2 h-4 w-4" />
           <span>Upload Resume</span>
@@ -230,14 +222,38 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
             onChange={handleFileUpload}
           />
         </label>
-        
         {uploadStatus && (
-          <span className="ml-4 text-sm text-gray-600">{uploadStatus}</span>
+          <span className="ml-1 text-sm text-gray-600">{uploadStatus}</span>
         )}
-        
-        <div className="ml-4 text-xs text-gray-500">
+        <div className="text-xs text-gray-500 ml-1">
           Supported formats: PDF, TXT
         </div>
+        {/* Show a visual indicator if a resume was uploaded and parsed */}
+        {showUploadSuccess && (
+          <span className="inline-flex items-center px-3 py-1 ml-2 rounded-full bg-green-100 border border-green-300 text-green-800 text-xs font-semibold">
+            <svg
+              className="h-4 w-4 mr-1 text-green-500"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707a1 1 0 00-1.414-1.414L9 11.586 7.707 10.293A1 1 0 006.293 11.707l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Resume uploaded and parsed successfully!
+            <button
+              className="ml-2 text-xs text-indigo-500 underline"
+              type="button"
+              onClick={resetUploadState}
+              tabIndex={-1}
+            >
+              Undo
+            </button>
+          </span>
+        )}
       </div>
     </div>
   );
