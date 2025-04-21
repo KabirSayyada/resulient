@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,29 +28,49 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
         
-        // Improved text extraction with spacing
+        // Advanced text extraction with improved spacing and format detection
         let lastY = null;
+        let lastX = null;
         let currentLine = "";
         let pageLines: string[] = [];
+        let isBulletPoint = false;
         
-        // Process each text item, tracking position for better paragraph detection
+        // First pass - gather text by position
         textContent.items.forEach(item => {
           if ('str' in item && item.str.trim()) {
-            // If we have a significant Y position change, it's likely a new paragraph
-            if (lastY !== null && Math.abs((item as any).transform[5] - lastY) > 5) {
+            const currentX = (item as any).transform[4];
+            const currentY = (item as any).transform[5];
+            
+            // Check for bullet point indicators
+            if (item.str.trim().match(/^[•\-–—*]/) || 
+                (lastX !== null && currentX > lastX + 10 && currentLine.trim().length < 3)) {
               if (currentLine.trim()) {
                 pageLines.push(currentLine.trim());
-                currentLine = "";
+              }
+              isBulletPoint = true;
+              currentLine = "• " + item.str.trim().replace(/^[•\-–—*]\s*/, '') + " ";
+            } 
+            // Significant Y position change indicates a new paragraph or section
+            else if (lastY !== null && Math.abs(currentY - lastY) > 5) {
+              if (currentLine.trim()) {
+                pageLines.push(currentLine.trim());
+                
+                // Add extra blank line for significant spacing (likely a section break)
+                if (Math.abs(currentY - lastY) > 12) {
+                  pageLines.push("");
+                }
               }
               
-              // Add an extra line break for significant spacing changes
-              if (Math.abs((item as any).transform[5] - lastY) > 12) {
-                pageLines.push("");
-              }
+              currentLine = item.str + " ";
+              isBulletPoint = false;
+            } 
+            // Continuing the same line
+            else {
+              currentLine += item.str + " ";
             }
             
-            currentLine += item.str + " ";
-            lastY = (item as any).transform[5];
+            lastY = currentY;
+            lastX = currentX;
           }
         });
         
@@ -60,7 +79,7 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
           pageLines.push(currentLine.trim());
         }
         
-        // Join the lines for this page
+        // Join the lines for this page with proper formatting
         const pageText = pageLines.join("\n");
         
         // Add double line breaks between pages for better section separation
@@ -81,10 +100,11 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
     const lines = text.split('\n');
     let formattedText = "";
     let inSection = false;
+    let previousLineWasBullet = false;
     
-    // Common section header indicators
+    // Common section header indicators with stronger matching
     const sectionHeaders = [
-      /^(EDUCATION|EXPERIENCE|SKILLS|SUMMARY|OBJECTIVE|PROJECTS|CERTIFICATIONS|AWARDS|PUBLICATIONS|REFERENCES|WORK EXPERIENCE|PROFESSIONAL EXPERIENCE|EMPLOYMENT|QUALIFICATIONS|VOLUNTEER|LEADERSHIP|ACTIVITIES|INTERESTS)(?:\s|:)/i
+      /^(EDUCATION|EXPERIENCE|SKILLS|SUMMARY|OBJECTIVE|PROJECTS|CERTIFICATIONS|AWARDS|PUBLICATIONS|REFERENCES|WORK EXPERIENCE|PROFESSIONAL EXPERIENCE|EMPLOYMENT|QUALIFICATIONS|VOLUNTEER|LEADERSHIP|ACTIVITIES|INTERESTS)(?:\s|:|$)/i
     ];
     
     for (let i = 0; i < lines.length; i++) {
@@ -100,6 +120,7 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
       
       // Check if this is a section header
       const isHeader = sectionHeaders.some(regex => regex.test(line));
+      const isBullet = line.startsWith('•') || line.startsWith('-') || line.startsWith('*');
       
       if (isHeader) {
         // Add extra spacing before new sections
@@ -110,9 +131,21 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
         // Format the header (uppercase for visibility)
         formattedText += line.toUpperCase() + "\n";
         inSection = true;
-      } else {
-        // Regular content line
+        previousLineWasBullet = false;
+      } else if (isBullet) {
+        // For bullet points, preserve the bullet formatting
+        if (!previousLineWasBullet && formattedText && !formattedText.endsWith("\n")) {
+          formattedText += "\n";
+        }
         formattedText += line + "\n";
+        previousLineWasBullet = true;
+      } else {
+        // Regular text - don't add bullets to normal text
+        if (previousLineWasBullet) {
+          formattedText += "\n";  // Add extra spacing after bullet lists
+        }
+        formattedText += line + "\n";
+        previousLineWasBullet = false;
       }
     }
     
@@ -122,8 +155,8 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
       .replace(/\n{4,}/g, "\n\n\n")
       // Ensure proper spacing after colons in fields like "Email: example@email.com"
       .replace(/(\w+):([\w@])/g, "$1: $2")
-      // Improve bulleted lists
-      .replace(/^[\s•\-–—*]+/gm, "• ");
+      // Keep original bullet formatting without making everything a bullet
+      .replace(/^[\s•\-–—*]+([^•\-–—*])/gm, "• $1");
       
     return formattedText;
   };
