@@ -53,8 +53,13 @@ serve(async (req) => {
       5. Certifications/Awards (10%): Industry-recognized credentials and honors.
       6. Formatting/Completeness (5%): Organization, length, and clarity.
       
-      IMPORTANT SCORING RULE:
+      IMPORTANT SCORING RULES:
       - If the resume contains any of the following keywords or similar indicators of top-tier achievement—such as elite universities (e.g., Harvard, MIT, Oxford, Stanford, Cambridge, Yale, Princeton), world-leading companies (e.g., Google, Microsoft, Apple, Netflix, Amazon, Meta, Tesla), major global awards (e.g., Nobel, Pulitzer, Olympics), or high-impact terms (e.g., million, billion, patent, keynote, founder)—add extra points in the relevant category (Education, Experience, Achievements). If any of those is found, the resume cannot be scored below 80/100 overall.
+      
+      - CRITICAL: Resumes that are too short (under 250 words) should be severely penalized in ALL categories.
+      - CRITICAL: Resumes missing major sections (such as education, work experience, or skills) should receive very low scores (maximum 40/100) in those missing categories.
+      - CRITICAL: Resumes with only one section should never score above 30/100 overall, regardless of content.
+      - CRITICAL: Resumes missing more than one major section should never score above 50/100 overall.
       
       ADDITIONAL FACTORS TO CONSIDER:
       - Length: Penalize if too short (<1 page) or too long (>2 pages for most industries)
@@ -89,7 +94,7 @@ serve(async (req) => {
         "eliteIndicatorsFound": string[]
       }
 
-      Return ONLY the JSON object, no extra text. BE BRUTALLY HONEST IN YOUR SCORES but remember that resumes containing elite indicators cannot score below 80/100 overall.
+      Return ONLY the JSON object, no extra text. BE BRUTALLY HONEST IN YOUR SCORES but remember that resumes containing elite indicators cannot score below 80/100 overall, UNLESS they are extremely short or missing multiple major sections.
       `;
     } else {
       // Default or "jobDescription" mode
@@ -111,8 +116,13 @@ serve(async (req) => {
       5. Certifications/Awards (10%): Industry-recognized credentials and honors relevant to the job.
       6. Formatting/Completeness (5%): Organization, length, and clarity.
       
-      IMPORTANT SCORING RULE:
+      IMPORTANT SCORING RULES:
       - If the resume contains any of the following keywords or similar indicators of top-tier achievement—such as elite universities (e.g., Harvard, MIT, Oxford, Stanford, Cambridge, Yale, Princeton), world-leading companies (e.g., Google, Microsoft, Apple, Netflix, Amazon, Meta, Tesla), major global awards (e.g., Nobel, Pulitzer, Olympics), or high-impact terms (e.g., million, billion, patent, keynote, founder)—add extra points in the relevant category (Education, Experience, Achievements). If any of those is found, the resume cannot be scored below 80/100 overall.
+      
+      - CRITICAL: Resumes that are too short (under 250 words) should be severely penalized in ALL categories.
+      - CRITICAL: Resumes missing major sections (such as education, work experience, or skills) should receive very low scores (maximum 40/100) in those missing categories.
+      - CRITICAL: Resumes with only one section should never score above 30/100 overall, regardless of content.
+      - CRITICAL: Resumes missing more than one major section should never score above 50/100 overall.
       
       ADDITIONAL FACTORS TO CONSIDER:
       - Keyword Matching: How well the resume uses key terminology from the job description
@@ -147,7 +157,7 @@ serve(async (req) => {
         "eliteIndicatorsFound": string[]
       }
       
-      Return ONLY the JSON object without any additional text. BE BRUTALLY HONEST IN YOUR SCORES but remember that resumes containing elite indicators cannot score below 80/100 overall.
+      Return ONLY the JSON object without any additional text. BE BRUTALLY HONEST IN YOUR SCORES but remember that resumes containing elite indicators cannot score below 80/100 overall, UNLESS they are extremely short or missing multiple major sections.
       `;
     }
 

@@ -2,7 +2,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScoreData } from "@/pages/ResumeScoring";
-import { Award, Star, Medal, BookOpen, Trophy, TrendingUp, BarChart } from "lucide-react";
+import { Award, Star, Medal, BookOpen, Trophy, TrendingUp, BarChart, AlertTriangle } from "lucide-react";
 import BenchmarkGraph from "./BenchmarkGraph";
 
 interface ResumeScoreCardProps {
@@ -12,6 +12,25 @@ interface ResumeScoreCardProps {
 export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
   const numSimilar = scoreData.numSimilarResumes || 12000; // fallback if backend didn't provide
   const percentile = scoreData.percentile;
+  
+  // Check for missing or low-scoring sections
+  const missingOrLowSections = [];
+  
+  if (!scoreData.skillsBreadth || scoreData.skillsBreadth < 40) {
+    missingOrLowSections.push("Skills");
+  }
+  
+  if (!scoreData.experienceDuration || scoreData.experienceDuration < 40) {
+    missingOrLowSections.push("Work Experience");
+  }
+  
+  if (!scoreData.achievements || scoreData.achievements < 40) {
+    missingOrLowSections.push("Achievements");
+  }
+  
+  if (!scoreData.educationQuality || scoreData.educationQuality < 40) {
+    missingOrLowSections.push("Education");
+  }
 
   return (
     <div className="max-w-md mx-auto shadow-2xl rounded-3xl overflow-hidden bg-gradient-to-br from-white via-indigo-50 to-blue-100 p-0 border-4 border-indigo-200 relative scorecard-for-export">
@@ -38,6 +57,17 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
           Overall Resume Score
         </div>
         
+        {missingOrLowSections.length > 0 && (
+          <div className="w-full mt-1 mb-2">
+            <div className="text-xs font-semibold text-red-700 bg-red-50 p-2 rounded-md border border-red-200 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+              <span>
+                Missing or underdeveloped sections: {missingOrLowSections.join(", ")}
+              </span>
+            </div>
+          </div>
+        )}
+        
         {scoreData.eliteIndicatorsFound && scoreData.eliteIndicatorsFound.length > 0 && (
           <div className="w-full mt-1 mb-2">
             <div className="text-xs font-semibold text-amber-700 bg-amber-50 p-2 rounded-md border border-amber-200">
@@ -57,17 +87,20 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
             icon={<Star className="w-4 h-4 text-yellow-500" />} 
             label="Skills (25%)" 
             value={scoreData.skillsBreadth}
+            missing={!scoreData.skillsBreadth || scoreData.skillsBreadth < 40}
           />
           <ScoreMetric 
             icon={<TrendingUp className="w-4 h-4 text-blue-500" />} 
             label="Experience (25%)" 
             value={scoreData.experienceDuration}
+            missing={!scoreData.experienceDuration || scoreData.experienceDuration < 40}
           />
           {scoreData.achievements && (
             <ScoreMetric 
               icon={<Trophy className="w-4 h-4 text-purple-500" />} 
               label="Achievements (20%)" 
               value={scoreData.achievements}
+              missing={!scoreData.achievements || scoreData.achievements < 40}
             />
           )}
           {scoreData.educationQuality && (
@@ -75,6 +108,7 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
               icon={<BookOpen className="w-4 h-4 text-indigo-500" />} 
               label="Education (15%)" 
               value={scoreData.educationQuality}
+              missing={!scoreData.educationQuality || scoreData.educationQuality < 40}
             />
           )}
           {scoreData.certifications && (
@@ -82,12 +116,14 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
               icon={<Award className="w-4 h-4 text-green-500" />} 
               label="Certifications (10%)" 
               value={scoreData.certifications}
+              missing={!scoreData.certifications || scoreData.certifications < 40}
             />
           )}
           <ScoreMetric 
             icon={<BarChart className="w-4 h-4 text-pink-500" />} 
             label="Structure (5%)" 
             value={scoreData.contentStructure}
+            missing={!scoreData.contentStructure || scoreData.contentStructure < 40}
           />
         </div>
         
@@ -120,18 +156,21 @@ const ScoreMetric = ({
   icon,
   label,
   value,
+  missing = false
 }: {
   icon: React.ReactNode;
   label: string;
   value: number;
+  missing?: boolean;
 }) => (
-  <div className="flex items-center gap-1 text-indigo-800">
+  <div className={`flex items-center gap-1 ${missing ? 'text-red-600' : 'text-indigo-800'}`}>
     <span>{icon}</span>
     <span className="font-medium">{label}:</span>
-    <span className="font-semibold text-[18px] text-indigo-900 ml-1">
+    <span className={`font-semibold text-[18px] ${missing ? 'text-red-700' : 'text-indigo-900'} ml-1`}>
       {value}
     </span>
-    <span className="text-sm text-fuchsia-800 font-extrabold">/100</span>
+    <span className={`text-sm ${missing ? 'text-red-600' : 'text-fuchsia-800'} font-extrabold`}>/100</span>
+    {missing && <AlertTriangle className="w-3 h-3 text-red-500 ml-1" />}
   </div>
 );
 
