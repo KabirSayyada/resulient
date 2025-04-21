@@ -18,23 +18,23 @@ import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 
 export interface ScoreData {
-  overall: number;
+  overallScore: number;
+  skillsAlignment: number;
+  WorkExperience: number;
+  Achievements: number;
+  EducationQuality: number;
+  Certifications: number;
+  ContentStructure: number;
   keywordRelevance: number;
-  skillsBreadth: number;
-  experienceDuration: number;
-  contentStructure: number;
   atsReadiness: number;
-  achievements?: number;
-  educationQuality?: number;
-  certifications?: number;
-  industry: string;
+  Industry: string;
   percentile: number;
+  numSimilarResumes: number;
   suggestedSkills: string[];
+  eliteIndicatorsFound: string[];
   timestamp: string;
   id: string;
   scoringMode?: "jobDescription" | "resumeOnly";
-  numSimilarResumes?: number;
-  eliteIndicatorsFound?: string[];
 }
 
 const ResumeScoring = () => {
@@ -75,17 +75,24 @@ const ResumeScoring = () => {
       if (data) {
         setScoreHistory(
           data.map((item: any) => ({
-            overall: item.overall_score,
+            // Map old DB fields to new frontend structure
+            overallScore: item.overall_score,
+            skillsAlignment: item.skills_alignment,
+            WorkExperience: item.work_experience,
+            Achievements: item.achievements,
+            EducationQuality: item.education_quality,
+            Certifications: item.certifications,
+            ContentStructure: item.content_structure,
             keywordRelevance: item.keyword_relevance,
-            skillsBreadth: item.skills_breadth,
-            experienceDuration: item.experience_duration,
-            contentStructure: item.content_structure,
             atsReadiness: item.ats_readiness,
-            industry: item.industry,
+            Industry: item.industry,
             percentile: item.percentile,
+            numSimilarResumes: item.num_similar_resumes || 12000,
             suggestedSkills: item.suggested_skills || [],
+            eliteIndicatorsFound: item.elite_indicators || [],
             timestamp: new Date(item.created_at).toLocaleString(),
             id: item.id,
+            scoringMode: item.scoring_mode || "resumeOnly",
           }))
         );
       }
@@ -128,23 +135,23 @@ const ResumeScoring = () => {
         throw new Error(response.error);
       }
       const newScoreData: ScoreData = {
-        overall: response.overallScore,
+        overallScore: response.overallScore,
+        skillsAlignment: response.skillsAlignment,
+        WorkExperience: response.WorkExperience,
+        Achievements: response.Achievements,
+        EducationQuality: response.EducationQuality,
+        Certifications: response.Certifications,
+        ContentStructure: response.ContentStructure,
         keywordRelevance: response.keywordRelevance,
-        skillsBreadth: response.skillsBreadth,
-        experienceDuration: response.experienceDuration,
-        contentStructure: response.contentStructure,
         atsReadiness: response.atsReadiness,
-        achievements: response.achievements,
-        educationQuality: response.educationQuality,
-        certifications: response.certifications,
-        industry: response.industry,
+        Industry: response.Industry,
         percentile: response.percentile,
+        numSimilarResumes: response.numSimilarResumes,
         suggestedSkills: response.suggestedSkills || [],
+        eliteIndicatorsFound: response.eliteIndicatorsFound || [],
         timestamp: new Date().toLocaleString(),
         id: crypto.randomUUID(),
         scoringMode,
-        numSimilarResumes: response.numSimilarResumes,
-        eliteIndicatorsFound: response.eliteIndicatorsFound || []
       };
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
@@ -152,21 +159,23 @@ const ResumeScoring = () => {
         .from("resume_scores")
         .insert({
           user_id: user?.id,
-          overall_score: newScoreData.overall,
+          overall_score: newScoreData.overallScore,
+          skills_alignment: newScoreData.skillsAlignment,
+          work_experience: newScoreData.WorkExperience,
+          achievements: newScoreData.Achievements,
+          education_quality: newScoreData.EducationQuality,
+          certifications: newScoreData.Certifications,
+          content_structure: newScoreData.ContentStructure,
           keyword_relevance: newScoreData.keywordRelevance,
-          skills_breadth: newScoreData.skillsBreadth,
-          experience_duration: newScoreData.experienceDuration,
-          content_structure: newScoreData.contentStructure,
           ats_readiness: newScoreData.atsReadiness,
-          achievements: newScoreData.achievements,
-          education_quality: newScoreData.educationQuality, 
-          certifications: newScoreData.certifications,
-          industry: newScoreData.industry,
+          industry: newScoreData.Industry,
           percentile: newScoreData.percentile,
+          num_similar_resumes: newScoreData.numSimilarResumes,
           suggested_skills: newScoreData.suggestedSkills,
           resume_content: resumeContent,
           job_description: scoringMode === "jobDescription" ? jobDescription : "",
-          elite_indicators: newScoreData.eliteIndicatorsFound
+          elite_indicators: newScoreData.eliteIndicatorsFound,
+          scoring_mode: scoringMode,
         });
       if (error) {
         console.error("Error saving score:", error);

@@ -12,33 +12,29 @@ interface ResumeScoreCardProps {
 export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
   const numSimilar = scoreData.numSimilarResumes || 12000; // fallback if backend didn't provide
   const percentile = scoreData.percentile;
-  
+
   // Check for missing or low-scoring sections
   const missingOrLowSections = [];
-  
-  if (!scoreData.skillsBreadth || scoreData.skillsBreadth < 40) {
+  if (!scoreData.skillsAlignment || scoreData.skillsAlignment < 40) {
     missingOrLowSections.push("Skills");
   }
-  
-  if (!scoreData.experienceDuration || scoreData.experienceDuration < 40) {
+  if (!scoreData.WorkExperience || scoreData.WorkExperience < 40) {
     missingOrLowSections.push("Work Experience");
   }
-  
-  if (!scoreData.achievements || scoreData.achievements < 40) {
+  if (!scoreData.Achievements || scoreData.Achievements < 40) {
     missingOrLowSections.push("Achievements");
   }
-  
-  if (!scoreData.educationQuality || scoreData.educationQuality < 40) {
+  if (!scoreData.EducationQuality || scoreData.EducationQuality < 40) {
     missingOrLowSections.push("Education");
   }
 
   // Count actual sections present
   let sectionCount = 0;
-  if (scoreData.skillsBreadth && scoreData.skillsBreadth > 10) sectionCount++;
-  if (scoreData.experienceDuration && scoreData.experienceDuration > 10) sectionCount++;
-  if (scoreData.achievements && scoreData.achievements > 10) sectionCount++;
-  if (scoreData.educationQuality && scoreData.educationQuality > 10) sectionCount++;
-  if (scoreData.certifications && scoreData.certifications > 10) sectionCount++;
+  if (scoreData.skillsAlignment && scoreData.skillsAlignment > 10) sectionCount++;
+  if (scoreData.WorkExperience && scoreData.WorkExperience > 10) sectionCount++;
+  if (scoreData.Achievements && scoreData.Achievements > 10) sectionCount++;
+  if (scoreData.EducationQuality && scoreData.EducationQuality > 10) sectionCount++;
+  if (scoreData.Certifications && scoreData.Certifications > 10) sectionCount++;
 
   // Resume completeness warning
   let completenessWarning = null;
@@ -58,23 +54,22 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
           Resume Scorecard
         </CardTitle>
         <span className="font-semibold text-indigo-700 text-lg">
-          {scoreData.industry}
+          {scoreData.Industry}
         </span>
         <Badge variant="secondary" className="mt-1 bg-fuchsia-100 text-fuchsia-700 font-bold text-xs rounded-full px-4 py-1 shadow animate-pulse">
           {scoreData.scoringMode === "resumeOnly"
             ? `Top ${scoreData.percentile}%`
-            : `Job Fit Score`}
+            : "Job Fit Score"}
         </Badge>
       </CardHeader>
       <CardContent className="py-6 px-4 flex flex-col items-center gap-4">
         <div className="text-[56px] font-extrabold text-fuchsia-600 leading-none flex items-center gap-2">
-          {scoreData.overall}
+          {scoreData.overallScore}
           <span className="text-xl text-indigo-700 font-bold">/100</span>
         </div>
         <div className="text-sm font-semibold text-indigo-600 -mt-2">
           Overall Resume Score
         </div>
-        
         {completenessWarning && (
           <div className="w-full mt-1 mb-2">
             <div className="text-xs font-semibold text-red-700 bg-red-50 p-3 rounded-md border border-red-200 flex items-start gap-2">
@@ -85,7 +80,6 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
             </div>
           </div>
         )}
-        
         {missingOrLowSections.length > 0 && !completenessWarning && (
           <div className="w-full mt-1 mb-2">
             <div className="text-xs font-semibold text-red-700 bg-red-50 p-2 rounded-md border border-red-200 flex items-start gap-2">
@@ -96,7 +90,6 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
             </div>
           </div>
         )}
-        
         {scoreData.eliteIndicatorsFound && scoreData.eliteIndicatorsFound.length > 0 && (
           <div className="w-full mt-1 mb-2">
             <div className="text-xs font-semibold text-amber-700 bg-amber-50 p-2 rounded-md border border-amber-200">
@@ -104,75 +97,63 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
             </div>
           </div>
         )}
-        
         {scoreData.scoringMode === "resumeOnly" && (
           <div className="w-full mt-2">
             <BenchmarkGraph percentile={percentile} numSimilar={numSimilar} />
           </div>
         )}
-        
         <div className="grid grid-cols-2 gap-x-8 gap-y-2 w-full mt-2">
-          <ScoreMetric 
-            icon={<Star className="w-4 h-4 text-yellow-500" />} 
-            label="Skills (25%)" 
-            value={scoreData.skillsBreadth}
-            missing={!scoreData.skillsBreadth || scoreData.skillsBreadth < 40}
+          <ScoreMetric
+            icon={<Star className="w-4 h-4 text-yellow-500" />}
+            label="Skills (25%)"
+            value={scoreData.skillsAlignment}
+            missing={!scoreData.skillsAlignment || scoreData.skillsAlignment < 40}
           />
-          <ScoreMetric 
-            icon={<TrendingUp className="w-4 h-4 text-blue-500" />} 
-            label="Experience (25%)" 
-            value={scoreData.experienceDuration}
-            missing={!scoreData.experienceDuration || scoreData.experienceDuration < 40}
+          <ScoreMetric
+            icon={<TrendingUp className="w-4 h-4 text-blue-500" />}
+            label="Experience (25%)"
+            value={scoreData.WorkExperience}
+            missing={!scoreData.WorkExperience || scoreData.WorkExperience < 40}
           />
-          {scoreData.achievements && (
-            <ScoreMetric 
-              icon={<Trophy className="w-4 h-4 text-purple-500" />} 
-              label="Achievements (20%)" 
-              value={scoreData.achievements}
-              missing={!scoreData.achievements || scoreData.achievements < 40}
-            />
-          )}
-          {scoreData.educationQuality && (
-            <ScoreMetric 
-              icon={<BookOpen className="w-4 h-4 text-indigo-500" />} 
-              label="Education (15%)" 
-              value={scoreData.educationQuality}
-              missing={!scoreData.educationQuality || scoreData.educationQuality < 40}
-            />
-          )}
-          {scoreData.certifications && (
-            <ScoreMetric 
-              icon={<Award className="w-4 h-4 text-green-500" />} 
-              label="Certifications (10%)" 
-              value={scoreData.certifications}
-              missing={!scoreData.certifications || scoreData.certifications < 40}
-            />
-          )}
-          <ScoreMetric 
-            icon={<BarChart className="w-4 h-4 text-pink-500" />} 
-            label="Structure (5%)" 
-            value={scoreData.contentStructure}
-            missing={!scoreData.contentStructure || scoreData.contentStructure < 40}
+          <ScoreMetric
+            icon={<Trophy className="w-4 h-4 text-purple-500" />}
+            label="Achievements (20%)"
+            value={scoreData.Achievements}
+            missing={!scoreData.Achievements || scoreData.Achievements < 40}
+          />
+          <ScoreMetric
+            icon={<BookOpen className="w-4 h-4 text-indigo-500" />}
+            label="Education (15%)"
+            value={scoreData.EducationQuality}
+            missing={!scoreData.EducationQuality || scoreData.EducationQuality < 40}
+          />
+          <ScoreMetric
+            icon={<Award className="w-4 h-4 text-green-500" />}
+            label="Certifications (10%)"
+            value={scoreData.Certifications}
+            missing={!scoreData.Certifications || scoreData.Certifications < 40}
+          />
+          <ScoreMetric
+            icon={<BarChart className="w-4 h-4 text-pink-500" />}
+            label="Structure (5%)"
+            value={scoreData.ContentStructure}
+            missing={!scoreData.ContentStructure || scoreData.ContentStructure < 40}
           />
         </div>
-        
         <div className="my-4 text-indigo-800 text-center">
           <div className="font-semibold text-sm mb-1">Suggested Skills to Add:</div>
           <div className="text-xs font-bold text-fuchsia-700 mb-1">
             {scoreData.suggestedSkills.join(", ")}
           </div>
         </div>
-        
         <div className="rounded-md text-xs text-gray-600 bg-indigo-50 p-2 font-medium w-full">
-          {scoreData.scoringMode === "resumeOnly" 
-            ? `Benchmarked vs. others in "${scoreData.industry}" — Top ${scoreData.percentile}%`
+          {scoreData.scoringMode === "resumeOnly"
+            ? `Benchmarked vs. others in "${scoreData.Industry}" — Top ${scoreData.percentile}%`
             : "Compared against your target job description"}
         </div>
-        
         <div className="flex items-center gap-2 justify-center text-xs text-indigo-900 mt-2 font-bold">
           <span>Generated on {scoreData.timestamp}</span>
         </div>
-        
         <div className="w-full text-center mt-1">
           <span className="text-xs text-gray-500">Share your progress and help others improve their resumes!</span>
         </div>
@@ -204,3 +185,5 @@ const ScoreMetric = ({
 );
 
 export default ResumeScoreCard;
+
+// NOTE: This file is now very long. Consider refactoring it to smaller components after checking your changes!

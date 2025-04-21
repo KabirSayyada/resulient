@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ScoreData } from "@/pages/ResumeScoring";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,11 +40,11 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
     .slice(0, 10)
     .map((score, index) => ({
       name: `Score ${scores.length - index}`,
-      Overall: score.overall,
+      Overall: score.overallScore,
       Keywords: score.keywordRelevance,
-      Skills: score.skillsBreadth,
-      Experience: score.experienceDuration,
-      Structure: score.contentStructure,
+      Skills: score.skillsAlignment,
+      Experience: score.WorkExperience,
+      Structure: score.ContentStructure,
       date: new Date(score.timestamp).toLocaleDateString()
     }))
     .reverse();
@@ -105,11 +104,11 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
               <div className="flex items-center">
                 <div className="mr-4">
                   <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                    score.overall >= 80 ? 'bg-green-100 text-green-600' : 
-                    score.overall >= 60 ? 'bg-yellow-100 text-yellow-600' : 
+                    score.overallScore >= 80 ? 'bg-green-100 text-green-600' : 
+                    score.overallScore >= 60 ? 'bg-yellow-100 text-yellow-600' : 
                     'bg-red-100 text-red-600'
                   }`}>
-                    {score.overall}
+                    {score.overallScore}
                   </div>
                 </div>
 
@@ -128,9 +127,9 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
                 <div className="hidden sm:block mr-4">
                   <div className="w-32">
                     <Progress 
-                      value={score.overall} 
+                      value={score.overallScore} 
                       className="h-2" 
-                      indicatorClassName={getProgressColor(score.overall)} 
+                      indicatorClassName={getProgressColor(score.overallScore)} 
                     />
                   </div>
                 </div>
