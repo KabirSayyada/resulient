@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +14,21 @@ const calculatePercentile = (score: number): string => {
   if (score >= 50) return "Average";
   if (score >= 40) return "Below Average";
   return "Bottom 25%";
+};
+
+// Convert string percentile to numeric value for database storage
+const percentileToNumber = (percentile: string): number => {
+  switch (percentile) {
+    case "Top 1%": return 99;
+    case "Top 5%": return 95;
+    case "Top 10%": return 90;
+    case "Top 25%": return 75;
+    case "Above Average": return 65;
+    case "Average": return 50;
+    case "Below Average": return 35;
+    case "Bottom 25%": return 25;
+    default: return 50;
+  }
 };
 
 export const useResumeScoring = (userId: string | undefined) => {
@@ -133,6 +149,9 @@ export const useResumeScoring = (userId: string | undefined) => {
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
       
+      // Convert string percentile to numeric value for database storage
+      const numericPercentile = percentileToNumber(calculatedPercentile);
+      
       const { error } = await supabase
         .from("resume_scores")
         .insert({
@@ -146,7 +165,7 @@ export const useResumeScoring = (userId: string | undefined) => {
           content_structure: newScoreData.ContentStructure,
           keyword_relevance: newScoreData.keywordRelevance,
           industry: newScoreData.Industry,
-          percentile: calculatedPercentile,
+          percentile: numericPercentile,
           similar_resumes: newScoreData.numSimilarResumes,
           suggested_skills: newScoreData.suggestedSkills,
           elite_indicators: newScoreData.eliteIndicatorsFound,
