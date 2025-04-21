@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.29.0";
-import { Configuration, OpenAIApi } from "https://esm.sh/openai@3.3.0";
+import OpenAI from "https://esm.sh/openai@4.17.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -31,17 +31,10 @@ serve(async (req) => {
       );
     }
 
-    // Get API key
-    const supabaseAdminClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
-
-    // Call OpenAI API for resume analysis
-    const configuration = new Configuration({
+    // Initialize OpenAI client with the latest SDK
+    const openai = new OpenAI({
       apiKey: Deno.env.get("OPENAI_API_KEY"),
     });
-    const openai = new OpenAIApi(configuration);
 
     let prompt = "";
     if (scoringMode === "resumeOnly") {
@@ -124,14 +117,15 @@ serve(async (req) => {
       `;
     }
 
-    const response = await openai.createCompletion({
-      model: "text-davinci-003",
+    // Call OpenAI with the updated SDK
+    const response = await openai.completions.create({
+      model: "gpt-3.5-turbo-instruct",
       prompt,
       max_tokens: 1500,
       temperature: 0.3,
     });
 
-    const content = response.data.choices[0].text?.trim() || "";
+    const content = response.choices[0].text?.trim() || "";
 
     try {
       // Parse the JSON response
@@ -177,4 +171,3 @@ serve(async (req) => {
     );
   }
 });
-
