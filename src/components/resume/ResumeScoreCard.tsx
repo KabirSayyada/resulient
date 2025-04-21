@@ -140,10 +140,10 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
           />
           <ScoreMetric
             icon={<BarChart className="w-4 h-4 text-pink-500" />}
-            label="ATS Compatibility"
-            value={Math.floor(scoreData.atsReadiness / 10)}
-            maxValue={10}
-            missing={!scoreData.atsReadiness || scoreData.atsReadiness < 50}
+            label="Content Structure"
+            value={scoreData.ContentStructure}
+            maxValue={5}
+            missing={!scoreData.ContentStructure || scoreData.ContentStructure < 2}
           />
         </div>
         <div className="my-4 text-indigo-800 text-center">
@@ -195,4 +195,3 @@ const ScoreMetric = ({
 );
 
 export default ResumeScoreCard;
-
