@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -22,7 +21,6 @@ const Index = () => {
   const [optimizedResume, setOptimizedResume] = useState("");
   const [optimizing, setOptimizing] = useState(false);
   
-  // Hook to call the Supabase function
   const { callFunction, loading: functionLoading, error: functionError } = useSupabaseFunction();
 
   useEffect(() => {
@@ -100,25 +98,24 @@ const Index = () => {
               Optimize your resume to beat Applicant Tracking Systems (ATS)
             </p>
           </div>
-          
           <div className="flex items-center gap-4">
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>Tools</NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <ul className="grid w-[400px] gap-3 p-4">
+                    <ul className="grid w-[420px] gap-3 p-4">
                       <li className="row-span-3">
                         <Link
                           to="/resume-scoring"
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-blue-50 to-indigo-100 p-6 no-underline outline-none focus:shadow-md"
+                          className="flex h-full w-full select-none flex-col justify-end rounded-lg bg-gradient-to-b from-indigo-200 to-blue-100 p-6 no-underline outline-none focus:shadow-md border border-indigo-400 hover:border-indigo-600"
                         >
-                          <BarChart2 className="h-6 w-6 text-indigo-500" />
-                          <div className="mb-2 mt-4 text-lg font-medium text-indigo-900">
+                          <BarChart2 className="h-7 w-7 text-indigo-600" />
+                          <div className="mb-2 mt-4 text-xl font-bold text-indigo-900">
                             Resume Score Analysis
                           </div>
-                          <p className="text-sm leading-tight text-indigo-800">
-                            Analyze your resume against industry standards and get detailed scoring metrics
+                          <p className="text-md leading-tight text-indigo-800">
+                            Analyze your resume before optimizing. Get a gorgeous, actionable scoring breakdown, see improvement history, and compete on the leaderboard!
                           </p>
                         </Link>
                       </li>

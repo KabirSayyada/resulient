@@ -54,6 +54,57 @@ export type Database = {
         }
         Relationships: []
       }
+      resume_scores: {
+        Row: {
+          ats_readiness: number
+          content_structure: number
+          created_at: string
+          experience_duration: number
+          id: string
+          industry: string
+          job_description: string
+          keyword_relevance: number
+          overall_score: number
+          percentile: number
+          resume_content: string
+          skills_breadth: number
+          suggested_skills: string[] | null
+          user_id: string
+        }
+        Insert: {
+          ats_readiness: number
+          content_structure: number
+          created_at?: string
+          experience_duration: number
+          id?: string
+          industry: string
+          job_description: string
+          keyword_relevance: number
+          overall_score: number
+          percentile: number
+          resume_content: string
+          skills_breadth: number
+          suggested_skills?: string[] | null
+          user_id: string
+        }
+        Update: {
+          ats_readiness?: number
+          content_structure?: number
+          created_at?: string
+          experience_duration?: number
+          id?: string
+          industry?: string
+          job_description?: string
+          keyword_relevance?: number
+          overall_score?: number
+          percentile?: number
+          resume_content?: string
+          skills_breadth?: number
+          suggested_skills?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

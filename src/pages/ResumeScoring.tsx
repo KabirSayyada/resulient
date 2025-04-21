@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -54,28 +53,31 @@ const ResumeScoring = () => {
   const fetchScoreHistory = async () => {
     try {
       const { data, error } = await supabase
-        .from('resume_scores')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("resume_scores")
+        .select("*")
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false });
 
       if (error) {
         throw error;
       }
 
       if (data) {
-        setScoreHistory(data.map(item => ({
-          ...item,
-          overall: item.overall_score,
-          keywordRelevance: item.keyword_relevance,
-          skillsBreadth: item.skills_breadth,
-          experienceDuration: item.experience_duration,
-          contentStructure: item.content_structure,
-          atsReadiness: item.ats_readiness,
-          suggestedSkills: item.suggested_skills || [],
-          percentile: item.percentile,
-          timestamp: new Date(item.created_at).toLocaleString(),
-          id: item.id
-        })));
+        setScoreHistory(
+          data.map((item: any) => ({
+            overall: item.overall_score,
+            keywordRelevance: item.keyword_relevance,
+            skillsBreadth: item.skills_breadth,
+            experienceDuration: item.experience_duration,
+            contentStructure: item.content_structure,
+            atsReadiness: item.ats_readiness,
+            industry: item.industry,
+            percentile: item.percentile,
+            suggestedSkills: item.suggested_skills || [],
+            timestamp: new Date(item.created_at).toLocaleString(),
+            id: item.id,
+          }))
+        );
       }
     } catch (error) {
       console.error("Error fetching score history:", error);
@@ -96,7 +98,6 @@ const ResumeScoring = () => {
       });
       return;
     }
-
     if (!jobDescription) {
       toast({
         title: "Missing Job Description",
@@ -105,19 +106,15 @@ const ResumeScoring = () => {
       });
       return;
     }
-
     setIsScoring(true);
-    
     try {
       const response = await callFunction("score-resume", {
         jobDescription,
         resumeContent,
       });
-      
       if (response?.error) {
         throw new Error(response.error);
       }
-      
       const newScoreData: ScoreData = {
         overall: response.overallScore,
         keywordRelevance: response.keywordRelevance,
@@ -129,15 +126,12 @@ const ResumeScoring = () => {
         percentile: response.percentile,
         suggestedSkills: response.suggestedSkills || [],
         timestamp: new Date().toLocaleString(),
-        id: crypto.randomUUID()
+        id: crypto.randomUUID(),
       };
-      
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
-      
-      // Save to database
       const { error } = await supabase
-        .from('resume_scores')
+        .from("resume_scores")
         .insert({
           user_id: user?.id,
           overall_score: newScoreData.overall,
@@ -150,13 +144,11 @@ const ResumeScoring = () => {
           percentile: newScoreData.percentile,
           suggested_skills: newScoreData.suggestedSkills,
           resume_content: resumeContent,
-          job_description: jobDescription
+          job_description: jobDescription,
         });
-
       if (error) {
         console.error("Error saving score:", error);
       }
-      
       toast({
         title: "Resume Scored",
         description: "Your resume has been analyzed for ATS compatibility.",
@@ -165,7 +157,10 @@ const ResumeScoring = () => {
       console.error("Error scoring resume:", error);
       toast({
         title: "Scoring Failed",
-        description: error instanceof Error ? error.message : "Failed to score resume",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to score resume",
         variant: "destructive",
       });
     } finally {
@@ -175,7 +170,6 @@ const ResumeScoring = () => {
 
   const handleDownloadReport = () => {
     if (!scoreData) return;
-    
     const reportContent = `
     RESUME SCORING REPORT
     ---------------------
@@ -193,7 +187,7 @@ const ResumeScoring = () => {
     - ATS Readiness: ${scoreData.atsReadiness}/100
     
     SUGGESTED SKILLS TO ADD:
-    ${scoreData.suggestedSkills.join(', ')}
+    ${scoreData.suggestedSkills.join(", ")}
     
     IMPROVEMENT TIPS:
     1. Add the suggested skills to your resume if you have experience with them
@@ -202,12 +196,12 @@ const ResumeScoring = () => {
     4. Quantify your achievements where possible
     5. Use a clean, ATS-friendly format
     `;
-    
-    const blob = new Blob([reportContent], { type: 'text/plain' });
+
+    const blob = new Blob([reportContent], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `resume-score-report-${new Date().toISOString().split('T')[0]}.txt`;
+    a.download = `resume-score-report-${new Date().toISOString().split("T")[0]}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -223,69 +217,69 @@ const ResumeScoring = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between mb-6">
+        <div className="flex justify-between mb-8 items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Resume Score Analyzer
+            <h1 className="text-4xl font-extrabold text-indigo-700 mb-2 tracking-tight drop-shadow-md">
+              🚀 Resume Score Analyzer
             </h1>
-            <p className="text-gray-600">
-              Get detailed insights on how your resume stacks up against industry standards
+            <p className="text-indigo-600 font-medium">
+              Get visually stunning insights about your resume, see your career growth and beat the competition!
             </p>
           </div>
           <UserMenu />
         </div>
-
-        <Tabs defaultValue="current" className="mb-6" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+        <Tabs defaultValue="current" className="mb-8" onValueChange={setActiveTab}>
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 rounded-lg shadow overflow-hidden border border-indigo-200">
             <TabsTrigger value="current">New Analysis</TabsTrigger>
             <TabsTrigger value="history">Score History</TabsTrigger>
           </TabsList>
-          <TabsContent value="current" className="space-y-6 mt-4">
-            <Card>
+          <TabsContent value="current" className="space-y-8 mt-6">
+            <Card className="bg-gradient-to-br from-white via-blue-50 to-indigo-100 shadow-md border-t-4 border-t-indigo-500">
               <CardHeader>
-                <CardTitle>Submit Your Resume</CardTitle>
-                <CardDescription>
-                  Upload your resume and the job description to get a detailed score analysis
+                <CardTitle className="font-bold text-2xl text-indigo-800">Submit Your Resume</CardTitle>
+                <CardDescription className="text-indigo-600 font-medium">
+                  Upload your resume and the job description, then get a breathtaking score breakdown!
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-8">
                 <JobDescriptionInput 
                   jobDescription={jobDescription} 
                   setJobDescription={setJobDescription} 
                 />
-                
                 <FileUploadSection 
                   resumeContent={resumeContent} 
                   setResumeContent={setResumeContent} 
                 />
-                
                 <div className="flex justify-center">
                   <Button 
                     onClick={handleScoreResume} 
                     disabled={isScoring || !resumeContent || !jobDescription}
-                    className="px-6 py-2 text-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                    className="px-10 py-3 text-lg font-bold rounded-full shadow bg-gradient-to-r from-indigo-600 to-fuchsia-500 hover:from-indigo-700 hover:to-fuchsia-600 transition-all"
                   >
-                    {isScoring ? "Analyzing..." : "Analyze Resume"}
+                    {isScoring ? "Analyzing..." : "✨ Analyze Resume"}
                   </Button>
                 </div>
               </CardContent>
             </Card>
-            
             {scoreData && (
-              <div className="mt-8">
-                <Card className="border-t-4 border-t-blue-500">
+              <div className="mt-10">
+                <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative">
+                  <div className="absolute top-0 right-0 m-4 z-10">
+                    <Button variant="secondary" size="sm" onClick={handleDownloadReport} className="font-semibold">
+                      <Download className="mr-2 h-4 w-4" /> Download Report
+                    </Button>
+                  </div>
                   <CardHeader className="flex flex-row items-start justify-between">
                     <div>
-                      <CardTitle className="text-2xl">Resume Score Results</CardTitle>
-                      <CardDescription>
+                      <CardTitle className="text-3xl font-extrabold text-indigo-700 drop-shadow">
+                        Resume Score Results
+                      </CardTitle>
+                      <CardDescription className="text-indigo-600 font-medium">
                         Analyzed on {scoreData.timestamp}
                       </CardDescription>
                     </div>
-                    <Button variant="outline" size="sm" onClick={handleDownloadReport}>
-                      <Download className="mr-2 h-4 w-4" /> Download Report
-                    </Button>
                   </CardHeader>
                   <CardContent>
                     <ScoreBreakdown scoreData={scoreData} />
@@ -294,17 +288,16 @@ const ResumeScoring = () => {
               </div>
             )}
           </TabsContent>
-          
           <TabsContent value="history">
             {scoreHistory.length > 0 ? (
               <ScoreHistory scores={scoreHistory} />
             ) : (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-10">
-                  <BarChart2 className="h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-1">No Score History</h3>
-                  <p className="text-gray-500 text-center max-w-md">
-                    You haven't analyzed any resumes yet. Start by uploading your resume and a job description to get insights.
+                  <BarChart2 className="h-12 w-12 text-indigo-400 mb-4" />
+                  <h3 className="text-lg font-medium text-indigo-900 mb-1">No Score History</h3>
+                  <p className="text-indigo-600 text-center max-w-md">
+                    You haven't analyzed any resumes yet. Start by uploading your resume and a job description to get detailed, actionable feedback and colorful charts tracking your progress.
                   </p>
                 </CardContent>
               </Card>
