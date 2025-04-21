@@ -1,3 +1,4 @@
+
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -9,23 +10,32 @@ interface ScoreBreakdownProps {
 }
 
 export const ScoreBreakdown = ({ scoreData }: ScoreBreakdownProps) => {
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
+  // Helper function to calculate normalized percentage (0-100) for display purposes
+  const normalizeScore = (score: number, weight: number) => {
+    // Convert score to percentage of its weight
+    return Math.min(100, Math.max(0, (score / weight) * 100));
+  };
+
+  const getScoreColor = (score: number, weight: number) => {
+    const normalizedScore = normalizeScore(score, weight);
+    if (normalizedScore >= 80) return "text-green-600";
+    if (normalizedScore >= 60) return "text-yellow-600";
     return "text-red-600";
   };
 
-  const getProgressColor = (score: number) => {
-    if (score >= 80) return "bg-green-500";
-    if (score >= 60) return "bg-yellow-500";
+  const getProgressColor = (score: number, weight: number) => {
+    const normalizedScore = normalizeScore(score, weight);
+    if (normalizedScore >= 80) return "bg-green-500";
+    if (normalizedScore >= 60) return "bg-yellow-500";
     return "bg-red-500";
   };
 
-  const getScoreLabel = (score: number) => {
-    if (score >= 80) return "Excellent";
-    if (score >= 70) return "Good";
-    if (score >= 60) return "Average";
-    if (score >= 40) return "Below Average";
+  const getScoreLabel = (score: number, weight: number) => {
+    const normalizedScore = normalizeScore(score, weight);
+    if (normalizedScore >= 80) return "Excellent";
+    if (normalizedScore >= 70) return "Good";
+    if (normalizedScore >= 60) return "Average";
+    if (normalizedScore >= 40) return "Below Average";
     return "Needs Improvement";
   };
 
@@ -37,7 +47,7 @@ export const ScoreBreakdown = ({ scoreData }: ScoreBreakdownProps) => {
           <div>
             <h3 className="text-lg font-medium text-gray-700">Overall Score</h3>
             <div className="flex items-baseline">
-              <span className={`text-4xl font-bold ${getScoreColor(scoreData.overallScore)}`}>
+              <span className={`text-4xl font-bold ${getScoreColor(scoreData.overallScore, 100)}`}>
                 {scoreData.overallScore}
               </span>
               <span className="text-xl ml-1">/100</span>
@@ -82,17 +92,17 @@ export const ScoreBreakdown = ({ scoreData }: ScoreBreakdownProps) => {
               <h3 className="font-medium">Skills Alignment (25%)</h3>
             </div>
             <div className="flex items-center justify-between mb-1">
-              <span className={`text-2xl font-bold ${getScoreColor(scoreData.skillsAlignment)}`}>
+              <span className={`text-2xl font-bold ${getScoreColor(scoreData.skillsAlignment, 25)}`}>
                 {scoreData.skillsAlignment}
               </span>
               <span className="text-sm text-gray-500">
-                {getScoreLabel(scoreData.skillsAlignment)}
+                {getScoreLabel(scoreData.skillsAlignment, 25)}
               </span>
             </div>
             <Progress 
-              value={scoreData.skillsAlignment} 
+              value={normalizeScore(scoreData.skillsAlignment, 25)} 
               className="h-2" 
-              indicatorClassName={getProgressColor(scoreData.skillsAlignment)} 
+              indicatorClassName={getProgressColor(scoreData.skillsAlignment, 25)} 
             />
           </CardContent>
         </Card>
@@ -104,17 +114,17 @@ export const ScoreBreakdown = ({ scoreData }: ScoreBreakdownProps) => {
               <h3 className="font-medium">Work Experience (25%)</h3>
             </div>
             <div className="flex items-center justify-between mb-1">
-              <span className={`text-2xl font-bold ${getScoreColor(scoreData.WorkExperience)}`}>
+              <span className={`text-2xl font-bold ${getScoreColor(scoreData.WorkExperience, 25)}`}>
                 {scoreData.WorkExperience}
               </span>
               <span className="text-sm text-gray-500">
-                {getScoreLabel(scoreData.WorkExperience)}
+                {getScoreLabel(scoreData.WorkExperience, 25)}
               </span>
             </div>
             <Progress 
-              value={scoreData.WorkExperience} 
+              value={normalizeScore(scoreData.WorkExperience, 25)} 
               className="h-2" 
-              indicatorClassName={getProgressColor(scoreData.WorkExperience)} 
+              indicatorClassName={getProgressColor(scoreData.WorkExperience, 25)} 
             />
           </CardContent>
         </Card>
@@ -126,17 +136,17 @@ export const ScoreBreakdown = ({ scoreData }: ScoreBreakdownProps) => {
               <h3 className="font-medium">Achievements (20%)</h3>
             </div>
             <div className="flex items-center justify-between mb-1">
-              <span className={`text-2xl font-bold ${getScoreColor(scoreData.Achievements)}`}>
+              <span className={`text-2xl font-bold ${getScoreColor(scoreData.Achievements, 20)}`}>
                 {scoreData.Achievements}
               </span>
               <span className="text-sm text-gray-500">
-                {getScoreLabel(scoreData.Achievements)}
+                {getScoreLabel(scoreData.Achievements, 20)}
               </span>
             </div>
             <Progress 
-              value={scoreData.Achievements} 
+              value={normalizeScore(scoreData.Achievements, 20)} 
               className="h-2" 
-              indicatorClassName={getProgressColor(scoreData.Achievements)} 
+              indicatorClassName={getProgressColor(scoreData.Achievements, 20)} 
             />
           </CardContent>
         </Card>
@@ -148,17 +158,17 @@ export const ScoreBreakdown = ({ scoreData }: ScoreBreakdownProps) => {
               <h3 className="font-medium">Education Quality (15%)</h3>
             </div>
             <div className="flex items-center justify-between mb-1">
-              <span className={`text-2xl font-bold ${getScoreColor(scoreData.EducationQuality)}`}>
+              <span className={`text-2xl font-bold ${getScoreColor(scoreData.EducationQuality, 15)}`}>
                 {scoreData.EducationQuality}
               </span>
               <span className="text-sm text-gray-500">
-                {getScoreLabel(scoreData.EducationQuality)}
+                {getScoreLabel(scoreData.EducationQuality, 15)}
               </span>
             </div>
             <Progress 
-              value={scoreData.EducationQuality} 
+              value={normalizeScore(scoreData.EducationQuality, 15)} 
               className="h-2" 
-              indicatorClassName={getProgressColor(scoreData.EducationQuality)} 
+              indicatorClassName={getProgressColor(scoreData.EducationQuality, 15)} 
             />
           </CardContent>
         </Card>
@@ -170,17 +180,17 @@ export const ScoreBreakdown = ({ scoreData }: ScoreBreakdownProps) => {
               <h3 className="font-medium">Certifications (10%)</h3>
             </div>
             <div className="flex items-center justify-between mb-1">
-              <span className={`text-2xl font-bold ${getScoreColor(scoreData.Certifications)}`}>
+              <span className={`text-2xl font-bold ${getScoreColor(scoreData.Certifications, 10)}`}>
                 {scoreData.Certifications}
               </span>
               <span className="text-sm text-gray-500">
-                {getScoreLabel(scoreData.Certifications)}
+                {getScoreLabel(scoreData.Certifications, 10)}
               </span>
             </div>
             <Progress 
-              value={scoreData.Certifications} 
+              value={normalizeScore(scoreData.Certifications, 10)} 
               className="h-2" 
-              indicatorClassName={getProgressColor(scoreData.Certifications)} 
+              indicatorClassName={getProgressColor(scoreData.Certifications, 10)} 
             />
           </CardContent>
         </Card>
@@ -192,17 +202,17 @@ export const ScoreBreakdown = ({ scoreData }: ScoreBreakdownProps) => {
               <h3 className="font-medium">Content Structure (5%)</h3>
             </div>
             <div className="flex items-center justify-between mb-1">
-              <span className={`text-2xl font-bold ${getScoreColor(scoreData.ContentStructure)}`}>
+              <span className={`text-2xl font-bold ${getScoreColor(scoreData.ContentStructure, 5)}`}>
                 {scoreData.ContentStructure}
               </span>
               <span className="text-sm text-gray-500">
-                {getScoreLabel(scoreData.ContentStructure)}
+                {getScoreLabel(scoreData.ContentStructure, 5)}
               </span>
             </div>
             <Progress 
-              value={scoreData.ContentStructure} 
+              value={normalizeScore(scoreData.ContentStructure, 5)} 
               className="h-2" 
-              indicatorClassName={getProgressColor(scoreData.ContentStructure)} 
+              indicatorClassName={getProgressColor(scoreData.ContentStructure, 5)} 
             />
           </CardContent>
         </Card>
@@ -214,17 +224,17 @@ export const ScoreBreakdown = ({ scoreData }: ScoreBreakdownProps) => {
               <h3 className="font-medium">ATS Compatibility</h3>
             </div>
             <div className="flex items-center justify-between mb-1">
-              <span className={`text-2xl font-bold ${getScoreColor(scoreData.atsReadiness)}`}>
+              <span className={`text-2xl font-bold ${getScoreColor(scoreData.atsReadiness, 100)}`}>
                 {scoreData.atsReadiness}
               </span>
               <span className="text-sm text-gray-500">
-                {getScoreLabel(scoreData.atsReadiness)}
+                {getScoreLabel(scoreData.atsReadiness, 100)}
               </span>
             </div>
             <Progress 
               value={scoreData.atsReadiness} 
               className="h-2" 
-              indicatorClassName={getProgressColor(scoreData.atsReadiness)} 
+              indicatorClassName={getProgressColor(scoreData.atsReadiness, 100)} 
             />
           </CardContent>
         </Card>
