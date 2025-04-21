@@ -1,4 +1,3 @@
-
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScoreData } from "@/pages/ResumeScoring";
@@ -146,10 +145,10 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
           />
           <ScoreMetric
             icon={<BarChart className="w-4 h-4 text-pink-500" />}
-            label="Structure (5%)"
-            value={scoreData.ContentStructure}
-            maxValue={5}
-            missing={!scoreData.ContentStructure || scoreData.ContentStructure < 2}
+            label="ATS Compatibility"
+            value={scoreData.atsReadiness}
+            maxValue={100}
+            missing={!scoreData.atsReadiness || scoreData.atsReadiness < 50}
           />
         </div>
         <div className="my-4 text-indigo-800 text-center">
