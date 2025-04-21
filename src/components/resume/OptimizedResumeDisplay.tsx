@@ -78,14 +78,55 @@ ${optimizedResume}
 
   const overallCategory = getScoreCategory(overallScore);
 
-  // Helper to add spacing by splitting resume text into paragraphs at double line breaks
+  // Enhanced resume rendering with better section identification and formatting
   const renderResumeWithSpacing = (text: string) => {
-    const paragraphs = text.split(/\n\s*\n/).filter(Boolean);
-    return paragraphs.map((para, index) => (
-      <p key={index} className="mb-4 whitespace-pre-wrap break-words">
-        {para.trim()}
-      </p>
-    ));
+    // First, split by clear section headers
+    const sectionRegex = /^(EDUCATION|EXPERIENCE|SKILLS|SUMMARY|OBJECTIVE|PROJECTS|CERTIFICATIONS|AWARDS|PUBLICATIONS|REFERENCES|WORK EXPERIENCE|PROFESSIONAL EXPERIENCE|EMPLOYMENT|QUALIFICATIONS|VOLUNTEER|LEADERSHIP|ACTIVITIES|INTERESTS)(?:\s|:)/i;
+    
+    // Process the text to identify and format sections
+    const paragraphs = text.split(/\n{2,}/); // Split by double newlines
+    
+    return paragraphs.map((para, index) => {
+      // Check if this paragraph is a section header
+      const isSectionHeader = sectionRegex.test(para.trim());
+      
+      if (isSectionHeader) {
+        // Format section headers with emphasis
+        return (
+          <div key={index} className="mt-6 mb-3">
+            <h3 className="text-lg font-bold text-indigo-700 uppercase tracking-wide border-b border-indigo-200 pb-1">
+              {para.trim()}
+            </h3>
+          </div>
+        );
+      }
+      
+      // Check if this paragraph contains bullet points
+      const hasBullets = /^\s*[•\-–—*]/m.test(para);
+      
+      if (hasBullets) {
+        // Process bulleted lists
+        const listItems = para.split(/\n/).filter(Boolean).map(item => item.trim().replace(/^\s*[•\-–—*]\s*/, ''));
+        
+        return (
+          <ul key={index} className="list-disc pl-6 mb-4 space-y-1">
+            {listItems.map((item, i) => (
+              <li key={i} className="text-sm text-gray-800">{item}</li>
+            ))}
+          </ul>
+        );
+      }
+      
+      // Regular paragraph with proper spacing
+      return (
+        <p 
+          key={index} 
+          className="mb-3 text-sm text-gray-800 whitespace-pre-line"
+        >
+          {para.trim()}
+        </p>
+      );
+    });
   };
 
   return (
@@ -226,8 +267,10 @@ ${optimizedResume}
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Optimized Resume
         </label>
-        <div className="bg-white p-4 rounded-md border border-gray-200 max-h-[500px] overflow-y-auto whitespace-pre-wrap text-sm text-gray-800 font-mono leading-relaxed">
-          {renderResumeWithSpacing(optimizedResume)}
+        <div className="bg-white p-4 rounded-md border border-gray-200 max-h-[500px] overflow-y-auto font-mono leading-relaxed shadow-inner">
+          <div className="resume-display">
+            {renderResumeWithSpacing(optimizedResume)}
+          </div>
         </div>
       </div>
     </div>

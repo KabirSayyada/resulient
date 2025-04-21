@@ -28,12 +28,47 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        const pageText = textContent.items
-          .map(item => ('str' in item ? item.str : ''))
-          .join(" ");
-        fullText += pageText + "\n";
+        
+        // Improved text extraction with spacing
+        let lastY = null;
+        let currentLine = "";
+        let pageLines: string[] = [];
+        
+        // Process each text item, tracking position for better paragraph detection
+        textContent.items.forEach(item => {
+          if ('str' in item && item.str.trim()) {
+            // If we have a significant Y position change, it's likely a new paragraph
+            if (lastY !== null && Math.abs((item as any).transform[5] - lastY) > 5) {
+              if (currentLine.trim()) {
+                pageLines.push(currentLine.trim());
+                currentLine = "";
+              }
+              
+              // Add an extra line break for significant spacing changes
+              if (Math.abs((item as any).transform[5] - lastY) > 12) {
+                pageLines.push("");
+              }
+            }
+            
+            currentLine += item.str + " ";
+            lastY = (item as any).transform[5];
+          }
+        });
+        
+        // Add the last line if not empty
+        if (currentLine.trim()) {
+          pageLines.push(currentLine.trim());
+        }
+        
+        // Join the lines for this page
+        const pageText = pageLines.join("\n");
+        
+        // Add double line breaks between pages for better section separation
+        fullText += pageText + "\n\n";
       }
       
+      // Post-process to detect and format sections
+      fullText = improveTextFormatting(fullText);
       return fullText;
     } catch (error) {
       console.error("Error extracting text from PDF:", error);
@@ -41,10 +76,63 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
     }
   };
 
+  const improveTextFormatting = (text: string): string => {
+    // 1. Split into lines
+    const lines = text.split('\n');
+    let formattedText = "";
+    let inSection = false;
+    
+    // Common section header indicators
+    const sectionHeaders = [
+      /^(EDUCATION|EXPERIENCE|SKILLS|SUMMARY|OBJECTIVE|PROJECTS|CERTIFICATIONS|AWARDS|PUBLICATIONS|REFERENCES|WORK EXPERIENCE|PROFESSIONAL EXPERIENCE|EMPLOYMENT|QUALIFICATIONS|VOLUNTEER|LEADERSHIP|ACTIVITIES|INTERESTS)(?:\s|:)/i
+    ];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      // Skip empty lines but maintain some spacing between sections
+      if (!line) {
+        if (formattedText && !formattedText.endsWith("\n\n")) {
+          formattedText += "\n";
+        }
+        continue;
+      }
+      
+      // Check if this is a section header
+      const isHeader = sectionHeaders.some(regex => regex.test(line));
+      
+      if (isHeader) {
+        // Add extra spacing before new sections
+        if (formattedText && !formattedText.endsWith("\n\n\n")) {
+          formattedText += "\n\n";
+        }
+        
+        // Format the header (uppercase for visibility)
+        formattedText += line.toUpperCase() + "\n";
+        inSection = true;
+      } else {
+        // Regular content line
+        formattedText += line + "\n";
+      }
+    }
+    
+    // Final cleanup
+    formattedText = formattedText
+      // Remove excessive newlines (more than 3)
+      .replace(/\n{4,}/g, "\n\n\n")
+      // Ensure proper spacing after colons in fields like "Email: example@email.com"
+      .replace(/(\w+):([\w@])/g, "$1: $2")
+      // Improve bulleted lists
+      .replace(/^[\s•\-–—*]+/gm, "• ");
+      
+    return formattedText;
+  };
+
   const extractTextFromTxt = async (file: File) => {
     try {
       const text = await file.text();
-      return text;
+      // Apply the same formatting improvements to text files
+      return improveTextFormatting(text);
     } catch (error) {
       console.error("Error extracting text from TXT:", error);
       throw new Error("Could not read text file");
@@ -93,7 +181,7 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
       </label>
       <Textarea
         placeholder="Paste your current resume content here or upload a file..."
-        className="min-h-[200px]"
+        className="min-h-[200px] font-mono text-sm"
         value={resumeContent}
         onChange={(e) => setResumeContent(e.target.value)}
       />
