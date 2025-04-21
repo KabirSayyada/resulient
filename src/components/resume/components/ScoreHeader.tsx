@@ -24,7 +24,7 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
     </span>
     <Badge variant="secondary" className="mt-1 bg-fuchsia-100 text-fuchsia-700 font-bold text-xs rounded-full px-4 py-1 shadow animate-pulse">
       {scoringMode === "resumeOnly"
-        ? `Top ${percentile}%`
+        ? `${percentile}`
         : "Job Fit Score"}
     </Badge>
   </CardHeader>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -40,34 +39,33 @@ const ResumeScoring = () => {
 
       if (data) {
         const formattedHistory: ScoreData[] = data.map((item) => {
-          // Convert numeric percentile to string representation
           const percentileString = (() => {
             const percentile = item.percentile || 50;
-            if (percentile >= 99) return "Top 1%";
-            if (percentile >= 95) return "Top 5%";
-            if (percentile >= 90) return "Top 10%";
-            if (percentile >= 75) return "Top 25%";
+            if (percentile >= 99) return "1";
+            if (percentile >= 95) return "5";
+            if (percentile >= 90) return "10";
+            if (percentile >= 75) return "25";
             if (percentile >= 65) return "Above Average";
             if (percentile >= 45) return "Average";
             if (percentile >= 30) return "Below Average";
-            return "Bottom 25%";
+            return "Bottom 25";
           })();
           
           return {
             overallScore: item.overall_score,
             skillsAlignment: item.skills_breadth || 0,
             WorkExperience: item.experience_duration || 0,
-            Achievements: item.experience_duration || 0, // Should be achievements_score but field doesn't exist yet
-            EducationQuality: item.content_structure || 0, // Should be education_score but field doesn't exist yet
-            Certifications: item.ats_readiness || 0, // Should be certifications_score but field doesn't exist yet
+            Achievements: item.experience_duration || 0,
+            EducationQuality: item.content_structure || 0,
+            Certifications: item.ats_readiness || 0,
             ContentStructure: item.content_structure || 0,
             keywordRelevance: item.keyword_relevance || 0,
             Industry: item.industry || "",
             percentile: percentileString,
-            numSimilarResumes: item.percentile || 12000, // Should be similar_resumes but field doesn't exist yet
+            numSimilarResumes: item.percentile || 12000,
             suggestedSkills: item.suggested_skills || [],
-            eliteIndicatorsFound: item.suggested_skills || [], // Should be elite_indicators but field doesn't exist yet
-            improvementTips: item.suggested_skills?.map(s => `Add ${s} to your resume`) || [], // Should be improvement_tips but field doesn't exist yet
+            eliteIndicatorsFound: item.suggested_skills || [],
+            improvementTips: item.suggested_skills?.map(s => `Add ${s} to your resume`) || [],
             timestamp: new Date(item.created_at).toLocaleString(),
             id: item.id,
             scoringMode: "resumeOnly",

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -6,27 +5,27 @@ import { useSupabaseFunction } from "@/hooks/useSupabaseFunction";
 import { ScoreData } from "@/types/resume";
 
 const calculatePercentile = (score: number): string => {
-  if (score >= 90) return "Top 1%";
-  if (score >= 85) return "Top 5%";
-  if (score >= 80) return "Top 10%";
-  if (score >= 70) return "Top 25%";
+  if (score >= 90) return "1";
+  if (score >= 85) return "5";
+  if (score >= 80) return "10";
+  if (score >= 70) return "25";
   if (score >= 60) return "Above Average";
   if (score >= 50) return "Average";
   if (score >= 40) return "Below Average";
-  return "Bottom 25%";
+  return "Bottom 25";
 };
 
 // Convert string percentile to numeric value for database storage
 const percentileToNumber = (percentile: string): number => {
   switch (percentile) {
-    case "Top 1%": return 99;
-    case "Top 5%": return 95;
-    case "Top 10%": return 90;
-    case "Top 25%": return 75;
+    case "1": return 99;
+    case "5": return 95;
+    case "10": return 90;
+    case "25": return 75;
     case "Above Average": return 65;
     case "Average": return 50;
     case "Below Average": return 35;
-    case "Bottom 25%": return 25;
+    case "Bottom 25": return 25;
     default: return 50;
   }
 };
@@ -89,17 +88,17 @@ export const useResumeScoring = (userId: string | undefined) => {
           overallScore: existingScore.overall_score,
           skillsAlignment: existingScore.skills_breadth || 0,
           WorkExperience: existingScore.experience_duration || 0,
-          Achievements: existingScore.experience_duration || 0,
-          EducationQuality: existingScore.content_structure || 0,
-          Certifications: existingScore.ats_readiness || 0,
+          Achievements: existingScore.experience_duration || 0, // No achievements_score field yet
+          EducationQuality: existingScore.content_structure || 0, // No education_score field yet
+          Certifications: existingScore.ats_readiness || 0, // No certifications_score field yet
           ContentStructure: existingScore.content_structure || 0,
           keywordRelevance: existingScore.keyword_relevance || 0,
           Industry: existingScore.industry || "",
           percentile: calculatedPercentile,
           numSimilarResumes: existingScore.percentile || 12000,
           suggestedSkills: existingScore.suggested_skills || [],
-          eliteIndicatorsFound: existingScore.suggested_skills || [],
-          improvementTips: existingScore.suggested_skills?.map(s => `Add ${s} to your resume`) || [],
+          eliteIndicatorsFound: existingScore.suggested_skills || [], // No elite_indicators field yet
+          improvementTips: existingScore.suggested_skills?.map(s => `Add ${s} to your resume`) || [], // No improvement_tips field yet
           timestamp: new Date().toLocaleString(),
           id: existingScore.id,
           scoringMode: "resumeOnly",
@@ -159,17 +158,18 @@ export const useResumeScoring = (userId: string | undefined) => {
           overall_score: newScoreData.overallScore,
           skills_breadth: newScoreData.skillsAlignment,
           experience_duration: newScoreData.WorkExperience,
-          achievements_score: newScoreData.Achievements,
-          education_score: newScoreData.EducationQuality,
-          certifications_score: newScoreData.Certifications,
+          // Commenting out the missing field that's causing the error
+          // achievements_score: newScoreData.Achievements,
+          // education_score: newScoreData.EducationQuality,
+          // certifications_score: newScoreData.Certifications,
           content_structure: newScoreData.ContentStructure,
           keyword_relevance: newScoreData.keywordRelevance,
           industry: newScoreData.Industry,
           percentile: numericPercentile,
           similar_resumes: newScoreData.numSimilarResumes,
           suggested_skills: newScoreData.suggestedSkills,
-          elite_indicators: newScoreData.eliteIndicatorsFound,
-          improvement_tips: newScoreData.improvementTips,
+          // elite_indicators: newScoreData.eliteIndicatorsFound,
+          // improvement_tips: newScoreData.improvementTips,
           resume_content: resumeContent,
           job_description: '',
           ats_readiness: 0,
