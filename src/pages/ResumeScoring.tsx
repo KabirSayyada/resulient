@@ -8,11 +8,12 @@ import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart2, ArrowLeft } from "lucide-react";
+import { BarChart2, ArrowLeft, Award } from "lucide-react";
 import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { supabase } from "@/integrations/supabase/client";
 import { ScoreData } from "@/types/resume";
 import { Button } from "@/components/ui/button";
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
@@ -112,7 +113,50 @@ const ResumeScoring = () => {
               Get visually stunning insights about your resume, see your career growth and beat the competition!
             </p>
           </div>
-          <UserMenu />
+          <div className="flex items-center gap-4">
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Tools</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[420px] gap-3 p-4">
+                      <li className="row-span-3">
+                        <Link
+                          to="/resume-scoring"
+                          className="flex h-full w-full select-none flex-col justify-end rounded-lg bg-gradient-to-b from-indigo-200 to-blue-100 p-6 no-underline outline-none focus:shadow-md border border-indigo-400 hover:border-indigo-600"
+                        >
+                          <BarChart2 className="h-7 w-7 text-indigo-600" />
+                          <div className="mb-2 mt-4 text-xl font-bold text-indigo-900">
+                            Resume Score Analysis
+                          </div>
+                          <p className="text-md leading-tight text-indigo-800">
+                            Analyze your resume before optimizing. Get a gorgeous, actionable scoring breakdown, see improvement history, and compete on the leaderboard!
+                          </p>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
+                        >
+                          <div className="flex items-center">
+                            <Award className="h-4 w-4 text-blue-500 mr-2" />
+                            <div className="text-sm font-medium leading-none">
+                              Resume Optimizer
+                            </div>
+                          </div>
+                          <p className="line-clamp-2 text-sm leading-snug text-gray-500">
+                            Optimize your resume to beat ATS systems
+                          </p>
+                        </Link>
+                      </li>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+            <UserMenu />
+          </div>
         </div>
 
         <Tabs defaultValue="current" className="mb-8" onValueChange={setActiveTab}>
