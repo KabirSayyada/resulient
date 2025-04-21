@@ -2,51 +2,23 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useResumeScoring } from "@/hooks/useResumeScoring";
 import { UserMenu } from "@/components/auth/UserMenu";
-import { ScoreBreakdown } from "@/components/resume/ScoreBreakdown";
-import { useToast } from "@/hooks/use-toast";
-import { useSupabaseFunction } from "@/hooks/useSupabaseFunction";
-import { supabase } from "@/integrations/supabase/client";
+import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart2 } from "lucide-react";
 import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
-import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
-
-export interface ScoreData {
-  overallScore: number;
-  skillsAlignment: number;
-  WorkExperience: number;
-  Achievements: number;
-  EducationQuality: number;
-  Certifications: number;
-  ContentStructure: number;
-  keywordRelevance: number;
-  Industry: string;
-  percentile: number;
-  numSimilarResumes: number;
-  suggestedSkills: string[];
-  eliteIndicatorsFound: string[];
-  improvementTips: string[];
-  timestamp: string;
-  id: string;
-  scoringMode?: "resumeOnly";
-}
+import { supabase } from "@/integrations/supabase/client";
+import type { ScoreData } from "@/types/resume";
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-
-  const [scoringMode] = useState<"resumeOnly">("resumeOnly");
   const [resumeContent, setResumeContent] = useState("");
-  const [scoreData, setScoreData] = useState<ScoreData | null>(null);
-  const [scoreHistory, setScoreHistory] = useState<ScoreData[]>([]);
-  const [isScoring, setIsScoring] = useState(false);
   const [activeTab, setActiveTab] = useState("current");
-
-  const { callFunction } = useSupabaseFunction();
+  const { scoreData, scoreHistory, setScoreHistory, isScoring, handleScoreResume } = useResumeScoring(user?.id);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -64,198 +36,32 @@ const ResumeScoring = () => {
         .eq("user_id", user?.id)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       if (data) {
-        setScoreHistory(
-          data.map((item: any) => ({
-            overallScore: item.overall_score,
-            skillsAlignment: item.skills_breadth || 0,
-            WorkExperience: item.experience_duration || 0,
-            Achievements: item.achievements || 0,
-            EducationQuality: item.education_quality || 0,
-            Certifications: item.certifications || 0,
-            ContentStructure: item.content_structure || 0,
-            keywordRelevance: item.keyword_relevance || 0,
-            Industry: item.industry || "",
-            percentile: item.percentile || 50,
-            numSimilarResumes: item.num_similar_resumes || 12000,
-            suggestedSkills: item.suggested_skills || [],
-            eliteIndicatorsFound: item.elite_indicators || [],
-            improvementTips: item.improvement_tips || [],
-            timestamp: new Date(item.created_at).toLocaleString(),
-            id: item.id,
-            scoringMode: item.scoring_mode || "resumeOnly",
-          }))
-        );
+        const formattedHistory: ScoreData[] = data.map((item) => ({
+          overallScore: item.overall_score,
+          skillsAlignment: item.skills_breadth || 0,
+          WorkExperience: item.experience_duration || 0,
+          Achievements: item.achievements_score || 0,
+          EducationQuality: item.education_score || 0,
+          Certifications: item.certifications_score || 0,
+          ContentStructure: item.content_structure || 0,
+          keywordRelevance: item.keyword_relevance || 0,
+          Industry: item.industry || "",
+          percentile: item.percentile || 50,
+          numSimilarResumes: item.similar_resumes || 12000,
+          suggestedSkills: item.suggested_skills || [],
+          eliteIndicatorsFound: item.elite_indicators || [],
+          improvementTips: item.improvement_tips || [],
+          timestamp: new Date(item.created_at).toLocaleString(),
+          id: item.id,
+          scoringMode: "resumeOnly",
+        }));
+        setScoreHistory(formattedHistory);
       }
     } catch (error) {
       console.error("Error fetching score history:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load your score history",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const findExistingScore = async (content: string) => {
-    if (!user) return null;
-    
-    try {
-      const { data, error } = await supabase
-        .from("resume_scores")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("resume_content", content)
-        .eq("scoring_mode", scoringMode)
-        .order("created_at", { ascending: false })
-        .limit(1);
-      
-      if (error) {
-        console.error("Error checking for existing score:", error);
-        return null;
-      }
-      
-      if (data && data.length > 0) {
-        return data[0];
-      }
-      
-      return null;
-    } catch (error) {
-      console.error("Error checking for existing score:", error);
-      return null;
-    }
-  };
-
-  const handleScoreResume = async () => {
-    if (!resumeContent) {
-      toast({
-        title: "Missing Content",
-        description: "Please upload or paste your resume content.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsScoring(true);
-    
-    try {
-      const existingScore = await findExistingScore(resumeContent);
-      
-      if (existingScore) {
-        console.log("Found existing score for this resume, reusing results");
-        
-        const cachedScoreData: ScoreData = {
-          overallScore: existingScore.overall_score,
-          skillsAlignment: existingScore.skills_breadth || 0,
-          WorkExperience: existingScore.experience_duration || 0,
-          Achievements: existingScore.achievements || 0,
-          EducationQuality: existingScore.education_quality || 0,
-          Certifications: existingScore.certifications || 0,
-          ContentStructure: existingScore.content_structure || 0,
-          keywordRelevance: existingScore.keyword_relevance || 0,
-          Industry: existingScore.industry || "",
-          percentile: existingScore.percentile || 50,
-          numSimilarResumes: existingScore.num_similar_resumes || 12000,
-          suggestedSkills: existingScore.suggested_skills || [],
-          eliteIndicatorsFound: existingScore.elite_indicators || [],
-          improvementTips: existingScore.improvement_tips || [],
-          timestamp: new Date().toLocaleString(),
-          id: existingScore.id,
-          scoringMode: existingScore.scoring_mode as "resumeOnly" || "resumeOnly",
-        };
-        
-        setScoreData(cachedScoreData);
-        
-        toast({
-          title: "Results Retrieved",
-          description: "We found existing results for this resume.",
-        });
-        
-        return;
-      }
-      
-      const payload = {
-        resumeContent,
-        scoringMode,
-      };
-      
-      const response = await callFunction("score-resume", payload);
-      
-      if (response?.error) {
-        throw new Error(response.error);
-      }
-      
-      const newScoreData: ScoreData = {
-        overallScore: response.overallScore,
-        skillsAlignment: response.skillsAlignment,
-        WorkExperience: response.WorkExperience,
-        Achievements: response.Achievements,
-        EducationQuality: response.EducationQuality,
-        Certifications: response.Certifications,
-        ContentStructure: response.ContentStructure,
-        keywordRelevance: response.keywordRelevance,
-        Industry: response.Industry,
-        percentile: response.percentile,
-        numSimilarResumes: response.numSimilarResumes,
-        suggestedSkills: response.suggestedSkills || [],
-        eliteIndicatorsFound: response.eliteIndicatorsFound || [],
-        improvementTips: response.improvementTips || [],
-        timestamp: new Date().toLocaleString(),
-        id: "newly-generated-" + crypto.randomUUID(),
-        scoringMode,
-      };
-      
-      setScoreData(newScoreData);
-      setScoreHistory([newScoreData, ...scoreHistory]);
-      
-      const { error } = await supabase
-        .from("resume_scores")
-        .insert({
-          user_id: user?.id,
-          overall_score: newScoreData.overallScore,
-          skills_breadth: newScoreData.skillsAlignment,
-          experience_duration: newScoreData.WorkExperience,
-          achievements: newScoreData.Achievements,
-          education_quality: newScoreData.EducationQuality,
-          certifications: newScoreData.Certifications,
-          content_structure: newScoreData.ContentStructure,
-          keyword_relevance: newScoreData.keywordRelevance,
-          industry: newScoreData.Industry,
-          percentile: newScoreData.percentile,
-          num_similar_resumes: newScoreData.numSimilarResumes,
-          suggested_skills: newScoreData.suggestedSkills,
-          elite_indicators: newScoreData.eliteIndicatorsFound,
-          improvement_tips: newScoreData.improvementTips,
-          resume_content: resumeContent,
-          job_description: '',
-          ats_readiness: 0,
-          scoring_mode: scoringMode
-        });
-      
-      if (error) {
-        console.error("Error saving score:", error);
-      }
-      
-      toast({
-        title: "Resume Benchmarked",
-        description: "Your resume has been benchmarked for your target industry.",
-      });
-    } catch (error) {
-      console.error("Error scoring resume:", error);
-      toast({
-        title: "Scoring Failed",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Failed to score resume",
-        variant: "destructive",
-      });
-    } finally {
-      setIsScoring(false);
     }
   };
 
@@ -266,6 +72,10 @@ const ResumeScoring = () => {
       </div>
     );
   }
+
+  const onScore = () => {
+    handleScoreResume(resumeContent);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -281,34 +91,32 @@ const ResumeScoring = () => {
           </div>
           <UserMenu />
         </div>
+
         <Tabs defaultValue="current" className="mb-8" onValueChange={setActiveTab}>
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 rounded-lg shadow overflow-hidden border border-indigo-200">
             <TabsTrigger value="current">New Analysis</TabsTrigger>
             <TabsTrigger value="history">Score History</TabsTrigger>
           </TabsList>
+
           <TabsContent value="current" className="space-y-8 mt-6">
             <Card className="bg-gradient-to-br from-white via-blue-50 to-indigo-100 shadow-md border-t-4 border-t-indigo-500">
-              <CardHeader>
-                <CardTitle className="font-bold text-2xl text-indigo-800">Submit Your Resume</CardTitle>
-                <CardDescription className="text-indigo-600 font-medium">
-                  Upload your resume to benchmark it against industry standards!
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-8">
+              <CardContent className="space-y-8 pt-6">
                 <ResumeScoringForm
-                  scoringMode={scoringMode}
+                  scoringMode="resumeOnly"
                   setScoringMode={() => {}}
                   resumeContent={resumeContent}
                   setResumeContent={setResumeContent}
                   isScoring={isScoring}
-                  onScore={handleScoreResume}
+                  onScore={onScore}
                 />
               </CardContent>
             </Card>
+
             {scoreData && (
               <ScoreResultSection scoreData={scoreData} />
             )}
           </TabsContent>
+
           <TabsContent value="history">
             {scoreHistory.length > 0 ? (
               <ScoreHistory scores={scoreHistory} />
