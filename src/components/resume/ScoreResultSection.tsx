@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -189,8 +188,9 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
       <CardContent>
         <ScoreBreakdown scoreData={scoreData} />
         {scoreData.scoringMode === "resumeOnly" && (
-          <div className="mt-8 text-center text-fuchsia-600 text-sm font-semibold">
-            {scoreData.Industry} industry
+          <div className="mt-8 text-center text-fuchsia-600 text-sm">
+            <div className="font-bold mb-2">{scoreData.overallScore}/100</div>
+            <div>{scoreData.Industry} industry</div>
           </div>
         )}
       </CardContent>
