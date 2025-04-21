@@ -34,8 +34,8 @@ serve(async (req) => {
     });
 
     const systemPrompt = `Score this resume based on the following criteria:     
-If 2 of the following sections are missing (work experience, skills, education, achievements) and the final score of resume is over 40/100 then automatically just score it 40/100 else give the score as it is.   
-If the resume has less than 300 words and its score exceeds 50 then automatically give it 50 else give right score.  
+Important: If up to two of the following sections are missing (Experience, Skills, Education, Achievements) and the final score of resume is over 40/100 then automatically just give overallScore as 40 else leave the score as it is (overallScore).   
+If the resume has less than 300 words and its score exceeds 50 then automatically give it 50 else leave the right score as it is (overallScore)
 
 Please use the following weighted criteria for the scoring:
 1. Skills Alignment (25%): Technical and soft skills relevant to the job and industry.
