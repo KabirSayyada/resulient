@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +24,9 @@ export interface ScoreData {
   experienceDuration: number;
   contentStructure: number;
   atsReadiness: number;
+  achievements?: number;
+  educationQuality?: number;
+  certifications?: number;
   industry: string;
   percentile: number;
   suggestedSkills: string[];
@@ -30,6 +34,7 @@ export interface ScoreData {
   id: string;
   scoringMode?: "jobDescription" | "resumeOnly";
   numSimilarResumes?: number;
+  eliteIndicatorsFound?: string[];
 }
 
 const ResumeScoring = () => {
@@ -129,13 +134,17 @@ const ResumeScoring = () => {
         experienceDuration: response.experienceDuration,
         contentStructure: response.contentStructure,
         atsReadiness: response.atsReadiness,
+        achievements: response.achievements,
+        educationQuality: response.educationQuality,
+        certifications: response.certifications,
         industry: response.industry,
         percentile: response.percentile,
         suggestedSkills: response.suggestedSkills || [],
         timestamp: new Date().toLocaleString(),
         id: crypto.randomUUID(),
         scoringMode,
-        numSimilarResumes: response.numSimilarResumes
+        numSimilarResumes: response.numSimilarResumes,
+        eliteIndicatorsFound: response.eliteIndicatorsFound || []
       };
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
@@ -149,11 +158,15 @@ const ResumeScoring = () => {
           experience_duration: newScoreData.experienceDuration,
           content_structure: newScoreData.contentStructure,
           ats_readiness: newScoreData.atsReadiness,
+          achievements: newScoreData.achievements,
+          education_quality: newScoreData.educationQuality, 
+          certifications: newScoreData.certifications,
           industry: newScoreData.industry,
           percentile: newScoreData.percentile,
           suggested_skills: newScoreData.suggestedSkills,
           resume_content: resumeContent,
           job_description: scoringMode === "jobDescription" ? jobDescription : "",
+          elite_indicators: newScoreData.eliteIndicatorsFound
         });
       if (error) {
         console.error("Error saving score:", error);

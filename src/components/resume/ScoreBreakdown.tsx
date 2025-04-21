@@ -2,7 +2,7 @@
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Trophy, Star, TrendingUp, List, BarChart } from "lucide-react";
+import { Trophy, Star, TrendingUp, List, BarChart, BookOpen, Award, Medal } from "lucide-react";
 import { ScoreData } from "@/pages/ResumeScoring";
 
 interface ScoreBreakdownProps {
@@ -57,34 +57,30 @@ export const ScoreBreakdown = ({ scoreData }: ScoreBreakdownProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {scoreData.eliteIndicatorsFound && scoreData.eliteIndicatorsFound.length > 0 && (
+        <Card className="bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center mb-3">
+              <Medal className="h-5 w-5 text-amber-500 mr-2" />
+              <h3 className="font-medium text-amber-800">Notable Achievements Detected</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {scoreData.eliteIndicatorsFound.map((indicator, index) => (
+                <span key={index} className="bg-amber-100 text-amber-800 px-2 py-1 rounded-md text-sm">
+                  {indicator}
+                </span>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center mb-2">
               <Star className="h-5 w-5 text-amber-500 mr-2" />
-              <h3 className="font-medium">Keyword Relevance</h3>
-            </div>
-            <div className="flex items-center justify-between mb-1">
-              <span className={`text-2xl font-bold ${getScoreColor(scoreData.keywordRelevance)}`}>
-                {scoreData.keywordRelevance}
-              </span>
-              <span className="text-sm text-gray-500">
-                {getScoreLabel(scoreData.keywordRelevance)}
-              </span>
-            </div>
-            <Progress 
-              value={scoreData.keywordRelevance} 
-              className="h-2" 
-              indicatorClassName={getProgressColor(scoreData.keywordRelevance)} 
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center mb-2">
-              <TrendingUp className="h-5 w-5 text-blue-500 mr-2" />
-              <h3 className="font-medium">Skills Breadth</h3>
+              <h3 className="font-medium">Skills Alignment (25%)</h3>
             </div>
             <div className="flex items-center justify-between mb-1">
               <span className={`text-2xl font-bold ${getScoreColor(scoreData.skillsBreadth)}`}>
@@ -105,8 +101,8 @@ export const ScoreBreakdown = ({ scoreData }: ScoreBreakdownProps) => {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center mb-2">
-              <BarChart className="h-5 w-5 text-indigo-500 mr-2" />
-              <h3 className="font-medium">Experience Duration</h3>
+              <TrendingUp className="h-5 w-5 text-blue-500 mr-2" />
+              <h3 className="font-medium">Work Experience (25%)</h3>
             </div>
             <div className="flex items-center justify-between mb-1">
               <span className={`text-2xl font-bold ${getScoreColor(scoreData.experienceDuration)}`}>
@@ -124,11 +120,83 @@ export const ScoreBreakdown = ({ scoreData }: ScoreBreakdownProps) => {
           </CardContent>
         </Card>
 
+        {scoreData.achievements && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center mb-2">
+                <Trophy className="h-5 w-5 text-purple-500 mr-2" />
+                <h3 className="font-medium">Achievements (20%)</h3>
+              </div>
+              <div className="flex items-center justify-between mb-1">
+                <span className={`text-2xl font-bold ${getScoreColor(scoreData.achievements)}`}>
+                  {scoreData.achievements}
+                </span>
+                <span className="text-sm text-gray-500">
+                  {getScoreLabel(scoreData.achievements)}
+                </span>
+              </div>
+              <Progress 
+                value={scoreData.achievements} 
+                className="h-2" 
+                indicatorClassName={getProgressColor(scoreData.achievements)} 
+              />
+            </CardContent>
+          </Card>
+        )}
+
+        {scoreData.educationQuality && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center mb-2">
+                <BookOpen className="h-5 w-5 text-indigo-500 mr-2" />
+                <h3 className="font-medium">Education Quality (15%)</h3>
+              </div>
+              <div className="flex items-center justify-between mb-1">
+                <span className={`text-2xl font-bold ${getScoreColor(scoreData.educationQuality)}`}>
+                  {scoreData.educationQuality}
+                </span>
+                <span className="text-sm text-gray-500">
+                  {getScoreLabel(scoreData.educationQuality)}
+                </span>
+              </div>
+              <Progress 
+                value={scoreData.educationQuality} 
+                className="h-2" 
+                indicatorClassName={getProgressColor(scoreData.educationQuality)} 
+              />
+            </CardContent>
+          </Card>
+        )}
+
+        {scoreData.certifications && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center mb-2">
+                <Award className="h-5 w-5 text-green-500 mr-2" />
+                <h3 className="font-medium">Certifications (10%)</h3>
+              </div>
+              <div className="flex items-center justify-between mb-1">
+                <span className={`text-2xl font-bold ${getScoreColor(scoreData.certifications)}`}>
+                  {scoreData.certifications}
+                </span>
+                <span className="text-sm text-gray-500">
+                  {getScoreLabel(scoreData.certifications)}
+                </span>
+              </div>
+              <Progress 
+                value={scoreData.certifications} 
+                className="h-2" 
+                indicatorClassName={getProgressColor(scoreData.certifications)} 
+              />
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center mb-2">
-              <List className="h-5 w-5 text-green-500 mr-2" />
-              <h3 className="font-medium">Content Structure</h3>
+              <List className="h-5 w-5 text-pink-500 mr-2" />
+              <h3 className="font-medium">Content Structure (5%)</h3>
             </div>
             <div className="flex items-center justify-between mb-1">
               <span className={`text-2xl font-bold ${getScoreColor(scoreData.contentStructure)}`}>
@@ -142,6 +210,28 @@ export const ScoreBreakdown = ({ scoreData }: ScoreBreakdownProps) => {
               value={scoreData.contentStructure} 
               className="h-2" 
               indicatorClassName={getProgressColor(scoreData.contentStructure)} 
+            />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center mb-2">
+              <BarChart className="h-5 w-5 text-cyan-500 mr-2" />
+              <h3 className="font-medium">ATS Compatibility</h3>
+            </div>
+            <div className="flex items-center justify-between mb-1">
+              <span className={`text-2xl font-bold ${getScoreColor(scoreData.atsReadiness)}`}>
+                {scoreData.atsReadiness}
+              </span>
+              <span className="text-sm text-gray-500">
+                {getScoreLabel(scoreData.atsReadiness)}
+              </span>
+            </div>
+            <Progress 
+              value={scoreData.atsReadiness} 
+              className="h-2" 
+              indicatorClassName={getProgressColor(scoreData.atsReadiness)} 
             />
           </CardContent>
         </Card>

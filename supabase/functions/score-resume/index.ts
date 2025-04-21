@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.29.0";
 import OpenAI from "https://esm.sh/openai@4.17.0";
@@ -38,26 +39,28 @@ serve(async (req) => {
     let prompt = "";
     if (scoringMode === "resumeOnly") {
       prompt = `
-      Analyze this resume with BRUTAL HONESTY, following extremely high industry standards. This analysis should be thorough and critical, with a low baseline for scores.
+      Analyze this resume with BRUTAL HONESTY, following extremely high industry standards. This analysis should be thorough and critical, with a detailed, weighted scoring system.
 
       RESUME:
       ${resumeContent}
       
-      Please estimate the industry this resume best matches. Then, provide a comprehensive scoring breakdown with the following on a scale of 0-100, where 70 is considered decent for a professional resume, and 90+ is exceptional and rare:
+      Please provide a comprehensive scoring breakdown using the following weighted criteria:
       
-      1. Overall Score: How well the resume demonstrates candidate qualifications (be very critical)
-      2. Keyword Relevance: Appropriate use of industry-specific terminology (penalize generic terms)
-      3. Skills Breadth: Range of in-demand technical and soft skills (verify alignment with industry standards)
-      4. Experience Duration: Appropriate experience level, gaps in employment history, and relevance
-      5. Content Structure: Professional organization, formatting consistency, and readability
-      6. ATS Readiness: Compatibility with Applicant Tracking Systems (penalize overformatting)
+      1. Skills Alignment (25%): Technical and soft skills relevant to the industry.
+      2. Work Experience (25%): Company reputation, role relevance, and career progression. Include personal projects.
+      3. Achievements (20%): Quantifiable accomplishments with measurable impact.
+      4. Education Quality (15%): Institution prestige and degree relevance.
+      5. Certifications/Awards (10%): Industry-recognized credentials and honors.
+      6. Formatting/Completeness (5%): Organization, length, and clarity.
       
-      Additional Scoring Factors (factor these into the appropriate above categories):
+      IMPORTANT SCORING RULE:
+      - If the resume contains any of the following keywords or similar indicators of top-tier achievement—such as elite universities (e.g., Harvard, MIT, Oxford, Stanford, Cambridge, Yale, Princeton), world-leading companies (e.g., Google, Microsoft, Apple, Netflix, Amazon, Meta, Tesla), major global awards (e.g., Nobel, Pulitzer, Olympics), or high-impact terms (e.g., million, billion, patent, keynote, founder)—add extra points in the relevant category (Education, Experience, Achievements). If any of those is found, the resume cannot be scored below 80/100 overall.
+      
+      ADDITIONAL FACTORS TO CONSIDER:
       - Length: Penalize if too short (<1 page) or too long (>2 pages for most industries)
       - Completeness: Missing crucial sections like education, experience, skills (severe penalty)
       - Professionalism: Language formality, third-person perspective, no personal pronouns
       - Grammar/Spelling: Any errors should significantly lower scores
-      - Prestige Factors: Education institutions, notable employers (globally recognized names)
       - Quantifiable Achievements: Specific metrics and accomplishments (not just responsibilities)
       
       Estimate:
@@ -66,26 +69,32 @@ serve(async (req) => {
       3. Number of similar resumes in this industry (approximate, e.g., "about 12,000+")
       4. Suggested missing or in-demand skills to improve competitiveness
       
+      Calculate the final overall score as a weighted average of the individual category scores based on the percentages above.
+      
       Format your response as a JSON object with these fields:
       {
         "overallScore": number,
-        "keywordRelevance": number,
         "skillsBreadth": number,
         "experienceDuration": number,
+        "achievements": number,
+        "educationQuality": number,
+        "certifications": number,
         "contentStructure": number,
+        "keywordRelevance": number,
         "atsReadiness": number,
         "industry": string,
         "percentile": number,
         "numSimilarResumes": number,
-        "suggestedSkills": string[]
+        "suggestedSkills": string[],
+        "eliteIndicatorsFound": string[]
       }
 
-      Return ONLY the JSON object, no extra text. BE BRUTALLY HONEST IN YOUR SCORES - most resumes should score below 70 in multiple categories.
+      Return ONLY the JSON object, no extra text. BE BRUTALLY HONEST IN YOUR SCORES but remember that resumes containing elite indicators cannot score below 80/100 overall.
       `;
     } else {
       // Default or "jobDescription" mode
       prompt = `
-      Analyze this resume against the provided job description with BRUTAL HONESTY and extremely high standards:
+      Analyze this resume against the provided job description with BRUTAL HONESTY, using a weighted scoring system:
       
       JOB DESCRIPTION:
       ${jobDescription}
@@ -93,21 +102,25 @@ serve(async (req) => {
       RESUME:
       ${resumeContent}
       
-      Please provide a rigorous analysis with the following scores on a scale of 0-100, where 70 is considered decent, and 90+ is exceptional and rare:
+      Please provide a comprehensive scoring breakdown using the following weighted criteria:
       
-      1. Overall Score: Total alignment between resume and job requirements (be very critical)
-      2. Keyword Relevance: How precisely the resume uses key terminology from the job description
-      3. Skills Breadth: Coverage of required and preferred skills (penalize missing critical skills)
-      4. Experience Duration: Appropriate length and relevance of experience for this specific role
-      5. Content Structure: Professional organization and readability (penalize poor formatting)
-      6. ATS Readiness: How likely the resume is to pass ATS systems for this job
+      1. Skills Alignment (25%): Technical and soft skills relevant to the job and industry.
+      2. Work Experience (25%): Company reputation, role relevance to the job, and career progression. Include personal projects.
+      3. Achievements (20%): Quantifiable accomplishments with measurable impact relevant to the job.
+      4. Education Quality (15%): Institution prestige and degree relevance to the position.
+      5. Certifications/Awards (10%): Industry-recognized credentials and honors relevant to the job.
+      6. Formatting/Completeness (5%): Organization, length, and clarity.
       
-      Additional Scoring Factors (factor these into the appropriate above categories):
+      IMPORTANT SCORING RULE:
+      - If the resume contains any of the following keywords or similar indicators of top-tier achievement—such as elite universities (e.g., Harvard, MIT, Oxford, Stanford, Cambridge, Yale, Princeton), world-leading companies (e.g., Google, Microsoft, Apple, Netflix, Amazon, Meta, Tesla), major global awards (e.g., Nobel, Pulitzer, Olympics), or high-impact terms (e.g., million, billion, patent, keynote, founder)—add extra points in the relevant category (Education, Experience, Achievements). If any of those is found, the resume cannot be scored below 80/100 overall.
+      
+      ADDITIONAL FACTORS TO CONSIDER:
+      - Keyword Matching: How well the resume uses key terminology from the job description
+      - ATS Compatibility: How likely the resume is to pass ATS systems for this job
       - Length: Penalize if too short (<1 page) or too long (>2 pages for most industries)
-      - Completeness: Missing crucial sections (severe penalty)
+      - Completeness: Missing crucial sections like education, experience, skills (severe penalty)
       - Professionalism: Language formality, third-person perspective, no personal pronouns
       - Grammar/Spelling: Any errors should significantly lower scores
-      - Prestige Factors: Education institutions, notable employers (globally recognized names)
       - Quantifiable Achievements: Specific metrics and accomplishments (not just responsibilities)
       
       Also determine:
@@ -115,20 +128,26 @@ serve(async (req) => {
       2. Critical missing skills that would improve the resume for this specific job
       3. Estimated percentile ranking compared to typical applicants (e.g., top 20%)
       
+      Calculate the final overall score as a weighted average of the individual category scores based on the percentages above.
+      
       Format your response as a JSON object with these fields:
       {
         "overallScore": number,
-        "keywordRelevance": number,
         "skillsBreadth": number,
         "experienceDuration": number,
+        "achievements": number,
+        "educationQuality": number,
+        "certifications": number,
         "contentStructure": number,
+        "keywordRelevance": number,
         "atsReadiness": number,
         "industry": string,
         "suggestedSkills": string[],
-        "percentile": number
+        "percentile": number,
+        "eliteIndicatorsFound": string[]
       }
       
-      Return ONLY the JSON object without any additional text. BE BRUTALLY HONEST IN YOUR SCORES - most resumes should score below 70 in multiple categories when compared to an actual job.
+      Return ONLY the JSON object without any additional text. BE BRUTALLY HONEST IN YOUR SCORES but remember that resumes containing elite indicators cannot score below 80/100 overall.
       `;
     }
 

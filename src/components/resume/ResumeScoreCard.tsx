@@ -2,7 +2,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScoreData } from "@/pages/ResumeScoring";
-import { Award, Star, Medal } from "lucide-react";
+import { Award, Star, Medal, BookOpen, Trophy, TrendingUp, BarChart } from "lucide-react";
 import BenchmarkGraph from "./BenchmarkGraph";
 
 interface ResumeScoreCardProps {
@@ -38,6 +38,14 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
           Overall Resume Score
         </div>
         
+        {scoreData.eliteIndicatorsFound && scoreData.eliteIndicatorsFound.length > 0 && (
+          <div className="w-full mt-1 mb-2">
+            <div className="text-xs font-semibold text-amber-700 bg-amber-50 p-2 rounded-md border border-amber-200">
+              Notable achievements detected: {scoreData.eliteIndicatorsFound.join(", ")}
+            </div>
+          </div>
+        )}
+        
         {scoreData.scoringMode === "resumeOnly" && (
           <div className="w-full mt-2">
             <BenchmarkGraph percentile={percentile} numSimilar={numSimilar} />
@@ -47,28 +55,39 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
         <div className="grid grid-cols-2 gap-x-8 gap-y-2 w-full mt-2">
           <ScoreMetric 
             icon={<Star className="w-4 h-4 text-yellow-500" />} 
-            label="Keywords" 
-            value={scoreData.keywordRelevance}
-          />
-          <ScoreMetric 
-            icon={<Medal className="w-4 h-4 text-blue-500" />} 
-            label="Skills" 
+            label="Skills (25%)" 
             value={scoreData.skillsBreadth}
           />
           <ScoreMetric 
-            icon={<Award className="w-4 h-4 text-purple-500" />} 
-            label="Experience" 
+            icon={<TrendingUp className="w-4 h-4 text-blue-500" />} 
+            label="Experience (25%)" 
             value={scoreData.experienceDuration}
           />
+          {scoreData.achievements && (
+            <ScoreMetric 
+              icon={<Trophy className="w-4 h-4 text-purple-500" />} 
+              label="Achievements (20%)" 
+              value={scoreData.achievements}
+            />
+          )}
+          {scoreData.educationQuality && (
+            <ScoreMetric 
+              icon={<BookOpen className="w-4 h-4 text-indigo-500" />} 
+              label="Education (15%)" 
+              value={scoreData.educationQuality}
+            />
+          )}
+          {scoreData.certifications && (
+            <ScoreMetric 
+              icon={<Award className="w-4 h-4 text-green-500" />} 
+              label="Certifications (10%)" 
+              value={scoreData.certifications}
+            />
+          )}
           <ScoreMetric 
-            icon={<Award className="w-4 h-4 text-green-500" />} 
-            label="Structure" 
+            icon={<BarChart className="w-4 h-4 text-pink-500" />} 
+            label="Structure (5%)" 
             value={scoreData.contentStructure}
-          />
-          <ScoreMetric 
-            icon={<Award className="w-4 h-4 text-pink-500" />} 
-            label="ATS Readiness" 
-            value={scoreData.atsReadiness}
           />
         </div>
         
