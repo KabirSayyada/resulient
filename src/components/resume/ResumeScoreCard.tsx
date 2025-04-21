@@ -1,3 +1,4 @@
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScoreData } from "@/pages/ResumeScoring";
@@ -28,18 +29,22 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
             : `Job Fit Score`}
         </Badge>
       </CardHeader>
-      <CardContent className="py-6 px-4 flex flex-col items-center gap-3">
+      <CardContent className="py-6 px-4 flex flex-col items-center gap-4">
         <div className="text-[56px] font-extrabold text-fuchsia-600 leading-none flex items-center gap-2">
           {scoreData.overall}
           <span className="text-xl text-indigo-700 font-bold">/100</span>
         </div>
-        <div className="text-sm font-semibold text-indigo-600 -mt-2 mb-2">
+        <div className="text-sm font-semibold text-indigo-600 -mt-2">
           Overall Resume Score
         </div>
+        
         {scoreData.scoringMode === "resumeOnly" && (
-          <BenchmarkGraph percentile={percentile} numSimilar={numSimilar} />
+          <div className="w-full mt-2">
+            <BenchmarkGraph percentile={percentile} numSimilar={numSimilar} />
+          </div>
         )}
-        <div className="grid grid-cols-2 gap-x-8 gap-y-2 w-full mb-2">
+        
+        <div className="grid grid-cols-2 gap-x-8 gap-y-2 w-full mt-2">
           <ScoreMetric 
             icon={<Star className="w-4 h-4 text-yellow-500" />} 
             label="Keywords" 
@@ -66,21 +71,25 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
             value={scoreData.atsReadiness}
           />
         </div>
-        <div className="my-2 text-indigo-800 text-center">
+        
+        <div className="my-4 text-indigo-800 text-center">
           <div className="font-semibold text-sm mb-1">Suggested Skills to Add:</div>
           <div className="text-xs font-bold text-fuchsia-700 mb-1">
             {scoreData.suggestedSkills.join(", ")}
           </div>
         </div>
-        <div className="rounded-md text-xs text-gray-600 bg-indigo-50 p-2 font-medium mb-2">
+        
+        <div className="rounded-md text-xs text-gray-600 bg-indigo-50 p-2 font-medium w-full">
           {scoreData.scoringMode === "resumeOnly" 
             ? `Benchmarked vs. others in "${scoreData.industry}" — Top ${scoreData.percentile}%`
             : "Compared against your target job description"}
         </div>
+        
         <div className="flex items-center gap-2 justify-center text-xs text-indigo-900 mt-2 font-bold">
           <span>Generated on {scoreData.timestamp}</span>
         </div>
-        <div className="w-full text-center mt-2">
+        
+        <div className="w-full text-center mt-1">
           <span className="text-xs text-gray-500">Share your progress and help others improve their resumes!</span>
         </div>
       </CardContent>

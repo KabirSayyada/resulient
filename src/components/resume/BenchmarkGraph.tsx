@@ -37,17 +37,17 @@ export const BenchmarkGraph = ({
   const { data, userP } = createDistributionData(numSimilar, percentile);
 
   return (
-    <div className="w-full flex flex-col items-center my-4">
-      <div className="font-semibold text-sm text-indigo-800 mb-1">
+    <div className="w-full flex flex-col items-center my-6">
+      <div className="font-semibold text-sm text-indigo-800 mb-2">
         Where you stand vs. estimated <span className="font-bold">{numSimilar.toLocaleString()}</span> {numSimilar === 1 ? 'resume' : 'resumes'} in this industry
       </div>
-      <div className="w-full max-w-md h-40 rounded-xl bg-indigo-50">
+      <div className="w-full max-w-md h-44 rounded-xl bg-indigo-50 p-2">
         <ChartContainer config={{
           resumes: { label: "Competitive Resumes", color: "#a78bfa" },
           user: { label: "You", color: "#d946ef" }
         }}>
           <ResponsiveContainer width="100%" height={160}>
-            <AreaChart data={data}>
+            <AreaChart data={data} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
               <XAxis
                 dataKey="percentile"
                 type="number"
@@ -57,14 +57,17 @@ export const BenchmarkGraph = ({
                 label={{
                   value: "Percentile (Top ⟶ Bottom)",
                   position: "insideBottom",
-                  offset: -6,
-                  style: { fill: "#6D28D9", fontSize: 13 }
+                  offset: -5,
+                  style: { fill: "#6D28D9", fontSize: 12 }
                 }}
                 stroke="#ddd"
                 axisLine={false}
               />
               <YAxis hide />
-              <Tooltip contentStyle={{ fontSize: 12 }} formatter={(_, n) => [_, n === "resumes" ? "Resumes" : "You"]}/>
+              <Tooltip 
+                contentStyle={{ fontSize: 12, backgroundColor: "white", border: "1px solid #e2e8f0" }} 
+                formatter={(_, n) => [_, n === "resumes" ? "Resumes" : "You"]}
+              />
               <Area
                 type="monotone"
                 dataKey="resumes"
@@ -94,7 +97,7 @@ export const BenchmarkGraph = ({
           </ResponsiveContainer>
         </ChartContainer>
       </div>
-      <div className="mt-0.5 text-xs text-indigo-700">
+      <div className="mt-2 text-xs text-indigo-700">
         <strong>Top {formatPercentile(percentile)}%</strong> — you're outperforming nearly <strong>{Math.round((100 - percentile) / 100 * numSimilar).toLocaleString()}</strong> others!
       </div>
     </div>
