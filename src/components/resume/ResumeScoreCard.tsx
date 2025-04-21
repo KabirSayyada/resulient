@@ -58,7 +58,14 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
     }
   };
 
-  const displayPercentile = scoreData.percentile.replace(/ %/g, '%');
+  const displayPercentile = () => {
+    let cleanedPercentile = scoreData.percentile
+      .replace(/^(Top\s+)+/i, 'Top ')  // Remove duplicate "Top"
+      .replace(/%+/g, '%')  // Ensure only one % symbol
+      .trim();
+
+    return cleanedPercentile;
+  };
 
   return (
     <div className="max-w-md mx-auto shadow-2xl rounded-3xl overflow-hidden bg-gradient-to-br from-white via-indigo-50 to-blue-100 p-0 border-4 border-indigo-200 relative scorecard-for-export">
@@ -138,7 +145,7 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
 
         <div className="rounded-md text-xs text-gray-600 bg-indigo-50 p-2 font-medium w-full">
           {scoreData.scoringMode === "resumeOnly"
-            ? `Benchmarked vs. others in "${scoreData.Industry}" — Top ${displayPercentile}`
+            ? `Benchmarked vs. others in "${scoreData.Industry}" — ${displayPercentile()}`
             : "Compared against your target job description"}
         </div>
 
