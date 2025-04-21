@@ -33,7 +33,7 @@ export interface ScoreData {
   improvementTips: string[];
   timestamp: string;
   id: string;
-  scoringMode?: "jobDescription" | "resumeOnly";
+  scoringMode?: "resumeOnly";
 }
 
 const ResumeScoring = () => {
@@ -41,8 +41,7 @@ const ResumeScoring = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [scoringMode, setScoringMode] = useState<"jobDescription" | "resumeOnly">("jobDescription");
-  const [jobDescription, setJobDescription] = useState("");
+  const [scoringMode] = useState<"resumeOnly">("resumeOnly");
   const [resumeContent, setResumeContent] = useState("");
   const [scoreData, setScoreData] = useState<ScoreData | null>(null);
   const [scoreHistory, setScoreHistory] = useState<ScoreData[]>([]);
@@ -113,19 +112,10 @@ const ResumeScoring = () => {
       });
       return;
     }
-    if (scoringMode === "jobDescription" && !jobDescription) {
-      toast({
-        title: "Missing Job Description",
-        description: "Please paste the job description to score against.",
-        variant: "destructive",
-      });
-      return;
-    }
     setIsScoring(true);
     try {
       const payload = {
         resumeContent,
-        ...(scoringMode === "jobDescription" ? { jobDescription } : {}),
         scoringMode,
       };
       const response = await callFunction("score-resume", payload);
@@ -168,7 +158,6 @@ const ResumeScoring = () => {
           num_similar_resumes: newScoreData.numSimilarResumes,
           suggested_skills: newScoreData.suggestedSkills,
           resume_content: resumeContent,
-          job_description: scoringMode === "jobDescription" ? jobDescription : "",
           elite_indicators: newScoreData.eliteIndicatorsFound,
           scoring_mode: scoringMode,
           ats_readiness: 0
@@ -178,10 +167,8 @@ const ResumeScoring = () => {
         console.error("Error saving score:", error);
       }
       toast({
-        title: scoringMode === "jobDescription" ? "Resume Scored" : "Resume Benchmarked",
-        description: scoringMode === "jobDescription"
-          ? "Your resume has been analyzed for ATS compatibility."
-          : "Your resume has been benchmarked for your target industry.",
+        title: "Resume Benchmarked",
+        description: "Your resume has been benchmarked for your target industry.",
       });
     } catch (error) {
       console.error("Error scoring resume:", error);
@@ -230,15 +217,13 @@ const ResumeScoring = () => {
               <CardHeader>
                 <CardTitle className="font-bold text-2xl text-indigo-800">Submit Your Resume</CardTitle>
                 <CardDescription className="text-indigo-600 font-medium">
-                  Upload your resume and choose how to analyze it!
+                  Upload your resume to benchmark it against industry standards!
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
                 <ResumeScoringForm
                   scoringMode={scoringMode}
-                  setScoringMode={setScoringMode}
-                  jobDescription={jobDescription}
-                  setJobDescription={setJobDescription}
+                  setScoringMode={() => {}}
                   resumeContent={resumeContent}
                   setResumeContent={setResumeContent}
                   isScoring={isScoring}
@@ -259,7 +244,7 @@ const ResumeScoring = () => {
                   <BarChart2 className="h-12 w-12 text-indigo-400 mb-4" />
                   <h3 className="text-lg font-medium text-indigo-900 mb-1">No Score History</h3>
                   <p className="text-indigo-600 text-center max-w-md">
-                    You haven't analyzed any resumes yet. Start by uploading your resume and a job description to get detailed, actionable feedback and colorful charts tracking your progress.
+                    You haven't analyzed any resumes yet. Start by uploading your resume to get detailed, actionable feedback and colorful charts tracking your progress.
                   </p>
                 </CardContent>
               </Card>
