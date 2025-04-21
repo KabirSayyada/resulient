@@ -38,10 +38,10 @@ export const BenchmarkGraph = ({
 
   return (
     <div className="w-full flex flex-col items-center my-6">
-      <div className="font-semibold text-sm text-indigo-800 mb-2">
+      <div className="font-semibold text-sm text-indigo-800 mb-2 text-center">
         Where you stand vs. estimated <span className="font-bold">{numSimilar.toLocaleString()}</span> {numSimilar === 1 ? 'resume' : 'resumes'} in this industry
       </div>
-      <div className="w-full max-w-md h-44 rounded-xl bg-indigo-50 p-2">
+      <div className="w-full max-w-md h-44 rounded-xl bg-indigo-50 p-2 relative z-0">
         <ChartContainer config={{
           resumes: { label: "Competitive Resumes", color: "#a78bfa" },
           user: { label: "You", color: "#d946ef" }
@@ -97,7 +97,7 @@ export const BenchmarkGraph = ({
           </ResponsiveContainer>
         </ChartContainer>
       </div>
-      <div className="mt-2 text-xs text-indigo-700">
+      <div className="mt-4 text-center text-xs text-indigo-700 bg-indigo-50 px-3 py-1 rounded shadow-sm max-w-md w-full z-10 relative">
         <strong>Top {formatPercentile(percentile)}%</strong> — you're outperforming nearly <strong>{Math.round((100 - percentile) / 100 * numSimilar).toLocaleString()}</strong> others!
       </div>
     </div>
@@ -105,3 +105,4 @@ export const BenchmarkGraph = ({
 };
 
 export default BenchmarkGraph;
+
