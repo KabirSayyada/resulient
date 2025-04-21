@@ -101,14 +101,27 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
   // rather than a newly generated one that has "newly-generated" prefix
   const isCachedResult = scoreData.id && !scoreData.id.includes("newly-generated");
 
-  // Improved percentile display function with more thorough regex
-  const cleanPercentile = (percentile: string) => {
+  // Completely rewritten percentile display function for maximum reliability
+  const cleanPercentile = (percentile: string): string => {
     if (!percentile) return "";
     
-    return percentile
-      .replace(/^(Top\s+)+/gi, 'Top ')  // Replace multiple "Top " with just one
-      .replace(/\s*%+\s*$/g, '%')       // Replace multiple % at the end with just one
-      .trim();
+    // First, extract just the key part (Top X%, Below Average, etc.)
+    let result = percentile;
+    
+    // Remove any duplicate "Top" prefixes
+    if (result.toLowerCase().startsWith("top")) {
+      result = "Top " + result.replace(/^(?:top\s+)+/i, "");
+    }
+    
+    // Make sure we have exactly one % at the end if needed
+    if (result.includes("%")) {
+      // Remove all % symbols first
+      result = result.replace(/%/g, "");
+      // Then add one back at the end
+      result = result.trim() + "%";
+    }
+    
+    return result;
   };
 
   return (
