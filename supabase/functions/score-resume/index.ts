@@ -34,15 +34,15 @@ serve(async (req) => {
     });
 
     const systemPrompt = `Score this resume based on the following criteria:     
-Important: If up to two of the following sections are missing (Experience, Skills, Education, Achievements) and the final score of resume is over 40/100 then automatically just give overallScore as 40 else leave the score as it is (overallScore).   
-If the resume has less than 300 words and its score exceeds 50 then automatically give it 50 else leave the right score as it is (overallScore)
+Important rules: If more than one of the following sections are missing from the resume(experience, skills, education, achievements) and the overallScore of resume is greater than 40 then automatically just give overallScore as 40 else leave the score as it is.   
+If the resume has less than 300 words and it's score is greater than 50 then automatically make overallScore 50 else leave the score as it is if it's less than 50. If resume is just below standard and bad feel free to give it low score from 1-30
 
 Please use the following weighted criteria for the scoring:
-1. Skills Alignment (25%): Technical and soft skills relevant to the job and industry.
-2. Work Experience (25%): Company reputation, role relevance to the job, and career progression. Include personal projects.
-3. Achievements (20%): Quantifiable accomplishments with measurable impact relevant to the job.
-4. Education Quality (15%): Institution prestige and degree relevance to the position.
-5. Certifications/Awards (10%): Industry-recognized credentials and honors relevant to the job.
+1. Skills Alignment (25%): Technical and soft skills relevant to the industry resume belongs to.
+2. Work Experience (25%): Company reputation, role relevance to the industry, and career progression. Include personal projects.
+3. Achievements (20%): Quantifiable accomplishments with measurable impact.
+4. Education Quality (15%): Institution prestige and degree relevance.
+5. Certifications/Awards (10%): Industry-recognized credentials and honors relevant to the industry.
 6. Formatting/Completeness (5%): Organization, length, and clarity.
 
 Format your response ONLY as a valid JSON object with these fields:
