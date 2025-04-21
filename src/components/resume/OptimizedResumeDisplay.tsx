@@ -77,60 +77,6 @@ ${optimizedResume}
 
   const overallCategory = getScoreCategory(overallScore);
 
-  // Enhanced resume rendering: REMOVE ALL BULLETS/LISTS, only emphasize section headers and add clean spacing
-  const renderResumeWithSpacing = (text: string) => {
-    // Identify sections and split content
-    const sections: { title: string; content: string }[] = [];
-    const sectionRegex = /^(EDUCATION|EXPERIENCE|SKILLS|SUMMARY|OBJECTIVE|PROJECTS|CERTIFICATIONS|AWARDS|PUBLICATIONS|REFERENCES|WORK EXPERIENCE|PROFESSIONAL EXPERIENCE|EMPLOYMENT|QUALIFICATIONS|VOLUNTEER|LEADERSHIP|ACTIVITIES|INTERESTS)(?:\s|:|$)/i;
-    
-    // Split text into lines, then into sections
-    const lines = text.split('\n');
-    let currentSection = { title: '', content: '' };
-    let inSection = false;
-    
-    lines.forEach(line => {
-      const trimmedLine = line.trim();
-      const sectionMatch = trimmedLine.match(sectionRegex);
-      if (sectionMatch) {
-        if (inSection && currentSection.content.trim()) {
-          sections.push({ ...currentSection });
-        }
-        currentSection = { title: trimmedLine, content: '' };
-        inSection = true;
-      } else if (inSection) {
-        currentSection.content += line + '\n';
-      } else if (trimmedLine) {
-        if (!currentSection.title) {
-          currentSection = { title: 'Header', content: '' };
-        }
-        currentSection.content += line + '\n';
-      }
-    });
-    if (currentSection.content.trim()) {
-      sections.push(currentSection);
-    }
-    // Render sections with only spacing and header styling
-    return sections.map((section, i) => (
-      <div key={i} className={i === 0 ? "mb-8" : "mt-12 mb-8"}>
-        {section.title !== 'Header' && (
-          <div className="text-lg md:text-xl font-extrabold text-indigo-700 uppercase tracking-wide mb-6 mt-2">
-            {section.title}
-          </div>
-        )}
-        {renderSectionContent(section.content)}
-      </div>
-    ));
-  };
-
-  // Renders plain paragraphs with spacing, no lists, no bullets
-  const renderSectionContent = (content: string) => {
-    // Split into paragraphs by double line break, or fallback to single lines if needed
-    const paragraphs = content.split(/\n{2,}/).filter(para => para.trim());
-    return paragraphs.map((para, i) => (
-      <p key={i} className="mb-4 text-sm text-gray-800 whitespace-pre-line">{para.trim()}</p>
-    ));
-  };
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -270,9 +216,8 @@ ${optimizedResume}
           Optimized Resume
         </label>
         <div className="bg-white p-4 rounded-md border border-gray-200 max-h-[500px] overflow-y-auto font-mono leading-relaxed shadow-inner">
-          <div className="resume-display">
-            {renderResumeWithSpacing(optimizedResume)}
-          </div>
+          {/* Show the resume exactly as uploaded: preserve all original line breaks, spaces, bullets, and formatting */}
+          <pre className="text-sm text-gray-800 whitespace-pre-line">{optimizedResume}</pre>
         </div>
       </div>
     </div>
