@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.29.0";
 import OpenAI from "https://esm.sh/openai@4.17.0";
@@ -14,8 +15,6 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-
-    // Only supporting resumeContent in the new prompt
     const { resumeContent } = body;
 
     if (!resumeContent) {
@@ -30,19 +29,15 @@ serve(async (req) => {
       );
     }
 
-    // Initialize OpenAI client with the latest SDK
     const openai = new OpenAI({
       apiKey: Deno.env.get("OPENAI_API_KEY"),
     });
 
-    // New, strict prompt:
-    const prompt = `
-Score this resume. 
+    const prompt = `Score this resume;     
 RESUME:
-${resumeContent}
-
-If 2 of the following sections are missing (work experience, skills, education, achievements) and the final score of resume is over 40/100 then automatically just score it 40/100 else give the score as it is. 
-If the resume has less than 300 words and its score exceeds 50 then automatically give it 50, else give the right score.
+${resumeContent}                                             
+If 2 of the following sections are missing(work experience, skills, education, achievements) and the final score of resume is over 40/100 then automatically just score it 40/100 else give the score as it is.   
+If the resume has less than 300 words and its score exceeds 50 then automatically give it 50 else give right score.  
 
 Please use the following weighted criteria for the scoring.
 
@@ -52,31 +47,28 @@ CORE CRITERIA TO ANALYZE:
 3. Achievements (20%): Quantifiable accomplishments with measurable impact relevant to the job.
 4. Education Quality (15%): Institution prestige and degree relevance to the position.
 5. Certifications/Awards (10%): Industry-recognized credentials and honors relevant to the job.
-6. Formatting/Completeness (5%): Organization, length, and clarity.
+6. Formatting/Completeness (5%): Organization, length, and clarity.                                                          
 
-Format your response as a JSON object with these fields: 
+Format your response as a JSON object with these fields:
 {
   "overallScore": number,
-  "skillsAlignment": number,
-  "WorkExperience": number,
-  "Achievements": number,
-  "EducationQuality": number,
-  "Certifications": number,
-  "ContentStructure": number,
+  "skillsAlignment": number, 
+  "WorkExperience": number, 
+  "Achievements": number, 
+  "EducationQuality": number, 
+  "Certifications": number, 
+  "ContentStructure": number, 
   "keywordRelevance": number,
   "atsReadiness": number,
-  "Industry": string,
+  "Industry": string, 
   "percentile": number,
-  "numSimilarResumes": number,
+  "numSimilarResumes": number, 
   "suggestedSkills": string[],
   "eliteIndicatorsFound": string[]
-}
-Return ONLY the JSON object. Apply the logic above STRICTLY.
-`;
+}`;
 
-    // Call OpenAI with the updated prompt
     const response = await openai.completions.create({
-      model: "gpt-3.5-turbo-instruct",
+      model: "gpt-4o-mini",  // Updated to use gpt-4o-mini
       prompt,
       max_tokens: 1500,
       temperature: 0.3,
