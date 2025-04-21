@@ -153,13 +153,14 @@ const ResumeScoring = () => {
       };
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
+      
       const { error } = await supabase
         .from("resume_scores")
         .insert({
           user_id: user?.id,
           overall_score: newScoreData.overallScore,
           skills_breadth: newScoreData.skillsAlignment,
-          work_experience: newScoreData.WorkExperience,
+          experience_duration: newScoreData.WorkExperience,
           content_structure: newScoreData.ContentStructure,
           keyword_relevance: newScoreData.keywordRelevance,
           industry: newScoreData.Industry,
@@ -170,8 +171,9 @@ const ResumeScoring = () => {
           job_description: scoringMode === "jobDescription" ? jobDescription : "",
           elite_indicators: newScoreData.eliteIndicatorsFound,
           scoring_mode: scoringMode,
-          experience_duration: newScoreData.WorkExperience,
+          ats_readiness: 0
         });
+      
       if (error) {
         console.error("Error saving score:", error);
       }
