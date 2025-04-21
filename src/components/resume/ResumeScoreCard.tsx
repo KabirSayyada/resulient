@@ -60,8 +60,8 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
 
   const displayPercentile = () => {
     let cleanedPercentile = scoreData.percentile
-      .replace(/^(Top\s+)+/i, 'Top ')  // Remove duplicate "Top"
-      .replace(/%+/g, '%')  // Ensure only one % symbol
+      .replace(/^(Top\s+)+/gi, 'Top ')
+      .replace(/%+/g, '%')
       .trim();
 
     return cleanedPercentile;
