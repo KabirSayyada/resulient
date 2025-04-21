@@ -100,28 +100,28 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
   // rather than a newly generated one that has "newly-generated" prefix
   const isCachedResult = scoreData.id && !scoreData.id.includes("newly-generated");
 
-  // Completely rewritten percentile display function for maximum reliability
-  const cleanPercentile = (percentile: string): string => {
-    if (!percentile) return "";
+  // We don't need this function anymore as we're removing the ranking display
+  // const cleanPercentile = (percentile: string): string => {
+  //   if (!percentile) return "";
     
-    // First, extract just the key part (Top X%, Below Average, etc.)
-    let result = percentile;
+  //   // First, extract just the key part (Top X%, Below Average, etc.)
+  //   let result = percentile;
     
-    // Remove any duplicate "Top" prefixes
-    if (result.toLowerCase().startsWith("top")) {
-      result = "Top " + result.replace(/^(?:top\s+)+/i, "");
-    }
+  //   // Remove any duplicate "Top" prefixes
+  //   if (result.toLowerCase().startsWith("top")) {
+  //     result = "Top " + result.replace(/^(?:top\s+)+/i, "");
+  //   }
     
-    // Make sure we have exactly one % at the end if needed
-    if (result.includes("%")) {
-      // Remove all % symbols first
-      result = result.replace(/%/g, "");
-      // Then add one back at the end
-      result = result.trim() + "%";
-    }
+  //   // Make sure we have exactly one % at the end if needed
+  //   if (result.includes("%")) {
+  //     // Remove all % symbols first
+  //     result = result.replace(/%/g, "");
+  //     // Then add one back at the end
+  //     result = result.trim() + "%";
+  //   }
     
-    return result;
-  };
+  //   return result;
+  // };
 
   return (
     <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in">
