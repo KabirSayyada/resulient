@@ -32,6 +32,24 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
     missingOrLowSections.push("Education");
   }
 
+  // Count actual sections present
+  let sectionCount = 0;
+  if (scoreData.skillsBreadth && scoreData.skillsBreadth > 10) sectionCount++;
+  if (scoreData.experienceDuration && scoreData.experienceDuration > 10) sectionCount++;
+  if (scoreData.achievements && scoreData.achievements > 10) sectionCount++;
+  if (scoreData.educationQuality && scoreData.educationQuality > 10) sectionCount++;
+  if (scoreData.certifications && scoreData.certifications > 10) sectionCount++;
+
+  // Resume completeness warning
+  let completenessWarning = null;
+  if (sectionCount === 0) {
+    completenessWarning = "Your resume appears empty. Please add content to receive an accurate score.";
+  } else if (sectionCount === 1) {
+    completenessWarning = "Your resume has only one section. A complete resume should include skills, experience, education, and achievements.";
+  } else if (sectionCount <= 2) {
+    completenessWarning = "Your resume is missing multiple important sections. A complete resume needs skills, experience, education, and achievements.";
+  }
+
   return (
     <div className="max-w-md mx-auto shadow-2xl rounded-3xl overflow-hidden bg-gradient-to-br from-white via-indigo-50 to-blue-100 p-0 border-4 border-indigo-200 relative scorecard-for-export">
       <CardHeader className="flex flex-col items-center justify-center gap-2 bg-gradient-to-r from-indigo-400 via-fuchsia-300 to-blue-300 py-6 animate-fade-in">
@@ -57,7 +75,18 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
           Overall Resume Score
         </div>
         
-        {missingOrLowSections.length > 0 && (
+        {completenessWarning && (
+          <div className="w-full mt-1 mb-2">
+            <div className="text-xs font-semibold text-red-700 bg-red-50 p-3 rounded-md border border-red-200 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+              <span>
+                <strong>Critical Issue:</strong> {completenessWarning}
+              </span>
+            </div>
+          </div>
+        )}
+        
+        {missingOrLowSections.length > 0 && !completenessWarning && (
           <div className="w-full mt-1 mb-2">
             <div className="text-xs font-semibold text-red-700 bg-red-50 p-2 rounded-md border border-red-200 flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
