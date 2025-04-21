@@ -51,13 +51,14 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
     .reverse();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <Card className="border-t-4 border-t-indigo-500 shadow-md overflow-hidden">
         <CardHeader>
           <CardTitle>Your Progress Over Time</CardTitle>
         </CardHeader>
         <CardContent className="p-4">
-          <div className="h-[300px] w-full">
+          {/* Increased the height of the chart container */}
+          <div className="h-[380px] w-full">
             <ChartContainer 
               config={{
                 overall: { label: "Overall", color: "#4f46e5" },
@@ -70,7 +71,7 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart 
                   data={chartData}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 30 }}
+                  margin={{ top: 20, right: 30, left: 10, bottom: 50 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
@@ -81,11 +82,15 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
                   />
                   <YAxis 
                     domain={[0, 100]} 
-                    padding={{ top: 10, bottom: 10 }}
+                    padding={{ top: 20, bottom: 20 }}
                     tick={{ fontSize: 12 }}
                   />
                   <Tooltip contentStyle={{ fontSize: 12 }} />
-                  <Legend wrapperStyle={{ paddingTop: 10, fontSize: 12 }} />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: 20, fontSize: 12 }} 
+                    verticalAlign="bottom" 
+                    height={36}
+                  />
                   <Line 
                     type="monotone" 
                     dataKey="Overall" 
@@ -105,7 +110,7 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
         </CardContent>
       </Card>
 
-      <div className="space-y-4 mt-8">
+      <div className="space-y-4 mt-10">
         <h2 className="text-xl font-semibold text-gray-800">Previous Resume Scores</h2>
         
         {scores.map((score, index) => (
