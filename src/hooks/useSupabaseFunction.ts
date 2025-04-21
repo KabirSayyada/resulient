@@ -9,11 +9,16 @@ interface UseSupabaseFunctionReturn {
   ) => Promise<T>;
   loading: boolean;
   error: Error | null;
+  reset: () => void;
 }
 
 export function useSupabaseFunction(): UseSupabaseFunctionReturn {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  const reset = () => {
+    setError(null);
+  };
 
   async function callFunction<T = any>(
     functionName: string,
@@ -48,5 +53,6 @@ export function useSupabaseFunction(): UseSupabaseFunctionReturn {
     callFunction,
     loading,
     error,
+    reset
   };
 }

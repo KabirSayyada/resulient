@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { Button } from "@/components/ui/button";
 import { JobDescriptionInput } from "@/components/resume/JobDescriptionInput";
@@ -9,6 +9,8 @@ import { FileUploadSection } from "@/components/resume/FileUploadSection";
 import { OptimizedResumeDisplay } from "@/components/resume/OptimizedResumeDisplay";
 import { useToast } from "@/hooks/use-toast";
 import { useSupabaseFunction } from "@/hooks/useSupabaseFunction";
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
+import { BarChart2, Award } from "lucide-react";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -89,7 +91,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               ATS Resume Optimizer
@@ -98,7 +100,51 @@ const Index = () => {
               Optimize your resume to beat Applicant Tracking Systems (ATS)
             </p>
           </div>
-          <UserMenu />
+          
+          <div className="flex items-center gap-4">
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Tools</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[400px] gap-3 p-4">
+                      <li className="row-span-3">
+                        <Link
+                          to="/resume-scoring"
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-blue-50 to-indigo-100 p-6 no-underline outline-none focus:shadow-md"
+                        >
+                          <BarChart2 className="h-6 w-6 text-indigo-500" />
+                          <div className="mb-2 mt-4 text-lg font-medium text-indigo-900">
+                            Resume Score Analysis
+                          </div>
+                          <p className="text-sm leading-tight text-indigo-800">
+                            Analyze your resume against industry standards and get detailed scoring metrics
+                          </p>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/"
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
+                        >
+                          <div className="flex items-center">
+                            <Award className="h-4 w-4 text-blue-500 mr-2" />
+                            <div className="text-sm font-medium leading-none">
+                              Resume Optimizer
+                            </div>
+                          </div>
+                          <p className="line-clamp-2 text-sm leading-snug text-gray-500">
+                            Optimize your resume to beat ATS systems
+                          </p>
+                        </Link>
+                      </li>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+            <UserMenu />
+          </div>
         </div>
 
         <div className="space-y-6">
