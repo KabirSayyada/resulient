@@ -1,14 +1,17 @@
-
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScoreData } from "@/pages/ResumeScoring";
 import { Award, Star, Medal } from "lucide-react";
+import BenchmarkGraph from "./BenchmarkGraph";
 
 interface ResumeScoreCardProps {
   scoreData: ScoreData;
 }
 
 export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
+  const numSimilar = scoreData.numSimilarResumes || 12000; // fallback if backend didn't provide
+  const percentile = scoreData.percentile;
+
   return (
     <div className="max-w-md mx-auto shadow-2xl rounded-3xl overflow-hidden bg-gradient-to-br from-white via-indigo-50 to-blue-100 p-0 border-4 border-indigo-200 relative scorecard-for-export">
       <CardHeader className="flex flex-col items-center justify-center gap-2 bg-gradient-to-r from-indigo-400 via-fuchsia-300 to-blue-300 py-6 animate-fade-in">
@@ -33,6 +36,9 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
         <div className="text-sm font-semibold text-indigo-600 -mt-2 mb-2">
           Overall Resume Score
         </div>
+        {scoreData.scoringMode === "resumeOnly" && (
+          <BenchmarkGraph percentile={percentile} numSimilar={numSimilar} />
+        )}
         <div className="grid grid-cols-2 gap-x-8 gap-y-2 w-full mb-2">
           <ScoreMetric 
             icon={<Star className="w-4 h-4 text-yellow-500" />} 

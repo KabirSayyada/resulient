@@ -29,6 +29,7 @@ export interface ScoreData {
   timestamp: string;
   id: string;
   scoringMode?: "jobDescription" | "resumeOnly";
+  numSimilarResumes?: number;
 }
 
 const ResumeScoring = () => {
@@ -134,6 +135,7 @@ const ResumeScoring = () => {
         timestamp: new Date().toLocaleString(),
         id: crypto.randomUUID(),
         scoringMode,
+        numSimilarResumes: response.numSimilarResumes
       };
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
