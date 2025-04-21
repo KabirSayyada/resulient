@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -100,11 +101,13 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
   // rather than a newly generated one that has "newly-generated" prefix
   const isCachedResult = scoreData.id && !scoreData.id.includes("newly-generated");
 
-  // Clean percentile display function
+  // Improved percentile display function with more thorough regex
   const cleanPercentile = (percentile: string) => {
+    if (!percentile) return "";
+    
     return percentile
-      .replace(/^(Top\s+)+/gi, 'Top ')
-      .replace(/%+/g, '%')
+      .replace(/^(Top\s+)+/gi, 'Top ')  // Replace multiple "Top " with just one
+      .replace(/\s*%+\s*$/g, '%')       // Replace multiple % at the end with just one
       .trim();
   };
 
