@@ -211,28 +211,6 @@ export const ScoreBreakdown = ({ scoreData }: { scoreData: ScoreData }) => {
             />
           </CardContent>
         </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center mb-2">
-              <BarChart className="h-5 w-5 text-cyan-500 mr-2" />
-              <h3 className="font-medium">ATS Compatibility</h3>
-            </div>
-            <div className="flex items-center justify-between mb-1">
-              <span className={`text-2xl font-bold ${getScoreColor(scoreData.atsReadiness, 100)}`}>
-                {scoreData.atsReadiness}
-              </span>
-              <span className="text-sm text-gray-500">
-                {getScoreLabel(scoreData.atsReadiness, 100)}
-              </span>
-            </div>
-            <Progress 
-              value={scoreData.atsReadiness} 
-              className="h-2" 
-              indicatorClassName={getProgressColor(scoreData.atsReadiness, 100)} 
-            />
-          </CardContent>
-        </Card>
       </div>
 
       <Card>
@@ -259,30 +237,14 @@ export const ScoreBreakdown = ({ scoreData }: { scoreData: ScoreData }) => {
         <CardContent className="pt-6">
           <h3 className="font-medium mb-3">Improvement Tips</h3>
           <ul className="space-y-2">
-            <li className="flex items-start">
-              <div className="bg-blue-100 rounded-full p-1 mr-2 mt-0.5">
-                <span className="block h-1.5 w-1.5 rounded-full bg-blue-600"></span>
-              </div>
-              <span>Add the suggested skills to your resume if you have experience with them</span>
-            </li>
-            <li className="flex items-start">
-              <div className="bg-blue-100 rounded-full p-1 mr-2 mt-0.5">
-                <span className="block h-1.5 w-1.5 rounded-full bg-blue-600"></span>
-              </div>
-              <span>Use more keywords from the job description</span>
-            </li>
-            <li className="flex items-start">
-              <div className="bg-blue-100 rounded-full p-1 mr-2 mt-0.5">
-                <span className="block h-1.5 w-1.5 rounded-full bg-blue-600"></span>
-              </div>
-              <span>Quantify your achievements with specific metrics</span>
-            </li>
-            <li className="flex items-start">
-              <div className="bg-blue-100 rounded-full p-1 mr-2 mt-0.5">
-                <span className="block h-1.5 w-1.5 rounded-full bg-blue-600"></span>
-              </div>
-              <span>Improve your content structure with clear sections and bullet points</span>
-            </li>
+            {scoreData.improvementTips?.map((tip, index) => (
+              <li key={index} className="flex items-start">
+                <div className="bg-blue-100 rounded-full p-1 mr-2 mt-0.5">
+                  <span className="block h-1.5 w-1.5 rounded-full bg-blue-600"></span>
+                </div>
+                <span>{tip}</span>
+              </li>
+            ))}
           </ul>
         </CardContent>
       </Card>

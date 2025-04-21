@@ -25,12 +25,12 @@ export interface ScoreData {
   Certifications: number;
   ContentStructure: number;
   keywordRelevance: number;
-  atsReadiness: number;
   Industry: string;
   percentile: number;
   numSimilarResumes: number;
   suggestedSkills: string[];
   eliteIndicatorsFound: string[];
+  improvementTips: string[];
   timestamp: string;
   id: string;
   scoringMode?: "jobDescription" | "resumeOnly";
@@ -88,6 +88,7 @@ const ResumeScoring = () => {
             numSimilarResumes: item.num_similar_resumes || 12000,
             suggestedSkills: item.suggested_skills || [],
             eliteIndicatorsFound: item.elite_indicators || [],
+            improvementTips: item.improvement_tips || [],
             timestamp: new Date(item.created_at).toLocaleString(),
             id: item.id,
             scoringMode: item.scoring_mode || "resumeOnly",
@@ -147,6 +148,7 @@ const ResumeScoring = () => {
         numSimilarResumes: response.numSimilarResumes,
         suggestedSkills: response.suggestedSkills || [],
         eliteIndicatorsFound: response.eliteIndicatorsFound || [],
+        improvementTips: response.improvementTips || [],
         timestamp: new Date().toLocaleString(),
         id: crypto.randomUUID(),
         scoringMode,

@@ -1,7 +1,6 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreData } from "@/pages/ResumeScoring";
-import { Star, Medal, BookOpen, Trophy, TrendingUp, BarChart, Shield } from "lucide-react";
+import { Star, Medal, BookOpen, Trophy, TrendingUp, BarChart } from "lucide-react";
 import { ScoreMetric } from "./components/ScoreMetric";
 import { ResumeWarnings } from "./components/ResumeWarnings";
 import { ScoreHeader } from "./components/ScoreHeader";
@@ -11,12 +10,10 @@ interface ResumeScoreCardProps {
 }
 
 export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
-  // Calculate normalized percentage (0-100) for display purposes
   const normalizeScore = (score: number, weight: number) => {
     return Math.min(100, Math.max(0, (score / weight) * 100));
   };
 
-  // Check for missing or low-scoring sections
   const missingOrLowSections = [];
   if (!scoreData.skillsAlignment || normalizeScore(scoreData.skillsAlignment, 25) < 40) {
     missingOrLowSections.push("Skills");
@@ -31,7 +28,6 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
     missingOrLowSections.push("Education");
   }
 
-  // Count actual sections present
   let sectionCount = 0;
   if (scoreData.skillsAlignment && scoreData.skillsAlignment > 0) sectionCount++;
   if (scoreData.WorkExperience && scoreData.WorkExperience > 0) sectionCount++;
@@ -39,7 +35,6 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
   if (scoreData.EducationQuality && scoreData.EducationQuality > 0) sectionCount++;
   if (scoreData.Certifications && scoreData.Certifications > 0) sectionCount++;
 
-  // Resume completeness warning
   let completenessWarning = null;
   if (sectionCount === 0) {
     completenessWarning = "Your resume appears empty. Please add content to receive an accurate score.";
@@ -113,15 +108,6 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
             value={scoreData.ContentStructure}
             maxValue={5}
             missing={!scoreData.ContentStructure || scoreData.ContentStructure < 2}
-          />
-          {/* Add ATS Compatibility metric with correct scoring scale (out of 10) */}
-          <ScoreMetric
-            icon={<Shield className="w-4 h-4 text-indigo-600" />}
-            label="ATS Compatibility"
-            value={scoreData.atsReadiness}
-            maxValue={10}
-            missing={!scoreData.atsReadiness || scoreData.atsReadiness < 4}
-            isAtsScore={true} // Flag this as an ATS score for proper indicator display
           />
         </div>
 

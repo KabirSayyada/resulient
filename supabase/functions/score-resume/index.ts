@@ -44,6 +44,8 @@ Please use the following weighted criteria for the scoring:
 5. Certifications/Awards (10%): Industry-recognized credentials and honors relevant to the industry.
 6. Formatting/Completeness (5%): Organization, length, and clarity.
 
+Also provide specific, actionable improvement tips based on the resume's weaknesses.
+
 Format your response ONLY as a valid JSON object with these fields:
 {
   "overallScore": number,
@@ -54,12 +56,12 @@ Format your response ONLY as a valid JSON object with these fields:
   "Certifications": number, 
   "ContentStructure": number, 
   "keywordRelevance": number,
-  "atsReadiness": number,
   "Industry": string, 
   "percentile": number,
   "numSimilarResumes": number, 
   "suggestedSkills": string[],
-  "eliteIndicatorsFound": string[]
+  "eliteIndicatorsFound": string[],
+  "improvementTips": string[]
 }`;
 
     const response = await openai.chat.completions.create({
