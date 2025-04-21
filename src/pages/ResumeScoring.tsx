@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +13,8 @@ import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Download, BarChart2 } from "lucide-react";
+import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
+import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 
 export interface ScoreData {
   overall: number;
@@ -114,7 +115,7 @@ const ResumeScoring = () => {
       const payload = {
         resumeContent,
         ...(scoringMode === "jobDescription" ? { jobDescription } : {}),
-        scoringMode, // tell backend which mode we're scoring
+        scoringMode,
       };
       const response = await callFunction("score-resume", payload);
       if (response?.error) {
@@ -176,46 +177,6 @@ const ResumeScoring = () => {
     }
   };
 
-  const handleDownloadReport = () => {
-    if (!scoreData) return;
-    const reportContent = `
-    RESUME SCORING REPORT
-    ---------------------
-    Date: ${scoreData.timestamp}
-    
-    OVERALL SCORE: ${scoreData.overall}/100
-    Industry: ${scoreData.industry}
-    Percentile: Top ${scoreData.percentile}%
-    
-    SCORE BREAKDOWN:
-    - Keyword Relevance: ${scoreData.keywordRelevance}/100
-    - Skills Breadth: ${scoreData.skillsBreadth}/100
-    - Experience Duration: ${scoreData.experienceDuration}/100
-    - Content Structure: ${scoreData.contentStructure}/100
-    - ATS Readiness: ${scoreData.atsReadiness}/100
-    
-    SUGGESTED SKILLS TO ADD:
-    ${scoreData.suggestedSkills.join(", ")}
-    
-    IMPROVEMENT TIPS:
-    1. Add the suggested skills to your resume if you have experience with them
-    2. Use more keywords from the job description
-    3. Structure your resume with clear sections and bullet points
-    4. Quantify your achievements where possible
-    5. Use a clean, ATS-friendly format
-    `;
-
-    const blob = new Blob([reportContent], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `resume-score-report-${new Date().toISOString().split("T")[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -252,89 +213,20 @@ const ResumeScoring = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
-                {/* Mode selector */}
-                <div className="flex flex-wrap gap-4 mb-4">
-                  <button
-                    onClick={() => setScoringMode("jobDescription")}
-                    className={`px-6 py-2 rounded-full font-bold border transition-all shadow-sm
-                      ${scoringMode === "jobDescription"
-                        ? "bg-indigo-600 text-white border-indigo-700"
-                        : "bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50"}
-                    `}
-                  >
-                    Score with Job Description
-                  </button>
-                  <button
-                    onClick={() => setScoringMode("resumeOnly")}
-                    className={`px-6 py-2 rounded-full font-bold border transition-all shadow-sm
-                      ${scoringMode === "resumeOnly"
-                        ? "bg-fuchsia-500 text-white border-fuchsia-600"
-                        : "bg-white text-fuchsia-600 border-fuchsia-200 hover:bg-fuchsia-50"}
-                    `}
-                  >
-                    Score Resume Only
-                  </button>
-                </div>
-                {scoringMode === "jobDescription" && (
-                  <JobDescriptionInput 
-                    jobDescription={jobDescription} 
-                    setJobDescription={setJobDescription} 
-                  />
-                )}
-                <FileUploadSection 
-                  resumeContent={resumeContent} 
-                  setResumeContent={setResumeContent} 
+                <ResumeScoringForm
+                  scoringMode={scoringMode}
+                  setScoringMode={setScoringMode}
+                  jobDescription={jobDescription}
+                  setJobDescription={setJobDescription}
+                  resumeContent={resumeContent}
+                  setResumeContent={setResumeContent}
+                  isScoring={isScoring}
+                  onScore={handleScoreResume}
                 />
-                <div className="flex justify-center">
-                  <Button 
-                    onClick={handleScoreResume} 
-                    disabled={isScoring || !resumeContent || (scoringMode === "jobDescription" && !jobDescription)}
-                    className={`px-10 py-3 text-lg font-bold rounded-full shadow transition-all ${
-                      scoringMode === "resumeOnly"
-                        ? "bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500"
-                        : "bg-gradient-to-r from-indigo-600 to-fuchsia-500 hover:from-indigo-700 hover:to-fuchsia-600"
-                    }`}
-                  >
-                    {isScoring ? "Analyzing..." : (
-                      scoringMode === "resumeOnly" ? "🕹️ Benchmark Resume" : "✨ Analyze Resume"
-                    )}
-                  </Button>
-                </div>
-                {scoringMode === "resumeOnly" && (
-                  <div className="text-xs text-fuchsia-600 mt-2 font-medium border-l-4 border-fuchsia-400 pl-2">
-                    In <span className="font-bold">Resume Only</span> mode, your resume will be analyzed against estimated industry standards—no job description needed! You’ll see where you stand versus your competition and get skills to pursue.
-                  </div>
-                )}
               </CardContent>
             </Card>
             {scoreData && (
-              <div className="mt-10">
-                <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative">
-                  <div className="absolute top-0 right-0 m-4 z-10">
-                    <Button variant="secondary" size="sm" onClick={handleDownloadReport} className="font-semibold">
-                      <Download className="mr-2 h-4 w-4" /> Download Report
-                    </Button>
-                  </div>
-                  <CardHeader className="flex flex-row items-start justify-between">
-                    <div>
-                      <CardTitle className="text-3xl font-extrabold text-indigo-700 drop-shadow">
-                        Resume Score Results
-                      </CardTitle>
-                      <CardDescription className="text-indigo-600 font-medium">
-                        Analyzed on {scoreData.timestamp} ({scoreData.scoringMode === "resumeOnly" ? "Resume Only" : "Job Description"})
-                      </CardDescription>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <ScoreBreakdown scoreData={scoreData} />
-                    {scoreData.scoringMode === "resumeOnly" && (
-                      <div className="mt-8 text-center text-fuchsia-600 text-sm font-semibold">
-                        You are in the top <span className="font-bold">{scoreData.percentile}%</span> of resumes for <span className="font-bold">{scoreData.industry}</span>! Compete and improve to climb higher!
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
+              <ScoreResultSection scoreData={scoreData} />
             )}
           </TabsContent>
           <TabsContent value="history">
@@ -359,4 +251,3 @@ const ResumeScoring = () => {
 };
 
 export default ResumeScoring;
-
