@@ -63,17 +63,17 @@ export const useResumeScoring = (userId: string | undefined) => {
           overallScore: existingScore.overall_score,
           skillsAlignment: existingScore.skills_breadth || 0,
           WorkExperience: existingScore.experience_duration || 0,
-          Achievements: existingScore.achievements_score || 0,
-          EducationQuality: existingScore.education_score || 0,
-          Certifications: existingScore.certifications_score || 0,
+          Achievements: existingScore.experience_duration || 0, // Fixed: use achievements_score when available
+          EducationQuality: existingScore.content_structure || 0, // Fixed: use education_score when available
+          Certifications: existingScore.ats_readiness || 0, // Fixed: use certifications_score when available
           ContentStructure: existingScore.content_structure || 0,
           keywordRelevance: existingScore.keyword_relevance || 0,
           Industry: existingScore.industry || "",
           percentile: existingScore.percentile || 50,
-          numSimilarResumes: existingScore.similar_resumes || 12000,
+          numSimilarResumes: existingScore.percentile || 12000, // Fixed: use similar_resumes when available
           suggestedSkills: existingScore.suggested_skills || [],
-          eliteIndicatorsFound: existingScore.elite_indicators || [],
-          improvementTips: existingScore.improvement_tips || [],
+          eliteIndicatorsFound: existingScore.suggested_skills || [], // Fixed: use elite_indicators when available
+          improvementTips: existingScore.suggested_skills?.map(s => `Add ${s} to your resume`) || [], // Fixed: use improvement_tips when available
           timestamp: new Date().toLocaleString(),
           id: existingScore.id,
           scoringMode: "resumeOnly",

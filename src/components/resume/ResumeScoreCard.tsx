@@ -1,5 +1,6 @@
+
 import { Card, CardContent } from "@/components/ui/card";
-import { ScoreData } from "@/pages/ResumeScoring";
+import { ScoreData } from "@/types/resume";
 import { Star, Medal, BookOpen, Trophy, TrendingUp, BarChart } from "lucide-react";
 import { ScoreMetric } from "./components/ScoreMetric";
 import { ResumeWarnings } from "./components/ResumeWarnings";

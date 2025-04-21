@@ -2,7 +2,7 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Trophy, Star, TrendingUp, List, BarChart, BookOpen, Award, Medal } from "lucide-react";
-import { ScoreData } from "@/pages/ResumeScoring";
+import { ScoreData } from "@/types/resume";
 
 export const ScoreBreakdown = ({ scoreData }: { scoreData: ScoreData }) => {
   // Helper function to calculate normalized percentage (0-100) for display purposes

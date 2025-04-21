@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
-import { ScoreData } from "@/pages/ResumeScoring";
+import { ScoreData } from "@/types/resume";
 import { handleDownloadReport } from "@/helpers/resumeReportDownload";
 import ResumeScoreCard from "./ResumeScoreCard";
 import html2canvas from "html2canvas";

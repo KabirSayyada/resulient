@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { ScoreData } from "@/pages/ResumeScoring";
+import { ScoreData } from "@/types/resume";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
 import { ChevronDown, ChevronUp, Calendar } from "lucide-react";

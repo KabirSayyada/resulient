@@ -1,5 +1,4 @@
-
-import { ScoreData } from "@/pages/ResumeScoring";
+import { ScoreData } from "@/types/resume";
 
 export function handleDownloadReport(scoreData: ScoreData) {
   if (!scoreData) return;

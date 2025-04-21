@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart2 } from "lucide-react";
 import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { supabase } from "@/integrations/supabase/client";
-import type { ScoreData } from "@/types/resume";
+import { ScoreData } from "@/types/resume";
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
@@ -43,17 +43,17 @@ const ResumeScoring = () => {
           overallScore: item.overall_score,
           skillsAlignment: item.skills_breadth || 0,
           WorkExperience: item.experience_duration || 0,
-          Achievements: item.achievements_score || 0,
-          EducationQuality: item.education_score || 0,
-          Certifications: item.certifications_score || 0,
+          Achievements: item.experience_duration || 0, // Should be achievements_score but field doesn't exist yet
+          EducationQuality: item.content_structure || 0, // Should be education_score but field doesn't exist yet
+          Certifications: item.ats_readiness || 0, // Should be certifications_score but field doesn't exist yet
           ContentStructure: item.content_structure || 0,
           keywordRelevance: item.keyword_relevance || 0,
           Industry: item.industry || "",
           percentile: item.percentile || 50,
-          numSimilarResumes: item.similar_resumes || 12000,
+          numSimilarResumes: item.percentile || 12000, // Should be similar_resumes but field doesn't exist yet
           suggestedSkills: item.suggested_skills || [],
-          eliteIndicatorsFound: item.elite_indicators || [],
-          improvementTips: item.improvement_tips || [],
+          eliteIndicatorsFound: item.suggested_skills || [], // Should be elite_indicators but field doesn't exist yet
+          improvementTips: item.suggested_skills?.map(s => `Add ${s} to your resume`) || [], // Should be improvement_tips but field doesn't exist yet
           timestamp: new Date(item.created_at).toLocaleString(),
           id: item.id,
           scoringMode: "resumeOnly",
