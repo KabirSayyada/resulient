@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -78,13 +77,13 @@ ${optimizedResume}
 
   const overallCategory = getScoreCategory(overallScore);
 
-  // Enhanced resume rendering with better section identification and formatting
+  // Enhanced resume rendering: REMOVE ALL BULLETS/LISTS, only emphasize section headers and add clean spacing
   const renderResumeWithSpacing = (text: string) => {
-    // First, identify sections and split content
+    // Identify sections and split content
     const sections: { title: string; content: string }[] = [];
     const sectionRegex = /^(EDUCATION|EXPERIENCE|SKILLS|SUMMARY|OBJECTIVE|PROJECTS|CERTIFICATIONS|AWARDS|PUBLICATIONS|REFERENCES|WORK EXPERIENCE|PROFESSIONAL EXPERIENCE|EMPLOYMENT|QUALIFICATIONS|VOLUNTEER|LEADERSHIP|ACTIVITIES|INTERESTS)(?:\s|:|$)/i;
     
-    // Process the text line by line to identify sections
+    // Split text into lines, then into sections
     const lines = text.split('\n');
     let currentSection = { title: '', content: '' };
     let inSection = false;
@@ -92,103 +91,44 @@ ${optimizedResume}
     lines.forEach(line => {
       const trimmedLine = line.trim();
       const sectionMatch = trimmedLine.match(sectionRegex);
-      
       if (sectionMatch) {
-        // If we were already in a section, save it before starting a new one
         if (inSection && currentSection.content.trim()) {
           sections.push({ ...currentSection });
         }
-        
-        // Start a new section
         currentSection = { title: trimmedLine, content: '' };
         inSection = true;
       } else if (inSection) {
-        // Add to current section content
         currentSection.content += line + '\n';
       } else if (trimmedLine) {
-        // Handle text before any section (like contact info)
         if (!currentSection.title) {
           currentSection = { title: 'Header', content: '' };
         }
         currentSection.content += line + '\n';
       }
     });
-    
-    // Add the last section if not empty
     if (currentSection.content.trim()) {
       sections.push(currentSection);
     }
-    
-    // Render each section with appropriate styling
-    return sections.map((section, sectionIndex) => {
-      return (
-        <div key={sectionIndex} className="mb-6">
-          {section.title !== 'Header' && (
-            <h3 className="text-lg font-bold text-indigo-700 uppercase tracking-wide border-b border-indigo-200 pb-1 mt-4">
-              {section.title}
-            </h3>
-          )}
-          
-          {/* Process the content of each section */}
-          {renderSectionContent(section.content)}
-        </div>
-      );
-    });
+    // Render sections with only spacing and header styling
+    return sections.map((section, i) => (
+      <div key={i} className={i === 0 ? "mb-8" : "mt-12 mb-8"}>
+        {section.title !== 'Header' && (
+          <div className="text-lg md:text-xl font-extrabold text-indigo-700 uppercase tracking-wide mb-6 mt-2">
+            {section.title}
+          </div>
+        )}
+        {renderSectionContent(section.content)}
+      </div>
+    ));
   };
-  
-  // Helper function to render section content with proper formatting
+
+  // Renders plain paragraphs with spacing, no lists, no bullets
   const renderSectionContent = (content: string) => {
-    // Split content into paragraphs
-    const paragraphs = content.split(/\n{2,}/);
-    
-    return paragraphs.map((paragraph, index) => {
-      if (!paragraph.trim()) return null;
-      
-      // Check if this is a list of bullet points
-      const lines = paragraph.split('\n');
-      const bulletPointLines = lines.filter(line => line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().startsWith('*'));
-      
-      // If more than half the lines are bullet points, treat as a list
-      if (bulletPointLines.length > 0 && bulletPointLines.length >= lines.length / 2) {
-        return (
-          <ul key={index} className="list-disc pl-6 mb-3 space-y-1">
-            {lines.map((line, i) => {
-              const trimmedLine = line.trim();
-              if (!trimmedLine) return null;
-              
-              // Format as list item whether it has a bullet or not
-              const textContent = trimmedLine.replace(/^[•\-–—*]\s*/, '');
-              return textContent ? (
-                <li key={i} className="text-sm text-gray-800">{textContent}</li>
-              ) : null;
-            })}
-          </ul>
-        );
-      }
-      
-      // Handle regular text paragraphs
-      return (
-        <p key={index} className="mb-3 text-sm text-gray-800">
-          {lines.map((line, i) => {
-            const trimmedLine = line.trim();
-            if (!trimmedLine) return null;
-            
-            // If it's a standalone bullet point (but not part of a list)
-            if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-') || trimmedLine.startsWith('*')) {
-              const textContent = trimmedLine.replace(/^[•\-–—*]\s*/, '');
-              return (
-                <span key={i} className="block mb-1">• {textContent}</span>
-              );
-            }
-            
-            // Regular text line
-            return (
-              <span key={i} className="block mb-1">{trimmedLine}</span>
-            );
-          })}
-        </p>
-      );
-    });
+    // Split into paragraphs by double line break, or fallback to single lines if needed
+    const paragraphs = content.split(/\n{2,}/).filter(para => para.trim());
+    return paragraphs.map((para, i) => (
+      <p key={i} className="mb-4 text-sm text-gray-800 whitespace-pre-line">{para.trim()}</p>
+    ));
   };
 
   return (
