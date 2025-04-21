@@ -1,13 +1,12 @@
-
+import React, { useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
 import { ScoreData } from "@/types/resume";
 import { handleDownloadReport } from "@/helpers/resumeReportDownload";
 import ResumeScoreCard from "./ResumeScoreCard";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { useRef } from "react";
 import { Facebook, Linkedin, Twitter, Download, Share, History } from "lucide-react";
 
 interface ScoreResultSectionProps {
@@ -101,6 +100,14 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
   // rather than a newly generated one that has "newly-generated" prefix
   const isCachedResult = scoreData.id && !scoreData.id.includes("newly-generated");
 
+  // Clean percentile display function
+  const cleanPercentile = (percentile: string) => {
+    return percentile
+      .replace(/^(Top\s+)+/gi, 'Top ')
+      .replace(/%+/g, '%')
+      .trim();
+  };
+
   return (
     <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in">
       {isCachedResult && (
@@ -156,11 +163,9 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
         </Button>
       </div>
       <div className="flex flex-col items-center justify-center py-10">
-        {/* Hidden ScoreCard for export, absolutely positioned but visible for capture */}
         <div ref={scoreCardRef} className="fixed left-[-9999px] top-0 z-[-1] bg-white">
           <ResumeScoreCard scoreData={scoreData} />
         </div>
-        {/* Visible pretty preview! */}
         <div className="w-full flex items-center justify-center px-2">
           <ResumeScoreCard scoreData={scoreData} />
         </div>
@@ -169,7 +174,7 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
         <ScoreBreakdown scoreData={scoreData} />
         {scoreData.scoringMode === "resumeOnly" && (
           <div className="mt-8 text-center text-fuchsia-600 text-sm font-semibold">
-            You are in the top <span className="font-bold">{scoreData.percentile}%</span> of resumes for <span className="font-bold">{scoreData.Industry}</span>! Compete and improve to climb higher!
+            You are in the {cleanPercentile(scoreData.percentile)} of resumes for <span className="font-bold">{scoreData.Industry}</span>! Compete and improve to climb higher!
           </div>
         )}
       </CardContent>
