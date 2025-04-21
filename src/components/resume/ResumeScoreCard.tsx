@@ -46,14 +46,14 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
 
   const getPercentileNumeric = (percentile: string): number => {
     switch(percentile) {
-      case "1": return 1;
-      case "5": return 5;
-      case "10": return 10;
-      case "25": return 25;
+      case "Top 1%": return 1;
+      case "Top 5%": return 5;
+      case "Top 10%": return 10;
+      case "Top 25%": return 25;
       case "Above Average": return 50;
-      case "Average": return 50;
+      case "Average": return 65;
       case "Below Average": return 75;
-      case "Bottom 25": return 90;
+      case "Bottom 25%": return 90;
       default: return 50;
     }
   };
