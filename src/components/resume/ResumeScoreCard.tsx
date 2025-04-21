@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreData } from "@/types/resume";
 import { Star, Medal, BookOpen, Trophy, TrendingUp, BarChart } from "lucide-react";
@@ -45,11 +44,25 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
     completenessWarning = "Your resume is missing multiple important sections. A complete resume needs skills, experience, education, and achievements.";
   }
 
+  const getPercentileNumeric = (percentile: string): number => {
+    switch(percentile) {
+      case "Top 1%": return 1;
+      case "Top 5%": return 5;
+      case "Top 10%": return 10;
+      case "Top 25%": return 25;
+      case "Above Average": return 50;
+      case "Average": return 50;
+      case "Below Average": return 75;
+      case "Bottom 25%": return 90;
+      default: return 50;
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto shadow-2xl rounded-3xl overflow-hidden bg-gradient-to-br from-white via-indigo-50 to-blue-100 p-0 border-4 border-indigo-200 relative scorecard-for-export">
       <ScoreHeader 
         industry={scoreData.Industry}
-        percentile={scoreData.percentile}
+        percentile={getPercentileNumeric(scoreData.percentile)}
         scoringMode={scoreData.scoringMode || "resumeOnly"}
       />
       <CardContent className="py-6 px-4 flex flex-col items-center gap-4">
