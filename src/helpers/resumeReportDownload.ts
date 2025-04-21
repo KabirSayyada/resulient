@@ -8,15 +8,15 @@ RESUME SCORING REPORT
 ---------------------
 Date: ${scoreData.timestamp}
 
-OVERALL SCORE: ${scoreData.overall}/100
-Industry: ${scoreData.industry}
+OVERALL SCORE: ${scoreData.overallScore}/100
+Industry: ${scoreData.Industry}
 Percentile: Top ${scoreData.percentile}%
 
 SCORE BREAKDOWN:
 - Keyword Relevance: ${scoreData.keywordRelevance}/100
-- Skills Breadth: ${scoreData.skillsBreadth}/100
-- Experience Duration: ${scoreData.experienceDuration}/100
-- Content Structure: ${scoreData.contentStructure}/100
+- Skills Alignment: ${scoreData.skillsAlignment}/100
+- Work Experience: ${scoreData.WorkExperience}/100
+- Content Structure: ${scoreData.ContentStructure}/100
 - ATS Readiness: ${scoreData.atsReadiness}/100
 
 SUGGESTED SKILLS TO ADD:

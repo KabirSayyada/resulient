@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -75,13 +74,12 @@ const ResumeScoring = () => {
       if (data) {
         setScoreHistory(
           data.map((item: any) => ({
-            // Map old DB fields to new frontend structure
             overallScore: item.overall_score,
-            skillsAlignment: item.skills_alignment,
-            WorkExperience: item.work_experience,
-            Achievements: item.achievements,
-            EducationQuality: item.education_quality,
-            Certifications: item.certifications,
+            skillsAlignment: item.skills_alignment || item.skills_breadth,
+            WorkExperience: item.work_experience || item.experience_duration,
+            Achievements: item.achievements || 0,
+            EducationQuality: item.education_quality || 0,
+            Certifications: item.certifications || 0,
             ContentStructure: item.content_structure,
             keywordRelevance: item.keyword_relevance,
             atsReadiness: item.ats_readiness,
@@ -160,11 +158,8 @@ const ResumeScoring = () => {
         .insert({
           user_id: user?.id,
           overall_score: newScoreData.overallScore,
-          skills_alignment: newScoreData.skillsAlignment,
+          skills_breadth: newScoreData.skillsAlignment,
           work_experience: newScoreData.WorkExperience,
-          achievements: newScoreData.Achievements,
-          education_quality: newScoreData.EducationQuality,
-          certifications: newScoreData.Certifications,
           content_structure: newScoreData.ContentStructure,
           keyword_relevance: newScoreData.keywordRelevance,
           ats_readiness: newScoreData.atsReadiness,
@@ -176,6 +171,7 @@ const ResumeScoring = () => {
           job_description: scoringMode === "jobDescription" ? jobDescription : "",
           elite_indicators: newScoreData.eliteIndicatorsFound,
           scoring_mode: scoringMode,
+          experience_duration: newScoreData.WorkExperience,
         });
       if (error) {
         console.error("Error saving score:", error);

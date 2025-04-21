@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
@@ -156,7 +157,7 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
         <ScoreBreakdown scoreData={scoreData} />
         {scoreData.scoringMode === "resumeOnly" && (
           <div className="mt-8 text-center text-fuchsia-600 text-sm font-semibold">
-            You are in the top <span className="font-bold">{scoreData.percentile}%</span> of resumes for <span className="font-bold">{scoreData.industry}</span>! Compete and improve to climb higher!
+            You are in the top <span className="font-bold">{scoreData.percentile}%</span> of resumes for <span className="font-bold">{scoreData.Industry}</span>! Compete and improve to climb higher!
           </div>
         )}
       </CardContent>
