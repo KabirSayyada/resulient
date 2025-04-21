@@ -1,9 +1,19 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSupabaseFunction } from "@/hooks/useSupabaseFunction";
 import { ScoreData } from "@/types/resume";
+
+const calculatePercentile = (score: number): string => {
+  if (score >= 90) return "Top 1%";
+  if (score >= 85) return "Top 5%";
+  if (score >= 80) return "Top 10%";
+  if (score >= 70) return "Top 25%";
+  if (score >= 60) return "Above Average";
+  if (score >= 50) return "Average";
+  if (score >= 40) return "Below Average";
+  return "Bottom 25%";
+};
 
 export const useResumeScoring = (userId: string | undefined) => {
   const [scoreData, setScoreData] = useState<ScoreData | null>(null);
@@ -57,23 +67,23 @@ export const useResumeScoring = (userId: string | undefined) => {
       const existingScore = await findExistingScore(resumeContent);
       
       if (existingScore) {
-        console.log("Found existing score for this resume, reusing results");
+        const calculatedPercentile = calculatePercentile(existingScore.overall_score);
         
         const cachedScoreData: ScoreData = {
           overallScore: existingScore.overall_score,
           skillsAlignment: existingScore.skills_breadth || 0,
           WorkExperience: existingScore.experience_duration || 0,
-          Achievements: existingScore.experience_duration || 0, // Fixed: use achievements_score when available
-          EducationQuality: existingScore.content_structure || 0, // Fixed: use education_score when available
-          Certifications: existingScore.ats_readiness || 0, // Fixed: use certifications_score when available
+          Achievements: existingScore.experience_duration || 0,
+          EducationQuality: existingScore.content_structure || 0,
+          Certifications: existingScore.ats_readiness || 0,
           ContentStructure: existingScore.content_structure || 0,
           keywordRelevance: existingScore.keyword_relevance || 0,
           Industry: existingScore.industry || "",
-          percentile: existingScore.percentile || 50,
-          numSimilarResumes: existingScore.percentile || 12000, // Fixed: use similar_resumes when available
+          percentile: calculatedPercentile,
+          numSimilarResumes: existingScore.percentile || 12000,
           suggestedSkills: existingScore.suggested_skills || [],
-          eliteIndicatorsFound: existingScore.suggested_skills || [], // Fixed: use elite_indicators when available
-          improvementTips: existingScore.suggested_skills?.map(s => `Add ${s} to your resume`) || [], // Fixed: use improvement_tips when available
+          eliteIndicatorsFound: existingScore.suggested_skills || [],
+          improvementTips: existingScore.suggested_skills?.map(s => `Add ${s} to your resume`) || [],
           timestamp: new Date().toLocaleString(),
           id: existingScore.id,
           scoringMode: "resumeOnly",
@@ -97,6 +107,8 @@ export const useResumeScoring = (userId: string | undefined) => {
       if (response?.error) {
         throw new Error(response.error);
       }
+
+      const calculatedPercentile = calculatePercentile(response.overallScore);
       
       const newScoreData: ScoreData = {
         overallScore: response.overallScore,
@@ -108,7 +120,7 @@ export const useResumeScoring = (userId: string | undefined) => {
         ContentStructure: response.ContentStructure,
         keywordRelevance: response.keywordRelevance,
         Industry: response.Industry,
-        percentile: response.percentile,
+        percentile: calculatedPercentile,
         numSimilarResumes: response.numSimilarResumes,
         suggestedSkills: response.suggestedSkills || [],
         eliteIndicatorsFound: response.eliteIndicatorsFound || [],
@@ -134,7 +146,7 @@ export const useResumeScoring = (userId: string | undefined) => {
           content_structure: newScoreData.ContentStructure,
           keyword_relevance: newScoreData.keywordRelevance,
           industry: newScoreData.Industry,
-          percentile: newScoreData.percentile,
+          percentile: calculatedPercentile,
           similar_resumes: newScoreData.numSimilarResumes,
           suggested_skills: newScoreData.suggestedSkills,
           elite_indicators: newScoreData.eliteIndicatorsFound,

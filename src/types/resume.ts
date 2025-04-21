@@ -9,7 +9,7 @@ export interface ScoreData {
   ContentStructure: number;
   keywordRelevance: number;
   Industry: string;
-  percentile: number;
+  percentile: string;  // Changed from number to string to accommodate textual rankings
   numSimilarResumes: number;
   suggestedSkills: string[];
   eliteIndicatorsFound: string[];
