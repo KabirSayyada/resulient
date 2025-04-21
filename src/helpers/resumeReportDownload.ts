@@ -17,7 +17,6 @@ SCORE BREAKDOWN:
 - Skills Alignment: ${scoreData.skillsAlignment}/100
 - Work Experience: ${scoreData.WorkExperience}/100
 - Content Structure: ${scoreData.ContentStructure}/100
-- ATS Readiness: ${scoreData.atsReadiness}/100
 
 SUGGESTED SKILLS TO ADD:
 ${scoreData.suggestedSkills.join(", ")}
