@@ -105,4 +105,3 @@ export const BenchmarkGraph = ({
 };
 
 export default BenchmarkGraph;
-

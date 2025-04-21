@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.29.0";
 import OpenAI from "https://esm.sh/openai@4.17.0";
@@ -39,19 +38,27 @@ serve(async (req) => {
     let prompt = "";
     if (scoringMode === "resumeOnly") {
       prompt = `
-      Analyze this resume, and benchmark it for modern industry standards.
+      Analyze this resume with BRUTAL HONESTY, following extremely high industry standards. This analysis should be thorough and critical, with a low baseline for scores.
 
       RESUME:
       ${resumeContent}
       
-      Please estimate the industry this resume best matches. Then, provide a comprehensive scoring breakdown with the following on a scale of 0-100:
+      Please estimate the industry this resume best matches. Then, provide a comprehensive scoring breakdown with the following on a scale of 0-100, where 70 is considered decent for a professional resume, and 90+ is exceptional and rare:
       
-      1. Overall Score: How well the resume demonstrates candidate fit for the industry
-      2. Keyword Relevance: Use of relevant keywords for the industry (do not use a job description)
-      3. Skills Breadth: Range of in-demand skills covered
-      4. Experience Duration: Appropriateness of experience for typical roles in this space
-      5. Content Structure: Quality and clarity of the resume's organization
-      6. ATS Readiness: How likely the resume is to pass modern ATS systems
+      1. Overall Score: How well the resume demonstrates candidate qualifications (be very critical)
+      2. Keyword Relevance: Appropriate use of industry-specific terminology (penalize generic terms)
+      3. Skills Breadth: Range of in-demand technical and soft skills (verify alignment with industry standards)
+      4. Experience Duration: Appropriate experience level, gaps in employment history, and relevance
+      5. Content Structure: Professional organization, formatting consistency, and readability
+      6. ATS Readiness: Compatibility with Applicant Tracking Systems (penalize overformatting)
+      
+      Additional Scoring Factors (factor these into the appropriate above categories):
+      - Length: Penalize if too short (<1 page) or too long (>2 pages for most industries)
+      - Completeness: Missing crucial sections like education, experience, skills (severe penalty)
+      - Professionalism: Language formality, third-person perspective, no personal pronouns
+      - Grammar/Spelling: Any errors should significantly lower scores
+      - Prestige Factors: Education institutions, notable employers (globally recognized names)
+      - Quantifiable Achievements: Specific metrics and accomplishments (not just responsibilities)
       
       Estimate:
       1. The likely industry this resume targets
@@ -73,12 +80,12 @@ serve(async (req) => {
         "suggestedSkills": string[]
       }
 
-      Return ONLY the JSON object, no extra text.
+      Return ONLY the JSON object, no extra text. BE BRUTALLY HONEST IN YOUR SCORES - most resumes should score below 70 in multiple categories.
       `;
     } else {
       // Default or "jobDescription" mode
       prompt = `
-      Analyze this resume against the provided job description:
+      Analyze this resume against the provided job description with BRUTAL HONESTY and extremely high standards:
       
       JOB DESCRIPTION:
       ${jobDescription}
@@ -86,19 +93,27 @@ serve(async (req) => {
       RESUME:
       ${resumeContent}
       
-      Please provide a comprehensive analysis of how well this resume matches the job description. Include the following scores on a scale of 0-100:
+      Please provide a rigorous analysis with the following scores on a scale of 0-100, where 70 is considered decent, and 90+ is exceptional and rare:
       
-      1. Overall Score: How well the resume matches the job description overall.
-      2. Keyword Relevance: How well the resume uses keywords from the job description.
-      3. Skills Breadth: The range of relevant skills covered.
-      4. Experience Duration: Appropriateness of experience level for the role.
-      5. Content Structure: Quality and clarity of the resume's organization.
-      6. ATS Readiness: How likely the resume is to pass ATS systems.
+      1. Overall Score: Total alignment between resume and job requirements (be very critical)
+      2. Keyword Relevance: How precisely the resume uses key terminology from the job description
+      3. Skills Breadth: Coverage of required and preferred skills (penalize missing critical skills)
+      4. Experience Duration: Appropriate length and relevance of experience for this specific role
+      5. Content Structure: Professional organization and readability (penalize poor formatting)
+      6. ATS Readiness: How likely the resume is to pass ATS systems for this job
+      
+      Additional Scoring Factors (factor these into the appropriate above categories):
+      - Length: Penalize if too short (<1 page) or too long (>2 pages for most industries)
+      - Completeness: Missing crucial sections (severe penalty)
+      - Professionalism: Language formality, third-person perspective, no personal pronouns
+      - Grammar/Spelling: Any errors should significantly lower scores
+      - Prestige Factors: Education institutions, notable employers (globally recognized names)
+      - Quantifiable Achievements: Specific metrics and accomplishments (not just responsibilities)
       
       Also determine:
-      1. The industry this job belongs to.
-      2. Suggested missing skills that would improve the resume.
-      3. Estimated percentile ranking compared to other candidates (e.g., top 20%).
+      1. The industry this job belongs to
+      2. Critical missing skills that would improve the resume for this specific job
+      3. Estimated percentile ranking compared to typical applicants (e.g., top 20%)
       
       Format your response as a JSON object with these fields:
       {
@@ -113,7 +128,7 @@ serve(async (req) => {
         "percentile": number
       }
       
-      Return ONLY the JSON object without any additional text.
+      Return ONLY the JSON object without any additional text. BE BRUTALLY HONEST IN YOUR SCORES - most resumes should score below 70 in multiple categories when compared to an actual job.
       `;
     }
 
@@ -130,10 +145,7 @@ serve(async (req) => {
     try {
       // Parse the JSON response
       const scoreData = JSON.parse(content);
-      // If resumeOnly mode, remove numSimilarResumes from response if present as frontend doesn't expect it
-      if ("numSimilarResumes" in scoreData) {
-        delete scoreData.numSimilarResumes;
-      }
+      // If resumeOnly mode, keep numSimilarResumes for frontend to use in graph
       return new Response(
         JSON.stringify(scoreData),
         {
