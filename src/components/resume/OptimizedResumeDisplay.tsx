@@ -347,42 +347,42 @@ export const OptimizedResumeDisplay = ({
 
   return (
     <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in">
-      ResumeActions scoreCardRef={scoreCardRef} completeReportRef={completeReportRef} /&gt;
+      ResumeActions scoreCardRef={scoreCardRef} completeReportRef={completeReportRef} />
       
-      &lt;div className="flex flex-col items-center justify-center py-10"&gt;
-        &lt;div ref={scoreCardRef} className="fixed left-[-9999px] top-0 z-[-1] bg-white"&gt;
-          ResumeScoreCard scoreData={scoreData} /&gt;
-        &lt;/div&gt;
-        &lt;div className="w-full flex items-center justify-center px-2"&gt;
-          ResumeScoreCard scoreData={scoreData} /&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
+      <div className="flex flex-col items-center justify-center py-10">
+        <div ref={scoreCardRef} className="fixed left-[-9999px] top-0 z-[-1] bg-white">
+          ResumeScoreCard scoreData={scoreData} />
+        </div>
+        <div className="w-full flex items-center justify-center px-2">
+          ResumeScoreCard scoreData={scoreData} />
+        </div>
+      </div>
 
-      &lt;div ref={completeReportRef} className="bg-white p-6 rounded-lg mx-6 mb-6 shadow-inner"&gt;
-        &lt;div className="text-center mb-10"&gt;
-          &lt;h1 className="text-3xl font-bold text-indigo-800 mb-2"&gt;Complete Resume Analysis Report&lt;/h1&gt;
-          &lt;p className="text-fuchsia-600 font-medium"&gt;Generated on {scoreData.timestamp}&lt;/p&gt;
-          &lt;div className="mt-4 inline-block bg-indigo-50 px-4 py-2 rounded-full text-indigo-700 font-semibold"&gt;
+      <div ref={completeReportRef} className="bg-white p-6 rounded-lg mx-6 mb-6 shadow-inner">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-bold text-indigo-800 mb-2">Complete Resume Analysis Report</h1>
+          <p className="text-fuchsia-600 font-medium">Generated on {scoreData.timestamp}</p>
+          <div className="mt-4 inline-block bg-indigo-50 px-4 py-2 rounded-full text-indigo-700 font-semibold">
             Overall Score: {scoreData.overallScore}/100
-          &lt;/div&gt;
-        &lt;/div&gt;
+          </div>
+        </div>
 
-        ScoreBreakdown scoreData={scoreData} /&gt;
+        ScoreBreakdown scoreData={scoreData} />
 
         {qualificationGaps && qualificationGaps.length > 0 && (
-          &lt;QualificationWarnings qualificationGaps={qualificationGaps} /&gt;
+          <QualificationWarnings qualificationGaps={qualificationGaps} />
         )}
 
-        ImprovementSuggestions suggestions={suggestions} /&gt;
-        SuggestedSkills skills={scoreData.suggestedSkills} /&gt;
-      &lt;/div&gt;
+        ImprovementSuggestions suggestions={suggestions} />
+        SuggestedSkills skills={scoreData.suggestedSkills} />
+      </div>
 
-      &lt;CardContent&gt;
-        &lt;div className="mt-8 text-center text-sm"&gt;
-          &lt;div className="font-bold mb-2"&gt;{scoreData.overallScore}/100&lt;/div&gt;
-        &lt;/div&gt;
-      &lt;/CardContent&gt;
-    &lt;/Card&gt;
+      <CardContent>
+        <div className="mt-8 text-center text-sm">
+          <div className="font-bold mb-2">{scoreData.overallScore}/100</div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
