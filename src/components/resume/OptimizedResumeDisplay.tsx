@@ -1,17 +1,15 @@
 import { useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { QualificationGap, ScoreData } from "@/types/resume";
+import { QualificationGap } from "@/types/resume";
 import { QualificationWarnings } from "./components/QualificationWarnings";
 import { ImprovementSuggestions } from "./components/ImprovementSuggestions";
-import { SuggestedSkills } from "./components/SuggestedSkills";
 import { useLocation } from "react-router-dom";
-import { ScoreBreakdown } from "./ScoreBreakdown";
-import ResumeScoreCard from "./ResumeScoreCard";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { FileText, Star, CheckCircle, TrendingUp } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { AnalysisCards } from "./components/AnalysisCards";
+import { ReportHeader } from "./components/ReportHeader";
+import { OptimizedResumeContent } from "./components/OptimizedResumeContent";
+import { DownloadReportButton } from "./components/DownloadReportButton";
 
 interface OptimizedResumeDisplayProps {
   optimizedResume: string | any;
@@ -74,287 +72,13 @@ export const OptimizedResumeDisplay = ({
     pdf.save(`resume-optimization-report-${new Date().toISOString().split("T")[0]}.pdf`);
   };
 
-  const formatResumeContent = (resume: string | any): string => {
-    if (typeof resume === 'string') {
-      return resume;
-    }
-    
-    if (typeof resume === 'object' && resume !== null) {
-      try {
-        let formattedResume = '';
-        
-        if (resume.name) {
-          formattedResume += `${resume.name}\n`;
-        }
-        
-        if (resume.contact) {
-          const contact = resume.contact;
-          formattedResume += `${contact.email || ''} | ${contact.phone || ''}\n`;
-          formattedResume += `${contact.location || ''} | ${contact.linkedin || ''}\n\n`;
-        }
-        
-        if (resume.professionalSummary) {
-          formattedResume += `PROFESSIONAL SUMMARY\n${resume.professionalSummary}\n\n`;
-        }
-        
-        if (resume.keySkills && Array.isArray(resume.keySkills)) {
-          formattedResume += `KEY SKILLS\n`;
-          resume.keySkills.forEach((skill: string) => {
-            formattedResume += `• ${skill}\n`;
-          });
-          formattedResume += '\n';
-        }
-        
-        if (resume.professionalExperience && Array.isArray(resume.professionalExperience)) {
-          formattedResume += `PROFESSIONAL EXPERIENCE\n`;
-          resume.professionalExperience.forEach((exp: any) => {
-            formattedResume += `${exp.title || ''} | ${exp.company || ''} | ${exp.dates || ''}\n`;
-            formattedResume += `${exp.location || ''}\n`;
-            if (exp.responsibilities && Array.isArray(exp.responsibilities)) {
-              exp.responsibilities.forEach((resp: string) => {
-                formattedResume += `• ${resp}\n`;
-              });
-            }
-            formattedResume += '\n';
-          });
-        }
-        
-        if (resume.education && Array.isArray(resume.education)) {
-          formattedResume += `EDUCATION\n`;
-          resume.education.forEach((edu: any) => {
-            formattedResume += `${edu.degree || ''} | ${edu.institution || ''} | ${edu.graduationYear || ''}\n`;
-          });
-          formattedResume += '\n';
-        }
-        
-        if (resume.certifications && Array.isArray(resume.certifications)) {
-          formattedResume += `CERTIFICATIONS\n`;
-          resume.certifications.forEach((cert: string) => {
-            formattedResume += `• ${cert}\n`;
-          });
-          formattedResume += '\n';
-        }
-        
-        if (resume.achievements && Array.isArray(resume.achievements)) {
-          formattedResume += `ACHIEVEMENTS\n`;
-          resume.achievements.forEach((ach: string) => {
-            formattedResume += `• ${ach}\n`;
-          });
-        }
-        
-        return formattedResume;
-      } catch (error) {
-        console.error("Failed to format resume object:", error);
-        return "Error formatting resume content. Please check console for details.";
-      }
-    }
-    
-    return "Resume content not available in expected format.";
-  };
-
-  function calculateKeywordScore(resume: string | any, jobDescription: string): number {
-    let resumeText = typeof resume === 'string' ? resume : formatResumeContent(resume);
-    
-    if (!resumeText) {
-      console.warn('Resume is not a valid format in calculateKeywordScore', resume);
-      return 70;
-    }
-    
-    if (!jobDescription) return 70;
-  
-    const jobWords = jobDescription.toLowerCase().split(/\W+/).filter(word =>
-      word.length > 3 && !["and", "the", "that", "with", "for", "this"].includes(word)
-    );
-  
-    const uniqueJobWords = [...new Set(jobWords)];
-    const resumeTextLower = resumeText.toLowerCase();
-  
-    let matches = 0;
-    uniqueJobWords.forEach(word => {
-      if (resumeTextLower.includes(word)) {
-        matches++;
-      }
-    });
-  
-    const maxKeywords = Math.min(uniqueJobWords.length, 20);
-    const score = Math.round((matches / maxKeywords) * 100);
-  
-    return Math.max(0, Math.min(100, score));
-  }
-  
-  function calculateStructureScore(resume: string | any): number {
-    let resumeText = typeof resume === 'string' ? resume : formatResumeContent(resume);
-    
-    if (!resumeText) {
-      console.warn('Resume is not a valid format in calculateStructureScore', resume);
-      return 70;
-    }
-    
-    let score = 70;
-  
-    const sections = ["experience", "education", "skills", "summary", "objective", "projects"];
-  
-    let sectionCount = 0;
-    sections.forEach(section => {
-      if (resumeText.toLowerCase().includes(section)) {
-        sectionCount++;
-      }
-    });
-  
-    score += Math.min(15, sectionCount * 3);
-  
-    const bulletPoints = (resumeText.match(/•|■|-|✓|\*/g) || []).length;
-    score += Math.min(10, bulletPoints);
-  
-    const wordCount = resumeText.split(/\s+/).length;
-    if (wordCount > 700) {
-      score -= Math.min(10, Math.floor((wordCount - 700) / 50));
-    }
-  
-    return Math.max(0, Math.min(100, score));
-  }
-  
-  function calculateATSScore(resume: string | any): number {
-    let resumeText = typeof resume === 'string' ? resume : formatResumeContent(resume);
-    
-    if (!resumeText) {
-      console.warn('Resume is not a valid format in calculateATSScore', resume);
-      return 75;
-    }
-    
-    let score = 75;
-  
-    const issues = [];
-  
-    const hasContactInfo = /email|phone|linkedin/i.test(resumeText);
-    if (hasContactInfo) score += 10;
-  
-    const hasProperDates = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)\s+\d{4}\b/i.test(resumeText);
-    if (hasProperDates) score += 5;
-  
-    const standardHeaders = ["work experience", "education", "skills", "professional experience"];
-    let headerCount = 0;
-    standardHeaders.forEach(header => {
-      if (resumeText.toLowerCase().includes(header)) {
-        headerCount++;
-      }
-    });
-    score += Math.min(10, headerCount * 3);
-  
-    return Math.max(0, Math.min(100, score));
-  }
-  
-  function generateSuggestions(keywordScore: number, structureScore: number, atsScore: number, resume: string | any, jobDescription: string): string[] {
-    let resumeText = typeof resume === 'string' ? resume : formatResumeContent(resume);
-    
-    if (!resumeText) {
-      console.warn('Resume is not a valid format in generateSuggestions', resume);
-      resumeText = "";
-    }
-    
-    const suggestions: string[] = [];
-    const allSuggestions = {
-      keyword: [
-        "Include more job-specific keywords from the job description to improve ATS matching.",
-        "Align your skills section with the terminology used in the job posting.",
-        "Mirror the language and technical terms found in the job description.",
-        "Consider adding industry-standard abbreviations and full terms for better keyword coverage.",
-        "Incorporate relevant technical skills and tools mentioned in the job posting.",
-      ],
-      structure: [
-        "Improve your resume structure with clear section headers.",
-        "Use bullet points to highlight achievements and responsibilities.",
-        "Consider adding a professional summary section at the top.",
-        "Organize experiences in reverse chronological order for better readability.",
-        "Break down long paragraphs into concise bullet points.",
-        "Use consistent formatting throughout your resume.",
-        "Add clear section dividers to improve scannability.",
-      ],
-      ats: [
-        "Use a simple, ATS-friendly format without tables or columns.",
-        "Include your contact information clearly at the top.",
-        "Avoid using headers, footers, or text boxes.",
-        "Use standard section headings that ATS systems recognize.",
-        "Remove any images, graphics, or special characters.",
-        "Stick to common fonts like Arial or Calibri.",
-      ],
-      achievements: [
-        "Quantify your achievements with specific numbers and percentages.",
-        "Focus on results and impact rather than just responsibilities.",
-        "Include metrics that demonstrate your success.",
-        "Highlight specific projects and their outcomes.",
-        "Add relevant awards or recognition.",
-      ],
-      formatting: [
-        "Keep your resume concise - aim for 1-2 pages maximum.",
-        "Use consistent date formats throughout.",
-        "Ensure proper spacing between sections.",
-        "Maintain consistent font sizes for better readability.",
-        "Use bold text strategically to highlight key information.",
-      ]
-    };
-  
-    if (keywordScore < 70) {
-      suggestions.push(allSuggestions.keyword[Math.floor(Math.random() * allSuggestions.keyword.length)]);
-      
-      if (jobDescription) {
-        const jobWords = jobDescription.toLowerCase().split(/\W+/).filter(word =>
-          word.length > 4 && !["and", "the", "that", "with", "for", "this"].includes(word)
-        );
-  
-        const uniqueJobWords = [...new Set(jobWords)];
-        const resumeTextLower = resumeText.toLowerCase();
-        const missingKeywords: string[] = [];
-        
-        uniqueJobWords.forEach(word => {
-          if (!resumeTextLower.includes(word) && missingKeywords.length < 3) {
-            missingKeywords.push(word);
-          }
-        });
-  
-        if (missingKeywords.length > 0) {
-          suggestions.push(`Consider incorporating these keywords: ${missingKeywords.join(", ")}.`);
-        }
-      }
-    }
-  
-    if (structureScore < 70) {
-      suggestions.push(allSuggestions.structure[Math.floor(Math.random() * allSuggestions.structure.length)]);
-      suggestions.push(allSuggestions.structure[Math.floor(Math.random() * allSuggestions.structure.length)]);
-    }
-  
-    if (atsScore < 70) {
-      suggestions.push(allSuggestions.ats[Math.floor(Math.random() * allSuggestions.ats.length)]);
-    }
-  
-    const categories = ['achievements', 'formatting'];
-    categories.forEach(category => {
-      const randomSuggestion = allSuggestions[category][Math.floor(Math.random() * allSuggestions[category].length)];
-      if (!suggestions.includes(randomSuggestion)) {
-        suggestions.push(randomSuggestion);
-      }
-    });
-  
-    while (suggestions.length < 5) {
-      const randomCategory = Object.keys(allSuggestions)[Math.floor(Math.random() * Object.keys(allSuggestions).length)];
-      const randomSuggestion = allSuggestions[randomCategory][Math.floor(Math.random() * allSuggestions[randomCategory].length)];
-      if (!suggestions.includes(randomSuggestion)) {
-        suggestions.push(randomSuggestion);
-      }
-    }
-  
-    return suggestions.sort(() => Math.random() - 0.5).slice(0, 8);
-  }
-
   if (!optimizedResume) return null;
 
   const formattedResumeContent = formatResumeContent(optimizedResume);
-  
   const keywordScore = calculateKeywordScore(optimizedResume, jobDescription || "");
   const structureScore = calculateStructureScore(optimizedResume);
   const atsScore = calculateATSScore(optimizedResume);
   const overallScore = Math.round((keywordScore + structureScore + atsScore) / 3);
-
   const suggestions = generateSuggestions(keywordScore, structureScore, atsScore, optimizedResume, jobDescription || "");
   
   const currentDate = new Date();
@@ -366,80 +90,21 @@ export const OptimizedResumeDisplay = ({
       <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in">
         <CardContent className="p-6">
           <div className="space-y-6" ref={optimizationReportRef}>
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-indigo-800 mb-2">Resume Optimization Report</h1>
-              <p className="text-gray-600 mb-3">
-                Generated on {formattedDate} at {formattedTime}
-              </p>
-              <div className="inline-block bg-indigo-50 px-4 py-2 rounded-full text-indigo-700 font-semibold">
-                Overall Score: {overallScore}/100
-              </div>
-            </div>
+            <ReportHeader 
+              date={formattedDate}
+              time={formattedTime}
+              overallScore={overallScore}
+            />
 
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <h2 className="text-lg font-bold text-indigo-800 mb-4">Analysis</h2>
-                <div className="grid grid-cols-1 gap-4">
-                  <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center">
-                          <Star className="h-5 w-5 text-blue-600 mr-2" />
-                          <h3 className="font-semibold text-blue-900">Overall Score</h3>
-                        </div>
-                        <span className="text-xl font-bold text-blue-700">
-                          {overallScore}%
-                        </span>
-                      </div>
-                      <Progress value={overallScore} className="h-2" />
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-purple-50 to-fuchsia-50 border-purple-200">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center">
-                          <FileText className="h-5 w-5 text-purple-600 mr-2" />
-                          <h3 className="font-semibold text-purple-900">ATS Readiness</h3>
-                        </div>
-                        <span className="text-xl font-bold text-purple-700">
-                          {atsScore}%
-                        </span>
-                      </div>
-                      <Progress value={atsScore} className="h-2" />
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center">
-                          <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
-                          <h3 className="font-semibold text-green-900">Keyword Optimization</h3>
-                        </div>
-                        <span className="text-xl font-bold text-green-700">
-                          {keywordScore}%
-                        </span>
-                      </div>
-                      <Progress value={keywordScore} className="h-2" />
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center">
-                          <TrendingUp className="h-5 w-5 text-amber-600 mr-2" />
-                          <h3 className="font-semibold text-amber-900">Content Structure</h3>
-                        </div>
-                        <span className="text-xl font-bold text-amber-700">
-                          {structureScore}%
-                        </span>
-                      </div>
-                      <Progress value={structureScore} className="h-2" />
-                    </CardContent>
-                  </Card>
-                </div>
+                <AnalysisCards
+                  overallScore={overallScore}
+                  atsScore={atsScore}
+                  keywordScore={keywordScore}
+                  structureScore={structureScore}
+                />
               </div>
               
               <div>
@@ -454,23 +119,8 @@ export const OptimizedResumeDisplay = ({
               </div>
             )}
 
-            <div className="bg-white p-6 rounded-lg shadow-inner mt-6">
-              <h2 className="text-xl font-bold text-indigo-700 mb-6">Optimized Resume</h2>
-              <div className="whitespace-pre-wrap font-mono text-sm bg-gray-50 p-4 rounded-md border border-gray-200">
-                {formattedResumeContent}
-              </div>
-            </div>
-
-            <div className="flex justify-center mt-8">
-              <Button 
-                size="lg"
-                onClick={handleOptimizationReportDownload}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transform transition hover:scale-105 flex items-center gap-3"
-              >
-                <FileText className="h-5 w-5" />
-                Download Full Report (PDF)
-              </Button>
-            </div>
+            <OptimizedResumeContent content={formattedResumeContent} />
+            <DownloadReportButton onClick={handleOptimizationReportDownload} />
           </div>
         </CardContent>
       </Card>
