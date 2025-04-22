@@ -14,7 +14,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
 interface OptimizedResumeDisplayProps {
-  optimizedResume: string;
+  optimizedResume: string | any;
   jobDescription?: string;
   originalResume?: string;
   qualificationGaps?: QualificationGap[];
@@ -54,29 +54,109 @@ export const OptimizedResumeDisplay = ({
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     const imgWidth = pageWidth - 40;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const imgHeight = (canvas.height / canvas.width) * imgWidth;
     
     let heightLeft = imgHeight;
     let position = 20;
-    let page = 1;
+    let pageNumber = 1;
     
     pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
     heightLeft -= pageHeight;
     
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
+    while (heightLeft > 0) {
+      position = position - pageHeight;
+      pageNumber++;
       pdf.addPage();
       pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-      page++;
     }
     
     pdf.save(`resume-optimization-report-${new Date().toISOString().split("T")[0]}.pdf`);
   };
 
+  const formatResumeContent = (resume: string | any): string => {
+    if (typeof resume === 'string') {
+      return resume;
+    }
+    
+    if (typeof resume === 'object' && resume !== null) {
+      try {
+        let formattedResume = '';
+        
+        if (resume.name) {
+          formattedResume += `${resume.name}\n`;
+        }
+        
+        if (resume.contact) {
+          const contact = resume.contact;
+          formattedResume += `${contact.email || ''} | ${contact.phone || ''}\n`;
+          formattedResume += `${contact.location || ''} | ${contact.linkedin || ''}\n\n`;
+        }
+        
+        if (resume.professionalSummary) {
+          formattedResume += `PROFESSIONAL SUMMARY\n${resume.professionalSummary}\n\n`;
+        }
+        
+        if (resume.keySkills && Array.isArray(resume.keySkills)) {
+          formattedResume += `KEY SKILLS\n`;
+          resume.keySkills.forEach((skill: string) => {
+            formattedResume += `• ${skill}\n`;
+          });
+          formattedResume += '\n';
+        }
+        
+        if (resume.professionalExperience && Array.isArray(resume.professionalExperience)) {
+          formattedResume += `PROFESSIONAL EXPERIENCE\n`;
+          resume.professionalExperience.forEach((exp: any) => {
+            formattedResume += `${exp.title || ''} | ${exp.company || ''} | ${exp.dates || ''}\n`;
+            formattedResume += `${exp.location || ''}\n`;
+            if (exp.responsibilities && Array.isArray(exp.responsibilities)) {
+              exp.responsibilities.forEach((resp: string) => {
+                formattedResume += `• ${resp}\n`;
+              });
+            }
+            formattedResume += '\n';
+          });
+        }
+        
+        if (resume.education && Array.isArray(resume.education)) {
+          formattedResume += `EDUCATION\n`;
+          resume.education.forEach((edu: any) => {
+            formattedResume += `${edu.degree || ''} | ${edu.institution || ''} | ${edu.graduationYear || ''}\n`;
+          });
+          formattedResume += '\n';
+        }
+        
+        if (resume.certifications && Array.isArray(resume.certifications)) {
+          formattedResume += `CERTIFICATIONS\n`;
+          resume.certifications.forEach((cert: string) => {
+            formattedResume += `• ${cert}\n`;
+          });
+          formattedResume += '\n';
+        }
+        
+        if (resume.achievements && Array.isArray(resume.achievements)) {
+          formattedResume += `ACHIEVEMENTS\n`;
+          resume.achievements.forEach((ach: string) => {
+            formattedResume += `• ${ach}\n`;
+          });
+        }
+        
+        return formattedResume;
+      } catch (error) {
+        console.error("Failed to format resume object:", error);
+        return "Error formatting resume content. Please check console for details.";
+      }
+    }
+    
+    return "Resume content not available in expected format.";
+  };
+
   function calculateKeywordScore(resume: string | any, jobDescription: string): number {
-    if (typeof resume !== 'string') {
-      console.warn('Resume is not a string in calculateKeywordScore', resume);
+    let resumeText = typeof resume === 'string' ? resume : formatResumeContent(resume);
+    
+    if (!resumeText) {
+      console.warn('Resume is not a valid format in calculateKeywordScore', resume);
       return 70;
     }
     
@@ -87,11 +167,11 @@ export const OptimizedResumeDisplay = ({
     );
   
     const uniqueJobWords = [...new Set(jobWords)];
-    const resumeText = resume.toLowerCase();
+    const resumeTextLower = resumeText.toLowerCase();
   
     let matches = 0;
     uniqueJobWords.forEach(word => {
-      if (resumeText.includes(word)) {
+      if (resumeTextLower.includes(word)) {
         matches++;
       }
     });
@@ -103,8 +183,10 @@ export const OptimizedResumeDisplay = ({
   }
   
   function calculateStructureScore(resume: string | any): number {
-    if (typeof resume !== 'string') {
-      console.warn('Resume is not a string in calculateStructureScore', resume);
+    let resumeText = typeof resume === 'string' ? resume : formatResumeContent(resume);
+    
+    if (!resumeText) {
+      console.warn('Resume is not a valid format in calculateStructureScore', resume);
       return 70;
     }
     
@@ -114,17 +196,17 @@ export const OptimizedResumeDisplay = ({
   
     let sectionCount = 0;
     sections.forEach(section => {
-      if (resume.toLowerCase().includes(section)) {
+      if (resumeText.toLowerCase().includes(section)) {
         sectionCount++;
       }
     });
   
     score += Math.min(15, sectionCount * 3);
   
-    const bulletPoints = (resume.match(/•|■|-|✓|\*/g) || []).length;
+    const bulletPoints = (resumeText.match(/•|■|-|✓|\*/g) || []).length;
     score += Math.min(10, bulletPoints);
   
-    const wordCount = resume.split(/\s+/).length;
+    const wordCount = resumeText.split(/\s+/).length;
     if (wordCount > 700) {
       score -= Math.min(10, Math.floor((wordCount - 700) / 50));
     }
@@ -133,8 +215,10 @@ export const OptimizedResumeDisplay = ({
   }
   
   function calculateATSScore(resume: string | any): number {
-    if (typeof resume !== 'string') {
-      console.warn('Resume is not a string in calculateATSScore', resume);
+    let resumeText = typeof resume === 'string' ? resume : formatResumeContent(resume);
+    
+    if (!resumeText) {
+      console.warn('Resume is not a valid format in calculateATSScore', resume);
       return 75;
     }
     
@@ -142,16 +226,16 @@ export const OptimizedResumeDisplay = ({
   
     const issues = [];
   
-    const hasContactInfo = /email|phone|linkedin/i.test(resume);
+    const hasContactInfo = /email|phone|linkedin/i.test(resumeText);
     if (hasContactInfo) score += 10;
   
-    const hasProperDates = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)\s+\d{4}\b/i.test(resume);
+    const hasProperDates = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)\s+\d{4}\b/i.test(resumeText);
     if (hasProperDates) score += 5;
   
     const standardHeaders = ["work experience", "education", "skills", "professional experience"];
     let headerCount = 0;
     standardHeaders.forEach(header => {
-      if (resume.toLowerCase().includes(header)) {
+      if (resumeText.toLowerCase().includes(header)) {
         headerCount++;
       }
     });
@@ -161,9 +245,11 @@ export const OptimizedResumeDisplay = ({
   }
   
   function generateSuggestions(keywordScore: number, structureScore: number, atsScore: number, resume: string | any, jobDescription: string): string[] {
-    if (typeof resume !== 'string') {
-      console.warn('Resume is not a string in generateSuggestions', resume);
-      resume = "";
+    let resumeText = typeof resume === 'string' ? resume : formatResumeContent(resume);
+    
+    if (!resumeText) {
+      console.warn('Resume is not a valid format in generateSuggestions', resume);
+      resumeText = "";
     }
     
     const suggestions: string[] = [];
@@ -217,11 +303,11 @@ export const OptimizedResumeDisplay = ({
         );
   
         const uniqueJobWords = [...new Set(jobWords)];
-        const resumeText = resume.toLowerCase();
+        const resumeTextLower = resumeText.toLowerCase();
         const missingKeywords: string[] = [];
         
         uniqueJobWords.forEach(word => {
-          if (!resumeText.includes(word) && missingKeywords.length < 3) {
+          if (!resumeTextLower.includes(word) && missingKeywords.length < 3) {
             missingKeywords.push(word);
           }
         });
@@ -262,12 +348,18 @@ export const OptimizedResumeDisplay = ({
 
   if (!optimizedResume) return null;
 
+  const formattedResumeContent = formatResumeContent(optimizedResume);
+  
   const keywordScore = calculateKeywordScore(optimizedResume, jobDescription || "");
   const structureScore = calculateStructureScore(optimizedResume);
   const atsScore = calculateATSScore(optimizedResume);
   const overallScore = Math.round((keywordScore + structureScore + atsScore) / 3);
 
   const suggestions = generateSuggestions(keywordScore, structureScore, atsScore, optimizedResume, jobDescription || "");
+  
+  const currentDate = new Date();
+  const formattedDate = currentDate.toLocaleDateString();
+  const formattedTime = currentDate.toLocaleTimeString();
 
   if (isAtsOptimizerPage) {
     return (
@@ -277,7 +369,7 @@ export const OptimizedResumeDisplay = ({
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-indigo-800 mb-2">Resume Optimization Report</h1>
               <p className="text-gray-600 mb-3">
-                Generated on {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
+                Generated on {formattedDate} at {formattedTime}
               </p>
               <div className="inline-block bg-indigo-50 px-4 py-2 rounded-full text-indigo-700 font-semibold">
                 Overall Score: {overallScore}/100
@@ -365,7 +457,7 @@ export const OptimizedResumeDisplay = ({
             <div className="bg-white p-6 rounded-lg shadow-inner mt-6">
               <h2 className="text-xl font-bold text-indigo-700 mb-6">Optimized Resume</h2>
               <div className="whitespace-pre-wrap font-mono text-sm bg-gray-50 p-4 rounded-md border border-gray-200">
-                {optimizedResume}
+                {formattedResumeContent}
               </div>
             </div>
 
