@@ -213,7 +213,12 @@ export const OptimizedResumeDisplay = ({
   );
 };
 
-function calculateKeywordScore(resume: string, jobDescription: string): number {
+function calculateKeywordScore(resume: string | any, jobDescription: string): number {
+  if (typeof resume !== 'string') {
+    console.warn('Resume is not a string in calculateKeywordScore', resume);
+    return 70;
+  }
+  
   if (!jobDescription) return 70;
 
   const jobWords = jobDescription.toLowerCase().split(/\W+/).filter(word =>
@@ -236,7 +241,12 @@ function calculateKeywordScore(resume: string, jobDescription: string): number {
   return Math.max(0, Math.min(100, score));
 }
 
-function calculateStructureScore(resume: string): number {
+function calculateStructureScore(resume: string | any): number {
+  if (typeof resume !== 'string') {
+    console.warn('Resume is not a string in calculateStructureScore', resume);
+    return 70;
+  }
+  
   let score = 70;
 
   const sections = ["experience", "education", "skills", "summary", "objective", "projects"];
@@ -261,7 +271,12 @@ function calculateStructureScore(resume: string): number {
   return Math.max(0, Math.min(100, score));
 }
 
-function calculateATSScore(resume: string): number {
+function calculateATSScore(resume: string | any): number {
+  if (typeof resume !== 'string') {
+    console.warn('Resume is not a string in calculateATSScore', resume);
+    return 75;
+  }
+  
   let score = 75;
 
   const issues = [];
@@ -284,7 +299,12 @@ function calculateATSScore(resume: string): number {
   return Math.max(0, Math.min(100, score));
 }
 
-function generateSuggestions(keywordScore: number, structureScore: number, atsScore: number, resume: string, jobDescription: string): string[] {
+function generateSuggestions(keywordScore: number, structureScore: number, atsScore: number, resume: string | any, jobDescription: string): string[] {
+  if (typeof resume !== 'string') {
+    console.warn('Resume is not a string in generateSuggestions', resume);
+    resume = "";
+  }
+  
   const suggestions: string[] = [];
   const allSuggestions = {
     keyword: [

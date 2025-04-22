@@ -7,7 +7,8 @@ interface ImprovementSuggestionsProps {
 }
 
 export const ImprovementSuggestions = ({ suggestions }: ImprovementSuggestionsProps) => {
-  if (!suggestions || suggestions.length === 0) {
+  // Ensure suggestions is an array before proceeding
+  if (!suggestions || !Array.isArray(suggestions) || suggestions.length === 0) {
     return null;
   }
   
