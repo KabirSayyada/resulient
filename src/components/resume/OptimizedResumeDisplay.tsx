@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -9,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { QualificationWarnings } from "./components/QualificationWarnings";
-import { QualificationGap } from "@/types/resume"; // Added this import
+import { QualificationGap } from "@/types/resume";
 
 interface OptimizedResumeDisplayProps {
   optimizedResume: string;
@@ -373,10 +372,51 @@ function calculateATSScore(resume: string): number {
 
 function generateSuggestions(keywordScore: number, structureScore: number, atsScore: number, resume: string, jobDescription: string): string[] {
   const suggestions: string[] = [];
+  const allSuggestions = {
+    keyword: [
+      "Include more job-specific keywords from the job description to improve ATS matching.",
+      "Align your skills section with the terminology used in the job posting.",
+      "Mirror the language and technical terms found in the job description.",
+      "Consider adding industry-standard abbreviations and full terms for better keyword coverage.",
+      "Incorporate relevant technical skills and tools mentioned in the job posting.",
+    ],
+    structure: [
+      "Improve your resume structure with clear section headers.",
+      "Use bullet points to highlight achievements and responsibilities.",
+      "Consider adding a professional summary section at the top.",
+      "Organize experiences in reverse chronological order for better readability.",
+      "Break down long paragraphs into concise bullet points.",
+      "Use consistent formatting throughout your resume.",
+      "Add clear section dividers to improve scannability.",
+    ],
+    ats: [
+      "Use a simple, ATS-friendly format without tables or columns.",
+      "Include your contact information clearly at the top.",
+      "Avoid using headers, footers, or text boxes.",
+      "Use standard section headings that ATS systems recognize.",
+      "Remove any images, graphics, or special characters.",
+      "Stick to common fonts like Arial or Calibri.",
+    ],
+    achievements: [
+      "Quantify your achievements with specific numbers and percentages.",
+      "Focus on results and impact rather than just responsibilities.",
+      "Include metrics that demonstrate your success.",
+      "Highlight specific projects and their outcomes.",
+      "Add relevant awards or recognition.",
+    ],
+    formatting: [
+      "Keep your resume concise - aim for 1-2 pages maximum.",
+      "Use consistent date formats throughout.",
+      "Ensure proper spacing between sections.",
+      "Maintain consistent font sizes for better readability.",
+      "Use bold text strategically to highlight key information.",
+    ]
+  };
 
+  // Add keyword-related suggestions if score is low
   if (keywordScore < 70) {
-    suggestions.push("Include more job-specific keywords from the job description to improve ATS matching.");
-
+    suggestions.push(allSuggestions.keyword[Math.floor(Math.random() * allSuggestions.keyword.length)]);
+    
     if (jobDescription) {
       const jobWords = jobDescription.toLowerCase().split(/\W+/).filter(word =>
         word.length > 4 && !["and", "the", "that", "with", "for", "this"].includes(word)
@@ -384,8 +424,8 @@ function generateSuggestions(keywordScore: number, structureScore: number, atsSc
 
       const uniqueJobWords = [...new Set(jobWords)];
       const resumeText = resume.toLowerCase();
-
       const missingKeywords: string[] = [];
+      
       uniqueJobWords.forEach(word => {
         if (!resumeText.includes(word) && missingKeywords.length < 3) {
           missingKeywords.push(word);
@@ -398,29 +438,37 @@ function generateSuggestions(keywordScore: number, structureScore: number, atsSc
     }
   }
 
+  // Add structure-related suggestions if score is low
   if (structureScore < 70) {
-    suggestions.push("Improve your resume structure with clear section headers (Summary, Experience, Education, Skills).");
-    suggestions.push("Use bullet points to highlight achievements and responsibilities for better readability.");
+    suggestions.push(allSuggestions.structure[Math.floor(Math.random() * allSuggestions.structure.length)]);
+    suggestions.push(allSuggestions.structure[Math.floor(Math.random() * allSuggestions.structure.length)]);
   }
 
+  // Add ATS-related suggestions if score is low
   if (atsScore < 70) {
-    suggestions.push("Use a simple, ATS-friendly format without tables, columns, or unusual formatting.");
-    suggestions.push("Include your contact information clearly at the top of your resume.");
+    suggestions.push(allSuggestions.ats[Math.floor(Math.random() * allSuggestions.ats.length)]);
   }
 
-  if (suggestions.length < 3) {
-    suggestions.push("Quantify your achievements with specific numbers, percentages, or metrics.");
+  // Always add some general improvement suggestions
+  const categories = ['achievements', 'formatting'];
+  categories.forEach(category => {
+    const randomSuggestion = allSuggestions[category][Math.floor(Math.random() * allSuggestions[category].length)];
+    if (!suggestions.includes(randomSuggestion)) {
+      suggestions.push(randomSuggestion);
+    }
+  });
+
+  // Ensure we have at least 5 suggestions but no more than 8
+  while (suggestions.length < 5) {
+    const randomCategory = Object.keys(allSuggestions)[Math.floor(Math.random() * Object.keys(allSuggestions).length)];
+    const randomSuggestion = allSuggestions[randomCategory][Math.floor(Math.random() * allSuggestions[randomCategory].length)];
+    if (!suggestions.includes(randomSuggestion)) {
+      suggestions.push(randomSuggestion);
+    }
   }
 
-  if (suggestions.length < 4) {
-    suggestions.push("Keep your resume concise - aim for 1-2 pages maximum.");
-  }
-
-  suggestions.push("Use standard section headings that ATS systems recognize (e.g., 'Work Experience' instead of 'Career Journey').");
-  suggestions.push("Avoid using headers, footers, or text boxes as ATS systems often can't parse them properly.");
-  suggestions.push("Consider including a 'Skills' section with relevant technical and soft skills prominently displayed.");
-
-  return suggestions;
+  // Shuffle the suggestions array for more randomness
+  return suggestions.sort(() => Math.random() - 0.5).slice(0, 8);
 }
 
 export default OptimizedResumeDisplay;
