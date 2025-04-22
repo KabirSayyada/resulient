@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -8,17 +7,20 @@ import { FileDown, Star, Award, Medal, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { QualificationWarnings } from "./components/QualificationWarnings";
 
 interface OptimizedResumeDisplayProps {
   optimizedResume: string;
   jobDescription?: string;
   originalResume?: string;
+  qualificationGaps?: QualificationGap[];
 }
 
 export const OptimizedResumeDisplay = ({
   optimizedResume,
   jobDescription,
-  originalResume
+  originalResume,
+  qualificationGaps
 }: OptimizedResumeDisplayProps) => {
   const { toast } = useToast();
   const [showScoreDetails, setShowScoreDetails] = useState(false);
@@ -26,17 +28,14 @@ export const OptimizedResumeDisplay = ({
 
   if (!optimizedResume) return null;
 
-  // Calculate scores based on the optimized resume
   const keywordScore = calculateKeywordScore(optimizedResume, jobDescription || "");
   const structureScore = calculateStructureScore(optimizedResume);
   const atsScore = calculateATSScore(optimizedResume);
   const overallScore = Math.round((keywordScore + structureScore + atsScore) / 3);
 
-  // Generate improvement suggestions
   const suggestions = generateSuggestions(keywordScore, structureScore, atsScore, optimizedResume, jobDescription || "");
 
   const handleDownload = () => {
-    // Create a blob with the resume content and score report
     const scoreReport = `
 RESUME STRENGTH REPORT
 ======================
@@ -55,14 +54,12 @@ ${optimizedResume}
     const blob = new Blob([scoreReport], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
 
-    // Create a temporary link and click it
     const a = document.createElement("a");
     a.href = url;
     a.download = "resume-strength-report.txt";
     document.body.appendChild(a);
     a.click();
 
-    // Clean up
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
@@ -92,13 +89,11 @@ ${optimizedResume}
         format: "a4",
       });
 
-      // Calculate proper scaling
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       const imgWidth = pageWidth - 40;
       const imgHeight = (canvas.height / canvas.width) * imgWidth;
       
-      // If the image is taller than a page, split it across multiple pages
       let heightLeft = imgHeight;
       let position = 20;
       
@@ -229,6 +224,10 @@ ${optimizedResume}
           </Card>
         </div>
 
+        {qualificationGaps && qualificationGaps.length > 0 && (
+          <QualificationWarnings qualificationGaps={qualificationGaps} />
+        )}
+
         {showScoreDetails && (
           <Card className="mt-6">
             <CardHeader>
@@ -271,7 +270,6 @@ ${optimizedResume}
             Optimized Resume
           </label>
           <div className="bg-white p-4 rounded-md border border-gray-200 max-h-[500px] overflow-y-auto font-mono leading-relaxed shadow-inner">
-            {/* Show the resume exactly as uploaded: preserve all original line breaks, spaces, bullets, and formatting */}
             <pre className="text-sm text-gray-800 whitespace-pre-line">{optimizedResume}</pre>
           </div>
         </div>
@@ -301,7 +299,7 @@ ${optimizedResume}
 };
 
 function calculateKeywordScore(resume: string, jobDescription: string): number {
-  if (!jobDescription) return 70; // Default score if no job description
+  if (!jobDescription) return 70;
 
   const jobWords = jobDescription.toLowerCase().split(/\W+/).filter(word =>
     word.length > 3 && !["and", "the", "that", "with", "for", "this"].includes(word)
@@ -317,14 +315,14 @@ function calculateKeywordScore(resume: string, jobDescription: string): number {
     }
   });
 
-  const maxKeywords = Math.min(uniqueJobWords.length, 20); // Cap at 20 keywords
+  const maxKeywords = Math.min(uniqueJobWords.length, 20);
   const score = Math.round((matches / maxKeywords) * 100);
 
   return Math.max(0, Math.min(100, score));
 }
 
 function calculateStructureScore(resume: string): number {
-  let score = 70; // Start with a baseline score
+  let score = 70;
 
   const sections = ["experience", "education", "skills", "summary", "objective", "projects"];
 
@@ -349,7 +347,7 @@ function calculateStructureScore(resume: string): number {
 }
 
 function calculateATSScore(resume: string): number {
-  let score = 75; // Start with a baseline score
+  let score = 75;
 
   const issues = [];
 

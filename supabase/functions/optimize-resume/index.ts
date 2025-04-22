@@ -26,21 +26,29 @@ serve(async (req) => {
       throw new Error('OpenAI API key not found')
     }
 
-    // Create OpenAI client using the new version
     const openai = new OpenAI({
       apiKey: openAiKey,
     })
 
-    console.log('Sending request to OpenAI...')
+    console.log('Analyzing resume and job description...')
 
-    const prompt = `
-    As an expert ATS (Applicant Tracking System) optimization specialist and professional resume writer, 
-    optimize the following resume content to match the job description while maintaining truthfulness. 
-    Focus on:
-    1. Keyword alignment with the job description
-    2. Clear, achievement-focused bullet points
-    3. ATS-friendly formatting
-    4. Quantifiable results where possible
+    const analysisPrompt = `
+    As an expert ATS optimization specialist and career advisor, analyze this resume against the job description.
+    First optimize the resume content, then identify any missing but important qualifications from the job description
+    that might be sensitive or require verification (certifications, specific experiences, etc.).
+    For each gap, provide:
+    1. What qualification/skill is missing
+    2. How important it is (Critical/Important/Nice to have)
+    3. Constructive advice on how to acquire it
+    
+    Format the gaps analysis as a JSON array of objects with these fields:
+    {
+      "skill": "qualification name",
+      "importance": "importance level",
+      "howToAcquire": "advice"
+    }
+
+    Remember to be encouraging and empowering in the advice, suggesting practical ways to gain these qualifications.
 
     Job Description:
     ${jobDescription}
@@ -48,7 +56,12 @@ serve(async (req) => {
     Original Resume:
     ${resumeContent}
 
-    Please provide the optimized resume content maintaining professional formatting.`
+    Response format:
+    {
+      "optimizedResume": "the optimized resume content",
+      "qualificationGaps": [gap objects array]
+    }
+    `
 
     // Use the correct method for the new OpenAI version
     const completion = await openai.chat.completions.create({
@@ -56,27 +69,28 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: "You are an expert ATS optimization specialist and professional resume writer."
+          content: "You are an expert ATS optimization specialist and career advisor."
         },
         {
           role: "user",
-          content: prompt
+          content: analysisPrompt
         }
       ],
       temperature: 0.7,
-      max_tokens: 2000
+      max_tokens: 2500,
+      response_format: { type: "json_object" }
     })
 
-    const optimizedResume = completion.choices[0].message.content
-
-    if (!optimizedResume) {
-      throw new Error('Failed to generate optimized resume')
+    const response = JSON.parse(completion.choices[0].message.content);
+    
+    if (!response.optimizedResume || !response.qualificationGaps) {
+      throw new Error('Failed to generate complete analysis')
     }
 
-    console.log('Successfully generated optimized resume')
+    console.log('Successfully generated optimized resume and qualification gaps analysis')
 
     return new Response(
-      JSON.stringify({ optimizedResume }),
+      JSON.stringify(response),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
