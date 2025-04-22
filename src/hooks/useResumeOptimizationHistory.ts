@@ -38,7 +38,7 @@ export const useResumeOptimizationHistory = (userId: string | undefined) => {
           optimized_resume: data.optimizedResume,
           original_resume: data.originalResume,
           job_description: data.jobDescription,
-          qualification_gaps: data.qualificationGaps,
+          qualification_gaps: data.qualificationGaps as any,
           overall_score: data.overallScore,
           keyword_score: data.keywordScore,
           structure_score: data.structureScore,
@@ -83,6 +83,11 @@ export const useResumeOptimizationHistory = (userId: string | undefined) => {
       setOptimizationHistory(data || []);
     } catch (error) {
       console.error("Error fetching optimization history:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch optimization history.",
+        variant: "destructive",
+      });
     }
   };
 
