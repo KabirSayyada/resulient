@@ -1,3 +1,4 @@
+
 import { useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
@@ -6,7 +7,7 @@ import { ResumeActions } from "./components/ResumeActions";
 import { ImprovementSuggestions } from "./components/ImprovementSuggestions";
 import { SuggestedSkills } from "./components/SuggestedSkills";
 import ResumeScoreCard from "./ResumeScoreCard";
-import { QualificationGap } from "@/types/resume";
+import { QualificationGap, ScoreData } from "@/types/resume";
 
 interface OptimizedResumeDisplayProps {
   optimizedResume: string;
@@ -32,13 +33,25 @@ export const OptimizedResumeDisplay = ({
   const overallScore = Math.round((keywordScore + structureScore + atsScore) / 3);
 
   const suggestions = generateSuggestions(keywordScore, structureScore, atsScore, optimizedResume, jobDescription || "");
-  const scoreData = {
+  const scoreData: ScoreData = {
     overallScore,
-    keywordScore,
-    structureScore,
-    atsScore,
-    suggestions,
+    skillsAlignment: keywordScore,
+    WorkExperience: structureScore,
+    Achievements: atsScore,
+    EducationQuality: 70,
+    Certifications: 70,
+    ContentStructure: structureScore,
+    keywordRelevance: keywordScore,
+    Industry: "General",
+    percentile: "Average",
+    numSimilarResumes: 1000,
+    suggestedSkills: [],
+    eliteIndicatorsFound: [],
+    improvementTips: suggestions,
+    missingQualifications: qualificationGaps || [],
     timestamp: new Date().toLocaleString(),
+    id: "temp-" + Math.random().toString(36).substr(2, 9),
+    scoringMode: "resumeOnly"
   };
 
   return (
@@ -70,7 +83,7 @@ export const OptimizedResumeDisplay = ({
         )}
 
         <ImprovementSuggestions suggestions={suggestions} />
-        <SuggestedSkills skills={[]} />
+        <SuggestedSkills skills={scoreData.suggestedSkills} />
       </div>
 
       <CardContent>
