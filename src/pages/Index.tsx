@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -12,6 +11,7 @@ import { useSupabaseFunction } from "@/hooks/useSupabaseFunction";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { BarChart2, Award } from "lucide-react";
 import { QualificationGap } from "@/types/resume";
+import { useResumeOptimizationHistory } from "@/hooks/useResumeOptimizationHistory";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -25,6 +25,7 @@ const Index = () => {
   const [optimizing, setOptimizing] = useState(false);
   
   const { callFunction, loading: functionLoading, error: functionError } = useSupabaseFunction();
+  const { saveOptimization } = useResumeOptimizationHistory(user?.id);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -65,6 +66,24 @@ const Index = () => {
       
       setOptimizedResume(response.optimizedResume);
       setQualificationGaps(response.qualificationGaps || []);
+      
+      const keywordScore = calculateKeywordScore(response.optimizedResume, jobDescription);
+      const structureScore = calculateStructureScore(response.optimizedResume);
+      const atsScore = calculateATSScore(response.optimizedResume);
+      const overallScore = Math.round((keywordScore + structureScore + atsScore) / 3);
+      const suggestions = generateSuggestions(keywordScore, structureScore, atsScore, response.optimizedResume, jobDescription);
+
+      await saveOptimization({
+        optimizedResume: response.optimizedResume,
+        originalResume: resumeContent,
+        jobDescription,
+        qualificationGaps: response.qualificationGaps || [],
+        overallScore,
+        keywordScore,
+        structureScore,
+        atsScore,
+        suggestions
+      });
       
       toast({
         title: "Resume Optimized",
@@ -182,5 +201,22 @@ const Index = () => {
     </div>
   );
 };
+
+// Helper functions for score calculation (same as in OptimizedResumeDisplay.tsx)
+function calculateKeywordScore(resume: string, jobDescription: string): number {
+  // ... existing implementation
+}
+
+function calculateStructureScore(resume: string): number {
+  // ... existing implementation
+}
+
+function calculateATSScore(resume: string): number {
+  // ... existing implementation
+}
+
+function generateSuggestions(keywordScore: number, structureScore: number, atsScore: number, resume: string, jobDescription: string): string[] {
+  // ... existing implementation
+}
 
 export default Index;

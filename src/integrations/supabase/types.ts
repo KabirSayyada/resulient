@@ -54,6 +54,51 @@ export type Database = {
         }
         Relationships: []
       }
+      resume_optimizations: {
+        Row: {
+          ats_score: number | null
+          created_at: string
+          id: string
+          job_description: string
+          keyword_score: number | null
+          optimized_resume: string
+          original_resume: string
+          overall_score: number | null
+          qualification_gaps: Json | null
+          structure_score: number | null
+          suggestions: string[] | null
+          user_id: string
+        }
+        Insert: {
+          ats_score?: number | null
+          created_at?: string
+          id?: string
+          job_description: string
+          keyword_score?: number | null
+          optimized_resume: string
+          original_resume: string
+          overall_score?: number | null
+          qualification_gaps?: Json | null
+          structure_score?: number | null
+          suggestions?: string[] | null
+          user_id: string
+        }
+        Update: {
+          ats_score?: number | null
+          created_at?: string
+          id?: string
+          job_description?: string
+          keyword_score?: number | null
+          optimized_resume?: string
+          original_resume?: string
+          overall_score?: number | null
+          qualification_gaps?: Json | null
+          structure_score?: number | null
+          suggestions?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       resume_scores: {
         Row: {
           ats_readiness: number
