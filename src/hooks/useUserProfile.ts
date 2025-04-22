@@ -28,12 +28,15 @@ export function useUserProfile(userId?: string) {
         // Handle backwards compatibility, username used for "First Last"
         let firstName = "";
         let lastName = "";
-        if (data.username?.includes(" ")) {
-          [firstName, ...lastName] = data.username.split(" ");
-          lastName = lastName.join(" ");
+        
+        if (data.username && typeof data.username === 'string' && data.username.includes(" ")) {
+          const nameParts = data.username.split(" ");
+          firstName = nameParts[0] || "";
+          lastName = nameParts.slice(1).join(" "); // Join remaining parts as last name
         } else {
           firstName = data.username || "";
         }
+        
         setProfile({
           id: data.id,
           first_name: firstName,
