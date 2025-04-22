@@ -1,6 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreData } from "@/types/resume";
-import { Star, Medal, BookOpen, Trophy, TrendingUp, BarChart } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { Star, Medal, BookOpen, Trophy, TrendingUp, BarChart, Image } from "lucide-react";
 import { ScoreMetric } from "./components/ScoreMetric";
 import { ResumeWarnings } from "./components/ResumeWarnings";
 import { ScoreHeader } from "./components/ScoreHeader";
@@ -10,6 +12,9 @@ interface ResumeScoreCardProps {
 }
 
 export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
+  const { user } = useAuth();
+  const { profile } = useUserProfile(user?.id);
+
   const normalizeScore = (score: number, weight: number) => {
     return Math.min(100, Math.max(0, (score / weight) * 100));
   };
@@ -60,6 +65,27 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
 
   return (
     <div className="max-w-md mx-auto shadow-2xl rounded-3xl overflow-hidden bg-gradient-to-br from-white via-indigo-50 to-blue-100 p-0 border-4 border-indigo-200 relative scorecard-for-export">
+      <div className="flex flex-col items-center pt-8 pb-2 bg-gradient-to-r from-indigo-100 to-blue-100 border-b border-indigo-200 relative">
+        {profile?.avatar_url ? (
+          <img
+            src={profile.avatar_url}
+            alt="User avatar"
+            className="w-20 h-20 rounded-full object-cover border-4 border-fuchsia-300 shadow-xl mb-2"
+          />
+        ) : (
+          <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-2 border-4 border-fuchsia-100">
+            <Image className="text-indigo-300 w-10 h-10" />
+          </div>
+        )}
+        <div className="text-xl font-bold text-indigo-900 drop-shadow-sm">
+          {profile?.first_name || "Your Name"}
+        </div>
+        {profile?.avatar_url ? null : (
+          <div className="text-xs mt-2 text-fuchsia-700 font-semibold text-center max-w-[220px]">
+            Make this scorecard your own! Add a classy avatar or upload your picture for a more personal touch.
+          </div>
+        )}
+      </div>
       <ScoreHeader 
         industry={scoreData.Industry}
         percentile={getPercentileNumeric(scoreData.percentile)}

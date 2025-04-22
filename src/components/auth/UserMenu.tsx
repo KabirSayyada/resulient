@@ -1,19 +1,31 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, User2 } from "lucide-react";
+import { User2, Image } from "lucide-react";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 export function UserMenu() {
   const { user, signOut } = useAuth();
+  const { profile } = useUserProfile(user?.id);
 
   if (!user) return null;
 
   return (
     <div className="flex items-center gap-2 justify-end">
-      <User2 className="text-primary" />
-      <span className="font-medium text-gray-700">{user.email}</span>
+      {profile?.avatar_url ? (
+        <img
+          src={profile.avatar_url}
+          alt="avatar"
+          className="w-8 h-8 rounded-full object-cover border-2 border-indigo-400"
+        />
+      ) : (
+        <span className="rounded-full bg-indigo-100 flex items-center justify-center w-8 h-8">
+          <Image className="text-indigo-500" />
+        </span>
+      )}
+      <span className="font-medium text-gray-700">{profile?.first_name || user.email}</span>
       <Button variant="outline" size="sm" onClick={signOut}>
-        <LogOut className="mr-1" /> Logout
+        <User2 className="mr-1" /> Logout
       </Button>
     </div>
   );
