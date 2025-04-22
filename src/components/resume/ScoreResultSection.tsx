@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,7 +8,8 @@ import { handleDownloadReport } from "@/helpers/resumeReportDownload";
 import ResumeScoreCard from "./ResumeScoreCard";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { Facebook, Linkedin, Twitter, Download, Share, History } from "lucide-react";
+import { Facebook, Linkedin, Twitter, Download, Share, History, FilePdf } from "lucide-react";
+import { QualificationGaps } from './components/QualificationGaps';
 
 interface ScoreResultSectionProps {
   scoreData: ScoreData;
@@ -15,6 +17,7 @@ interface ScoreResultSectionProps {
 
 export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
   const scoreCardRef = useRef<HTMLDivElement | null>(null);
+  const completeReportRef = useRef<HTMLDivElement | null>(null);
 
   // Download as PDF
   const handlePDFDownload = async () => {
@@ -40,6 +43,53 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
 
     // Hide card after capture if needed (restore state)
     card.style.display = "";
+  };
+
+  // Download complete report as PDF with all the sections
+  const handleCompleteReportDownload = async () => {
+    if (!completeReportRef.current) return;
+    
+    const report = completeReportRef.current;
+    const canvas = await html2canvas(report, { 
+      scale: 2,
+      backgroundColor: '#ffffff',
+      logging: false,
+      useCORS: true,
+      allowTaint: true,
+      windowWidth: 1200,
+      windowHeight: report.scrollHeight
+    });
+    
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "pt",
+      format: "a4",
+    });
+
+    // Calculate proper scaling
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth - 40;
+    const imgHeight = (canvas.height / canvas.width) * imgWidth;
+    
+    // If the image is taller than a page, split it across multiple pages
+    let heightLeft = imgHeight;
+    let position = 20;
+    let pageNumber = 1;
+    
+    pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    
+    while (heightLeft > 0) {
+      position = position - pageHeight;
+      pageNumber++;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    
+    pdf.save(`complete-resume-analysis-${new Date().toISOString().split("T")[0]}.pdf`);
   };
 
   // Download as PNG image (for social/media shares)
@@ -100,29 +150,6 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
   // rather than a newly generated one that has "newly-generated" prefix
   const isCachedResult = scoreData.id && !scoreData.id.includes("newly-generated");
 
-  // We don't need this function anymore as we're removing the ranking display
-  // const cleanPercentile = (percentile: string): string => {
-  //   if (!percentile) return "";
-    
-  //   // First, extract just the key part (Top X%, Below Average, etc.)
-  //   let result = percentile;
-    
-  //   // Remove any duplicate "Top" prefixes
-  //   if (result.toLowerCase().startsWith("top")) {
-  //     result = "Top " + result.replace(/^(?:top\s+)+/i, "");
-  //   }
-    
-  //   // Make sure we have exactly one % at the end if needed
-  //   if (result.includes("%")) {
-  //     // Remove all % symbols first
-  //     result = result.replace(/%/g, "");
-  //     // Then add one back at the end
-  //     result = result.trim() + "%";
-  //   }
-    
-  //   return result;
-  // };
-
   return (
     <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in">
       {isCachedResult && (
@@ -139,15 +166,15 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
           onClick={handlePDFDownload}
           className="font-semibold"
         >
-          <Download className="mr-2 h-4 w-4" /> PDF
+          <Download className="mr-2 h-4 w-4" /> Scorecard
         </Button>
         <Button 
           variant="secondary" 
           size="sm" 
-          onClick={handlePNGDownload}
-          className="font-semibold"
+          onClick={handleCompleteReportDownload}
+          className="font-semibold text-fuchsia-700 bg-fuchsia-50 hover:bg-fuchsia-100"
         >
-          <Share className="mr-2 h-4 w-4" /> PNG
+          <FilePdf className="mr-2 h-4 w-4" /> Complete Report
         </Button>
         <Button 
           variant="ghost" 
@@ -185,8 +212,47 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
           <ResumeScoreCard scoreData={scoreData} />
         </div>
       </div>
-      <CardContent>
+      <div ref={completeReportRef} className="bg-white p-6 rounded-lg mx-6 mb-6 shadow-inner">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-bold text-indigo-800 mb-2">Complete Resume Analysis Report</h1>
+          <p className="text-fuchsia-600 font-medium">Generated on {scoreData.timestamp}</p>
+          <div className="mt-4 inline-block bg-indigo-50 px-4 py-2 rounded-full text-indigo-700 font-semibold">
+            Overall Score: {scoreData.overallScore}/100 • Industry: {scoreData.Industry}
+          </div>
+        </div>
+
         <ScoreBreakdown scoreData={scoreData} />
+
+        {scoreData.missingQualifications && scoreData.missingQualifications.length > 0 && (
+          <QualificationGaps qualifications={scoreData.missingQualifications} />
+        )}
+
+        <div className="mt-8 mb-6">
+          <h2 className="text-xl font-bold text-indigo-700 mb-4">Improvement Suggestions</h2>
+          <div className="bg-indigo-50 p-4 rounded-lg shadow-inner">
+            <ul className="space-y-3">
+              {scoreData.improvementTips.map((tip, index) => (
+                <li key={index} className="flex gap-2">
+                  <span className="text-indigo-500 font-bold">•</span>
+                  <span>{tip}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-8 mb-6">
+          <h2 className="text-xl font-bold text-indigo-700 mb-4">Suggested Skills</h2>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {scoreData.suggestedSkills.map((skill, index) => (
+              <span key={index} className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <CardContent>
         {scoreData.scoringMode === "resumeOnly" && (
           <div className="mt-8 text-center text-fuchsia-600 text-sm">
             <div className="font-bold mb-2">{scoreData.overallScore}/100</div>

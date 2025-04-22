@@ -8,7 +8,7 @@ import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart2, ArrowLeft, Award } from "lucide-react";
+import { BarChart2, ArrowLeft, Award, FilePdf } from "lucide-react";
 import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { supabase } from "@/integrations/supabase/client";
 import { ScoreData } from "@/types/resume";

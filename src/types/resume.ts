@@ -1,4 +1,10 @@
 
+export interface QualificationGap {
+  skill: string;
+  importance: string;
+  howToAcquire: string;
+}
+
 export interface ScoreData {
   overallScore: number;
   skillsAlignment: number;
@@ -14,6 +20,7 @@ export interface ScoreData {
   suggestedSkills: string[];
   eliteIndicatorsFound: string[];
   improvementTips: string[];
+  missingQualifications?: QualificationGap[];
   timestamp: string;
   id: string;
   scoringMode?: "resumeOnly";

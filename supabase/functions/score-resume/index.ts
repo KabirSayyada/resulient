@@ -45,7 +45,10 @@ Please use the following weighted criteria for the scoring:
 5. Certifications/Awards (10%): Industry-recognized credentials and honors relevant to the industry.
 6. Formatting/Completeness (5%): Organization, length, and clarity.
 
-Also provide specific, actionable improvement tips based on the resume's weaknesses.
+Also provide:
+1. Specific, actionable improvement tips based on the resume's weaknesses.
+2. List of skills or qualifications that appear to be missing and would significantly boost the candidate's chances.
+3. For each missing skill/qualification, provide a brief note on why it's important and how it can be acquired.
 
 Format your response ONLY as a valid JSON object with these fields:
 {
@@ -62,7 +65,14 @@ Format your response ONLY as a valid JSON object with these fields:
   "numSimilarResumes": number, 
   "suggestedSkills": string[],
   "eliteIndicatorsFound": string[],
-  "improvementTips": string[]
+  "improvementTips": string[],
+  "missingQualifications": [
+    {
+      "skill": string,
+      "importance": string,
+      "howToAcquire": string
+    }
+  ]
 }`;
 
     const response = await openai.chat.completions.create({
