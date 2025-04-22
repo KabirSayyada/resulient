@@ -1,13 +1,10 @@
-
 import { useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ScoreBreakdown } from "./ScoreBreakdown";
+import { QualificationGap, ScoreData } from "@/types/resume";
 import { QualificationWarnings } from "./components/QualificationWarnings";
-import { ResumeActions } from "./components/ResumeActions";
 import { ImprovementSuggestions } from "./components/ImprovementSuggestions";
 import { SuggestedSkills } from "./components/SuggestedSkills";
-import ResumeScoreCard from "./ResumeScoreCard";
-import { QualificationGap, ScoreData } from "@/types/resume";
+import { useLocation } from "react-router-dom";
 
 interface OptimizedResumeDisplayProps {
   optimizedResume: string;
@@ -22,8 +19,8 @@ export const OptimizedResumeDisplay = ({
   originalResume,
   qualificationGaps
 }: OptimizedResumeDisplayProps) => {
-  const scoreCardRef = useRef<HTMLDivElement | null>(null);
-  const completeReportRef = useRef<HTMLDivElement | null>(null);
+  const location = useLocation();
+  const isAtsOptimizerPage = location.pathname === "/";
 
   if (!optimizedResume) return null;
 
@@ -53,6 +50,30 @@ export const OptimizedResumeDisplay = ({
     id: "temp-" + Math.random().toString(36).substr(2, 9),
     scoringMode: "resumeOnly"
   };
+
+  if (isAtsOptimizerPage) {
+    return (
+      <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in">
+        <CardContent className="p-6">
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-lg shadow-inner">
+              <h2 className="text-xl font-bold text-indigo-700 mb-4">Optimized Resume Content</h2>
+              <div className="whitespace-pre-wrap font-mono text-sm bg-gray-50 p-4 rounded-md border border-gray-200">
+                {optimizedResume}
+              </div>
+            </div>
+
+            {qualificationGaps && qualificationGaps.length > 0 && (
+              <QualificationWarnings qualificationGaps={qualificationGaps} />
+            )}
+
+            <ImprovementSuggestions suggestions={suggestions} />
+            <SuggestedSkills skills={scoreData.suggestedSkills} />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in">
