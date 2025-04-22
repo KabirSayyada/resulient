@@ -8,7 +8,7 @@ import { handleDownloadReport } from "@/helpers/resumeReportDownload";
 import ResumeScoreCard from "./ResumeScoreCard";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { Facebook, Linkedin, Twitter, Download, Share, History, FilePdf } from "lucide-react";
+import { Facebook, Linkedin, Twitter, Download, Share, History, FileText } from "lucide-react";
 import { QualificationGaps } from './components/QualificationGaps';
 
 interface ScoreResultSectionProps {
@@ -174,7 +174,7 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
           onClick={handleCompleteReportDownload}
           className="font-semibold text-fuchsia-700 bg-fuchsia-50 hover:bg-fuchsia-100"
         >
-          <FilePdf className="mr-2 h-4 w-4" /> Complete Report
+          <FileText className="mr-2 h-4 w-4" /> Complete Report
         </Button>
         <Button 
           variant="ghost" 

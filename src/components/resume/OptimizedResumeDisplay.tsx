@@ -1,9 +1,10 @@
+
 import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileDown, Star, Award, Medal, FilePdf } from "lucide-react";
+import { FileDown, Star, Award, Medal, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -292,7 +293,7 @@ ${optimizedResume}
           onClick={handlePDFDownload}
           className="bg-indigo-600 hover:bg-indigo-700"
         >
-          <FilePdf className="mr-2 h-4 w-4" /> PDF Report
+          <FileText className="mr-2 h-4 w-4" /> PDF Report
         </Button>
       </div>
     </div>
