@@ -260,18 +260,7 @@ export const OptimizedResumeDisplay = ({
         <CardContent className="p-6">
           <div className="space-y-6" ref={optimizationReportRef}>
             <div className="bg-white p-6 rounded-lg shadow-inner">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-indigo-700">Resume Optimization Report</h2>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleOptimizationReportDownload}
-                  className="flex items-center gap-2"
-                >
-                  <FileText className="h-4 w-4" />
-                  Download Report
-                </Button>
-              </div>
+              <h2 className="text-xl font-bold text-indigo-700 mb-6">Resume Optimization Report</h2>
               <div className="whitespace-pre-wrap font-mono text-sm bg-gray-50 p-4 rounded-md border border-gray-200">
                 {optimizedResume}
               </div>
@@ -293,6 +282,21 @@ export const OptimizedResumeDisplay = ({
                         </span>
                       </div>
                       <Progress value={overallScore} className="h-2" />
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-purple-50 to-fuchsia-50 border-purple-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center">
+                          <FileText className="h-5 w-5 text-purple-600 mr-2" />
+                          <h3 className="font-semibold text-purple-900">ATS Readiness</h3>
+                        </div>
+                        <span className="text-xl font-bold text-purple-700">
+                          {atsScore}%
+                        </span>
+                      </div>
+                      <Progress value={atsScore} className="h-2" />
                     </CardContent>
                   </Card>
 
@@ -339,6 +343,17 @@ export const OptimizedResumeDisplay = ({
                 <QualificationWarnings qualificationGaps={qualificationGaps} />
               </div>
             )}
+
+            <div className="flex justify-center mt-8">
+              <Button 
+                size="lg"
+                onClick={handleOptimizationReportDownload}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transform transition hover:scale-105 flex items-center gap-3"
+              >
+                <FileText className="h-5 w-5" />
+                Download Full Report (PDF)
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
