@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -10,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useSupabaseFunction } from "@/hooks/useSupabaseFunction";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { BarChart2, Award } from "lucide-react";
+import { QualificationGap } from "@/types/resume";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -19,6 +21,7 @@ const Index = () => {
   const [jobDescription, setJobDescription] = useState("");
   const [resumeContent, setResumeContent] = useState("");
   const [optimizedResume, setOptimizedResume] = useState("");
+  const [qualificationGaps, setQualificationGaps] = useState<QualificationGap[]>([]);
   const [optimizing, setOptimizing] = useState(false);
   
   const { callFunction, loading: functionLoading, error: functionError } = useSupabaseFunction();
@@ -61,6 +64,7 @@ const Index = () => {
       }
       
       setOptimizedResume(response.optimizedResume);
+      setQualificationGaps(response.qualificationGaps || []);
       
       toast({
         title: "Resume Optimized",
@@ -170,6 +174,7 @@ const Index = () => {
               optimizedResume={optimizedResume}
               jobDescription={jobDescription}
               originalResume={resumeContent}
+              qualificationGaps={qualificationGaps}
             />
           )}
         </div>

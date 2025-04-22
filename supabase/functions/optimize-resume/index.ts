@@ -88,6 +88,7 @@ serve(async (req) => {
     }
 
     console.log('Successfully generated optimized resume and qualification gaps analysis')
+    console.log(`Found ${response.qualificationGaps.length} qualification gaps`)
 
     return new Response(
       JSON.stringify(response),
