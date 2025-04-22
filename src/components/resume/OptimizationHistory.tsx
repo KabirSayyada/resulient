@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { History } from "lucide-react";
 import { useResumeOptimizationHistory } from "@/hooks/useResumeOptimizationHistory";
-import { ScoreBreakdown } from "./ScoreBreakdown";
+import { ImprovementSuggestions } from "./components/ImprovementSuggestions";
 
 export const OptimizationHistory = ({ userId }: { userId: string | undefined }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,6 +17,12 @@ export const OptimizationHistory = ({ userId }: { userId: string | undefined }) 
       fetchOptimizationHistory();
     }
     setIsOpen(open);
+  };
+
+  // Function to truncate long text
+  const truncateText = (text: string, maxLength: number = 200) => {
+    if (!text) return "";
+    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
   };
 
   return (
@@ -43,28 +49,27 @@ export const OptimizationHistory = ({ userId }: { userId: string | undefined }) 
                     {new Date(item.created_at).toLocaleDateString()}
                   </p>
                 </CardHeader>
-                <CardContent>
-                  <ScoreBreakdown 
-                    scoreData={{
-                      overallScore: item.overall_score || 0,
-                      keywordRelevance: item.keyword_score || 0,
-                      ContentStructure: item.structure_score || 0,
-                      skillsAlignment: 0,
-                      WorkExperience: 0,
-                      Achievements: 0,
-                      EducationQuality: 0,
-                      Certifications: 0,
-                      Industry: "",
-                      percentile: "Average",
-                      numSimilarResumes: 0,
-                      suggestedSkills: [],
-                      eliteIndicatorsFound: [],
-                      improvementTips: item.suggestions || [],
-                      missingQualifications: item.qualification_gaps || [],
-                      timestamp: item.created_at,
-                      id: item.id
-                    }}
-                  />
+                <CardContent className="space-y-4">
+                  {/* Job Description Preview */}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-700 mb-1">Job Description</h3>
+                    <div className="text-sm bg-gray-50 p-3 rounded-md">
+                      {truncateText(item.job_description)}
+                    </div>
+                  </div>
+                  
+                  {/* Optimized Resume Preview */}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-700 mb-1">Optimized Resume</h3>
+                    <div className="text-sm bg-gray-50 p-3 rounded-md">
+                      {truncateText(item.optimized_resume)}
+                    </div>
+                  </div>
+                  
+                  {/* Improvement Suggestions */}
+                  {item.suggestions && item.suggestions.length > 0 && (
+                    <ImprovementSuggestions suggestions={item.suggestions} />
+                  )}
                 </CardContent>
               </Card>
             ))}

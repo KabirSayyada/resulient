@@ -4,13 +4,17 @@ interface ImprovementSuggestionsProps {
 }
 
 export const ImprovementSuggestions = ({ suggestions }: ImprovementSuggestionsProps) => {
+  if (!suggestions || suggestions.length === 0) {
+    return null;
+  }
+  
   return (
-    <div className="mt-8 mb-6">
-      <h2 className="text-xl font-bold text-indigo-700 mb-4">Improvement Suggestions</h2>
-      <div className="bg-indigo-50 p-4 rounded-lg shadow-inner">
-        <ul className="space-y-3">
+    <div className="mt-2">
+      <h3 className="text-sm font-medium text-gray-700 mb-2">Improvement Suggestions</h3>
+      <div className="bg-indigo-50 p-3 rounded-md">
+        <ul className="space-y-2">
           {suggestions.map((tip, index) => (
-            <li key={index} className="flex gap-2">
+            <li key={index} className="flex gap-2 text-sm">
               <span className="text-indigo-500 font-bold">•</span>
               <span>{tip}</span>
             </li>
