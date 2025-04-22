@@ -1,4 +1,3 @@
-
 import { useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { QualificationGap, ScoreData } from "@/types/resume";
@@ -260,13 +259,7 @@ export const OptimizedResumeDisplay = ({
       <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in">
         <CardContent className="p-6">
           <div className="space-y-6" ref={optimizationReportRef}>
-            <div className="bg-white p-6 rounded-lg shadow-inner">
-              <h2 className="text-xl font-bold text-indigo-700 mb-6">Resume Optimization Report</h2>
-              <div className="whitespace-pre-wrap font-mono text-sm bg-gray-50 p-4 rounded-md border border-gray-200">
-                {optimizedResume}
-              </div>
-            </div>
-
+            {/* Scores and Suggestions Sections */}
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <h2 className="text-lg font-bold text-indigo-800 mb-4">Analysis</h2>
@@ -344,6 +337,14 @@ export const OptimizedResumeDisplay = ({
                 <QualificationWarnings qualificationGaps={qualificationGaps} />
               </div>
             )}
+
+            {/* Move Optimized Resume to the end */}
+            <div className="bg-white p-6 rounded-lg shadow-inner mt-6">
+              <h2 className="text-xl font-bold text-indigo-700 mb-6">Optimized Resume</h2>
+              <div className="whitespace-pre-wrap font-mono text-sm bg-gray-50 p-4 rounded-md border border-gray-200">
+                {optimizedResume}
+              </div>
+            </div>
 
             <div className="flex justify-center mt-8">
               <Button 
