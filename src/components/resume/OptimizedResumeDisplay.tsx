@@ -5,6 +5,9 @@ import { QualificationWarnings } from "./components/QualificationWarnings";
 import { ImprovementSuggestions } from "./components/ImprovementSuggestions";
 import { SuggestedSkills } from "./components/SuggestedSkills";
 import { useLocation } from "react-router-dom";
+import { ScoreBreakdown } from "./ScoreBreakdown";
+import ResumeScoreCard from "./ResumeScoreCard";
+import { ResumeActions } from "./components/ResumeActions";
 
 interface OptimizedResumeDisplayProps {
   optimizedResume: string;
@@ -21,6 +24,8 @@ export const OptimizedResumeDisplay = ({
 }: OptimizedResumeDisplayProps) => {
   const location = useLocation();
   const isAtsOptimizerPage = location.pathname === "/";
+  const scoreCardRef = useRef<HTMLDivElement | null>(null);
+  const completeReportRef = useRef<HTMLDivElement | null>(null);
 
   if (!optimizedResume) return null;
 
