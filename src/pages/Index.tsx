@@ -13,6 +13,12 @@ import { BarChart2, Award } from "lucide-react";
 import { QualificationGap } from "@/types/resume";
 import { useResumeOptimizationHistory } from "@/hooks/useResumeOptimizationHistory";
 import { OptimizationHistory } from "@/components/resume/OptimizationHistory";
+import { 
+  calculateKeywordScore, 
+  calculateStructureScore, 
+  calculateATSScore,
+  generateSuggestions 
+} from "@/utils/resumeFormatters";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -202,33 +208,6 @@ const Index = () => {
       </div>
     </div>
   );
-};
-
-const calculateKeywordScore = (resume: string, jobDescription: string): number => {
-  return Math.floor(Math.random() * 41) + 60; // Returns a number between 60 and 100
-};
-
-const calculateStructureScore = (resume: string): number => {
-  return Math.floor(Math.random() * 41) + 60; // Returns a number between 60 and 100
-};
-
-const calculateATSScore = (resume: string): number => {
-  return Math.floor(Math.random() * 41) + 60; // Returns a number between 60 and 100
-};
-
-const generateSuggestions = (
-  keywordScore: number, 
-  structureScore: number, 
-  atsScore: number, 
-  resume: string, 
-  jobDescription: string
-): string[] => {
-  return [
-    "Consider adding more relevant keywords from the job description",
-    "Try to quantify your achievements with specific metrics",
-    "Make sure your resume sections are clearly labeled",
-    "Use action verbs to start your bullet points"
-  ];
 };
 
 export default Index;

@@ -1,3 +1,4 @@
+
 import { useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { QualificationGap } from "@/types/resume";
@@ -10,6 +11,13 @@ import { AnalysisCards } from "./components/AnalysisCards";
 import { ReportHeader } from "./components/ReportHeader";
 import { OptimizedResumeContent } from "./components/OptimizedResumeContent";
 import { DownloadReportButton } from "./components/DownloadReportButton";
+import { 
+  formatResumeContent, 
+  calculateKeywordScore, 
+  calculateStructureScore, 
+  calculateATSScore,
+  generateSuggestions 
+} from "@/utils/resumeFormatters";
 
 interface OptimizedResumeDisplayProps {
   optimizedResume: string | any;
@@ -75,11 +83,11 @@ export const OptimizedResumeDisplay = ({
   if (!optimizedResume) return null;
 
   const formattedResumeContent = formatResumeContent(optimizedResume);
-  const keywordScore = calculateKeywordScore(optimizedResume, jobDescription || "");
-  const structureScore = calculateStructureScore(optimizedResume);
-  const atsScore = calculateATSScore(optimizedResume);
+  const keywordScore = calculateKeywordScore(formattedResumeContent, jobDescription || "");
+  const structureScore = calculateStructureScore(formattedResumeContent);
+  const atsScore = calculateATSScore(formattedResumeContent);
   const overallScore = Math.round((keywordScore + structureScore + atsScore) / 3);
-  const suggestions = generateSuggestions(keywordScore, structureScore, atsScore, optimizedResume, jobDescription || "");
+  const suggestions = generateSuggestions(keywordScore, structureScore, atsScore, formattedResumeContent, jobDescription || "");
   
   const currentDate = new Date();
   const formattedDate = currentDate.toLocaleDateString();
