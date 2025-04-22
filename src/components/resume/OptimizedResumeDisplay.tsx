@@ -8,6 +8,8 @@ import { useLocation } from "react-router-dom";
 import { ScoreBreakdown } from "./ScoreBreakdown";
 import ResumeScoreCard from "./ResumeScoreCard";
 import { ResumeActions } from "./components/ResumeActions";
+import { Progress } from "@/components/ui/progress";
+import { FileText, Star, CheckCircle, TrendingUp } from "lucide-react";
 
 interface OptimizedResumeDisplayProps {
   optimizedResume: string;
@@ -56,6 +58,18 @@ export const OptimizedResumeDisplay = ({
     scoringMode: "resumeOnly"
   };
 
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-green-600";
+    if (score >= 60) return "text-yellow-600";
+    return "text-red-600";
+  };
+
+  const getProgressColor = (score: number) => {
+    if (score >= 80) return "bg-green-500";
+    if (score >= 60) return "bg-yellow-500";
+    return "bg-red-500";
+  };
+
   if (isAtsOptimizerPage) {
     return (
       <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in">
@@ -68,12 +82,90 @@ export const OptimizedResumeDisplay = ({
               </div>
             </div>
 
-            {qualificationGaps && qualificationGaps.length > 0 && (
-              <QualificationWarnings qualificationGaps={qualificationGaps} />
-            )}
+            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-lg border border-indigo-100">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-indigo-800 mb-2">Resume Optimization Report</h2>
+                <p className="text-fuchsia-600 font-medium">Generated on {new Date().toLocaleString()}</p>
+                <div className="mt-4 inline-block bg-white px-6 py-3 rounded-full shadow-sm border border-indigo-100">
+                  <span className="text-2xl font-bold text-indigo-700">{overallScore}</span>
+                  <span className="text-gray-600 ml-1">/100</span>
+                </div>
+              </div>
+            </div>
 
-            <ImprovementSuggestions suggestions={suggestions} />
-            <SuggestedSkills skills={scoreData.suggestedSkills} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center">
+                      <Star className="h-5 w-5 text-blue-600 mr-2" />
+                      <h3 className="font-semibold text-blue-900">Overall Score</h3>
+                    </div>
+                    <span className={`text-xl font-bold ${getScoreColor(overallScore)}`}>
+                      {overallScore}%
+                    </span>
+                  </div>
+                  <Progress value={overallScore} className="h-2" indicatorClassName={getProgressColor(overallScore)} />
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center">
+                      <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+                      <h3 className="font-semibold text-green-900">Keyword Optimization</h3>
+                    </div>
+                    <span className={`text-xl font-bold ${getScoreColor(keywordScore)}`}>
+                      {keywordScore}%
+                    </span>
+                  </div>
+                  <Progress value={keywordScore} className="h-2" indicatorClassName={getProgressColor(keywordScore)} />
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-purple-50 to-fuchsia-50 border-purple-200">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center">
+                      <FileText className="h-5 w-5 text-purple-600 mr-2" />
+                      <h3 className="font-semibold text-purple-900">Content Structure</h3>
+                    </div>
+                    <span className={`text-xl font-bold ${getScoreColor(structureScore)}`}>
+                      {structureScore}%
+                    </span>
+                  </div>
+                  <Progress value={structureScore} className="h-2" indicatorClassName={getProgressColor(structureScore)} />
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center">
+                      <TrendingUp className="h-5 w-5 text-amber-600 mr-2" />
+                      <h3 className="font-semibold text-amber-900">ATS Readiness</h3>
+                    </div>
+                    <span className={`text-xl font-bold ${getScoreColor(atsScore)}`}>
+                      {atsScore}%
+                    </span>
+                  </div>
+                  <Progress value={atsScore} className="h-2" indicatorClassName={getProgressColor(atsScore)} />
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <ImprovementSuggestions suggestions={suggestions} />
+                <SuggestedSkills skills={scoreData.suggestedSkills} />
+              </div>
+              <div>
+                {qualificationGaps && qualificationGaps.length > 0 && (
+                  <QualificationWarnings qualificationGaps={qualificationGaps} />
+                )}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -235,7 +327,6 @@ function generateSuggestions(keywordScore: number, structureScore: number, atsSc
     ]
   };
 
-  // Add keyword-related suggestions if score is low
   if (keywordScore < 70) {
     suggestions.push(allSuggestions.keyword[Math.floor(Math.random() * allSuggestions.keyword.length)]);
     
@@ -260,18 +351,15 @@ function generateSuggestions(keywordScore: number, structureScore: number, atsSc
     }
   }
 
-  // Add structure-related suggestions if score is low
   if (structureScore < 70) {
     suggestions.push(allSuggestions.structure[Math.floor(Math.random() * allSuggestions.structure.length)]);
     suggestions.push(allSuggestions.structure[Math.floor(Math.random() * allSuggestions.structure.length)]);
   }
 
-  // Add ATS-related suggestions if score is low
   if (atsScore < 70) {
     suggestions.push(allSuggestions.ats[Math.floor(Math.random() * allSuggestions.ats.length)]);
   }
 
-  // Always add some general improvement suggestions
   const categories = ['achievements', 'formatting'];
   categories.forEach(category => {
     const randomSuggestion = allSuggestions[category][Math.floor(Math.random() * allSuggestions[category].length)];
@@ -280,7 +368,6 @@ function generateSuggestions(keywordScore: number, structureScore: number, atsSc
     }
   });
 
-  // Ensure we have at least 5 suggestions but no more than 8
   while (suggestions.length < 5) {
     const randomCategory = Object.keys(allSuggestions)[Math.floor(Math.random() * Object.keys(allSuggestions).length)];
     const randomSuggestion = allSuggestions[randomCategory][Math.floor(Math.random() * allSuggestions[randomCategory].length)];
@@ -289,7 +376,6 @@ function generateSuggestions(keywordScore: number, structureScore: number, atsSc
     }
   }
 
-  // Shuffle the suggestions array for more randomness
   return suggestions.sort(() => Math.random() - 0.5).slice(0, 8);
 }
 

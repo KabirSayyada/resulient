@@ -1,4 +1,7 @@
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Info } from "lucide-react";
+
 interface ImprovementSuggestionsProps {
   suggestions: string[];
 }
@@ -9,18 +12,26 @@ export const ImprovementSuggestions = ({ suggestions }: ImprovementSuggestionsPr
   }
   
   return (
-    <div className="mt-2">
-      <h3 className="text-sm font-medium text-gray-700 mb-2">Improvement Suggestions</h3>
-      <div className="bg-indigo-50 p-3 rounded-md">
-        <ul className="space-y-2">
+    <Card className="border-t-4 border-t-blue-500 shadow-lg">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+          <Info className="h-5 w-5 text-blue-500" />
+          Improvement Suggestions
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg space-y-3">
           {suggestions.map((tip, index) => (
-            <li key={index} className="flex gap-2 text-sm">
-              <span className="text-indigo-500 font-bold">•</span>
-              <span>{tip}</span>
-            </li>
+            <div 
+              key={index} 
+              className="flex items-start gap-3 bg-white/80 p-3 rounded-md shadow-sm border border-blue-100"
+            >
+              <span className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-blue-400" />
+              <span className="text-gray-700">{tip}</span>
+            </div>
           ))}
-        </ul>
-      </div>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
