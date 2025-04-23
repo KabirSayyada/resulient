@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -221,46 +220,27 @@ label {
   max-width: 100%;
 }
 
-/* Fix text rendering in PDF exports */
-.pdf-export-in-progress .text-fuchsia-700 {
-  word-break: break-word;
-  white-space: normal;
-  overflow: visible;
-  max-height: none;
-}
-
-/* Fix avatar/images in PDF exports */
-.pdf-export-in-progress img {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* Fix color gradients in PDF exports */
-.pdf-export-in-progress .bg-gradient-to-r,
-.pdf-export-in-progress .bg-gradient-to-br,
+/* Fix PDF export rendering issues */
+.pdf-export-in-progress .pdf-header,
 .pdf-export-in-progress .from-indigo-400,
 .pdf-export-in-progress .via-fuchsia-300,
-.pdf-export-in-progress .to-blue-300 {
-  background-color: #9b87f5 !important; /* Backup color for gradients */
-}
-
-/* Add explicit styles for purple background in the header */
-.pdf-export-in-progress .CardHeader,
-.pdf-export-in-progress header,
-.pdf-export-in-progress .from-indigo-400.via-fuchsia-300.to-blue-300 {
+.pdf-export-in-progress .to-blue-300,
+.pdf-export-in-progress .bg-gradient-to-r,
+.pdf-export-in-progress .bg-gradient-to-br,
+.pdf-export-in-progress .profile-header {
   background-color: #9b87f5 !important;
   color: #000000 !important;
 }
 
-/* Ensure avatar images are visible in PDFs */
-.pdf-export-in-progress .rounded-full,
+/* Fix avatar/images in PDF exports */
+.pdf-export-in-progress .pdf-avatar,
 .pdf-export-in-progress .avatar {
   overflow: visible !important;
 }
 
-.pdf-export-in-progress .rounded-full img,
-.pdf-export-in-progress .avatar img {
+.pdf-export-in-progress .pdf-avatar img, 
+.pdf-export-in-progress .avatar img,
+.pdf-export-in-progress .pdf-image {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -268,12 +248,14 @@ label {
   height: 100% !important;
 }
 
-/* Prevent overlapping text in PDF exports */
-.print-scorecard .text-xs,
-.print-report .text-xs,
-.print-export .text-xs {
-  line-height: 1.5;
-  margin-bottom: 0.25rem;
+/* Fix text rendering in PDF exports */
+.pdf-export-in-progress .pdf-skills-text,
+.pdf-export-in-progress .text-fuchsia-700 {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
+  overflow: visible !important;
 }
 
 @media print {
@@ -290,5 +272,22 @@ label {
     padding: 0.5in;
     box-shadow: none;
     background: white;
+  }
+  
+  /* Ensure gradients print properly */
+  .bg-gradient-to-r,
+  .bg-gradient-to-br,
+  .from-indigo-400,
+  .via-fuchsia-300,
+  .to-blue-300 {
+    background-color: #9b87f5 !important;
+    color: #000000 !important;
+  }
+  
+  /* Ensure images print properly */
+  img {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }

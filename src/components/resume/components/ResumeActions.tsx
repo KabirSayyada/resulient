@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { FileDown, FileText, Facebook, Twitter, Linkedin, FileType } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -25,39 +24,49 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
       description: "Creating a high-quality PDF of your scorecard...",
     });
     
-    // Force any images to load before processing
-    const images = Array.from(scoreCardRef.current.querySelectorAll('img'));
-    for (const img of images) {
-      if (!img.complete) {
-        img.setAttribute('crossorigin', 'anonymous');
-        await new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve;
-          // Force reload with crossOrigin
-          const src = img.src;
-          img.src = '';
-          img.src = src;
+    try {
+      // Apply temporary class to improve PDF rendering
+      document.body.classList.add('pdf-export-in-progress');
+      
+      // Force any images to load before processing 
+      const images = Array.from(scoreCardRef.current.querySelectorAll('img'));
+      for (const img of images) {
+        if (!img.complete) {
+          img.setAttribute('crossorigin', 'anonymous');
+          await new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+            // Force reload with crossOrigin
+            const src = img.src;
+            img.src = '';
+            setTimeout(() => {
+              img.src = src;
+            }, 10);
+          });
+        }
+      }
+      
+      const success = await generatePDFFromElement(
+        scoreCardRef.current,
+        `resume-scorecard-${new Date().toISOString().split("T")[0]}.pdf`,
+        true // force single page for scorecards
+      );
+      
+      if (success) {
+        toast({
+          title: "Scorecard Downloaded",
+          description: "Your scorecard has been downloaded as a PDF",
+        });
+      } else {
+        toast({
+          title: "Download Failed",
+          description: "There was an error downloading your scorecard",
+          variant: "destructive",
         });
       }
-    }
-    
-    const success = await generatePDFFromElement(
-      scoreCardRef.current,
-      `resume-scorecard-${new Date().toISOString().split("T")[0]}.pdf`,
-      true // force single page for scorecards
-    );
-    
-    if (success) {
-      toast({
-        title: "Scorecard Downloaded",
-        description: "Your scorecard has been downloaded as a PDF",
-      });
-    } else {
-      toast({
-        title: "Download Failed",
-        description: "There was an error downloading your scorecard",
-        variant: "destructive",
-      });
+    } finally {
+      // Remove temporary class
+      document.body.classList.remove('pdf-export-in-progress');
     }
   };
 

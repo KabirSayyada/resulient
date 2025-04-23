@@ -71,15 +71,15 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
 
   return (
     <div className="w-full max-w-md mx-auto shadow-2xl rounded-3xl overflow-hidden bg-gradient-to-br from-white via-indigo-50 to-blue-100 p-0 border-4 border-indigo-200 relative scorecard-for-export">
-      <div className="flex flex-col items-center pt-8 pb-2 bg-gradient-to-r from-indigo-100 to-blue-100 border-b border-indigo-200 relative"
+      <div className="profile-header flex flex-col items-center pt-8 pb-2 bg-gradient-to-r from-indigo-100 to-blue-100 border-b border-indigo-200 relative"
            style={{ backgroundColor: '#9b87f5' }}>
         {shouldShowAvatar && profile?.avatar_url ? (
-          <Avatar className="w-20 h-20 relative border-4 border-fuchsia-300 shadow-xl mb-2">
+          <Avatar className="pdf-avatar w-20 h-20 relative border-4 border-fuchsia-300 shadow-xl mb-2">
             <AvatarImage 
               src={profile.avatar_url} 
               alt="User avatar" 
-              className="object-cover"
-              crossOrigin="anonymous" 
+              className="object-cover pdf-image"
+              crossOrigin="anonymous"
             />
             <AvatarFallback className="bg-indigo-50 text-indigo-300">
               <Image className="w-10 h-10" />
@@ -170,7 +170,7 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
 
         <div className="my-4 text-indigo-800 text-center w-full">
           <div className="font-semibold text-sm mb-1">Suggested Skills to Add:</div>
-          <div className="text-xs font-bold text-fuchsia-700 mb-1 px-2 w-full"
+          <div className="text-xs font-bold text-fuchsia-700 mb-1 px-2 w-full pdf-skills-text"
                style={{ whiteSpace: 'normal', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
             {scoreData.suggestedSkills && scoreData.suggestedSkills.length > 0 
               ? scoreData.suggestedSkills.join(", ") 

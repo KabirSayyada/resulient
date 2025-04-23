@@ -28,7 +28,7 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
 
   return (
     <CardHeader 
-      className="flex flex-col items-center justify-center gap-2 bg-gradient-to-r from-indigo-400 via-fuchsia-300 to-blue-300 py-6 animate-fade-in"
+      className="pdf-header flex flex-col items-center justify-center gap-2 bg-gradient-to-r from-indigo-400 via-fuchsia-300 to-blue-300 py-6 animate-fade-in"
       style={{ backgroundColor: '#9b87f5' }} // More prominent backup color for PDF export
     >
       <Award className="text-yellow-400 w-12 h-12 drop-shadow-lg mb-1" />
