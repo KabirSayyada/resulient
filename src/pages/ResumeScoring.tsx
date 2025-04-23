@@ -8,11 +8,12 @@ import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart2, ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft, FileText } from "lucide-react";
 import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { supabase } from "@/integrations/supabase/client";
 import { ScoreData } from "@/types/resume";
 import { Button } from "@/components/ui/button";
+import { MainNavigation } from "@/components/resume/MainNavigation";
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
@@ -135,6 +136,8 @@ const ResumeScoring = () => {
           </Link>
         </Button>
 
+        <MainNavigation />
+
         <Tabs defaultValue="current" className="mb-8" onValueChange={setActiveTab}>
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 rounded-lg shadow overflow-hidden border border-indigo-200">
             <TabsTrigger value="current">New Analysis</TabsTrigger>
@@ -166,7 +169,7 @@ const ResumeScoring = () => {
             ) : (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-10">
-                  <BarChart2 className="h-12 w-12 text-indigo-400 mb-4" />
+                  <FileText className="h-12 w-12 text-indigo-400 mb-4" />
                   <h3 className="text-lg font-medium text-indigo-900 mb-1">No Score History</h3>
                   <p className="text-indigo-600 text-center max-w-md">
                     You haven't analyzed any resumes yet. Start by uploading your resume to get detailed, actionable feedback and colorful charts tracking your progress.

@@ -9,11 +9,10 @@ import { FileUploadSection } from "@/components/resume/FileUploadSection";
 import { OptimizedResumeDisplay } from "@/components/resume/OptimizedResumeDisplay";
 import { useToast } from "@/hooks/use-toast";
 import { useSupabaseFunction } from "@/hooks/useSupabaseFunction";
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
-import { BarChart2, Award } from "lucide-react";
 import { QualificationGap } from "@/types/resume";
 import { useResumeOptimizationHistory } from "@/hooks/useResumeOptimizationHistory";
 import { OptimizationHistory } from "@/components/resume/OptimizationHistory";
+import { MainNavigation } from "@/components/resume/MainNavigation";
 import { 
   calculateKeywordScore, 
   calculateStructureScore, 
@@ -144,50 +143,11 @@ const Index = () => {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>Tools</NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="grid w-[420px] gap-3 p-4">
-                      <li className="row-span-3">
-                        <Link
-                          to="/resume-scoring"
-                          className="flex h-full w-full select-none flex-col justify-end rounded-lg bg-gradient-to-b from-indigo-200 to-blue-100 p-6 no-underline outline-none focus:shadow-md border border-indigo-400 hover:border-indigo-600"
-                        >
-                          <BarChart2 className="h-7 w-7 text-indigo-600" />
-                          <div className="mb-2 mt-4 text-xl font-bold text-indigo-900">
-                            Resume Score Analysis
-                          </div>
-                          <p className="text-md leading-tight text-indigo-800">
-                            Analyze your resume before optimizing. Get a gorgeous, actionable scoring breakdown, see improvement history, and compete on the leaderboard!
-                          </p>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="/"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
-                        >
-                          <div className="flex items-center">
-                            <Award className="h-4 w-4 text-blue-500 mr-2" />
-                            <div className="text-sm font-medium leading-none">
-                              Resume Optimizer
-                            </div>
-                          </div>
-                          <p className="line-clamp-2 text-sm leading-snug text-gray-500">
-                            Optimize your resume to beat ATS systems
-                          </p>
-                        </Link>
-                      </li>
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
             <OptimizationHistory userId={user?.id} />
           </div>
         </div>
+
+        <MainNavigation />
 
         <div className="gap-6 space-y-8 animate-fade-in">
           <div className="grid md:grid-cols-2 gap-8">

@@ -1,15 +1,12 @@
 
 import React, { useRef } from 'react';
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
 import { ScoreData } from "@/types/resume";
-import { handleDownloadReport } from "@/helpers/resumeReportDownload";
 import ResumeScoreCard from "./ResumeScoreCard";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-import { Facebook, Linkedin, Twitter, Download, Share, History, FileText } from "lucide-react";
+import { History } from "lucide-react";
 import { QualificationGaps } from './components/QualificationGaps';
+import { ResumeActions } from './components/ResumeActions';
 
 interface ScoreResultSectionProps {
   scoreData: ScoreData;
@@ -19,139 +16,11 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
   const scoreCardRef = useRef<HTMLDivElement | null>(null);
   const completeReportRef = useRef<HTMLDivElement | null>(null);
 
-  // Download as PDF
-  const handlePDFDownload = async () => {
-    if (!scoreCardRef.current) return;
-    const card = scoreCardRef.current;
-
-    // Make sure the card is visible for capture
-    card.style.display = "block";
-    const canvas = await html2canvas(card, { scale: 2 });
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "pt",
-      format: "a4",
-    });
-
-    // Center image in PDF page
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const imgWidth = Math.min(400, pageWidth - 40);
-    const imgHeight = (canvas.height / canvas.width) * imgWidth;
-    pdf.addImage(imgData, "PNG", (pageWidth - imgWidth) / 2, 40, imgWidth, imgHeight);
-    pdf.save(`resume-scorecard-${new Date().toISOString().split("T")[0]}.pdf`);
-
-    // Hide card after capture if needed (restore state)
-    card.style.display = "";
-  };
-
-  // Download complete report as PDF with all the sections
-  const handleCompleteReportDownload = async () => {
-    if (!completeReportRef.current) return;
-    
-    const report = completeReportRef.current;
-    const canvas = await html2canvas(report, { 
-      scale: 2,
-      backgroundColor: '#ffffff',
-      logging: false,
-      useCORS: true,
-      allowTaint: true,
-      windowWidth: 1200,
-      windowHeight: report.scrollHeight
-    });
-    
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "pt",
-      format: "a4",
-    });
-
-    // Calculate proper scaling
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = pageWidth - 40;
-    const imgHeight = (canvas.height / canvas.width) * imgWidth;
-    
-    // If the image is taller than a page, split it across multiple pages
-    let heightLeft = imgHeight;
-    let position = 20;
-    let pageNumber = 1;
-    
-    pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    
-    while (heightLeft > 0) {
-      position = position - pageHeight;
-      pageNumber++;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-    
-    pdf.save(`complete-resume-analysis-${new Date().toISOString().split("T")[0]}.pdf`);
-  };
-
-  // Download as PNG image (for social/media shares)
-  const handlePNGDownload = async () => {
-    if (!scoreCardRef.current) return;
-    const card = scoreCardRef.current;
-    const canvas = await html2canvas(card, { scale: 2 });
-    const img = canvas.toDataURL("image/png");
-    const a = document.createElement("a");
-    a.href = img;
-    a.download = `resume-scorecard-${new Date().toISOString().split("T")[0]}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
-
-  // Helper for sharing to LinkedIn/Twitter/Facebook
-  const handleShare = async (platform: "linkedin" | "facebook" | "twitter") => {
-    if (!scoreCardRef.current) return;
-    const card = scoreCardRef.current;
-    const canvas = await html2canvas(card, { scale: 2 });
-    const img = canvas.toDataURL("image/png");
-    // Share image using Web Share API or fallback with a message
-    if ((navigator as any).canShare && (navigator as any).canShare({ files: [] })) {
-      try {
-        const blob = await (await fetch(img)).blob();
-        const file = new File([blob], "resume-scorecard.png", { type: "image/png" });
-        await (navigator as any).share({
-          files: [file],
-          title: "Check out my resume scorecard!",
-          text: "Check out my resume scorecard! How does yours compare?",
-        });
-        return;
-      } catch (e) {
-        // fallback to custom share
-      }
-    }
-    // Fallback: open social share links (cannot auto-upload image)
-    let shareUrl = "";
-    if (platform === "linkedin") {
-      shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-        window.location.origin
-      )}`;
-    } else if (platform === "twitter") {
-      shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        "Check out my resume scorecard! 🚀 How does yours compare? "
-      )}&url=${encodeURIComponent(window.location.origin)}`;
-    } else if (platform === "facebook") {
-      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-        window.location.origin
-      )}`;
-    }
-    window.open(shareUrl, "_blank");
-  };
-
   // Check if this was a cached result by examining the id
-  // If it was reused, the ID would be an existing UUID from the database
-  // rather than a newly generated one that has "newly-generated" prefix
   const isCachedResult = scoreData.id && !scoreData.id.includes("newly-generated");
 
   return (
-    <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in">
+    <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in overflow-hidden">
       {isCachedResult && (
         <div className="absolute top-0 left-0 m-4 z-10 flex gap-2 items-center">
           <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold flex items-center">
@@ -159,64 +28,30 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
           </div>
         </div>
       )}
-      <div className="absolute top-0 right-0 m-4 z-10 flex gap-2 items-center">
-        <Button 
-          variant="secondary" 
-          size="sm" 
-          onClick={handlePDFDownload}
-          className="font-semibold"
-        >
-          <Download className="mr-2 h-4 w-4" /> Scorecard
-        </Button>
-        <Button 
-          variant="secondary" 
-          size="sm" 
-          onClick={handleCompleteReportDownload}
-          className="font-semibold text-fuchsia-700 bg-fuchsia-50 hover:bg-fuchsia-100"
-        >
-          <FileText className="mr-2 h-4 w-4" /> Complete Report
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => handleShare("linkedin")}
-          aria-label="Share to LinkedIn"
-          className="hover:bg-blue-100"
-        >
-          <Linkedin className="h-5 w-5 text-[#0A66C2]" />
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => handleShare("twitter")}
-          aria-label="Share to Twitter"
-          className="hover:bg-blue-50"
-        >
-          <Twitter className="h-5 w-5 text-[#1DA1F2]" />
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => handleShare("facebook")}
-          aria-label="Share to Facebook"
-          className="hover:bg-blue-50"
-        >
-          <Facebook className="h-5 w-5 text-[#1877F3]" />
-        </Button>
-      </div>
-      <div className="flex flex-col items-center justify-center py-10">
+      
+      <div className="flex flex-col items-center justify-center py-6 px-2 sm:px-6">
         <div ref={scoreCardRef} className="fixed left-[-9999px] top-0 z-[-1] bg-white">
           <ResumeScoreCard scoreData={scoreData} />
         </div>
-        <div className="w-full flex items-center justify-center px-2">
+        
+        <div className="w-full max-w-md mx-auto">
           <ResumeScoreCard scoreData={scoreData} />
         </div>
+        
+        <ResumeActions 
+          scoreCardRef={scoreCardRef} 
+          completeReportRef={completeReportRef} 
+        />
       </div>
-      <div ref={completeReportRef} className="bg-white p-6 rounded-lg mx-6 mb-6 shadow-inner">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-indigo-800 mb-2">Complete Resume Analysis Report</h1>
+      
+      <div 
+        ref={completeReportRef} 
+        className="bg-white p-4 sm:p-6 rounded-lg mx-3 sm:mx-6 mb-6 shadow-inner overflow-x-hidden"
+      >
+        <div className="text-center mb-8 sm:mb-10">
+          <h1 className="text-2xl sm:text-3xl font-bold text-indigo-800 mb-2">Complete Resume Analysis Report</h1>
           <p className="text-fuchsia-600 font-medium">Generated on {scoreData.timestamp}</p>
-          <div className="mt-4 inline-block bg-indigo-50 px-4 py-2 rounded-full text-indigo-700 font-semibold">
+          <div className="mt-4 inline-block bg-indigo-50 px-4 py-2 rounded-full text-indigo-700 font-semibold text-sm sm:text-base">
             Overall Score: {scoreData.overallScore}/100 • Industry: {scoreData.Industry}
           </div>
         </div>
@@ -233,8 +68,8 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
             <ul className="space-y-3">
               {scoreData.improvementTips.map((tip, index) => (
                 <li key={index} className="flex gap-2">
-                  <span className="text-indigo-500 font-bold">•</span>
-                  <span>{tip}</span>
+                  <span className="text-indigo-500 font-bold flex-shrink-0">•</span>
+                  <span className="text-sm sm:text-base">{tip}</span>
                 </li>
               ))}
             </ul>
@@ -254,7 +89,7 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
       </div>
       <CardContent>
         {scoreData.scoringMode === "resumeOnly" && (
-          <div className="mt-8 text-center text-fuchsia-600 text-sm">
+          <div className="mt-4 text-center text-fuchsia-600 text-sm">
             <div className="font-bold mb-2">{scoreData.overallScore}/100</div>
             <div>{scoreData.Industry} industry</div>
           </div>

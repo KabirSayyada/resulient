@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreData } from "@/types/resume";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,6 +7,7 @@ import { Star, Medal, BookOpen, Trophy, TrendingUp, BarChart, Image } from "luci
 import { ScoreMetric } from "./components/ScoreMetric";
 import { ResumeWarnings } from "./components/ResumeWarnings";
 import { ScoreHeader } from "./components/ScoreHeader";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ResumeScoreCardProps {
   scoreData: ScoreData;
@@ -14,6 +16,7 @@ interface ResumeScoreCardProps {
 export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
   const { user } = useAuth();
   const { profile } = useUserProfile(user?.id);
+  const isMobile = useIsMobile();
 
   const normalizeScore = (score: number, weight: number) => {
     return Math.min(100, Math.max(0, (score / weight) * 100));
@@ -67,7 +70,7 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
   const shouldShowAvatar = profile?.show_avatar_on_scorecard !== false;
 
   return (
-    <div className="max-w-md mx-auto shadow-2xl rounded-3xl overflow-hidden bg-gradient-to-br from-white via-indigo-50 to-blue-100 p-0 border-4 border-indigo-200 relative scorecard-for-export">
+    <div className="w-full max-w-md mx-auto shadow-2xl rounded-3xl overflow-hidden bg-gradient-to-br from-white via-indigo-50 to-blue-100 p-0 border-4 border-indigo-200 relative scorecard-for-export">
       <div className="flex flex-col items-center pt-8 pb-2 bg-gradient-to-r from-indigo-100 to-blue-100 border-b border-indigo-200 relative">
         {shouldShowAvatar && profile?.avatar_url ? (
           <img
@@ -113,7 +116,7 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
           eliteIndicators={scoreData.eliteIndicatorsFound}
         />
 
-        <div className="grid grid-cols-2 gap-x-8 gap-y-2 w-full mt-2">
+        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-x-8 gap-y-2 w-full mt-2`}>
           <ScoreMetric
             icon={<Star className="w-4 h-4 text-yellow-500" />}
             label="Skills (25%)"
@@ -160,14 +163,14 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
 
         <div className="my-4 text-indigo-800 text-center">
           <div className="font-semibold text-sm mb-1">Suggested Skills to Add:</div>
-          <div className="text-xs font-bold text-fuchsia-700 mb-1">
+          <div className="text-xs font-bold text-fuchsia-700 mb-1 overflow-x-auto px-2 max-w-full">
             {scoreData.suggestedSkills && scoreData.suggestedSkills.length > 0 
               ? scoreData.suggestedSkills.join(", ") 
               : "No additional skills suggested"}
           </div>
         </div>
 
-        <div className="rounded-md text-xs text-gray-600 bg-indigo-50 p-2 font-medium w-full">
+        <div className="rounded-md text-xs text-gray-600 bg-indigo-50 p-2 font-medium w-full text-center">
           {scoreData.scoringMode === "resumeOnly"
             ? `Benchmarked vs. others in "${scoreData.Industry}" — ${scoreData.percentile}`
             : "Compared against your target job description"}

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,10 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { History } from "lucide-react";
 import { useResumeOptimizationHistory } from "@/hooks/useResumeOptimizationHistory";
 import { ImprovementSuggestions } from "./components/ImprovementSuggestions";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const OptimizationHistory = ({ userId }: { userId: string | undefined }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { optimizationHistory, fetchOptimizationHistory } = useResumeOptimizationHistory(userId);
+  const isMobile = useIsMobile();
 
   const handleOpen = (open: boolean) => {
     if (open) {
@@ -33,7 +35,10 @@ export const OptimizationHistory = ({ userId }: { userId: string | undefined }) 
           History
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-md md:max-w-lg lg:max-w-xl overflow-hidden p-0">
+      <SheetContent 
+        side="right" 
+        className={`${isMobile ? 'w-full' : 'w-full sm:max-w-md md:max-w-xl lg:max-w-2xl'} overflow-hidden p-0`}
+      >
         <SheetHeader className="p-6 pb-2">
           <SheetTitle>Optimization History</SheetTitle>
         </SheetHeader>
@@ -58,7 +63,7 @@ export const OptimizationHistory = ({ userId }: { userId: string | undefined }) 
                     {/* Job Description Preview */}
                     <div>
                       <h3 className="text-sm font-medium text-gray-700 mb-1">Job Description</h3>
-                      <div className="text-sm bg-gray-50 p-3 rounded-md max-h-40 overflow-y-auto">
+                      <div className="text-sm bg-gray-50 p-3 rounded-md max-h-40 overflow-y-auto break-words">
                         {item.job_description || "No job description provided"}
                       </div>
                     </div>
@@ -66,7 +71,7 @@ export const OptimizationHistory = ({ userId }: { userId: string | undefined }) 
                     {/* Optimized Resume Preview */}
                     <div>
                       <h3 className="text-sm font-medium text-gray-700 mb-1">Optimized Resume</h3>
-                      <div className="text-sm bg-gray-50 p-3 rounded-md max-h-60 overflow-y-auto">
+                      <div className="text-sm bg-gray-50 p-3 rounded-md max-h-60 overflow-y-auto break-words">
                         {item.optimized_resume || "No optimized resume available"}
                       </div>
                     </div>
