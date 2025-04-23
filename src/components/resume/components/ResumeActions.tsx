@@ -5,6 +5,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import html2canvas from "html2canvas";
 import { generatePDFFromElement, handleDownloadTextReport } from "@/utils/reportGenerationUtils";
 import { ScoreData } from "@/types/resume";
+import { exportElementAsImage } from "@/utils/imageExportUtils";
 
 interface ResumeActionsProps {
   scoreCardRef: React.RefObject<HTMLDivElement>;
@@ -124,6 +125,33 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
     }
   };
 
+  const handleImageDownload = async () => {
+    if (!scoreCardRef.current) return;
+
+    toast({
+      title: "Preparing Image",
+      description: "Rendering a high-quality image of your scorecard...",
+    });
+
+    const success = await exportElementAsImage(
+      scoreCardRef.current,
+      `resume-scorecard-${new Date().toISOString().split("T")[0]}.png`
+    );
+
+    if (success) {
+      toast({
+        title: "Scorecard Image Downloaded",
+        description: "Your scorecard has been downloaded as an image (PNG).",
+      });
+    } else {
+      toast({
+        title: "Image Download Failed",
+        description: "There was an error downloading your scorecard as an image.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleShare = async (platform: "linkedin" | "facebook" | "twitter") => {
     if (!scoreCardRef.current) return;
     
@@ -230,7 +258,15 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
           onClick={handlePDFDownload}
           className="font-semibold"
         >
-          <FileDown className="mr-2 h-4 w-4" /> Scorecard
+          <FileDown className="mr-2 h-4 w-4" /> Scorecard (PDF)
+        </Button>
+        <Button
+          variant="secondary"
+          size={isMobile ? "sm" : "default"}
+          onClick={handleImageDownload}
+          className="font-semibold text-fuchsia-700 bg-fuchsia-50 hover:bg-fuchsia-100"
+        >
+          <FileDown className="mr-2 h-4 w-4" /> Scorecard (Image)
         </Button>
         <Button 
           variant="secondary" 
