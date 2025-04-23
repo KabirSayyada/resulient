@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { FileDown, FileText, Facebook, Twitter, Linkedin, FileType } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -6,6 +7,7 @@ import html2canvas from "html2canvas";
 import { generatePDFFromElement, handleDownloadTextReport } from "@/utils/reportGenerationUtils";
 import { ScoreData } from "@/types/resume";
 import { exportElementAsImage } from "@/utils/imageExportUtils";
+import React, { useState } from "react";
 
 interface ResumeActionsProps {
   scoreCardRef: React.RefObject<HTMLDivElement>;
@@ -16,59 +18,9 @@ interface ResumeActionsProps {
 export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: ResumeActionsProps) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const [showShareMessage, setShowShareMessage] = useState(true);
 
-  const handleCompleteReportDownload = async () => {
-    if (!completeReportRef.current) return;
-
-    toast({
-      title: "Preparing Report",
-      description: "Creating a detailed PDF report...",
-    });
-
-    const images = Array.from(completeReportRef.current.querySelectorAll('img'));
-    for (const img of images) {
-      if (!img.complete) {
-        img.setAttribute('crossorigin', 'anonymous');
-        await new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve;
-          const src = img.src;
-          img.src = '';
-          img.src = src;
-        });
-      }
-    }
-
-    const success = await generatePDFFromElement(
-      completeReportRef.current,
-      `complete-resume-analysis-${new Date().toISOString().split("T")[0]}.pdf`,
-      false // multi-page for complete reports
-    );
-
-    if (success) {
-      toast({
-        title: "Report Downloaded",
-        description: "Your complete report has been downloaded as a PDF",
-      });
-    } else {
-      toast({
-        title: "Download Failed",
-        description: "There was an error downloading your report",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleTextReportDownload = () => {
-    if (scoreData) {
-      handleDownloadTextReport(scoreData);
-      toast({
-        title: "Text Report Downloaded",
-        description: "Your text report has been downloaded for better compatibility",
-      });
-    }
-  };
-
+  // Download Scorecard as Image (PNG)
   const handleImageDownload = async () => {
     if (!scoreCardRef.current) return;
 
@@ -96,6 +48,18 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
     }
   };
 
+  // Download Text Report
+  const handleTextReportDownload = () => {
+    if (scoreData) {
+      handleDownloadTextReport(scoreData);
+      toast({
+        title: "Text Report Downloaded",
+        description: "Your text report has been downloaded for better compatibility",
+      });
+    }
+  };
+
+  // Share to Social Media: Capture scorecard image and include in post/share
   const handleShare = async (platform: "linkedin" | "facebook" | "twitter") => {
     if (!scoreCardRef.current) return;
     try {
@@ -104,16 +68,14 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
         description: "Creating image for sharing...",
       });
       const card = scoreCardRef.current;
+      // Ensure all images in the card are loaded & crossOrigin set
       const images = Array.from(card.querySelectorAll('img'));
       for (const img of images) {
+        img.setAttribute('crossorigin', 'anonymous');
         if (!img.complete) {
-          img.setAttribute('crossorigin', 'anonymous');
           await new Promise((resolve) => {
             img.onload = resolve;
             img.onerror = resolve;
-            const src = img.src;
-            img.src = '';
-            img.src = src;
           });
         }
       }
@@ -123,6 +85,7 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
         allowTaint: true,
         backgroundColor: '#ffffff',
         onclone: (clonedDoc: Document) => {
+          // Force gradient backgrounds to appropriate color
           const gradientElements = clonedDoc.querySelectorAll('.bg-gradient-to-r, .bg-gradient-to-br');
           gradientElements.forEach(el => {
             (el as HTMLElement).style.backgroundColor = '#9b87f5';
@@ -141,27 +104,40 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
         }
       });
       const img = canvas.toDataURL("image/png");
+      
+      // Web Share API with file if possible
       if ((navigator as any).canShare && (navigator as any).canShare({ files: [] })) {
-        try {
-          const blob = await (await fetch(img)).blob();
-          const file = new File([blob], "resume-scorecard.png", { type: "image/png" });
-          await (navigator as any).share({
-            files: [file],
-            title: "Check out my resume scorecard!",
-            text: "Check out my resume scorecard! How does yours compare?",
-          });
-          return;
-        } catch (e) { }
+        const blob = await (await fetch(img)).blob();
+        const file = new File([blob], "resume-scorecard.png", { type: "image/png" });
+        await (navigator as any).share({
+          files: [file],
+          title: "Check out my resume scorecard!",
+          text: "Check out my resume scorecard! How does yours compare?",
+        });
+        return;
       }
 
+      // Fallback: Open social URLs with image in clipboard or instruct user to paste
       let shareUrl = "";
       if (platform === "linkedin") {
         shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}`;
       } else if (platform === "twitter") {
-        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent("Check out my resume scorecard! 🚀 How does yours compare? ")}&url=${encodeURIComponent(window.location.origin)}`;
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent("Check out my resume scorecard! 🚀 How does yours compare?")}&url=${encodeURIComponent(window.location.origin)}`;
       } else if (platform === "facebook") {
         shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin)}`;
       }
+
+      // Try to copy image to clipboard for pasting
+      if (navigator.clipboard && (window as any).ClipboardItem) {
+        const blob = await (await fetch(img)).blob();
+        const clipboardItem = new (window as any).ClipboardItem({ "image/png": blob });
+        await navigator.clipboard.write([clipboardItem]);
+        toast({
+          title: "Image Copied!",
+          description: "Your scorecard image has been copied. Paste it in your post on the social platform tab that opens.",
+        });
+      }
+
       window.open(shareUrl, "_blank");
       toast({
         title: "Sharing",
@@ -176,8 +152,24 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
     }
   };
 
+  // "Why share" encouragement message right above export/share buttons
   return (
     <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border border-indigo-100 shadow-sm">
+      {showShareMessage && (
+        <div className="mb-4 bg-fuchsia-100 border border-fuchsia-200 px-3 py-2 rounded text-sm text-fuchsia-800 flex flex-col gap-1 sm:flex-row sm:items-center justify-between">
+          <span>
+            <span className="font-medium">Why share your scorecard?</span> Sharing your scorecard on social media helps you stand out to employers, shows your commitment to personal growth, and motivates your friends to level up their resumes too!
+          </span>
+          <button
+            onClick={() => setShowShareMessage(false)}
+            className="ml-2 text-xs text-fuchsia-600 underline font-semibold"
+            aria-label="Dismiss info"
+            tabIndex={0}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
       <h3 className="text-sm font-medium text-indigo-800 mb-3">Export Options</h3>
       <div className={`flex ${isMobile ? 'flex-wrap' : ''} gap-2 items-center`}>
         <Button
@@ -188,13 +180,22 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
         >
           <FileDown className="mr-2 h-4 w-4" /> Scorecard (Image)
         </Button>
+        {/* REMOVE Scorecard PDF option */}
         <Button 
           variant="secondary" 
           size={isMobile ? "sm" : "default"}
-          onClick={handleCompleteReportDownload}
-          className="font-semibold text-fuchsia-700 bg-fuchsia-50 hover:bg-fuchsia-100"
+          onClick={() => {
+            if (completeReportRef && completeReportRef.current) {
+              toast({
+                title: "Use Image Export",
+                description: "PDF export has been disabled. Please use the Image option to export your scorecard.",
+                variant: "destructive",
+              });
+            }
+          }}
+          className="hidden"
         >
-          <FileText className="mr-2 h-4 w-4" /> Complete Report
+          <FileText className="mr-2 h-4 w-4" /> Scorecard (PDF)
         </Button>
         {scoreData && (
           <Button 

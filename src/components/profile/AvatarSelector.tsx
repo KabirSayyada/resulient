@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Only allow users to upload their own photo—no viral avatars/premade options.
+ * If a photo is not uploaded, no avatar will display.
  */
 interface AvatarSelectorProps {
   value?: string | null;
@@ -11,7 +12,7 @@ interface AvatarSelectorProps {
 }
 
 export const AvatarSelector: React.FC<AvatarSelectorProps> = ({ value, onChange }) => {
-  const [uploadUrl, setUploadUrl] = useState<string | null>(null);
+  const [uploadUrl, setUploadUrl] = useState<string | null>(value || null);
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -40,9 +41,10 @@ export const AvatarSelector: React.FC<AvatarSelectorProps> = ({ value, onChange 
         </label>
       </div>
       <div className="flex items-center gap-2">
-        {(value || uploadUrl) && (
+        {/* Only show avatar if a photo was uploaded (not a generic/fallback) */}
+        {uploadUrl && (
           <img
-            src={value || uploadUrl!}
+            src={uploadUrl}
             alt="Selected avatar"
             className="w-14 h-14 rounded-full object-cover border-2 border-indigo-500"
           />

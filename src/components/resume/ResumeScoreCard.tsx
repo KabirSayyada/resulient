@@ -66,23 +66,25 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
     }
   };
 
-  const shouldShowAvatar = !!profile?.avatar_url && profile?.show_avatar_on_scorecard !== false;
+  // Only show avatar if the profile avatar_url exists and is a valid photo (not empty string/null)
+  const shouldShowAvatar = !!profile?.avatar_url && profile?.avatar_url.length > 10; // crude check
 
   return (
     <div className="w-full max-w-md mx-auto shadow-2xl rounded-3xl overflow-hidden bg-gradient-to-br from-white via-indigo-50 to-blue-100 p-0 border-4 border-indigo-200 relative scorecard-for-export">
       <div className="profile-header flex flex-col items-center pt-8 pb-2 bg-gradient-to-r from-indigo-100 to-blue-100 border-b border-indigo-200 relative"
            style={{ backgroundColor: '#9b87f5' }}>
-        {shouldShowAvatar ? (
+        {/* Only show the avatar if the user actually uploaded one */}
+        {shouldShowAvatar && (
           <Avatar className="pdf-avatar w-20 h-20 relative border-4 border-fuchsia-300 shadow-xl mb-2">
-            <AvatarImage 
-              src={profile.avatar_url} 
-              alt="User avatar" 
+            <AvatarImage
+              src={profile.avatar_url}
+              alt="User avatar"
               className="object-cover pdf-image"
               crossOrigin="anonymous"
             />
             <AvatarFallback className="bg-indigo-50 text-indigo-300" />
           </Avatar>
-        ) : null}
+        )}
         <div className="text-xl font-bold text-indigo-900 drop-shadow-sm">
           {profile?.first_name || "Your Name"}
         </div>
