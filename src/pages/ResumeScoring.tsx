@@ -124,6 +124,19 @@ const ResumeScoring = () => {
           </div>
         </div>
 
+        {/* Info block for Resume Scoring */}
+        <div className="bg-gradient-to-br from-fuchsia-50 via-indigo-50 to-blue-50 rounded-xl border border-indigo-100 shadow-md px-4 py-5 mb-6 sm:px-7 max-w-2xl mx-auto text-center">
+          <div className="text-lg sm:text-xl font-semibold text-indigo-900 leading-snug mb-0">
+            <span className="text-fuchsia-700 font-bold">New!</span> 
+            &nbsp;Unlock insights with <span className="text-fuchsia-700 font-bold">Resulient Resume Scoring</span>
+          </div>
+          <p className="text-gray-700 text-sm mt-3 max-w-2xl mx-auto">
+            Instantly compare your resume to <span className="font-bold text-indigo-700">hundreds of thousands</span> of real career journeys. 
+            Using Artificial Intelligence, Resulient shows you exactly where you stand among your competition—so you know how to outshine other applicants.
+          </p>
+        </div>
+        {/* End info block */}
+
         <Button 
           variant="ghost" 
           size="sm" 

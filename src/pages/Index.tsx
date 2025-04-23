@@ -132,6 +132,21 @@ const Index = () => {
           <UserMenu />
         </div>
 
+        {/* NEW: About section, styled and responsive */}
+        <div className="bg-gradient-to-br from-fuchsia-50 via-indigo-50 to-yellow-50 rounded-xl border border-indigo-100 shadow-md px-4 py-5 mb-5 sm:mb-8 sm:px-6 mx-auto max-w-2xl text-center">
+          <p className="text-lg sm:text-xl font-semibold text-indigo-900 leading-snug mb-2">
+            <span className="text-fuchsia-700 font-bold">Resulient</span> is on a mission to make your resume shine&nbsp;
+            <span className="hidden sm:inline">—</span>
+            <span className="block sm:inline text-base sm:text-lg font-normal text-indigo-700">
+              We give everyone a fighting chance against unfair machines and "black box" ATS gatekeepers.
+            </span>
+          </p>
+          <p className="text-gray-600 text-sm mt-2">
+            Upload your resume and the job description — we help you stand out, get noticed, and get hired, no matter what automated system tries to stop you.
+          </p>
+        </div>
+        {/* End About section */}
+
         {/* Main functional area */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
           <div>
