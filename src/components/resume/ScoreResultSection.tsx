@@ -30,24 +30,73 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
       )}
       
       <div className="flex flex-col items-center justify-center py-6 px-2 sm:px-6">
-        <div ref={scoreCardRef} className="fixed left-[-9999px] top-0 z-[-1] bg-white">
+        {/* Hidden version for PDF export */}
+        <div ref={scoreCardRef} className="fixed left-[-9999px] top-0 z-[-1] bg-white p-4 print-scorecard">
           <ResumeScoreCard scoreData={scoreData} />
         </div>
         
+        {/* Visible version */}
         <div className="w-full max-w-md mx-auto">
           <ResumeScoreCard scoreData={scoreData} />
         </div>
-        
+      </div>
+      
+      {/* Export options section */}
+      <CardContent className="px-3 sm:px-6 pb-6">
         <ResumeActions 
           scoreCardRef={scoreCardRef} 
           completeReportRef={completeReportRef} 
+          scoreData={scoreData}
         />
-      </div>
+      </CardContent>
       
       <div 
         ref={completeReportRef} 
-        className="bg-white p-4 sm:p-6 rounded-lg mx-3 sm:mx-6 mb-6 shadow-inner overflow-x-hidden"
+        className="fixed left-[-9999px] top-0 z-[-1] bg-white p-8 rounded-lg max-w-3xl print-report"
       >
+        {/* Complete report content for PDF export */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-indigo-800 mb-2">Complete Resume Analysis Report</h1>
+          <p className="text-fuchsia-600 font-medium">Generated on {scoreData.timestamp}</p>
+          <div className="mt-4 inline-block bg-indigo-50 px-4 py-2 rounded-full text-indigo-700 font-semibold">
+            Overall Score: {scoreData.overallScore}/100 • Industry: {scoreData.Industry}
+          </div>
+        </div>
+
+        <ScoreBreakdown scoreData={scoreData} />
+
+        {scoreData.missingQualifications && scoreData.missingQualifications.length > 0 && (
+          <QualificationGaps qualifications={scoreData.missingQualifications} />
+        )}
+
+        <div className="mt-8 mb-6">
+          <h2 className="text-xl font-bold text-indigo-700 mb-4">Improvement Suggestions</h2>
+          <div className="bg-indigo-50 p-4 rounded-lg">
+            <ul className="space-y-3">
+              {scoreData.improvementTips.map((tip, index) => (
+                <li key={index} className="flex gap-2">
+                  <span className="text-indigo-500 font-bold flex-shrink-0">•</span>
+                  <span>{tip}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-8 mb-6">
+          <h2 className="text-xl font-bold text-indigo-700 mb-4">Suggested Skills</h2>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {scoreData.suggestedSkills.map((skill, index) => (
+              <span key={index} className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+      
+      {/* Visible Report Preview */}
+      <div className="bg-white p-4 sm:p-6 rounded-lg mx-3 sm:mx-6 mb-6 shadow-inner overflow-x-hidden">
         <div className="text-center mb-8 sm:mb-10">
           <h1 className="text-2xl sm:text-3xl font-bold text-indigo-800 mb-2">Complete Resume Analysis Report</h1>
           <p className="text-fuchsia-600 font-medium">Generated on {scoreData.timestamp}</p>
@@ -87,14 +136,6 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
           </div>
         </div>
       </div>
-      <CardContent>
-        {scoreData.scoringMode === "resumeOnly" && (
-          <div className="mt-4 text-center text-fuchsia-600 text-sm">
-            <div className="font-bold mb-2">{scoreData.overallScore}/100</div>
-            <div>{scoreData.Industry} industry</div>
-          </div>
-        )}
-      </CardContent>
     </Card>
   );
 };

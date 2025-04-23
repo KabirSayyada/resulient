@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -188,4 +187,60 @@ label {
 /* Ensure card content is properly padded on mobile */
 .card-mobile-padding {
   @apply p-3 sm:p-6;
+}
+
+/* Additional utility classes for PDF export */
+.print-scorecard {
+  width: 800px;
+  max-width: 800px;
+  padding: 20px;
+  background: white;
+}
+
+.print-report {
+  width: 800px;
+  max-width: 800px;
+  padding: 40px;
+  background: white;
+  font-size: 12pt;
+}
+
+.print-export {
+  width: 800px;
+  background: white;
+  font-size: 12pt;
+}
+
+/* Ensure no text overflow in PDF exports */
+.print-scorecard *,
+.print-report *,
+.print-export * {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* Prevent overlapping text in PDF exports */
+.print-scorecard .text-xs,
+.print-report .text-xs,
+.print-export .text-xs {
+  line-height: 1.5;
+  margin-bottom: 0.25rem;
+}
+
+@media print {
+  /* Custom print styles */
+  body {
+    background: white;
+  }
+  
+  .print-scorecard,
+  .print-report,
+  .print-export {
+    max-width: 100%;
+    margin: 0;
+    padding: 0.5in;
+    box-shadow: none;
+    background: white;
+  }
 }
