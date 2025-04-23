@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreData } from "@/types/resume";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +8,7 @@ import { ScoreMetric } from "./components/ScoreMetric";
 import { ResumeWarnings } from "./components/ResumeWarnings";
 import { ScoreHeader } from "./components/ScoreHeader";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface ResumeScoreCardProps {
   scoreData: ScoreData;
@@ -72,12 +74,17 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
       <div className="flex flex-col items-center pt-8 pb-2 bg-gradient-to-r from-indigo-100 to-blue-100 border-b border-indigo-200 relative"
            style={{ backgroundColor: '#9b87f5' }}>
         {shouldShowAvatar && profile?.avatar_url ? (
-          <img
-            src={profile.avatar_url}
-            alt="User avatar"
-            className="w-20 h-20 rounded-full object-cover border-4 border-fuchsia-300 shadow-xl mb-2"
-            crossOrigin="anonymous"
-          />
+          <Avatar className="w-20 h-20 relative border-4 border-fuchsia-300 shadow-xl mb-2">
+            <AvatarImage 
+              src={profile.avatar_url} 
+              alt="User avatar" 
+              className="object-cover"
+              crossOrigin="anonymous" 
+            />
+            <AvatarFallback className="bg-indigo-50 text-indigo-300">
+              <Image className="w-10 h-10" />
+            </AvatarFallback>
+          </Avatar>
         ) : (
           shouldShowAvatar ?
           <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-2 border-4 border-fuchsia-100">

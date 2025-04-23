@@ -1,3 +1,4 @@
+
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { ScoreData } from "@/types/resume";
@@ -31,28 +32,43 @@ const CANVAS_SETTINGS = {
       }
     });
     
-    // Fix any purple gradients by adding inline styles
-    const gradientElements = clonedDoc.querySelectorAll('.bg-gradient-to-r, .bg-gradient-to-br');
+    // Apply explicit background colors to elements with gradients
+    const gradientElements = clonedDoc.querySelectorAll('.bg-gradient-to-r, .bg-gradient-to-br, .from-indigo-400, .via-fuchsia-300, .to-blue-300');
     gradientElements.forEach(el => {
       (el as HTMLElement).style.backgroundColor = '#9b87f5';
     });
     
-    // Ensure scorecard header is visible
-    const headerElements = clonedDoc.querySelectorAll('.scorecard-for-export .from-indigo-400');
+    // Ensure scorecard header is visible with explicit background color
+    const headerElements = clonedDoc.querySelectorAll('.scorecard-for-export .from-indigo-400, .CardHeader, header');
     headerElements.forEach(el => {
       (el as HTMLElement).style.backgroundColor = '#9b87f5';
+      (el as HTMLElement).style.color = '#000000'; // Ensure text is visible
     });
     
-    // Ensure avatars are visible
-    const avatarImgs = clonedDoc.querySelectorAll('.scorecard-for-export img');
+    // Fix all images by applying inline crossOrigin
+    const allImages = clonedDoc.querySelectorAll('img');
+    allImages.forEach(img => {
+      // Force crossOrigin for all images to allow them to render
+      img.setAttribute('crossorigin', 'anonymous');
+      // Make sure images are visible
+      (img as HTMLElement).style.display = 'block';
+      (img as HTMLElement).style.visibility = 'visible';
+      (img as HTMLElement).style.opacity = '1';
+    });
+    
+    // Fix avatar images specifically 
+    const avatarImgs = clonedDoc.querySelectorAll('.rounded-full img, .avatar img');
     avatarImgs.forEach(img => {
-      const imgEl = img as HTMLImageElement;
-      // Force loading of image by setting crossOrigin to anonymous
-      imgEl.crossOrigin = "anonymous";
+      // Add explicit inline styles to ensure avatar visibility
+      (img as HTMLElement).style.display = 'block';
+      (img as HTMLElement).style.visibility = 'visible';
+      (img as HTMLElement).style.width = '100%';
+      (img as HTMLElement).style.height = '100%';
+      img.setAttribute('crossorigin', 'anonymous');
     });
     
     // Fix text overflow in suggested skills section
-    const skillsText = clonedDoc.querySelectorAll('.scorecard-for-export .text-fuchsia-700.text-xs');
+    const skillsText = clonedDoc.querySelectorAll('.text-fuchsia-700.text-xs, .mb-1.px-2.w-full');
     skillsText.forEach(el => {
       (el as HTMLElement).style.whiteSpace = 'normal';
       (el as HTMLElement).style.wordBreak = 'break-word';
@@ -91,6 +107,9 @@ export async function generatePDFFromElement(
       element.style.position = 'absolute';
       element.style.left = '0';
       element.style.zIndex = '9999';
+      
+      // Add a small delay to allow images to load
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Capture the element as an image
       const canvas = await html2canvas(element, CANVAS_SETTINGS);
@@ -153,6 +172,9 @@ export async function generatePDFFromElement(
       pdf.save(filename);
       return true;
     } else {
+      // Add a small delay to allow images to load
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Capture the element as an image
       const canvas = await html2canvas(element, CANVAS_SETTINGS);
       element.classList.remove('pdf-export-in-progress');

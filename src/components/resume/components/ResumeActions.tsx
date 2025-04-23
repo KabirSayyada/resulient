@@ -25,6 +25,22 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
       description: "Creating a high-quality PDF of your scorecard...",
     });
     
+    // Force any images to load before processing
+    const images = Array.from(scoreCardRef.current.querySelectorAll('img'));
+    for (const img of images) {
+      if (!img.complete) {
+        img.setAttribute('crossorigin', 'anonymous');
+        await new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve;
+          // Force reload with crossOrigin
+          const src = img.src;
+          img.src = '';
+          img.src = src;
+        });
+      }
+    }
+    
     const success = await generatePDFFromElement(
       scoreCardRef.current,
       `resume-scorecard-${new Date().toISOString().split("T")[0]}.pdf`,
@@ -52,6 +68,22 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
       title: "Preparing Report",
       description: "Creating a detailed PDF report...",
     });
+    
+    // Force any images to load before processing
+    const images = Array.from(completeReportRef.current.querySelectorAll('img'));
+    for (const img of images) {
+      if (!img.complete) {
+        img.setAttribute('crossorigin', 'anonymous');
+        await new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve;
+          // Force reload with crossOrigin
+          const src = img.src;
+          img.src = '';
+          img.src = src;
+        });
+      }
+    }
     
     const success = await generatePDFFromElement(
       completeReportRef.current,
@@ -93,6 +125,23 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
       });
       
       const card = scoreCardRef.current;
+      
+      // Force any images to load before processing
+      const images = Array.from(card.querySelectorAll('img'));
+      for (const img of images) {
+        if (!img.complete) {
+          img.setAttribute('crossorigin', 'anonymous');
+          await new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+            // Force reload with crossOrigin
+            const src = img.src;
+            img.src = '';
+            img.src = src;
+          });
+        }
+      }
+      
       const canvas = await html2canvas(card, { 
         scale: 2,
         useCORS: true,
@@ -109,6 +158,15 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
           const headerElements = clonedDoc.querySelectorAll('.scorecard-for-export .from-indigo-400');
           headerElements.forEach(el => {
             (el as HTMLElement).style.backgroundColor = '#9b87f5';
+          });
+          
+          // Make sure images are visible
+          const allImages = clonedDoc.querySelectorAll('img');
+          allImages.forEach(img => {
+            img.setAttribute('crossorigin', 'anonymous');
+            (img as HTMLElement).style.display = 'block';
+            (img as HTMLElement).style.visibility = 'visible';
+            (img as HTMLElement).style.opacity = '1';
           });
         }
       });

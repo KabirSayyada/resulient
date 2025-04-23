@@ -233,13 +233,39 @@ label {
 .pdf-export-in-progress img {
   display: block !important;
   visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Fix color gradients in PDF exports */
 .pdf-export-in-progress .bg-gradient-to-r,
 .pdf-export-in-progress .bg-gradient-to-br,
-.pdf-export-in-progress .from-indigo-400 {
+.pdf-export-in-progress .from-indigo-400,
+.pdf-export-in-progress .via-fuchsia-300,
+.pdf-export-in-progress .to-blue-300 {
   background-color: #9b87f5 !important; /* Backup color for gradients */
+}
+
+/* Add explicit styles for purple background in the header */
+.pdf-export-in-progress .CardHeader,
+.pdf-export-in-progress header,
+.pdf-export-in-progress .from-indigo-400.via-fuchsia-300.to-blue-300 {
+  background-color: #9b87f5 !important;
+  color: #000000 !important;
+}
+
+/* Ensure avatar images are visible in PDFs */
+.pdf-export-in-progress .rounded-full,
+.pdf-export-in-progress .avatar {
+  overflow: visible !important;
+}
+
+.pdf-export-in-progress .rounded-full img,
+.pdf-export-in-progress .avatar img {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* Prevent overlapping text in PDF exports */
