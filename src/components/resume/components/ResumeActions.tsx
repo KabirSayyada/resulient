@@ -20,6 +20,11 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
   const handlePDFDownload = async () => {
     if (!scoreCardRef.current) return;
     
+    toast({
+      title: "Preparing Scorecard",
+      description: "Creating a high-quality PDF of your scorecard...",
+    });
+    
     const success = await generatePDFFromElement(
       scoreCardRef.current,
       `resume-scorecard-${new Date().toISOString().split("T")[0]}.pdf`,
@@ -42,6 +47,11 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
 
   const handleCompleteReportDownload = async () => {
     if (!completeReportRef.current) return;
+    
+    toast({
+      title: "Preparing Report",
+      description: "Creating a detailed PDF report...",
+    });
     
     const success = await generatePDFFromElement(
       completeReportRef.current,
@@ -77,8 +87,32 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
     if (!scoreCardRef.current) return;
     
     try {
+      toast({
+        title: "Preparing Scorecard",
+        description: "Creating image for sharing...",
+      });
+      
       const card = scoreCardRef.current;
-      const canvas = await html2canvas(card, { scale: 2 });
+      const canvas = await html2canvas(card, { 
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        onclone: (clonedDoc: Document) => {
+          // Fix any purple gradients by adding inline styles
+          const gradientElements = clonedDoc.querySelectorAll('.bg-gradient-to-r, .bg-gradient-to-br');
+          gradientElements.forEach(el => {
+            (el as HTMLElement).style.backgroundColor = '#9b87f5';
+          });
+          
+          // Ensure scorecard header is visible
+          const headerElements = clonedDoc.querySelectorAll('.scorecard-for-export .from-indigo-400');
+          headerElements.forEach(el => {
+            (el as HTMLElement).style.backgroundColor = '#9b87f5';
+          });
+        }
+      });
+      
       const img = canvas.toDataURL("image/png");
       
       if ((navigator as any).canShare && (navigator as any).canShare({ files: [] })) {

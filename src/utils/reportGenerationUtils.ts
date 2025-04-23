@@ -1,4 +1,3 @@
-
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { ScoreData } from "@/types/resume";
@@ -13,6 +12,54 @@ const CANVAS_SETTINGS = {
   useCORS: true,
   allowTaint: true,
   windowWidth: 1200,
+  imageTimeout: 0, // Prevent image timeout
+  onclone: (clonedDoc: Document) => {
+    // Ensure all styles are applied to the cloned document
+    const styles = Array.from(document.styleSheets);
+    styles.forEach(styleSheet => {
+      try {
+        const rules = styleSheet.cssRules;
+        if (rules) {
+          const newStyleEl = clonedDoc.createElement('style');
+          for (let i = 0; i < rules.length; i++) {
+            newStyleEl.appendChild(clonedDoc.createTextNode(rules[i].cssText));
+          }
+          clonedDoc.head.appendChild(newStyleEl);
+        }
+      } catch (e) {
+        console.log('Error applying styles to PDF clone', e);
+      }
+    });
+    
+    // Fix any purple gradients by adding inline styles
+    const gradientElements = clonedDoc.querySelectorAll('.bg-gradient-to-r, .bg-gradient-to-br');
+    gradientElements.forEach(el => {
+      (el as HTMLElement).style.backgroundColor = '#9b87f5';
+    });
+    
+    // Ensure scorecard header is visible
+    const headerElements = clonedDoc.querySelectorAll('.scorecard-for-export .from-indigo-400');
+    headerElements.forEach(el => {
+      (el as HTMLElement).style.backgroundColor = '#9b87f5';
+    });
+    
+    // Ensure avatars are visible
+    const avatarImgs = clonedDoc.querySelectorAll('.scorecard-for-export img');
+    avatarImgs.forEach(img => {
+      const imgEl = img as HTMLImageElement;
+      // Force loading of image by setting crossOrigin to anonymous
+      imgEl.crossOrigin = "anonymous";
+    });
+    
+    // Fix text overflow in suggested skills section
+    const skillsText = clonedDoc.querySelectorAll('.scorecard-for-export .text-fuchsia-700.text-xs');
+    skillsText.forEach(el => {
+      (el as HTMLElement).style.whiteSpace = 'normal';
+      (el as HTMLElement).style.wordBreak = 'break-word';
+      (el as HTMLElement).style.maxWidth = '100%';
+      (el as HTMLElement).style.overflowX = 'visible';
+    });
+  }
 };
 
 /**
@@ -23,7 +70,7 @@ export async function generatePDFFromElement(
   filename: string, 
   singlePage: boolean = false
 ) {
-  if (!element) return;
+  if (!element) return false;
   
   try {
     // Make element visible for capture if it was hidden
@@ -32,62 +79,135 @@ export async function generatePDFFromElement(
       element.style.display = 'block';
     }
     
-    // Capture the element as an image
-    const canvas = await html2canvas(element, { 
-      ...CANVAS_SETTINGS, 
-      windowHeight: element.scrollHeight
-    });
+    // Add temporary class for export to ensure proper styling
+    element.classList.add('pdf-export-in-progress');
     
-    const imgData = canvas.toDataURL("image/png", 1.0);
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "pt",
-      format: "a4",
-    });
+    // Temporarily expand offscreen elements to be visible during capture
+    if (element.classList.contains('fixed')) {
+      const originalPosition = element.style.position;
+      const originalLeft = element.style.left;
+      const originalZIndex = element.style.zIndex;
+      
+      element.style.position = 'absolute';
+      element.style.left = '0';
+      element.style.zIndex = '9999';
+      
+      // Capture the element as an image
+      const canvas = await html2canvas(element, CANVAS_SETTINGS);
+      
+      // Restore original positioning
+      element.style.position = originalPosition;
+      element.style.left = originalLeft;
+      element.style.zIndex = originalZIndex;
+      
+      element.classList.remove('pdf-export-in-progress');
+      
+      const imgData = canvas.toDataURL("image/png", 1.0);
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4",
+      });
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    
-    if (singlePage) {
-      // For scorecards - fit the entire content on one page with proper scaling
-      const imgWidth = pageWidth - 40; // margins
-      const scaleFactor = imgWidth / canvas.width;
-      const imgHeight = canvas.height * scaleFactor;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
       
-      // Center vertically if there's room
-      const yPosition = imgHeight < pageHeight - 40 
-        ? (pageHeight - imgHeight) / 2 
-        : 20;
+      if (singlePage) {
+        // For scorecards - fit the entire content on one page with proper scaling
+        const imgWidth = pageWidth - 40; // margins
+        const scaleFactor = imgWidth / canvas.width;
+        const imgHeight = canvas.height * scaleFactor;
         
-      pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
-    } else {
-      // For full reports - handle multi-page properly
-      const imgWidth = pageWidth - 40; // margins
-      const imgHeight = (canvas.height / canvas.width) * imgWidth;
-      
-      let heightLeft = imgHeight;
-      let position = 20; // initial y-position
-      
-      // First page
-      pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
-      heightLeft -= (pageHeight - 40);
-      
-      // Additional pages if needed
-      while (heightLeft > 0) {
-        position = position - pageHeight + 40; // 40px combined margin
-        pdf.addPage();
+        // Center vertically if there's room
+        const yPosition = imgHeight < pageHeight - 40 
+          ? (pageHeight - imgHeight) / 2 
+          : 20;
+          
+        pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
+      } else {
+        // For full reports - handle multi-page properly
+        const imgWidth = pageWidth - 40; // margins
+        const imgHeight = (canvas.height / canvas.width) * imgWidth;
+        
+        let heightLeft = imgHeight;
+        let position = 20; // initial y-position
+        
+        // First page
         pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
         heightLeft -= (pageHeight - 40);
+        
+        // Additional pages if needed
+        while (heightLeft > 0) {
+          position = position - pageHeight + 40; // 40px combined margin
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
+          heightLeft -= (pageHeight - 40);
+        }
       }
+      
+      // Reset display if it was changed
+      if (originalDisplay === 'none') {
+        element.style.display = originalDisplay;
+      }
+      
+      pdf.save(filename);
+      return true;
+    } else {
+      // Capture the element as an image
+      const canvas = await html2canvas(element, CANVAS_SETTINGS);
+      element.classList.remove('pdf-export-in-progress');
+      
+      const imgData = canvas.toDataURL("image/png", 1.0);
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4",
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      if (singlePage) {
+        // For scorecards - fit the entire content on one page with proper scaling
+        const imgWidth = pageWidth - 40; // margins
+        const scaleFactor = imgWidth / canvas.width;
+        const imgHeight = canvas.height * scaleFactor;
+        
+        // Center vertically if there's room
+        const yPosition = imgHeight < pageHeight - 40 
+          ? (pageHeight - imgHeight) / 2 
+          : 20;
+          
+        pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
+      } else {
+        // For full reports - handle multi-page properly
+        const imgWidth = pageWidth - 40; // margins
+        const imgHeight = (canvas.height / canvas.width) * imgWidth;
+        
+        let heightLeft = imgHeight;
+        let position = 20; // initial y-position
+        
+        // First page
+        pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
+        heightLeft -= (pageHeight - 40);
+        
+        // Additional pages if needed
+        while (heightLeft > 0) {
+          position = position - pageHeight + 40; // 40px combined margin
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
+          heightLeft -= (pageHeight - 40);
+        }
+      }
+      
+      // Reset display if it was changed
+      if (originalDisplay === 'none') {
+        element.style.display = originalDisplay;
+      }
+      
+      pdf.save(filename);
+      return true;
     }
-    
-    // Reset display if it was changed
-    if (originalDisplay === 'none') {
-      element.style.display = originalDisplay;
-    }
-    
-    pdf.save(filename);
-    return true;
   } catch (error) {
     console.error("PDF generation error:", error);
     return false;

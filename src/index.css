@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -218,6 +219,27 @@ label {
   overflow-wrap: break-word;
   word-break: break-word;
   max-width: 100%;
+}
+
+/* Fix text rendering in PDF exports */
+.pdf-export-in-progress .text-fuchsia-700 {
+  word-break: break-word;
+  white-space: normal;
+  overflow: visible;
+  max-height: none;
+}
+
+/* Fix avatar/images in PDF exports */
+.pdf-export-in-progress img {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Fix color gradients in PDF exports */
+.pdf-export-in-progress .bg-gradient-to-r,
+.pdf-export-in-progress .bg-gradient-to-br,
+.pdf-export-in-progress .from-indigo-400 {
+  background-color: #9b87f5 !important; /* Backup color for gradients */
 }
 
 /* Prevent overlapping text in PDF exports */

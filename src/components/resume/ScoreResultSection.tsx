@@ -30,8 +30,12 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
       )}
       
       <div className="flex flex-col items-center justify-center py-6 px-2 sm:px-6">
-        {/* Hidden version for PDF export */}
-        <div ref={scoreCardRef} className="fixed left-[-9999px] top-0 z-[-1] bg-white p-4 print-scorecard">
+        {/* Hidden version for PDF export with embedded styles for consistent rendering */}
+        <div 
+          ref={scoreCardRef} 
+          className="fixed left-[-9999px] top-0 z-[-1] bg-white p-4 print-scorecard"
+          style={{ overflow: 'hidden' }}
+        >
           <ResumeScoreCard scoreData={scoreData} />
         </div>
         
@@ -53,6 +57,7 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
       <div 
         ref={completeReportRef} 
         className="fixed left-[-9999px] top-0 z-[-1] bg-white p-8 rounded-lg max-w-3xl print-report"
+        style={{ overflow: 'hidden' }}
       >
         {/* Complete report content for PDF export */}
         <div className="text-center mb-8">

@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreData } from "@/types/resume";
 import { useAuth } from "@/hooks/useAuth";
@@ -66,17 +65,18 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
     }
   };
 
-  // Use "show_avatar_on_scorecard" setting, defaulting to true if undefined
   const shouldShowAvatar = profile?.show_avatar_on_scorecard !== false;
 
   return (
     <div className="w-full max-w-md mx-auto shadow-2xl rounded-3xl overflow-hidden bg-gradient-to-br from-white via-indigo-50 to-blue-100 p-0 border-4 border-indigo-200 relative scorecard-for-export">
-      <div className="flex flex-col items-center pt-8 pb-2 bg-gradient-to-r from-indigo-100 to-blue-100 border-b border-indigo-200 relative">
+      <div className="flex flex-col items-center pt-8 pb-2 bg-gradient-to-r from-indigo-100 to-blue-100 border-b border-indigo-200 relative"
+           style={{ backgroundColor: '#9b87f5' }}>
         {shouldShowAvatar && profile?.avatar_url ? (
           <img
             src={profile.avatar_url}
             alt="User avatar"
             className="w-20 h-20 rounded-full object-cover border-4 border-fuchsia-300 shadow-xl mb-2"
+            crossOrigin="anonymous"
           />
         ) : (
           shouldShowAvatar ?
@@ -161,9 +161,10 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
           />
         </div>
 
-        <div className="my-4 text-indigo-800 text-center">
+        <div className="my-4 text-indigo-800 text-center w-full">
           <div className="font-semibold text-sm mb-1">Suggested Skills to Add:</div>
-          <div className="text-xs font-bold text-fuchsia-700 mb-1 overflow-x-auto px-2 max-w-full">
+          <div className="text-xs font-bold text-fuchsia-700 mb-1 px-2 w-full"
+               style={{ whiteSpace: 'normal', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
             {scoreData.suggestedSkills && scoreData.suggestedSkills.length > 0 
               ? scoreData.suggestedSkills.join(", ") 
               : "No additional skills suggested"}
