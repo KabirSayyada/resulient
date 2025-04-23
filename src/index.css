@@ -102,6 +102,11 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Improved responsiveness */
+  html, body {
+    @apply overflow-x-hidden;
+  }
 }
 
 /* Brand font utility */
@@ -117,5 +122,37 @@ label {
 
 /* Section card for upload/input */
 .section-card {
-  @apply bg-gradient-to-tr from-yellow-50 via-indigo-50 to-fuchsia-50 border border-indigo-100 rounded-2xl shadow-lg p-6;
+  @apply bg-gradient-to-tr from-yellow-50 via-indigo-50 to-fuchsia-50 border border-indigo-100 rounded-2xl shadow-lg p-4 sm:p-6;
+}
+
+/* Responsive visibility utilities */
+.xs-only {
+  @apply sm:hidden;
+}
+
+.sm-up {
+  @apply hidden sm:block;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Improve readability on mobile screens */
+@media (max-width: 640px) {
+  .text-overflow-ellipsis {
+    @apply truncate;
+    max-width: 220px;
+  }
+  
+  .mobile-full-width {
+    width: 100%;
+    max-width: 100%;
+  }
 }

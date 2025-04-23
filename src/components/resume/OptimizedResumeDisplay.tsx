@@ -95,18 +95,18 @@ export const OptimizedResumeDisplay = ({
 
   if (isAtsOptimizerPage) {
     return (
-      <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in">
-        <CardContent className="p-6">
-          <div className="space-y-6" ref={optimizationReportRef}>
+      <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-6 sm:mt-10 animate-fade-in">
+        <CardContent className="p-4 sm:p-6">
+          <div className="space-y-4 sm:space-y-6" ref={optimizationReportRef}>
             <ReportHeader 
               date={formattedDate}
               time={formattedTime}
               overallScore={overallScore}
             />
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <h2 className="text-lg font-bold text-indigo-800 mb-4">Analysis</h2>
+                <h2 className="text-lg font-bold text-indigo-800 mb-2 sm:mb-4">Analysis</h2>
                 <AnalysisCards
                   overallScore={overallScore}
                   atsScore={atsScore}
@@ -116,13 +116,13 @@ export const OptimizedResumeDisplay = ({
               </div>
               
               <div>
-                <h2 className="text-lg font-bold text-indigo-800 mb-4">Improvement Suggestions</h2>
+                <h2 className="text-lg font-bold text-indigo-800 mb-2 sm:mb-4">Improvement Suggestions</h2>
                 <ImprovementSuggestions suggestions={suggestions} />
               </div>
             </div>
 
             {qualificationGaps && qualificationGaps.length > 0 && (
-              <div className="mt-6">
+              <div className="mt-4 sm:mt-6">
                 <QualificationWarnings qualificationGaps={qualificationGaps} />
               </div>
             )}
@@ -136,8 +136,8 @@ export const OptimizedResumeDisplay = ({
   }
 
   return (
-    <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in">
-      <CardContent>
+    <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-6 sm:mt-10 animate-fade-in">
+      <CardContent className="p-4 sm:p-6">
         <div className="text-center">
           <h2 className="text-xl font-bold text-indigo-700 mb-2">Resume Score</h2>
           <div className="font-bold text-2xl">{overallScore}/100</div>

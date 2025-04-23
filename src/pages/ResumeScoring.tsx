@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -7,12 +8,11 @@ import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart2, ArrowLeft, Award, FileText } from "lucide-react";
+import { BarChart2, ArrowLeft, FileText } from "lucide-react";
 import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { supabase } from "@/integrations/supabase/client";
 import { ScoreData } from "@/types/resume";
 import { Button } from "@/components/ui/button";
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
@@ -94,19 +94,46 @@ const ResumeScoring = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
-          <div className="flex items-center gap-4">
-            <span className="font-brand text-4xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-yellow-400 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
-              Resulient
-            </span>
-            <span className="rounded-full px-3 py-1 text-xs sm:text-sm font-semibold bg-fuchsia-100 text-fuchsia-700 shadow border border-fuchsia-200 animate-fade-in">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Link to="/" className="flex items-center">
+              <span className="font-brand text-3xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-yellow-400 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
+                Resulient
+              </span>
+            </Link>
+            <span className="rounded-full px-2 py-1 text-xs sm:text-sm font-semibold bg-fuchsia-100 text-fuchsia-700 shadow border border-fuchsia-200 animate-fade-in whitespace-nowrap">
               Resume Score Analyzer
             </span>
           </div>
-          <UserMenu />
+          <div className="flex justify-between items-center w-full sm:w-auto mt-2 sm:mt-0">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="flex items-center gap-1 sm:hidden"
+              asChild
+            >
+              <Link to="/">
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Link>
+            </Button>
+            <UserMenu />
+          </div>
         </div>
+
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="mb-4 hidden sm:flex items-center gap-1"
+          asChild
+        >
+          <Link to="/">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
 
         <Tabs defaultValue="current" className="mb-8" onValueChange={setActiveTab}>
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 rounded-lg shadow overflow-hidden border border-indigo-200">
@@ -114,9 +141,9 @@ const ResumeScoring = () => {
             <TabsTrigger value="history">Score History</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="current" className="space-y-8 mt-6">
+          <TabsContent value="current" className="space-y-6 mt-6">
             <Card className="bg-gradient-to-br from-white via-blue-50 to-indigo-100 shadow-md border-t-4 border-t-indigo-500">
-              <CardContent className="space-y-8 pt-6">
+              <CardContent className="space-y-6 pt-6">
                 <ResumeScoringForm
                   scoringMode="resumeOnly"
                   setScoringMode={() => {}}
@@ -133,7 +160,7 @@ const ResumeScoring = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="history">
+          <TabsContent value="history" className="mt-6">
             {scoreHistory.length > 0 ? (
               <ScoreHistory scores={scoreHistory} />
             ) : (
