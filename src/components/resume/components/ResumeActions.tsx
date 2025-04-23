@@ -17,69 +17,14 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  const handlePDFDownload = async () => {
-    if (!scoreCardRef.current) return;
-    
-    toast({
-      title: "Preparing Scorecard",
-      description: "Creating a high-quality PDF of your scorecard...",
-    });
-    
-    try {
-      // Apply temporary class to improve PDF rendering
-      document.body.classList.add('pdf-export-in-progress');
-      
-      // Force any images to load before processing 
-      const images = Array.from(scoreCardRef.current.querySelectorAll('img'));
-      for (const img of images) {
-        if (!img.complete) {
-          img.setAttribute('crossorigin', 'anonymous');
-          await new Promise((resolve) => {
-            img.onload = resolve;
-            img.onerror = resolve;
-            // Force reload with crossOrigin
-            const src = img.src;
-            img.src = '';
-            setTimeout(() => {
-              img.src = src;
-            }, 10);
-          });
-        }
-      }
-      
-      const success = await generatePDFFromElement(
-        scoreCardRef.current,
-        `resume-scorecard-${new Date().toISOString().split("T")[0]}.pdf`,
-        true // force single page for scorecards
-      );
-      
-      if (success) {
-        toast({
-          title: "Scorecard Downloaded",
-          description: "Your scorecard has been downloaded as a PDF",
-        });
-      } else {
-        toast({
-          title: "Download Failed",
-          description: "There was an error downloading your scorecard",
-          variant: "destructive",
-        });
-      }
-    } finally {
-      // Remove temporary class
-      document.body.classList.remove('pdf-export-in-progress');
-    }
-  };
-
   const handleCompleteReportDownload = async () => {
     if (!completeReportRef.current) return;
-    
+
     toast({
       title: "Preparing Report",
       description: "Creating a detailed PDF report...",
     });
-    
-    // Force any images to load before processing
+
     const images = Array.from(completeReportRef.current.querySelectorAll('img'));
     for (const img of images) {
       if (!img.complete) {
@@ -87,20 +32,19 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
         await new Promise((resolve) => {
           img.onload = resolve;
           img.onerror = resolve;
-          // Force reload with crossOrigin
           const src = img.src;
           img.src = '';
           img.src = src;
         });
       }
     }
-    
+
     const success = await generatePDFFromElement(
       completeReportRef.current,
       `complete-resume-analysis-${new Date().toISOString().split("T")[0]}.pdf`,
       false // multi-page for complete reports
     );
-    
+
     if (success) {
       toast({
         title: "Report Downloaded",
@@ -154,16 +98,12 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
 
   const handleShare = async (platform: "linkedin" | "facebook" | "twitter") => {
     if (!scoreCardRef.current) return;
-    
     try {
       toast({
         title: "Preparing Scorecard",
         description: "Creating image for sharing...",
       });
-      
       const card = scoreCardRef.current;
-      
-      // Force any images to load before processing
       const images = Array.from(card.querySelectorAll('img'));
       for (const img of images) {
         if (!img.complete) {
@@ -171,33 +111,26 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
           await new Promise((resolve) => {
             img.onload = resolve;
             img.onerror = resolve;
-            // Force reload with crossOrigin
             const src = img.src;
             img.src = '';
             img.src = src;
           });
         }
       }
-      
       const canvas = await html2canvas(card, { 
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
         onclone: (clonedDoc: Document) => {
-          // Fix any purple gradients by adding inline styles
           const gradientElements = clonedDoc.querySelectorAll('.bg-gradient-to-r, .bg-gradient-to-br');
           gradientElements.forEach(el => {
             (el as HTMLElement).style.backgroundColor = '#9b87f5';
           });
-          
-          // Ensure scorecard header is visible
           const headerElements = clonedDoc.querySelectorAll('.scorecard-for-export .from-indigo-400');
           headerElements.forEach(el => {
             (el as HTMLElement).style.backgroundColor = '#9b87f5';
           });
-          
-          // Make sure images are visible
           const allImages = clonedDoc.querySelectorAll('img');
           allImages.forEach(img => {
             img.setAttribute('crossorigin', 'anonymous');
@@ -207,9 +140,7 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
           });
         }
       });
-      
       const img = canvas.toDataURL("image/png");
-      
       if ((navigator as any).canShare && (navigator as any).canShare({ files: [] })) {
         try {
           const blob = await (await fetch(img)).blob();
@@ -220,11 +151,9 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
             text: "Check out my resume scorecard! How does yours compare?",
           });
           return;
-        } catch (e) {
-          // fallback to custom share
-        }
+        } catch (e) { }
       }
-      
+
       let shareUrl = "";
       if (platform === "linkedin") {
         shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}`;
@@ -234,7 +163,6 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
         shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin)}`;
       }
       window.open(shareUrl, "_blank");
-      
       toast({
         title: "Sharing",
         description: `Opening ${platform} to share your scorecard`,
@@ -252,14 +180,6 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
     <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border border-indigo-100 shadow-sm">
       <h3 className="text-sm font-medium text-indigo-800 mb-3">Export Options</h3>
       <div className={`flex ${isMobile ? 'flex-wrap' : ''} gap-2 items-center`}>
-        <Button 
-          variant="secondary" 
-          size={isMobile ? "sm" : "default"}
-          onClick={handlePDFDownload}
-          className="font-semibold"
-        >
-          <FileDown className="mr-2 h-4 w-4" /> Scorecard (PDF)
-        </Button>
         <Button
           variant="secondary"
           size={isMobile ? "sm" : "default"}

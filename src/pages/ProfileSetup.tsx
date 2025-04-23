@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -101,9 +100,9 @@ export default function ProfileSetup() {
             />
           </div>
           <div>
-            <label className="font-semibold text-gray-700 mb-1 block">Avatar (optional)</label>
+            <label className="font-semibold text-gray-700 mb-1 block">Photo (optional)</label>
             <AvatarSelector value={avatar} onChange={setAvatar} />
-            <div className="text-xs text-gray-400 mt-1">Choose a viral avatar or upload your own picture!</div>
+            <div className="text-xs text-gray-400 mt-1">Upload a photo of yourself (or leave blank if you prefer no photo).</div>
           </div>
           <div className="flex items-center gap-2">
             <input
