@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -54,7 +53,7 @@ const ResumeScoring = () => {
             if (percentile >= 30) return "Below Average";
             return "Bottom 25";
           })();
-          
+
           return {
             overallScore: item.overall_score,
             skillsAlignment: item.skills_breadth || 0,
@@ -97,66 +96,16 @@ const ResumeScoring = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between mb-8 items-center">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Link to="/">
-                <Button variant="ghost" size="icon" className="rounded-full" aria-label="Back to Resume Optimizer">
-                  <ArrowLeft className="h-5 w-5 text-indigo-700" />
-                </Button>
-              </Link>
-              <h1 className="text-4xl font-extrabold text-indigo-700 tracking-tight drop-shadow-md">
-                🚀 Resume Score Analyzer
-              </h1>
-            </div>
-            <p className="text-indigo-600 font-medium">
-              Get visually stunning insights about your resume, see your career growth and beat the competition!
-            </p>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
           <div className="flex items-center gap-4">
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>Tools</NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="grid w-[420px] gap-3 p-4">
-                      <li className="row-span-3">
-                        <Link
-                          to="/resume-scoring"
-                          className="flex h-full w-full select-none flex-col justify-end rounded-lg bg-gradient-to-b from-indigo-200 to-blue-100 p-6 no-underline outline-none focus:shadow-md border border-indigo-400 hover:border-indigo-600"
-                        >
-                          <BarChart2 className="h-7 w-7 text-indigo-600" />
-                          <div className="mb-2 mt-4 text-xl font-bold text-indigo-900">
-                            Resume Score Analysis
-                          </div>
-                          <p className="text-md leading-tight text-indigo-800">
-                            Analyze your resume before optimizing. Get a gorgeous, actionable scoring breakdown, see improvement history, and compete on the leaderboard!
-                          </p>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          to="/"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100"
-                        >
-                          <div className="flex items-center">
-                            <Award className="h-4 w-4 text-blue-500 mr-2" />
-                            <div className="text-sm font-medium leading-none">
-                              Resume Optimizer
-                            </div>
-                          </div>
-                          <p className="line-clamp-2 text-sm leading-snug text-gray-500">
-                            Optimize your resume to beat ATS systems
-                          </p>
-                        </Link>
-                      </li>
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-            <UserMenu />
+            <span className="font-brand text-4xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-yellow-400 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
+              Resulient
+            </span>
+            <span className="rounded-full px-3 py-1 text-xs sm:text-sm font-semibold bg-fuchsia-100 text-fuchsia-700 shadow border border-fuchsia-200 animate-fade-in">
+              Resume Score Analyzer
+            </span>
           </div>
+          <UserMenu />
         </div>
 
         <Tabs defaultValue="current" className="mb-8" onValueChange={setActiveTab}>

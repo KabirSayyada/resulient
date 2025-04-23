@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -192,19 +191,19 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
   };
 
   return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+    <div className="bg-gradient-to-tr from-yellow-50 via-fuchsia-50 to-indigo-50 border border-fuchsia-100 rounded-2xl shadow-lg p-6 transition-all group hover:shadow-xl">
+      <label className="block text-sm font-semibold text-fuchsia-700 mb-2 group-hover:text-indigo-600 transition-all">
         Your Resume
       </label>
       {/* PASTED resume tip */}
       <div className="mb-3">
-        <div className="text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-3 py-2 mb-0">
+        <div className="text-xs text-fuchsia-700 bg-fuchsia-50 border border-fuchsia-200 rounded px-3 py-2 mb-0">
           <span className="font-semibold">Tip:</span> If you paste your resume, add extra blank lines (press Enter twice) between sections like <b>EDUCATION</b>, <b>EXPERIENCE</b>, etc. This helps group information for best analysis.
         </div>
       </div>
       <Textarea
         placeholder="Paste your current resume content here or upload a file..."
-        className="min-h-[200px] font-mono text-sm"
+        className="min-h-[200px] font-mono text-sm bg-white/80 border border-indigo-100 rounded-lg shadow-inner focus:ring-2 focus:ring-fuchsia-300 focus:border-indigo-500 transition-all"
         value={inputMode === "uploaded" ? "" : resumeContent}
         onChange={handleTextareaChange}
         onFocus={handleTextareaFocus}
@@ -212,8 +211,8 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
       />
 
       <div className="mt-4 flex items-center gap-4 flex-wrap">
-        <label className="flex items-center px-4 py-2 bg-white text-blue-500 rounded-md shadow cursor-pointer hover:bg-gray-50 border border-gray-200">
-          <Upload className="mr-2 h-4 w-4" />
+        <label className="flex items-center px-4 py-2 bg-gradient-to-br from-indigo-100 via-fuchsia-50 to-yellow-50 text-indigo-600 rounded-md shadow cursor-pointer hover:bg-fuchsia-100 border border-fuchsia-200">
+          <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M16 16v6H8v-6m8 0a4 4 0 10-8 0m8 0V8a4 4 0 10-8 0v8"></path></svg>
           <span>Upload Resume</span>
           <input
             type="file"

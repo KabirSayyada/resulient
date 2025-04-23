@@ -1,6 +1,10 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Brand font for Resulient */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
 
 @layer base {
   :root {
@@ -98,4 +102,20 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Brand font utility */
+.font-brand {
+  font-family: 'Playfair Display', serif;
+  letter-spacing: -0.02em;
+}
+
+/* Make labels and headers extra pretty */
+label {
+  @apply font-semibold text-indigo-800;
+}
+
+/* Section card for upload/input */
+.section-card {
+  @apply bg-gradient-to-tr from-yellow-50 via-indigo-50 to-fuchsia-50 border border-indigo-100 rounded-2xl shadow-lg p-6;
 }

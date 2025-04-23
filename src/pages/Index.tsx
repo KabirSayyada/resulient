@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -24,13 +25,13 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [jobDescription, setJobDescription] = useState("");
   const [resumeContent, setResumeContent] = useState("");
   const [optimizedResume, setOptimizedResume] = useState("");
   const [qualificationGaps, setQualificationGaps] = useState<QualificationGap[]>([]);
   const [optimizing, setOptimizing] = useState(false);
-  
+
   const { callFunction, loading: functionLoading, error: functionError } = useSupabaseFunction();
   const { saveOptimization } = useResumeOptimizationHistory(user?.id);
 
@@ -60,20 +61,20 @@ const Index = () => {
     }
 
     setOptimizing(true);
-    
+
     try {
       const response = await callFunction("optimize-resume", {
         jobDescription,
         resumeContent,
       });
-      
+
       if (response?.error) {
         throw new Error(response.error);
       }
-      
+
       setOptimizedResume(response.optimizedResume);
       setQualificationGaps(response.qualificationGaps || []);
-      
+
       const keywordScore = calculateKeywordScore(response.optimizedResume, jobDescription);
       const structureScore = calculateStructureScore(response.optimizedResume);
       const atsScore = calculateATSScore(response.optimizedResume);
@@ -91,7 +92,7 @@ const Index = () => {
         atsScore,
         suggestions
       });
-      
+
       toast({
         title: "Resume Optimized",
         description: "Your resume has been successfully optimized for ATS.",
@@ -119,9 +120,23 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        {/* Brand Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
+          <div className="flex items-center gap-4">
+            <span className="font-brand text-4xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-yellow-400 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
+              Resulient
+            </span>
+            <span className="rounded-full px-3 py-1 text-xs sm:text-sm font-semibold bg-indigo-100 text-indigo-700 shadow border border-indigo-200 animate-fade-in">
+              ATS Resume Optimization
+            </span>
+          </div>
+          <UserMenu />
+        </div>
+
+        {/* Main functional area */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
               ATS Resume Optimizer
             </h1>
             <p className="text-gray-600">
@@ -171,26 +186,26 @@ const Index = () => {
               </NavigationMenuList>
             </NavigationMenu>
             <OptimizationHistory userId={user?.id} />
-            <UserMenu />
           </div>
         </div>
 
-        <div className="space-y-6">
-          <JobDescriptionInput 
-            jobDescription={jobDescription} 
-            setJobDescription={setJobDescription} 
-          />
-          
-          <FileUploadSection 
-            resumeContent={resumeContent} 
-            setResumeContent={setResumeContent} 
-          />
+        <div className="gap-6 space-y-8 animate-fade-in">
+          <div className="grid md:grid-cols-2 gap-8">
+            <JobDescriptionInput 
+              jobDescription={jobDescription} 
+              setJobDescription={setJobDescription} 
+            />
+            <FileUploadSection 
+              resumeContent={resumeContent} 
+              setResumeContent={setResumeContent} 
+            />
+          </div>
           
           <div className="flex justify-center">
             <Button 
               onClick={handleOptimizeResume} 
               disabled={optimizing || !resumeContent || !jobDescription}
-              className="px-6 py-2 text-lg"
+              className="px-7 py-3 text-lg font-bold rounded-full shadow transition-all bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500"
             >
               {optimizing ? "Optimizing..." : "Optimize Resume"}
             </Button>
