@@ -35,6 +35,8 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           id: string
+          job_title: string | null
+          show_avatar_on_scorecard: boolean
           updated_at: string
           username: string | null
         }
@@ -42,6 +44,8 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           id: string
+          job_title?: string | null
+          show_avatar_on_scorecard?: boolean
           updated_at?: string
           username?: string | null
         }
@@ -49,6 +53,8 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           id?: string
+          job_title?: string | null
+          show_avatar_on_scorecard?: boolean
           updated_at?: string
           username?: string | null
         }

@@ -8,6 +8,7 @@ export type UserProfile = {
   last_name: string;
   job_title?: string | null;
   avatar_url?: string | null;
+  show_avatar_on_scorecard?: boolean;
 };
 
 export function useUserProfile(userId?: string) {
@@ -20,28 +21,27 @@ export function useUserProfile(userId?: string) {
       setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, avatar_url")
+        .select("id, username, avatar_url, job_title, show_avatar_on_scorecard")
         .eq("id", userId)
-        .single();
+        .maybeSingle();
 
       if (data) {
-        // Handle backwards compatibility, username used for "First Last"
         let firstName = "";
         let lastName = "";
-        
         if (data.username && typeof data.username === 'string' && data.username.includes(" ")) {
           const nameParts = data.username.split(" ");
           firstName = nameParts[0] || "";
-          lastName = nameParts.slice(1).join(" "); // Join remaining parts as last name
+          lastName = nameParts.slice(1).join(" ");
         } else {
           firstName = data.username || "";
         }
-        
         setProfile({
           id: data.id,
           first_name: firstName,
           last_name: lastName,
+          job_title: data.job_title || "",
           avatar_url: data.avatar_url,
+          show_avatar_on_scorecard: data.show_avatar_on_scorecard ?? true,
         });
       }
       setLoading(false);

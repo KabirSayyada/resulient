@@ -10,6 +10,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import AuthPage from "./pages/Auth";
 import ResumeScoring from "./pages/ResumeScoring";
 import ProfileSetup from "@/pages/ProfileSetup";
+import ProfileEdit from "@/pages/ProfileEdit";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 
@@ -45,6 +46,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/profile-setup" element={<ProfileSetup />} />
+            <Route path="/profile-edit" element={<ProfileEdit />} />
             <Route
               path="/"
               element={

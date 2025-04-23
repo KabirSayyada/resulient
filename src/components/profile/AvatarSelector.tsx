@@ -2,26 +2,36 @@
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 
+// New viral avatars: animals, cartoons, minimalists, patterns etc. 
 const PREMADE_AVATARS = [
-  // These can use unsplash random user faces or fun illustrations
-  // (If you want to add more, just append the array)
   {
-    url: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?auto=format&fit=facearea&w=256&h=256",
-    label: "Kitten"
+    url: "https://api.dicebear.com/7.x/lorelei/svg?seed=unicorn",
+    label: "Unicorn"
   },
   {
-    url: "https://images.unsplash.com/photo-1501286353178-1ec881214838?auto=format&fit=facearea&w=256&h=256",
-    label: "Monkey"
+    url: "https://api.dicebear.com/7.x/bottts/svg?seed=robo-viral",
+    label: "Robo Viral"
   },
   {
-    url: "https://images.unsplash.com/photo-1485833077593-4278bba3f11f?auto=format&fit=facearea&w=256&h=256",
-    label: "Deer"
+    url: "https://api.dicebear.com/7.x/icons/svg?seed=catstar",
+    label: "Star Cat"
   },
   {
-    url: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=facearea&w=256&h=256",
-    label: "Fruit Bowl"
-  }
-  // More preset avatars can be added!
+    url: "https://api.dicebear.com/7.x/notionists/svg?seed=owlviral",
+    label: "Owl Viral"
+  },
+  {
+    url: "https://api.dicebear.com/7.x/pixel-art/svg?seed=pixelhero",
+    label: "Pixel Hero"
+  },
+  {
+    url: "https://api.dicebear.com/7.x/shapes/svg?seed=patternviral",
+    label: "Pattern Viral"
+  },
+  {
+    url: "https://api.dicebear.com/7.x/fun-emoji/svg?seed=partyhazard",
+    label: "Party Emoji"
+  },
 ];
 
 interface AvatarSelectorProps {
