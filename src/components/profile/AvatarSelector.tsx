@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Only allow users to upload their own photo—no viral avatars/premade options.
- * If a photo is not uploaded, no avatar will display.
+ * Users can only upload their own photo. No generic avatars.
+ * If no photo is uploaded, nothing will display.
  */
 interface AvatarSelectorProps {
   value?: string | null;
@@ -41,7 +41,6 @@ export const AvatarSelector: React.FC<AvatarSelectorProps> = ({ value, onChange 
         </label>
       </div>
       <div className="flex items-center gap-2">
-        {/* Only show avatar if a photo was uploaded (not a generic/fallback) */}
         {uploadUrl && (
           <img
             src={uploadUrl}

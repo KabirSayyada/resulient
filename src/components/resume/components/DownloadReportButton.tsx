@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { FileText, Download } from "lucide-react";
+import { Download } from "lucide-react";
 
 interface DownloadReportButtonProps {
   onClick: () => void;
@@ -8,7 +8,7 @@ interface DownloadReportButtonProps {
 
 export const DownloadReportButton = ({ onClick }: DownloadReportButtonProps) => {
   return (
-    <div className="flex justify-center mt-8">
+    <div className="flex justify-center mt-8 w-full">
       <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-4 rounded-lg border border-indigo-100 w-full sm:w-auto">
         <div className="text-center mb-2">
           <p className="text-sm text-gray-600">Save this report for your records or to share with others</p>

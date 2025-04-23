@@ -66,8 +66,14 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
     }
   };
 
-  // Only show avatar if the profile avatar_url exists and is a valid photo (not empty string/null)
-  const shouldShowAvatar = !!profile?.avatar_url && profile?.avatar_url.length > 10; // crude check
+  // Only show avatar if the profile avatar_url exists and is a valid user-uploaded photo
+  // (we treat long base64 or uploaded URL as valid; ignore placeholder or empty string)
+  const shouldShowAvatar =
+    !!profile?.avatar_url &&
+    typeof profile.avatar_url === "string" &&
+    profile.avatar_url.length > 10 &&
+    !profile.avatar_url.includes("placeholder") &&
+    !profile.avatar_url.endsWith(".svg");
 
   return (
     <div className="w-full max-w-md mx-auto shadow-2xl rounded-3xl overflow-hidden bg-gradient-to-br from-white via-indigo-50 to-blue-100 p-0 border-4 border-indigo-200 relative scorecard-for-export">

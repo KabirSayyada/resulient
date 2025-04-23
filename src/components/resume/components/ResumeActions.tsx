@@ -8,6 +8,7 @@ import { generatePDFFromElement, handleDownloadTextReport } from "@/utils/report
 import { ScoreData } from "@/types/resume";
 import { exportElementAsImage } from "@/utils/imageExportUtils";
 import React, { useState } from "react";
+import { DownloadReportButton } from "./DownloadReportButton"; // ADD this for “Full Report (PDF)”
 
 interface ResumeActionsProps {
   scoreCardRef: React.RefObject<HTMLDivElement>;
@@ -59,6 +60,34 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
     }
   };
 
+  // Download FULL REPORT as PDF
+  const handleFullReportDownload = async () => {
+    if (!completeReportRef.current) return;
+    toast({
+      title: "Preparing PDF",
+      description: "Exporting your complete resume analysis as a PDF. Hang tight!",
+    });
+
+    const success = await generatePDFFromElement(
+      completeReportRef.current,
+      `resume-full-report-${new Date().toISOString().split("T")[0]}.pdf`,
+      false // Multi-page PDF for full report
+    );
+
+    if (success) {
+      toast({
+        title: "Full Report PDF Downloaded",
+        description: "Your full analysis has been downloaded as PDF.",
+      });
+    } else {
+      toast({
+        title: "PDF Export Failed",
+        description: "There was an error downloading your full analysis as PDF.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Share to Social Media: Capture scorecard image and include in post/share
   const handleShare = async (platform: "linkedin" | "facebook" | "twitter") => {
     if (!scoreCardRef.current) return;
@@ -104,7 +133,7 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
         }
       });
       const img = canvas.toDataURL("image/png");
-      
+
       // Web Share API with file if possible
       if ((navigator as any).canShare && (navigator as any).canShare({ files: [] })) {
         const blob = await (await fetch(img)).blob();
@@ -152,24 +181,14 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
     }
   };
 
-  // "Why share" encouragement message right above export/share buttons
   return (
     <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border border-indigo-100 shadow-sm">
-      {showShareMessage && (
-        <div className="mb-4 bg-fuchsia-100 border border-fuchsia-200 px-3 py-2 rounded text-sm text-fuchsia-800 flex flex-col gap-1 sm:flex-row sm:items-center justify-between">
-          <span>
-            <span className="font-medium">Why share your scorecard?</span> Sharing your scorecard on social media helps you stand out to employers, shows your commitment to personal growth, and motivates your friends to level up their resumes too!
-          </span>
-          <button
-            onClick={() => setShowShareMessage(false)}
-            className="ml-2 text-xs text-fuchsia-600 underline font-semibold"
-            aria-label="Dismiss info"
-            tabIndex={0}
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
+      {/* Encouragement message for sharing, always visible above export/share buttons */}
+      <div className="mb-4 bg-fuchsia-100 border border-fuchsia-200 px-3 py-2 rounded text-sm text-fuchsia-800 flex flex-col gap-1 sm:flex-row sm:items-center justify-between">
+        <span>
+          <span className="font-medium">Why share your scorecard?</span> Sharing your scorecard on social media helps you stand out to employers, demonstrates your commitment to personal growth, and encourages your friends to level up their resumes too. Add the photo with your post to boost engagement!
+        </span>
+      </div>
       <h3 className="text-sm font-medium text-indigo-800 mb-3">Export Options</h3>
       <div className={`flex ${isMobile ? 'flex-wrap' : ''} gap-2 items-center`}>
         <Button
@@ -181,22 +200,7 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
           <FileDown className="mr-2 h-4 w-4" /> Scorecard (Image)
         </Button>
         {/* REMOVE Scorecard PDF option */}
-        <Button 
-          variant="secondary" 
-          size={isMobile ? "sm" : "default"}
-          onClick={() => {
-            if (completeReportRef && completeReportRef.current) {
-              toast({
-                title: "Use Image Export",
-                description: "PDF export has been disabled. Please use the Image option to export your scorecard.",
-                variant: "destructive",
-              });
-            }
-          }}
-          className="hidden"
-        >
-          <FileText className="mr-2 h-4 w-4" /> Scorecard (PDF)
-        </Button>
+        {/* {PDF export disabled as requested} */}
         {scoreData && (
           <Button 
             variant="outline" 
@@ -207,6 +211,7 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
             <FileType className="mr-2 h-4 w-4" /> Text Report
           </Button>
         )}
+
         <div className={`${isMobile ? 'w-full mt-2' : 'ml-auto'} flex gap-1`}>
           <span className="text-xs text-gray-500 mr-2 self-center hidden sm:inline-block">Share:</span>
           <Button 
@@ -238,6 +243,8 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
           </Button>
         </div>
       </div>
+      {/* Button for exporting full report PDF (add below all other export options) */}
+      <DownloadReportButton onClick={handleFullReportDownload} />
     </div>
   );
 };
