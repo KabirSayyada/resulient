@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { FileDown, FileText, Facebook, Twitter, Linkedin, FileType } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import html2canvas from "html2canvas";
 import { generatePDFFromElement, handleDownloadTextReport } from "@/utils/reportGenerationUtils";
 import { ScoreData } from "@/types/resume";
 
