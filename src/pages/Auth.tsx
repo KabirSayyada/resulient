@@ -1,6 +1,5 @@
-
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { Loader2 } from "lucide-react";
@@ -11,7 +10,6 @@ const AuthPage = () => {
 
   useEffect(() => {
     if (!loading && user) {
-      // If already logged in, redirect home
       navigate("/");
     }
   }, [user, loading, navigate]);
@@ -28,7 +26,6 @@ const AuthPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 px-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-100">
         <div className="mb-6 text-center">
-          {/* App name branding */}
           <span className="font-brand text-4xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-yellow-400 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none inline-block mb-2">
             Resulient
           </span>
@@ -45,6 +42,11 @@ const AuthPage = () => {
         </div>
         <AuthForm />
         <div className="mt-8 text-xs text-center text-gray-400">
+          By signing up, you agree to our{" "}
+          <Link to="/legal" className="text-primary hover:underline">
+            Terms of Service, Privacy Policy, and Refund Policy
+          </Link>
+          <br />
           &copy; {new Date().getFullYear()} ATS Resume Optimizer
         </div>
       </div>
