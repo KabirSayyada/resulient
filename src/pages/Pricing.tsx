@@ -1,9 +1,9 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, CheckCircle, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface PricingFeature {
   text: string;
@@ -76,7 +76,6 @@ const PricingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-12">
       <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
         <div className="text-center mb-12">
           <span className="font-brand text-4xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-yellow-400 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none inline-block mb-6">
             Resulient
@@ -89,7 +88,6 @@ const PricingPage = () => {
           </p>
         </div>
 
-        {/* Value Proposition */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="bg-white rounded-xl p-6 shadow-md border border-indigo-100">
             <Star className="h-8 w-8 text-yellow-500 mb-3" />
@@ -108,7 +106,6 @@ const PricingPage = () => {
           </div>
         </div>
 
-        {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {pricingTiers.map((tier) => (
             <Card key={tier.name} className={`relative ${
@@ -172,7 +169,81 @@ const PricingPage = () => {
           ))}
         </div>
 
-        {/* FAQ Section */}
+        <div className="max-w-3xl mx-auto mt-20 mb-12">
+          <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+          <Accordion type="single" collapsible className="bg-white rounded-lg shadow-md p-6">
+            <AccordionItem value="item-1">
+              <AccordionTrigger>What happens when I reach my daily limit on the free tier?</AccordionTrigger>
+              <AccordionContent>
+                Your daily limits reset at midnight UTC. Until then, you can continue viewing your previous results and reports, but you'll need to wait for the reset to perform new scans or optimizations.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-2">
+              <AccordionTrigger>Can I switch between monthly and yearly billing?</AccordionTrigger>
+              <AccordionContent>
+                Yes! You can switch between monthly and yearly billing at any time. If you switch to yearly, you'll immediately benefit from the discounted rate. If you switch to monthly, the change will take effect at your next billing cycle.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-3">
+              <AccordionTrigger>What payment methods do you accept?</AccordionTrigger>
+              <AccordionContent>
+                We accept all major credit cards (Visa, MasterCard, American Express) and PayPal. All payments are processed securely through our payment processor.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-4">
+              <AccordionTrigger>Is there a difference in features between monthly and yearly subscriptions?</AccordionTrigger>
+              <AccordionContent>
+                No, you get exactly the same features whether you choose monthly or yearly billing. The only difference is that yearly subscribers enjoy significant savings on their subscription cost.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-5">
+              <AccordionTrigger>Can I cancel my subscription at any time?</AccordionTrigger>
+              <AccordionContent>
+                Yes, you can cancel your subscription at any time. Your access will continue until the end of your current billing period. We don't offer refunds for partial months, but you can check our refund policy for more details.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-6">
+              <AccordionTrigger>What happens to my saved reports if I downgrade to the free tier?</AccordionTrigger>
+              <AccordionContent>
+                Your previously generated reports remain accessible, but download capabilities will be limited to free tier restrictions. We recommend downloading any important reports before downgrading.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-7">
+              <AccordionTrigger>Do you offer refunds if I'm not satisfied?</AccordionTrigger>
+              <AccordionContent>
+                Yes, we offer a satisfaction guarantee. If you're not happy with our service, you can request a refund within 14 days of your subscription purchase. Please refer to our refund policy for detailed information.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-8">
+              <AccordionTrigger>Can I share my account with others?</AccordionTrigger>
+              <AccordionContent>
+                No, accounts are for individual use only. Each user should have their own account to maintain the quality of service and ensure proper tracking of usage limits.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-9">
+              <AccordionTrigger>How do I get started with the free tier?</AccordionTrigger>
+              <AccordionContent>
+                Simply sign up for an account - no credit card required! You'll immediately have access to all free tier features, including daily resume scorings and optimizations.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-10">
+              <AccordionTrigger>What support options are available?</AccordionTrigger>
+              <AccordionContent>
+                Free tier users receive basic email support. Premium and Platinum subscribers enjoy priority support with faster response times and access to advanced troubleshooting assistance.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold mb-4">Still not convinced?</h2>
           <p className="text-gray-600 mb-6">
