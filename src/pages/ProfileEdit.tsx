@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AvatarSelector } from "@/components/profile/AvatarSelector";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 const ProfileEdit = () => {
   const { user } = useAuth();
@@ -139,6 +139,13 @@ const ProfileEdit = () => {
             {submitting ? "Saving..." : "Update Profile"}
           </Button>
         </form>
+        <div className="mt-6 text-xs text-center text-gray-400">
+          <Link to="/terms-of-service" className="text-primary hover:underline">Terms</Link>
+          {" · "}
+          <Link to="/privacy-policy" className="text-primary hover:underline">Privacy</Link>
+          {" · "}
+          <Link to="/refund-policy" className="text-primary hover:underline">Refunds</Link>
+        </div>
       </div>
     </div>
   );

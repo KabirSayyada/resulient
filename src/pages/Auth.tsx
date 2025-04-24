@@ -43,11 +43,19 @@ const AuthPage = () => {
         <AuthForm />
         <div className="mt-8 text-xs text-center text-gray-400">
           By signing up, you agree to our{" "}
-          <Link to="/legal" className="text-primary hover:underline">
-            Terms of Service, Privacy Policy, and Refund Policy
+          <Link to="/terms-of-service" className="text-primary hover:underline">
+            Terms of Service
+          </Link>
+          ,{" "}
+          <Link to="/privacy-policy" className="text-primary hover:underline">
+            Privacy Policy
+          </Link>
+          , and{" "}
+          <Link to="/refund-policy" className="text-primary hover:underline">
+            Refund Policy
           </Link>
           <br />
-          &copy; {new Date().getFullYear()} ATS Resume Optimizer
+          &copy; {new Date().getFullYear()} Resulient
         </div>
       </div>
     </div>
