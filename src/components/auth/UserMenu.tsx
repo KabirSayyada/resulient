@@ -10,10 +10,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 export const UserMenu = () => {
   const { user, signOut } = useAuth();
+  const { profile } = useUserProfile(user?.id);
 
   const initials = user?.email?.substring(0, 2).toUpperCase() || "??";
 
@@ -22,7 +24,11 @@ export const UserMenu = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarFallback>{initials}</AvatarFallback>
+            {profile?.avatar_url ? (
+              <AvatarImage src={profile.avatar_url} alt="Profile picture" />
+            ) : (
+              <AvatarFallback>{initials}</AvatarFallback>
+            )}
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -31,7 +37,7 @@ export const UserMenu = () => {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">Account</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user?.email}
+              {profile?.first_name || user?.email}
             </p>
           </div>
         </DropdownMenuLabel>
