@@ -1,14 +1,19 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
 
 User-agent: *
 Allow: /
+
+# Sitemaps
+Sitemap: https://resulient.ai/sitemap.xml
+
+# Prevent crawling of authentication pages
+Disallow: /auth
+Disallow: /profile-edit
+Disallow: /profile-setup
+
+# Allow crawling of main pages
+Allow: /
+Allow: /pricing
+Allow: /resume-scoring
+Allow: /terms-of-service
+Allow: /privacy-policy
+Allow: /refund-policy
