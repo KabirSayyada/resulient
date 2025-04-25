@@ -1,38 +1,51 @@
 
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { User2, Image, Pencil } from "lucide-react";
-import { useUserProfile } from "@/hooks/useUserProfile";
 import { Link } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-export function UserMenu() {
+export const UserMenu = () => {
   const { user, signOut } = useAuth();
-  const { profile } = useUserProfile(user?.id);
 
-  if (!user) return null;
+  const initials = user?.email?.substring(0, 2).toUpperCase() || "??";
 
   return (
-    <div className="flex items-center gap-2 justify-end">
-      {profile?.avatar_url ? (
-        <img
-          src={profile.avatar_url}
-          alt="avatar"
-          className="w-8 h-8 rounded-full object-cover border-2 border-indigo-400"
-        />
-      ) : (
-        <span className="rounded-full bg-indigo-100 flex items-center justify-center w-8 h-8">
-          <Image className="text-indigo-500" />
-        </span>
-      )}
-      <span className="font-medium text-gray-700">{profile?.first_name || user.email}</span>
-      <Link to="/profile-edit">
-        <Button variant="ghost" size="sm" className="px-2 py-1" title="Edit Profile">
-          <Pencil className="w-4 h-4 mr-1" /> Edit
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
         </Button>
-      </Link>
-      <Button variant="outline" size="sm" onClick={signOut}>
-        <User2 className="mr-1" /> Logout
-      </Button>
-    </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">Account</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {user?.email}
+            </p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/profile-edit">Profile Settings</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/pricing">Pricing</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={signOut}>
+          Log out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
-}
+};
