@@ -1,11 +1,10 @@
-
-import { ScaleType } from 'html2canvas';
+import html2canvas from 'html2canvas';
 
 /**
  * Consistent settings for all canvas capture operations
  */
 export const CANVAS_SETTINGS = {
-  scale: 2 as ScaleType,
+  scale: 2 as const,
   backgroundColor: '#ffffff',
   logging: false,
   useCORS: true,
@@ -103,4 +102,3 @@ export const SECURE_PDF_SETTINGS = {
   },
   maxPdfLength: 100 * 1024 * 1024 // 100MB limit
 };
-
