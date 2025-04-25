@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -19,6 +18,7 @@ import {
   calculateATSScore,
   generateSuggestions 
 } from "@/utils/resumeFormatters";
+import { LegalFooter } from "@/components/layout/LegalFooter";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -195,6 +195,9 @@ const Index = () => {
             />
           )}
         </div>
+      </div>
+      <div className="mt-8">
+        <LegalFooter />
       </div>
     </div>
   );

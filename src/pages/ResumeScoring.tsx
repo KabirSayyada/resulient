@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -14,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ScoreData } from "@/types/resume";
 import { Button } from "@/components/ui/button";
 import { MainNavigation } from "@/components/resume/MainNavigation";
+import { LegalFooter } from "@/components/layout/LegalFooter";
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
@@ -42,7 +42,6 @@ const ResumeScoring = () => {
 
       if (data) {
         const formattedHistory: ScoreData[] = data.map((item) => {
-          // Format percentile without prefixes/suffixes
           const percentileString = (() => {
             const percentile = item.percentile || 50;
             if (percentile >= 99) return "1";
@@ -192,6 +191,9 @@ const ResumeScoring = () => {
             )}
           </TabsContent>
         </Tabs>
+      </div>
+      <div className="mt-8">
+        <LegalFooter />
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Check, CheckCircle, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { LegalFooter } from "@/components/layout/LegalFooter";
 
 interface PricingFeature {
   text: string;
@@ -253,6 +254,10 @@ const PricingPage = () => {
           <Button asChild variant="outline">
             <Link to="/auth">Start Your Journey</Link>
           </Button>
+        </div>
+
+        <div className="mt-16">
+          <LegalFooter />
         </div>
       </div>
     </div>
