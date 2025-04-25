@@ -19,19 +19,6 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
   const [inputMode, setInputMode] = useState<"pasted" | "uploaded" | "idle">("idle");
   const { toast } = useToast();
 
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit
-  const ALLOWED_FILE_TYPES = ['application/pdf', 'text/plain'];
-  const MAX_TEXT_LENGTH = 50000; // 50k characters
-
-  const sanitizeText = (text: string): string => {
-    // Remove potentially harmful characters and limit length
-    return text
-      .slice(0, MAX_TEXT_LENGTH)
-      .replace(/[<>]/g, '') // Remove HTML tags
-      .replace(/^\s+|\s+$/g, '') // Trim whitespace
-      .replace(/[^\x20-\x7E\n\r\t]/g, ''); // Only allow printable ASCII
-  };
-
   const extractTextFromPdf = async (file: File) => {
     try {
       setUploadStatus("Extracting text from PDF...");
@@ -147,27 +134,6 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      toast({
-        title: "Error",
-        description: "File size exceeds 5MB limit",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate file type
-    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-      toast({
-        title: "Error",
-        description: "Invalid file type. Please upload PDF or TXT files only.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       setUploadStatus("Processing file...");
       let text = "";
@@ -175,16 +141,11 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
         text = await extractTextFromPdf(file);
       } else if (file.type === "text/plain") {
         text = await extractTextFromTxt(file);
+      } else {
+        throw new Error("File format not supported. Please upload a PDF or TXT file.");
       }
-      
-      // Sanitize and validate text content
-      const sanitizedText = sanitizeText(text);
-      if (sanitizedText.length > MAX_TEXT_LENGTH) {
-        throw new Error("Resume content exceeds maximum length limit");
-      }
-      
-      if (sanitizedText) {
-        setResumeContent(sanitizedText);
+      if (text) {
+        setResumeContent(text);
         setInputMode("uploaded");
         setShowUploadSuccess(true);
         setUploadStatus("");
@@ -206,21 +167,14 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
     }
   };
 
+  // Handle textarea input -- for pasted resumes
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const sanitizedText = sanitizeText(e.target.value);
-    setResumeContent(sanitizedText);
+    setResumeContent(e.target.value);
     setInputMode("pasted");
     setShowUploadSuccess(false);
-    
-    if (sanitizedText.length > MAX_TEXT_LENGTH) {
-      toast({
-        title: "Warning",
-        description: `Content exceeds ${MAX_TEXT_LENGTH} characters limit. Text will be truncated.`,
-        variant: "destructive",
-      });
-    }
   };
 
+  // If the user manually clears or changes content, reset upload state
   const handleTextareaFocus = () => {
     if (inputMode === "uploaded") {
       setInputMode("pasted");
@@ -229,6 +183,7 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
     }
   };
 
+  // Optionally, add a method to fully reset the upload state
   const resetUploadState = () => {
     setShowUploadSuccess(false);
     setInputMode("idle");
@@ -240,6 +195,7 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
       <label className="block text-sm font-semibold text-fuchsia-700 mb-2 group-hover:text-indigo-600 transition-all">
         Your Resume
       </label>
+      {/* PASTED resume tip */}
       <div className="mb-3">
         <div className="text-xs text-fuchsia-700 bg-fuchsia-50 border border-fuchsia-200 rounded px-3 py-2 mb-0">
           <span className="font-semibold">Tip:</span> If you paste your resume, add extra blank lines (press Enter twice) between sections like <b>EDUCATION</b>, <b>EXPERIENCE</b>, etc. This helps group information for best analysis.
@@ -271,6 +227,7 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
         <div className="text-xs text-gray-500 ml-1">
           Supported formats: PDF, TXT
         </div>
+        {/* Show a visual indicator if a resume was uploaded and parsed */}
         {showUploadSuccess && (
           <span className="inline-flex items-center px-3 py-1 ml-2 rounded-full bg-green-100 border border-green-300 text-green-800 text-xs font-semibold">
             <svg
