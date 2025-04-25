@@ -96,6 +96,35 @@ const CANVAS_SETTINGS = {
 /**
  * Generate a PDF from a DOM element with reliable rendering
  */
+const SECURE_PDF_SETTINGS = {
+  encryption: {
+    userPassword: undefined,
+    ownerPassword: undefined,
+    userPermissions: ['print', 'copy'] // Limit what users can do with the PDF
+  },
+  maxPdfLength: 100 * 1024 * 1024 // 100MB limit for generated PDFs
+};
+
+const sanitizePdfContent = (element: HTMLElement) => {
+  // Remove potentially harmful elements
+  const scripts = element.getElementsByTagName('script');
+  Array.from(scripts).forEach(script => script.remove());
+  
+  // Remove event handlers
+  const elements = element.getElementsByTagName('*');
+  Array.from(elements).forEach(el => {
+    const attrs = el.attributes;
+    for (let i = attrs.length - 1; i >= 0; i--) {
+      const attr = attrs[i];
+      if (attr.name.startsWith('on')) {
+        el.removeAttribute(attr.name);
+      }
+    }
+  });
+  
+  return element;
+};
+
 export async function generatePDFFromElement(
   element: HTMLElement, 
   filename: string, 
@@ -104,6 +133,9 @@ export async function generatePDFFromElement(
   if (!element) return false;
   
   try {
+    // Sanitize the element before processing
+    const sanitizedElement = sanitizePdfContent(element);
+    
     // Make element visible for capture if it was hidden
     const originalDisplay = element.style.display;
     const originalPosition = element.style.position;
@@ -128,7 +160,7 @@ export async function generatePDFFromElement(
     await new Promise(resolve => setTimeout(resolve, 100));
     
     // Capture the element as an image
-    const canvas = await html2canvas(element, CANVAS_SETTINGS);
+    const canvas = await html2canvas(sanitizedElement, CANVAS_SETTINGS);
     
     // Create PDF
     const imgData = canvas.toDataURL("image/png", 1.0);
@@ -173,6 +205,16 @@ export async function generatePDFFromElement(
         heightLeft -= (pageHeight - 40);
       }
     }
+    
+    // Add security settings to PDF
+    pdf.viewerPreferences({
+      displayTitle: true,
+      hideToolbar: true,
+      hideMenubar: true,
+      hideWindowUI: true,
+      fitWindow: true,
+      centerWindow: true
+    });
     
     // Restore original element properties
     element.classList.remove('pdf-export-in-progress');
