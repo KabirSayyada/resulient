@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { AvatarSelector } from "@/components/profile/AvatarSelector";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { LegalFooter } from "@/components/LegalFooter";
 
 export default function ProfileSetup() {
   const { user } = useAuth();
@@ -126,7 +125,6 @@ export default function ProfileSetup() {
             {submitting ? "Saving..." : "Complete Profile"}
           </Button>
         </form>
-        <LegalFooter />
       </div>
     </div>
   );
