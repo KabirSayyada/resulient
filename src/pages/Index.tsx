@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -19,6 +18,7 @@ import {
   calculateATSScore,
   generateSuggestions 
 } from "@/utils/resumeFormatters";
+import { LegalFooter } from "@/components/LegalFooter";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -117,7 +117,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col">
       <div className="max-w-4xl mx-auto">
         {/* Brand Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
@@ -195,6 +195,9 @@ const Index = () => {
             />
           )}
         </div>
+      </div>
+      <div className="mt-auto pb-6">
+        <LegalFooter />
       </div>
     </div>
   );
