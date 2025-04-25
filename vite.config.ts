@@ -1,11 +1,22 @@
 
-import { defineConfig } from "vite";
+import { defineConfig, ConfigEnv, UserConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { IncomingMessage, ServerResponse } from "http";
+
+// Define the request tracking interface
+interface RequestTracker {
+  [ip: string]: number[];
+}
+
+// Declare global namespace for request tracking
+declare global {
+  var requests: RequestTracker;
+}
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }: ConfigEnv): UserConfig => ({
   server: {
     host: "::",
     port: 8080,
@@ -20,20 +31,20 @@ export default defineConfig(({ mode }) => ({
     },
     // Rate Limiting Middleware
     middlewares: [
-      async (req, res, next) => {
+      async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
         const rateLimit = {
           windowMs: 15 * 60 * 1000, // 15 minutes
           max: 100 // limit each IP to 100 requests per windowMs
         };
         
         // Simple rate limiting implementation
-        const ip = req.socket.remoteAddress;
+        const ip = req.socket.remoteAddress || 'unknown';
         const now = Date.now();
         const windowStart = now - rateLimit.windowMs;
         
         // Clean up old requests
         global.requests = global.requests || {};
-        global.requests[ip] = (global.requests[ip] || []).filter(time => time > windowStart);
+        global.requests[ip] = (global.requests[ip] || []).filter((time: number) => time > windowStart);
         
         if (global.requests[ip].length >= rateLimit.max) {
           res.writeHead(429, { 'Content-Type': 'application/json' });
@@ -56,11 +67,13 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Input size limits
+  // Input size limits - corrected format
   optimizeDeps: {
-    entries: {
-      maxSize: '2mb' // Limit bundle size
-    }
+    // Using string array for entries instead of object with maxSize
+    entries: [
+      'src/main.tsx',
+    ],
+    // Add size limit through other means if needed
   },
   build: {
     rollupOptions: {
@@ -73,3 +86,4 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 2000, // 2MB warning limit
   }
 }));
+

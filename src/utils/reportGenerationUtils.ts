@@ -1,3 +1,4 @@
+
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { ScoreData } from "@/types/resume";
@@ -206,14 +207,14 @@ export async function generatePDFFromElement(
       }
     }
     
-    // Add security settings to PDF
+    // Add security settings to PDF - Fixed: using correct property names for jsPDF 3.0+
     pdf.viewerPreferences({
-      displayTitle: true,
-      hideToolbar: true,
-      hideMenubar: true,
-      hideWindowUI: true,
-      fitWindow: true,
-      centerWindow: true
+      DisplayDocTitle: true,
+      HideToolbar: true,
+      HideMenubar: true,
+      HideWindowUI: true,
+      FitWindow: true,
+      CenterWindow: true
     });
     
     // Restore original element properties
@@ -280,3 +281,4 @@ IMPROVEMENT TIPS:
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
