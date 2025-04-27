@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
@@ -6,6 +7,7 @@ import ResumeScoreCard from "./ResumeScoreCard";
 import { History } from "lucide-react";
 import { QualificationGaps } from './components/QualificationGaps';
 import { ResumeActions } from './components/ResumeActions';
+import { LeaderboardSection } from './components/LeaderboardSection';
 
 interface ScoreResultSectionProps {
   scoreData: ScoreData;
@@ -51,6 +53,11 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
           completeReportRef={completeReportRef} 
           scoreData={scoreData}
         />
+      </CardContent>
+      
+      {/* New Industry Leaderboard Section */}
+      <CardContent className="px-3 sm:px-6 pb-6">
+        <LeaderboardSection scoreData={scoreData} />
       </CardContent>
       
       <div 

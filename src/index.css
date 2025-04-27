@@ -1,95 +1,52 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Brand font for Resulient */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
-
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    --foreground: 224 71.4% 4.1%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 224 71.4% 4.1%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 262.1 83.3% 57.8%;
+    --radius: 0.75rem;
   }
-
+ 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 263.4 70% 50.4%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 263.4 70% 50.4%;
   }
 }
 
@@ -97,197 +54,37 @@
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
   }
+}
 
-  /* Improved responsiveness */
-  html, body {
-    @apply overflow-x-hidden;
+/* Custom animation for leaderboard highlight */
+@keyframes pulse-slow {
+  0%, 100% {
+    background-color: rgba(253, 242, 248, 0.5);
+  }
+  50% {
+    background-color: rgba(253, 242, 248, 0.9);
   }
 }
 
-/* Brand font utility */
-.font-brand {
-  font-family: 'Playfair Display', serif;
-  letter-spacing: -0.02em;
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Make labels and headers extra pretty */
-label {
-  @apply font-semibold text-indigo-800;
-}
-
-/* Section card for upload/input */
-.section-card {
-  @apply bg-gradient-to-tr from-yellow-50 via-indigo-50 to-fuchsia-50 border border-indigo-100 rounded-2xl shadow-lg p-4 sm:p-6;
-}
-
-/* Responsive visibility utilities */
-.xs-only {
-  @apply sm:hidden;
-}
-
-.sm-up {
-  @apply hidden sm:block;
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* Fade in animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-/* Break words on mobile to prevent overflow */
-.break-words {
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-
-/* Improve readability on mobile screens */
-@media (max-width: 640px) {
-  .text-overflow-ellipsis {
-    @apply truncate;
-    max-width: 220px;
-  }
-  
-  .mobile-full-width {
-    width: 100%;
-    max-width: 100%;
-  }
-  
-  /* Prevent horizontal scrolling on mobile */
-  .prevent-overflow-x {
-    max-width: 100vw;
-    overflow-x: hidden;
-  }
-  
-  /* Make text smaller on mobile */
-  .mobile-text-sm {
-    font-size: 0.875rem;
-  }
-  
-  /* Fix border issues on mobile */
-  .mobile-border-fix {
-    border-width: 1px;
-  }
-}
-
-/* Make charts more responsive */
-.recharts-wrapper, .recharts-surface {
-  @apply w-full !important;
-  overflow: visible;
-}
-
-/* Ensure card content is properly padded on mobile */
-.card-mobile-padding {
-  @apply p-3 sm:p-6;
-}
-
-/* Additional utility classes for PDF export */
-.print-scorecard {
-  width: 800px;
-  max-width: 800px;
-  padding: 20px;
-  background: white;
-}
-
-.print-report {
-  width: 800px;
-  max-width: 800px;
-  padding: 40px;
-  background: white;
-  font-size: 12pt;
-}
-
-.print-export {
-  width: 800px;
-  background: white;
-  font-size: 12pt;
-}
-
-/* Ensure no text overflow in PDF exports */
-.print-scorecard *,
-.print-report *,
-.print-export * {
-  overflow-wrap: break-word;
-  word-break: break-word;
-  max-width: 100%;
-}
-
-/* Fix PDF export rendering issues */
-.pdf-export-in-progress .pdf-header,
-.pdf-export-in-progress .from-indigo-400,
-.pdf-export-in-progress .via-fuchsia-300,
-.pdf-export-in-progress .to-blue-300,
-.pdf-export-in-progress .bg-gradient-to-r,
-.pdf-export-in-progress .bg-gradient-to-br,
-.pdf-export-in-progress .profile-header {
-  background-color: #9b87f5 !important;
-  color: #000000 !important;
-}
-
-/* Fix avatar/images in PDF exports */
-.pdf-export-in-progress .pdf-avatar,
-.pdf-export-in-progress .avatar {
-  overflow: visible !important;
-}
-
-.pdf-export-in-progress .pdf-avatar img, 
-.pdf-export-in-progress .avatar img,
-.pdf-export-in-progress .pdf-image {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  width: 100% !important;
-  height: 100% !important;
-}
-
-/* Fix text rendering in PDF exports */
-.pdf-export-in-progress .pdf-skills-text,
-.pdf-export-in-progress .text-fuchsia-700 {
-  white-space: normal !important;
-  word-break: break-word !important;
-  overflow-wrap: break-word !important;
-  max-width: 100% !important;
-  overflow: visible !important;
-}
-
-@media print {
-  /* Custom print styles */
-  body {
-    background: white;
-  }
-  
-  .print-scorecard,
-  .print-report,
-  .print-export {
-    max-width: 100%;
-    margin: 0;
-    padding: 0.5in;
-    box-shadow: none;
-    background: white;
-  }
-  
-  /* Ensure gradients print properly */
-  .bg-gradient-to-r,
-  .bg-gradient-to-br,
-  .from-indigo-400,
-  .via-fuchsia-300,
-  .to-blue-300 {
-    background-color: #9b87f5 !important;
-    color: #000000 !important;
-  }
-  
-  /* Ensure images print properly */
-  img {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
+  animation: fade-in 0.5s ease-out forwards;
 }
