@@ -3,7 +3,7 @@ import { ScoreData } from "@/types/resume";
 import { LeaderboardSection } from "./LeaderboardSection";
 import { Card } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { generateLeaderboardData } from "@/utils/leaderboardUtils";
 
 interface IndustryLeaderboardSectionProps {
@@ -42,11 +42,11 @@ export const IndustryLeaderboardSection = ({ scoreData }: IndustryLeaderboardSec
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Bar
-                dataKey="score"
-                fill={(entry) => entry.isUser ? "#e879f9" : "#818cf8"}
-                radius={[4, 4, 0, 0]}
-              />
+              <Bar dataKey="score" fill="#818cf8" radius={[4, 4, 0, 0]}>
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.isUser ? "#e879f9" : "#818cf8"} />
+                ))}
+              </Bar>
             </BarChart>
           </ChartContainer>
         </div>
