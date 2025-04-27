@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
@@ -7,8 +8,6 @@ import { History } from "lucide-react";
 import { QualificationGaps } from './components/QualificationGaps';
 import { ResumeActions } from './components/ResumeActions';
 import { LeaderboardSection } from './components/LeaderboardSection';
-import { useNavigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
 
 interface ScoreResultSectionProps {
   scoreData: ScoreData;
@@ -17,12 +16,9 @@ interface ScoreResultSectionProps {
 export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
   const scoreCardRef = useRef<HTMLDivElement | null>(null);
   const completeReportRef = useRef<HTMLDivElement | null>(null);
-  const navigate = useNavigate();
-  const isCachedResult = scoreData.id && !scoreData.id.includes("newly-generated");
 
-  const handleViewLeaderboard = () => {
-    navigate('/industry-leaderboard', { state: { scoreData } });
-  };
+  // Check if this was a cached result by examining the id
+  const isCachedResult = scoreData.id && !scoreData.id.includes("newly-generated");
 
   return (
     <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in overflow-hidden">
@@ -35,6 +31,7 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
       )}
       
       <div className="flex flex-col items-center justify-center py-6 px-2 sm:px-6">
+        {/* Hidden version for PDF export with embedded styles for consistent rendering */}
         <div 
           ref={scoreCardRef} 
           className="fixed left-[-9999px] top-0 z-[-1] bg-white p-4 print-scorecard"
@@ -43,28 +40,22 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
           <ResumeScoreCard scoreData={scoreData} />
         </div>
         
+        {/* Visible version */}
         <div className="w-full max-w-md mx-auto">
           <ResumeScoreCard scoreData={scoreData} />
         </div>
       </div>
       
+      {/* Export options section */}
       <CardContent className="px-3 sm:px-6 pb-6">
         <ResumeActions 
           scoreCardRef={scoreCardRef} 
           completeReportRef={completeReportRef} 
           scoreData={scoreData}
         />
-        
-        <div className="mt-6 text-center">
-          <Button
-            onClick={handleViewLeaderboard}
-            className="bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white font-semibold hover:from-indigo-600 hover:to-fuchsia-600"
-          >
-            View Full Industry Leaderboard →
-          </Button>
-        </div>
       </CardContent>
       
+      {/* New Industry Leaderboard Section */}
       <CardContent className="px-3 sm:px-6 pb-6">
         <LeaderboardSection scoreData={scoreData} />
       </CardContent>
@@ -74,6 +65,7 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
         className="fixed left-[-9999px] top-0 z-[-1] bg-white p-8 rounded-lg max-w-3xl print-report"
         style={{ overflow: 'hidden' }}
       >
+        {/* Complete report content for PDF export */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-indigo-800 mb-2">Complete Resume Analysis Report</h1>
           <p className="text-fuchsia-600 font-medium">Generated on {scoreData.timestamp}</p>
@@ -114,6 +106,7 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
         </div>
       </div>
       
+      {/* Visible Report Preview */}
       <div className="bg-white p-4 sm:p-6 rounded-lg mx-3 sm:mx-6 mb-6 shadow-inner overflow-x-hidden">
         <div className="text-center mb-8 sm:mb-10">
           <h1 className="text-2xl sm:text-3xl font-bold text-indigo-800 mb-2">Complete Resume Analysis Report</h1>
