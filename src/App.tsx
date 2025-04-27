@@ -17,6 +17,7 @@ import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
 import Pricing from "./pages/Pricing";
+import IndustryLeaderboard from "./pages/IndustryLeaderboard";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,14 @@ const App = () => (
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route
+              path="/industry-leaderboard"
+              element={
+                <ProtectedRoute>
+                  <IndustryLeaderboard />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
