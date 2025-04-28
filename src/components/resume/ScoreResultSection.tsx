@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
@@ -6,11 +7,9 @@ import ResumeScoreCard from "./ResumeScoreCard";
 import { History, Download } from "lucide-react";
 import { QualificationGaps } from './components/QualificationGaps';
 import { ResumeActions } from './components/ResumeActions';
-import { ImprovementSuggestions } from './components/ImprovementSuggestions';
-import { SuggestedSkills } from './components/SuggestedSkills';
 import { Button } from "@/components/ui/button";
 import { generatePDFFromElement } from "@/utils/reportGenerationUtils";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 interface ScoreResultSectionProps {
   scoreData: ScoreData;
@@ -68,14 +67,6 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
         {scoreData.missingQualifications && scoreData.missingQualifications.length > 0 && (
           <QualificationGaps qualifications={scoreData.missingQualifications} />
         )}
-
-        <div className="mt-8 mb-6">
-          <ImprovementSuggestions suggestions={scoreData.improvementTips} />
-        </div>
-
-        <div className="mt-8 mb-6">
-          <SuggestedSkills skills={scoreData.suggestedSkills} />
-        </div>
       </div>
       
       <div className="bg-white p-4 sm:p-6 rounded-lg mx-3 sm:mx-6 mb-6 shadow-inner overflow-x-hidden">
@@ -134,3 +125,4 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
     </Card>
   );
 };
+
