@@ -24,7 +24,7 @@ export const IndustryLeaderboardSection = ({ scoreData }: IndustryLeaderboardSec
     <div className="space-y-6 mt-6">
       <Card className="p-6 bg-white shadow-lg border-t-4 border-t-indigo-500">
         <h2 className="text-2xl font-bold text-indigo-800 mb-4">Industry Performance Overview</h2>
-        <div className="h-[300px] w-full">
+        <div className="h-[400px] w-full">
           <ChartContainer
             config={{
               score: {
@@ -37,10 +37,20 @@ export const IndustryLeaderboardSection = ({ scoreData }: IndustryLeaderboardSec
               },
             }}
           >
-            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <BarChart 
+              data={chartData} 
+              margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
+              <XAxis 
+                dataKey="name" 
+                angle={-45} 
+                textAnchor="end" 
+                height={60} 
+                interval={0} 
+                tick={{ fontSize: 12 }}
+              />
+              <YAxis domain={[0, 100]} />
               <Tooltip />
               <Bar dataKey="score" fill="#818cf8" radius={[4, 4, 0, 0]}>
                 {chartData.map((entry, index) => (
