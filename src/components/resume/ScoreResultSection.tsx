@@ -7,6 +7,8 @@ import ResumeScoreCard from "./ResumeScoreCard";
 import { History } from "lucide-react";
 import { QualificationGaps } from './components/QualificationGaps';
 import { ResumeActions } from './components/ResumeActions';
+import { ImprovementSuggestions } from './components/ImprovementSuggestions';
+import { SuggestedSkills } from './components/SuggestedSkills';
 
 interface ScoreResultSectionProps {
   scoreData: ScoreData;
@@ -53,9 +55,8 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
           scoreData={scoreData}
         />
       </CardContent>
-      
+
       <div ref={completeReportRef} className="fixed left-[-9999px] top-0 z-[-1] bg-white p-8 rounded-lg max-w-3xl print-report" style={{ overflow: 'hidden' }}>
-        {/* Complete report content for PDF export */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-indigo-800 mb-2">Complete Resume Analysis Report</h1>
           <p className="text-fuchsia-600 font-medium">Generated on {scoreData.timestamp}</p>
@@ -70,29 +71,14 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
           <QualificationGaps qualifications={scoreData.missingQualifications} />
         )}
 
+        {/* Single instance of improvement suggestions */}
         <div className="mt-8 mb-6">
-          <h2 className="text-xl font-bold text-indigo-700 mb-4">Improvement Suggestions</h2>
-          <div className="bg-indigo-50 p-4 rounded-lg">
-            <ul className="space-y-3">
-              {scoreData.improvementTips.map((tip, index) => (
-                <li key={index} className="flex gap-2">
-                  <span className="text-indigo-500 font-bold flex-shrink-0">•</span>
-                  <span>{tip}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ImprovementSuggestions suggestions={scoreData.improvementTips} />
         </div>
 
+        {/* Single instance of suggested skills */}
         <div className="mt-8 mb-6">
-          <h2 className="text-xl font-bold text-indigo-700 mb-4">Suggested Skills</h2>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {scoreData.suggestedSkills.map((skill, index) => (
-              <span key={index} className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
-                {skill}
-              </span>
-            ))}
-          </div>
+          <SuggestedSkills skills={scoreData.suggestedSkills} />
         </div>
       </div>
       
@@ -112,28 +98,55 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
           <QualificationGaps qualifications={scoreData.missingQualifications} />
         )}
 
+        {/* Single instance of improvement suggestions */}
         <div className="mt-8 mb-6">
-          <h2 className="text-xl font-bold text-indigo-700 mb-4">Improvement Suggestions</h2>
-          <div className="bg-indigo-50 p-4 rounded-lg shadow-inner">
-            <ul className="space-y-3">
-              {scoreData.improvementTips.map((tip, index) => (
-                <li key={index} className="flex gap-2">
-                  <span className="text-indigo-500 font-bold flex-shrink-0">•</span>
-                  <span className="text-sm sm:text-base">{tip}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ImprovementSuggestions suggestions={scoreData.improvementTips} />
         </div>
 
+        {/* Single instance of suggested skills */}
         <div className="mt-8 mb-6">
-          <h2 className="text-xl font-bold text-indigo-700 mb-4">Suggested Skills</h2>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {scoreData.suggestedSkills.map((skill, index) => (
-              <span key={index} className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
-                {skill}
-              </span>
-            ))}
+          <SuggestedSkills skills={scoreData.suggestedSkills} />
+        </div>
+      </div>
+
+      {/* Download Full Report button moved to the end */}
+      <div className="px-3 sm:px-6 pb-6">
+        <div className="flex justify-center mt-4 w-full">
+          <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-4 rounded-lg border border-indigo-100 w-full sm:w-auto">
+            <div className="text-center mb-2">
+              <p className="text-sm text-gray-600">Save this report for your records or to share with others</p>
+            </div>
+            <Button 
+              size="lg"
+              onClick={() => {
+                const handleFullReportDownload = async () => {
+                  if (!completeReportRef.current) return;
+                  const success = await generatePDFFromElement(
+                    completeReportRef.current,
+                    `resume-full-report-${new Date().toISOString().split("T")[0]}.pdf`,
+                    false
+                  );
+                  
+                  if (success) {
+                    toast({
+                      title: "Full Report PDF Downloaded",
+                      description: "Your full analysis has been downloaded as PDF.",
+                    });
+                  } else {
+                    toast({
+                      title: "PDF Export Failed",
+                      description: "There was an error downloading your full analysis as PDF.",
+                      variant: "destructive",
+                    });
+                  }
+                };
+                handleFullReportDownload();
+              }}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transform transition hover:scale-105 flex items-center gap-3 w-full sm:w-auto justify-center"
+            >
+              <Download className="h-5 w-5" />
+              Download Full Report (PDF)
+            </Button>
           </div>
         </div>
       </div>
