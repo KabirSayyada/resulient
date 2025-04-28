@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
@@ -21,7 +20,6 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
   const scoreCardRef = useRef<HTMLDivElement | null>(null);
   const completeReportRef = useRef<HTMLDivElement | null>(null);
 
-  // Check if this was a cached result by examining the id
   const isCachedResult = scoreData.id && !scoreData.id.includes("newly-generated");
 
   return (
@@ -35,7 +33,6 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
       )}
       
       <div className="flex flex-col items-center justify-center py-6 px-2 sm:px-6">
-        {/* Hidden version for PDF export with embedded styles for consistent rendering */}
         <div 
           ref={scoreCardRef} 
           className="fixed left-[-9999px] top-0 z-[-1] bg-white p-4 print-scorecard"
@@ -44,13 +41,11 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
           <ResumeScoreCard scoreData={scoreData} />
         </div>
         
-        {/* Visible version */}
         <div className="w-full max-w-md mx-auto">
           <ResumeScoreCard scoreData={scoreData} />
         </div>
       </div>
       
-      {/* Export options section */}
       <CardContent className="px-3 sm:px-6 pb-6">
         <ResumeActions 
           scoreCardRef={scoreCardRef} 
@@ -74,18 +69,15 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
           <QualificationGaps qualifications={scoreData.missingQualifications} />
         )}
 
-        {/* Single instance of improvement suggestions */}
         <div className="mt-8 mb-6">
           <ImprovementSuggestions suggestions={scoreData.improvementTips} />
         </div>
 
-        {/* Single instance of suggested skills */}
         <div className="mt-8 mb-6">
           <SuggestedSkills skills={scoreData.suggestedSkills} />
         </div>
       </div>
       
-      {/* Visible Report Preview */}
       <div className="bg-white p-4 sm:p-6 rounded-lg mx-3 sm:mx-6 mb-6 shadow-inner overflow-x-hidden">
         <div className="text-center mb-8 sm:mb-10">
           <h1 className="text-2xl sm:text-3xl font-bold text-indigo-800 mb-2">Complete Resume Analysis Report</h1>
@@ -100,19 +92,8 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
         {scoreData.missingQualifications && scoreData.missingQualifications.length > 0 && (
           <QualificationGaps qualifications={scoreData.missingQualifications} />
         )}
-
-        {/* Single instance of improvement suggestions */}
-        <div className="mt-8 mb-6">
-          <ImprovementSuggestions suggestions={scoreData.improvementTips} />
-        </div>
-
-        {/* Single instance of suggested skills */}
-        <div className="mt-8 mb-6">
-          <SuggestedSkills skills={scoreData.suggestedSkills} />
-        </div>
       </div>
 
-      {/* Download Full Report button moved to the end */}
       <div className="px-3 sm:px-6 pb-6">
         <div className="flex justify-center mt-4 w-full">
           <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-4 rounded-lg border border-indigo-100 w-full sm:w-auto">
@@ -153,4 +134,3 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
     </Card>
   );
 };
-
