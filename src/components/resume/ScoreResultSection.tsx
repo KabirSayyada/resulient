@@ -131,15 +131,13 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
                   );
                   
                   if (success) {
-                    toast({
-                      title: "Full Report PDF Downloaded",
-                      description: "Your full analysis has been downloaded as PDF.",
+                    toast("Full Report PDF Downloaded", {
+                      description: "Your full analysis has been downloaded as PDF."
                     });
                   } else {
-                    toast({
-                      title: "PDF Export Failed",
+                    toast("PDF Export Failed", {
                       description: "There was an error downloading your full analysis as PDF.",
-                      variant: "destructive",
+                      variant: "destructive"
                     });
                   }
                 };
