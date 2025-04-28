@@ -4,11 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
 import { ScoreData } from "@/types/resume";
 import ResumeScoreCard from "./ResumeScoreCard";
-import { History } from "lucide-react";
+import { History, Download } from "lucide-react";
 import { QualificationGaps } from './components/QualificationGaps';
 import { ResumeActions } from './components/ResumeActions';
 import { ImprovementSuggestions } from './components/ImprovementSuggestions';
 import { SuggestedSkills } from './components/SuggestedSkills';
+import { Button } from "@/components/ui/button";
+import { generatePDFFromElement } from "@/utils/reportGenerationUtils";
+import { toast } from "@/components/ui/sonner";
 
 interface ScoreResultSectionProps {
   scoreData: ScoreData;
