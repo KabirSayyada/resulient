@@ -1,8 +1,7 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
-import { UserMenu } from "@/components/auth/UserMenu";
-import { Button } from "@/components/ui/button";
 import { JobDescriptionInput } from "@/components/resume/JobDescriptionInput";
 import { FileUploadSection } from "@/components/resume/FileUploadSection";
 import { OptimizedResumeDisplay } from "@/components/resume/OptimizedResumeDisplay";
@@ -19,6 +18,8 @@ import {
   generateSuggestions 
 } from "@/utils/resumeFormatters";
 import { LegalFooter } from "@/components/layout/LegalFooter";
+import { Button } from "@/components/ui/button";
+import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -117,7 +118,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Brand Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
@@ -125,23 +126,23 @@ const Index = () => {
             <span className="font-brand text-4xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-yellow-400 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
               Resulient
             </span>
-            <span className="rounded-full px-3 py-1 text-xs sm:text-sm font-semibold bg-indigo-100 text-indigo-700 shadow border border-indigo-200 animate-fade-in">
+            <span className="rounded-full px-3 py-1 text-xs sm:text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 shadow border border-indigo-200 dark:border-indigo-700 animate-fade-in">
               ATS Resume Optimization
             </span>
           </div>
-          <UserMenu />
+          <UserMenuWithTheme />
         </div>
 
         {/* NEW: About section, styled and responsive */}
-        <div className="bg-gradient-to-br from-fuchsia-50 via-indigo-50 to-yellow-50 rounded-xl border border-indigo-100 shadow-md px-4 py-5 mb-5 sm:mb-8 sm:px-6 mx-auto max-w-2xl text-center">
-          <p className="text-lg sm:text-xl font-semibold text-indigo-900 leading-snug mb-2">
-            <span className="text-fuchsia-700 font-bold">Resulient</span> is on a mission to make your resume shine&nbsp;
+        <div className="bg-gradient-to-br from-fuchsia-50 via-indigo-50 to-yellow-50 dark:from-fuchsia-950 dark:via-indigo-950 dark:to-yellow-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-md px-4 py-5 mb-5 sm:mb-8 sm:px-6 mx-auto max-w-2xl text-center">
+          <p className="text-lg sm:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-2">
+            <span className="text-fuchsia-700 dark:text-fuchsia-400 font-bold">Resulient</span> is on a mission to make your resume shine&nbsp;
             <span className="hidden sm:inline">—</span>
-            <span className="block sm:inline text-base sm:text-lg font-normal text-indigo-700">
+            <span className="block sm:inline text-base sm:text-lg font-normal text-indigo-700 dark:text-indigo-300">
               We give everyone a fighting chance against unfair machines and "black box" ATS gatekeepers.
             </span>
           </p>
-          <p className="text-gray-600 text-sm mt-2">
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
             Upload your resume and the job description — we help you stand out, get noticed, and get hired, no matter what automated system tries to stop you.
           </p>
         </div>
@@ -150,10 +151,10 @@ const Index = () => {
         {/* Main functional area */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               ATS Resume Optimizer
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               Optimize your resume to beat Applicant Tracking Systems (ATS)
             </p>
           </div>

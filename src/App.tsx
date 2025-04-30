@@ -19,6 +19,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
 import Pricing from "./pages/Pricing";
 import IndustryLeaderboard from "./pages/IndustryLeaderboard";
+import { ThemeProvider } from "./components/theme/ThemeProvider";
 
 const queryClient = new QueryClient();
 
@@ -43,49 +44,51 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/profile-setup" element={<ProfileSetup />} />
-            <Route path="/profile-edit" element={<ProfileEdit />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/resume-scoring"
-              element={
-                <ProtectedRoute>
-                  <ResumeScoring />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/legal" element={<Legal />} />
-            <Route path="/terms-of-service" element={<TermsOfService />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/refund-policy" element={<RefundPolicy />} />
-            <Route
-              path="/industry-leaderboard"
-              element={
-                <ProtectedRoute>
-                  <IndustryLeaderboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/profile-setup" element={<ProfileSetup />} />
+              <Route path="/profile-edit" element={<ProfileEdit />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/resume-scoring"
+                element={
+                  <ProtectedRoute>
+                    <ResumeScoring />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/legal" element={<Legal />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
+              <Route
+                path="/industry-leaderboard"
+                element={
+                  <ProtectedRoute>
+                    <IndustryLeaderboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

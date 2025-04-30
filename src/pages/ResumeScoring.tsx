@@ -1,8 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { useResumeScoring } from "@/hooks/useResumeScoring";
-import { UserMenu } from "@/components/auth/UserMenu";
 import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import { ScoreData } from "@/types/resume";
 import { Button } from "@/components/ui/button";
 import { MainNavigation } from "@/components/resume/MainNavigation";
 import { LegalFooter } from "@/components/layout/LegalFooter";
+import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
@@ -94,7 +95,7 @@ const ResumeScoring = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950 dark:text-white py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
           <div className="flex items-center gap-2 sm:gap-4">
@@ -103,7 +104,7 @@ const ResumeScoring = () => {
                 Resulient
               </span>
             </Link>
-            <span className="rounded-full px-2 py-1 text-xs sm:text-sm font-semibold bg-fuchsia-100 text-fuchsia-700 shadow border border-fuchsia-200 animate-fade-in whitespace-nowrap">
+            <span className="rounded-full px-2 py-1 text-xs sm:text-sm font-semibold bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900 dark:text-fuchsia-300 shadow border border-fuchsia-200 dark:border-fuchsia-700 animate-fade-in whitespace-nowrap">
               Resume Score Analyzer
             </span>
           </div>
@@ -119,18 +120,18 @@ const ResumeScoring = () => {
                 Back
               </Link>
             </Button>
-            <UserMenu />
+            <UserMenuWithTheme />
           </div>
         </div>
 
         {/* Info block for Resume Scoring */}
-        <div className="bg-gradient-to-br from-fuchsia-50 via-indigo-50 to-blue-50 rounded-xl border border-indigo-100 shadow-md px-4 py-5 mb-6 sm:px-7 max-w-2xl mx-auto text-center">
-          <div className="text-lg sm:text-xl font-semibold text-indigo-900 leading-snug mb-0">
-            <span className="text-fuchsia-700 font-bold">New!</span> 
-            &nbsp;Unlock insights with <span className="text-fuchsia-700 font-bold">Resulient Resume Scoring</span>
+        <div className="bg-gradient-to-br from-fuchsia-50 via-indigo-50 to-blue-50 dark:from-fuchsia-950 dark:via-indigo-950 dark:to-blue-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-md px-4 py-5 mb-6 sm:px-7 max-w-2xl mx-auto text-center">
+          <div className="text-lg sm:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-0">
+            <span className="text-fuchsia-700 dark:text-fuchsia-400 font-bold">New!</span> 
+            &nbsp;Unlock insights with <span className="text-fuchsia-700 dark:text-fuchsia-400 font-bold">Resulient Resume Scoring</span>
           </div>
-          <p className="text-gray-700 text-sm mt-3 max-w-2xl mx-auto">
-            Instantly compare your resume to <span className="font-bold text-indigo-700">hundreds of thousands</span> of real career journeys. 
+          <p className="text-gray-700 dark:text-gray-300 text-sm mt-3 max-w-2xl mx-auto">
+            Instantly compare your resume to <span className="font-bold text-indigo-700 dark:text-indigo-400">hundreds of thousands</span> of real career journeys. 
             Using Artificial Intelligence, Resulient shows you exactly where you stand among your competition—so you know how to outshine other applicants.
           </p>
         </div>

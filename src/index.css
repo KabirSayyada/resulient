@@ -69,6 +69,19 @@
   }
 }
 
+.dark .animate-pulse-slow {
+  animation: dark-pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes dark-pulse-slow {
+  0%, 100% {
+    background-color: rgba(30, 27, 36, 0.5);
+  }
+  50% {
+    background-color: rgba(30, 27, 36, 0.9);
+  }
+}
+
 .animate-pulse-slow {
   animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
