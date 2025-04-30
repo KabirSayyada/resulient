@@ -3,11 +3,12 @@ import { useState } from "react";
 import { ScoreData } from "@/types/resume";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
-import { ChevronDown, ChevronUp, Calendar } from "lucide-react";
+import { ChevronDown, ChevronUp, Calendar, ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { ChartContainer } from "@/components/ui/chart";
+import { CompareResumes } from "./CompareResumes";
 import { 
   ResponsiveContainer, 
   LineChart, 
@@ -25,6 +26,8 @@ interface ScoreHistoryProps {
 
 export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [selectedScores, setSelectedScores] = useState<ScoreData[]>([]);
 
   const toggleExpand = (index: number) => {
     setExpandedIndex(expandedIndex === index ? null : index);
@@ -34,6 +37,29 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
     if (score >= 80) return "bg-green-500";
     if (score >= 60) return "bg-yellow-500";
     return "bg-red-500";
+  };
+
+  const toggleScoreSelection = (score: ScoreData) => {
+    if (selectedScores.find(s => s.id === score.id)) {
+      setSelectedScores(selectedScores.filter(s => s.id !== score.id));
+    } else {
+      // Only allow two scores at a time
+      if (selectedScores.length >= 2) {
+        setSelectedScores([...selectedScores.slice(1), score]);
+      } else {
+        setSelectedScores([...selectedScores, score]);
+      }
+    }
+  };
+
+  const handleCompare = () => {
+    if (selectedScores.length < 2) {
+      // If less than 2 scores selected, select the first two scores automatically
+      if (scores.length >= 2) {
+        setSelectedScores([scores[0], scores[1]]);
+      }
+    }
+    setCompareOpen(true);
   };
 
   // Prepare data for the chart - last 10 entries only
@@ -53,8 +79,20 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
   return (
     <div className="space-y-8">
       <Card className="border-t-4 border-t-indigo-500 shadow-md overflow-hidden">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Your Progress Over Time</CardTitle>
+          {scores.length >= 2 && (
+            <Button 
+              onClick={handleCompare} 
+              size="sm" 
+              variant="outline" 
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Compare Scores</span>
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="p-4">
           <div className="h-[300px] sm:h-[350px] md:h-[380px] w-full">
@@ -116,20 +154,44 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
       </Card>
 
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-800">Previous Resume Scores</h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Previous Resume Scores</h2>
+          {selectedScores.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">
+                {selectedScores.length} selected
+              </span>
+              <Button 
+                onClick={handleCompare} 
+                size="sm" 
+                variant="outline"
+                disabled={selectedScores.length < 2}
+                className="flex items-center gap-1"
+              >
+                Compare Selected
+              </Button>
+            </div>
+          )}
+        </div>
         
         {scores.map((score, index) => (
           <Card key={score.id || index} className="overflow-hidden">
             <div 
-              className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center cursor-pointer hover:bg-gray-50 gap-2"
-              onClick={() => toggleExpand(index)}
+              className={`p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:bg-gray-50 dark:hover:bg-gray-800 gap-2 ${
+                selectedScores.find(s => s.id === score.id) 
+                  ? 'bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-l-indigo-500' 
+                  : ''
+              }`}
             >
-              <div className="flex items-center w-full sm:w-auto">
+              <div 
+                className="flex items-center w-full sm:w-auto cursor-pointer"
+                onClick={() => toggleScoreSelection(score)}
+              >
                 <div className="mr-4 flex-shrink-0">
                   <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                    score.overallScore >= 80 ? 'bg-green-100 text-green-600' : 
-                    score.overallScore >= 60 ? 'bg-yellow-100 text-yellow-600' : 
-                    'bg-red-100 text-red-600'
+                    score.overallScore >= 80 ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400' : 
+                    score.overallScore >= 60 ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/50 dark:text-yellow-400' : 
+                    'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400'
                   }`}>
                     {score.overallScore}
                   </div>
@@ -139,14 +201,14 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
                   <div className="font-medium truncate">
                     Resume Score #{scores.length - index}
                   </div>
-                  <div className="flex items-center text-sm text-gray-500">
+                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                     <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
                     <span className="truncate">{score.timestamp}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center w-full sm:w-auto justify-between sm:justify-end mt-2 sm:mt-0">
+              <div className="flex items-center w-full sm:w-auto justify-between sm:justify-end mt-2 sm:mt-0 gap-3">
                 <div className="w-full sm:w-32 mr-2">
                   <Progress 
                     value={score.overallScore} 
@@ -154,16 +216,23 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
                     indicatorClassName={getProgressColor(score.overallScore)} 
                   />
                 </div>
-                {expandedIndex === index ? (
-                  <ChevronUp className="h-5 w-5 text-gray-400 flex-shrink-0" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-gray-400 flex-shrink-0" />
-                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => toggleExpand(index)}
+                  className="p-0 h-8 w-8 rounded-full"
+                >
+                  {expandedIndex === index ? (
+                    <ChevronUp className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-gray-400" />
+                  )}
+                </Button>
               </div>
             </div>
 
             {expandedIndex === index && (
-              <div className="border-t border-gray-200">
+              <div className="border-t border-gray-200 dark:border-gray-700">
                 <CardContent className="pt-4 overflow-x-auto">
                   <ScoreBreakdown scoreData={score} />
                 </CardContent>
@@ -172,6 +241,13 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
           </Card>
         ))}
       </div>
+
+      {/* Compare Resume Dialog */}
+      <CompareResumes 
+        open={compareOpen} 
+        onOpenChange={setCompareOpen} 
+        scores={selectedScores.length >= 2 ? selectedScores : scores.slice(0, 2)}
+      />
     </div>
   );
 };

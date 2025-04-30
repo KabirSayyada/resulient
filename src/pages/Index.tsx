@@ -20,6 +20,7 @@ import {
 import { LegalFooter } from "@/components/layout/LegalFooter";
 import { Button } from "@/components/ui/button";
 import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
+import { GuidedTour } from "@/components/onboarding/GuidedTour";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -200,6 +201,7 @@ const Index = () => {
       <div className="mt-8">
         <LegalFooter />
       </div>
+      <GuidedTour />
     </div>
   );
 };

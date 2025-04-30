@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { MainNavigation } from "@/components/resume/MainNavigation";
 import { LegalFooter } from "@/components/layout/LegalFooter";
 import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
+import { GuidedTour } from "@/components/onboarding/GuidedTour";
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
@@ -183,8 +184,8 @@ const ResumeScoring = () => {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-10">
                   <FileText className="h-12 w-12 text-indigo-400 mb-4" />
-                  <h3 className="text-lg font-medium text-indigo-900 mb-1">No Score History</h3>
-                  <p className="text-indigo-600 text-center max-w-md">
+                  <h3 className="text-lg font-medium text-indigo-900 dark:text-indigo-100 mb-1">No Score History</h3>
+                  <p className="text-indigo-600 dark:text-indigo-300 text-center max-w-md">
                     You haven't analyzed any resumes yet. Start by uploading your resume to get detailed, actionable feedback and colorful charts tracking your progress.
                   </p>
                 </CardContent>
@@ -196,6 +197,7 @@ const ResumeScoring = () => {
       <div className="mt-8">
         <LegalFooter />
       </div>
+      <GuidedTour />
     </div>
   );
 };

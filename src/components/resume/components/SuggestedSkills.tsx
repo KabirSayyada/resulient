@@ -1,23 +1,32 @@
 
+import React from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { BadgeCheck, X } from "lucide-react";
+
 interface SuggestedSkillsProps {
   skills: string[];
 }
 
 export const SuggestedSkills = ({ skills }: SuggestedSkillsProps) => {
   if (!skills || skills.length === 0) {
-    return null;
-  }
-  
-  return (
-    <div className="mt-4 mb-4">
-      <h3 className="text-sm font-medium text-gray-700 mb-2">Suggested Skills</h3>
-      <div className="flex flex-wrap gap-2 mb-4">
-        {skills.map((skill, index) => (
-          <span key={index} className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
-            {skill}
-          </span>
-        ))}
+    return (
+      <div className="text-gray-500 italic text-center p-4">
+        No skills suggested
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {skills.map((skill, index) => (
+        <div 
+          key={index}
+          className="flex items-center gap-2 p-2 rounded-md bg-indigo-50 dark:bg-indigo-900/30"
+        >
+          <BadgeCheck className="h-4 w-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+          <span className="text-sm">{skill}</span>
+        </div>
+      ))}
     </div>
   );
 };
