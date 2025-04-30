@@ -2,13 +2,13 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { UserMenu } from "@/components/auth/UserMenu";
 import { MainNavigation } from "@/components/resume/MainNavigation";
 import { IndustryLeaderboardSection } from "@/components/resume/components/IndustryLeaderboardSection";
 import { LegalFooter } from "@/components/layout/LegalFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { ScoreData } from "@/types/resume";
 import { useState } from "react";
+import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
 
 const IndustryLeaderboard = () => {
   const { user, loading } = useAuth();
@@ -83,18 +83,18 @@ const IndustryLeaderboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950 py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
           <div className="flex items-center gap-2 sm:gap-4">
             <span className="font-brand text-3xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-yellow-400 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
               Resulient
             </span>
-            <span className="rounded-full px-2 py-1 text-xs sm:text-sm font-semibold bg-fuchsia-100 text-fuchsia-700 shadow border border-fuchsia-200 animate-fade-in whitespace-nowrap">
+            <span className="rounded-full px-2 py-1 text-xs sm:text-sm font-semibold bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900 dark:text-fuchsia-300 shadow border border-fuchsia-200 dark:border-fuchsia-800 animate-fade-in whitespace-nowrap">
               Industry Leaderboard
             </span>
           </div>
-          <UserMenu />
+          <UserMenuWithTheme />
         </div>
 
         <MainNavigation />
@@ -103,8 +103,8 @@ const IndustryLeaderboard = () => {
           <IndustryLeaderboardSection scoreData={latestScore} />
         ) : (
           <div className="text-center py-8">
-            <h2 className="text-xl font-semibold text-gray-700">No Resume Scores Yet</h2>
-            <p className="text-gray-600 mt-2">Score your first resume to see where you stand in your industry!</p>
+            <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">No Resume Scores Yet</h2>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">Score your first resume to see where you stand in your industry!</p>
           </div>
         )}
       </div>

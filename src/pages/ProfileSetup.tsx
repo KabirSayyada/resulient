@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AvatarSelector } from "@/components/profile/AvatarSelector";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export default function ProfileSetup() {
   const { user } = useAuth();
@@ -53,16 +55,19 @@ export default function ProfileSetup() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-6 px-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-100">
-        <h2 className="text-2xl font-bold mb-1 text-indigo-700 text-center">Set Up Your Profile</h2>
-        <p className="mb-4 text-sm text-center text-gray-500">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-blue-950 dark:via-purple-950 dark:to-pink-950 py-6 px-4">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-100 dark:border-gray-700">
+        <h2 className="text-2xl font-bold mb-1 text-indigo-700 dark:text-indigo-400 text-center">Set Up Your Profile</h2>
+        <p className="mb-4 text-sm text-center text-gray-500 dark:text-gray-400">
           Complete your profile to personalize your experience.
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex gap-2">
             <div className="flex-1">
-              <label htmlFor="firstName" className="block font-semibold text-gray-700 mb-1">
+              <label htmlFor="firstName" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 First Name
               </label>
               <Input
@@ -75,7 +80,7 @@ export default function ProfileSetup() {
               />
             </div>
             <div className="flex-1">
-              <label htmlFor="lastName" className="block font-semibold text-gray-700 mb-1">
+              <label htmlFor="lastName" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 Last Name
               </label>
               <Input
@@ -88,7 +93,7 @@ export default function ProfileSetup() {
             </div>
           </div>
           <div>
-            <label htmlFor="jobTitle" className="block font-semibold text-gray-700 mb-1">
+            <label htmlFor="jobTitle" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
               Job Title (optional)
             </label>
             <Input
@@ -100,9 +105,9 @@ export default function ProfileSetup() {
             />
           </div>
           <div>
-            <label className="font-semibold text-gray-700 mb-1 block">Photo (optional)</label>
+            <label className="font-semibold text-gray-700 dark:text-gray-300 mb-1 block">Photo (optional)</label>
             <AvatarSelector value={avatar} onChange={setAvatar} />
-            <div className="text-xs text-gray-400 mt-1">Upload a photo of yourself (or leave blank if you prefer no photo).</div>
+            <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">Upload a photo of yourself (or leave blank if you prefer no photo).</div>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -113,7 +118,7 @@ export default function ProfileSetup() {
               onChange={e => setShowAvatar(e.target.checked)}
               className="mr-2"
             />
-            <label htmlFor="showAvatar" className="font-medium text-sm text-gray-700">
+            <label htmlFor="showAvatar" className="font-medium text-sm text-gray-700 dark:text-gray-300">
               Show my avatar or photo on the resume scorecard
             </label>
           </div>

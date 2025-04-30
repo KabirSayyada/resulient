@@ -1,19 +1,23 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const Legal = () => {
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="max-w-3xl mx-auto space-y-12">
         <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-4">Legal Information</h1>
-          <p className="text-lg text-gray-600">Terms of Service, Privacy Policy, and Refund Policy for Resulient</p>
+          <h1 className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 mb-4">Legal Information</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-400">Terms of Service, Privacy Policy, and Refund Policy for Resulient</p>
         </div>
 
         {/* Terms of Service */}
-        <section className="prose max-w-none">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Terms of Service</h2>
+        <section className="prose dark:prose-invert max-w-none">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Terms of Service</h2>
           <p className="mb-4">Last updated: {new Date().toLocaleDateString()}</p>
           
           <h3 className="text-xl font-semibold mb-3">1. Introduction</h3>

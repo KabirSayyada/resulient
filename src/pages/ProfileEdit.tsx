@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -8,6 +9,7 @@ import { AvatarSelector } from "@/components/profile/AvatarSelector";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
 
 const ProfileEdit = () => {
   const { user } = useAuth();
@@ -72,13 +74,16 @@ const ProfileEdit = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-6 px-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-100">
-        <h2 className="text-2xl font-bold mb-1 text-indigo-700 text-center">Edit Your Profile</h2>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-indigo-950 dark:via-purple-950 dark:to-pink-950 py-6 px-4">
+      <div className="absolute top-4 right-4">
+        <UserMenuWithTheme />
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-100 dark:border-gray-700">
+        <h2 className="text-2xl font-bold mb-1 text-indigo-700 dark:text-indigo-400 text-center">Edit Your Profile</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex gap-2">
             <div className="flex-1">
-              <label htmlFor="firstName" className="block font-semibold text-gray-700 mb-1">
+              <label htmlFor="firstName" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 First Name
               </label>
               <Input
@@ -90,7 +95,7 @@ const ProfileEdit = () => {
               />
             </div>
             <div className="flex-1">
-              <label htmlFor="lastName" className="block font-semibold text-gray-700 mb-1">
+              <label htmlFor="lastName" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
                 Last Name
               </label>
               <Input
@@ -103,7 +108,7 @@ const ProfileEdit = () => {
             </div>
           </div>
           <div>
-            <label htmlFor="jobTitle" className="block font-semibold text-gray-700 mb-1">
+            <label htmlFor="jobTitle" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
               Job Title (optional)
             </label>
             <Input
@@ -115,7 +120,7 @@ const ProfileEdit = () => {
             />
           </div>
           <div>
-            <label className="font-semibold text-gray-700 mb-1 block">Avatar (optional)</label>
+            <label className="font-semibold text-gray-700 dark:text-gray-300 mb-1 block">Avatar (optional)</label>
             <AvatarSelector value={avatar} onChange={setAvatar} />
           </div>
           <div className="flex items-center gap-2">
@@ -127,7 +132,7 @@ const ProfileEdit = () => {
               onChange={e => setShowAvatar(e.target.checked)}
               className="mr-2"
             />
-            <label htmlFor="showAvatar" className="font-medium text-sm text-gray-700">
+            <label htmlFor="showAvatar" className="font-medium text-sm text-gray-700 dark:text-gray-300">
               Show my avatar or photo on the resume scorecard
             </label>
           </div>
@@ -139,7 +144,7 @@ const ProfileEdit = () => {
             {submitting ? "Saving..." : "Update Profile"}
           </Button>
         </form>
-        <div className="mt-6 text-xs text-center text-gray-400">
+        <div className="mt-6 text-xs text-center text-gray-400 dark:text-gray-500">
           <Link to="/terms-of-service" className="text-primary hover:underline">Terms</Link>
           {" · "}
           <Link to="/privacy-policy" className="text-primary hover:underline">Privacy</Link>
