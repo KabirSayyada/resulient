@@ -21,20 +21,22 @@ export function useUserProfile(userId?: string) {
       setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, avatar_url, job_title, show_avatar_on_scorecard")
+        .select("id, username, first_name, last_name, avatar_url, job_title, show_avatar_on_scorecard")
         .eq("id", userId)
         .maybeSingle();
 
       if (data) {
-        let firstName = "";
-        let lastName = "";
-        if (data.username && typeof data.username === 'string' && data.username.includes(" ")) {
+        // For backward compatibility with existing profiles
+        let firstName = data.first_name || "";
+        let lastName = data.last_name || "";
+        
+        // If first_name or last_name are not set but username is, parse from username
+        if ((!firstName || !lastName) && data.username && typeof data.username === 'string') {
           const nameParts = data.username.split(" ");
-          firstName = nameParts[0] || "";
-          lastName = nameParts.slice(1).join(" ");
-        } else {
-          firstName = data.username || "";
+          firstName = firstName || nameParts[0] || "";
+          lastName = lastName || nameParts.slice(1).join(" ") || "";
         }
+        
         setProfile({
           id: data.id,
           first_name: firstName,

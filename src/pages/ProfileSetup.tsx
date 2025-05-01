@@ -30,6 +30,8 @@ export default function ProfileSetup() {
       .from("profiles")
       .update({
         username: `${firstName.trim()} ${lastName.trim()}`,
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
         avatar_url: avatar,
         job_title: jobTitle,
         show_avatar_on_scorecard: showAvatar,
@@ -39,6 +41,7 @@ export default function ProfileSetup() {
     setSubmitting(false);
 
     if (error) {
+      console.error("Profile setup error:", error);
       toast({
         title: "Profile Setup Failed",
         description: error.message,

@@ -43,6 +43,8 @@ const ProfileEdit = () => {
       .from("profiles")
       .update({
         username: `${firstName.trim()} ${lastName.trim()}`,
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
         avatar_url: avatar,
         job_title: jobTitle,
         show_avatar_on_scorecard: showAvatar,
@@ -52,6 +54,7 @@ const ProfileEdit = () => {
     setSubmitting(false);
 
     if (error) {
+      console.error("Profile update error:", error);
       toast({
         title: "Profile Update Failed",
         description: error.message,
@@ -59,9 +62,11 @@ const ProfileEdit = () => {
       });
       return;
     }
+    
     toast({
       title: "Profile Updated",
     });
+    
     setProfile({
       ...profile,
       first_name: firstName,
@@ -70,6 +75,7 @@ const ProfileEdit = () => {
       avatar_url: avatar,
       show_avatar_on_scorecard: showAvatar,
     });
+    
     navigate("/");
   };
 

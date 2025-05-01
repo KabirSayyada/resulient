@@ -17,7 +17,9 @@ export const UserMenu = () => {
   const { user, signOut } = useAuth();
   const { profile } = useUserProfile(user?.id);
 
-  const initials = user?.email?.substring(0, 2).toUpperCase() || "??";
+  const initials = profile 
+    ? `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`.toUpperCase()
+    : user?.email?.substring(0, 2).toUpperCase() || "??";
 
   return (
     <DropdownMenu>
@@ -37,7 +39,7 @@ export const UserMenu = () => {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">Account</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {profile?.first_name || user?.email}
+              {profile ? `${profile.first_name} ${profile.last_name}` : user?.email}
             </p>
           </div>
         </DropdownMenuLabel>
