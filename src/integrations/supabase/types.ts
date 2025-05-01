@@ -34,8 +34,10 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          first_name: string | null
           id: string
           job_title: string | null
+          last_name: string | null
           show_avatar_on_scorecard: boolean
           updated_at: string
           username: string | null
@@ -43,8 +45,10 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          first_name?: string | null
           id: string
           job_title?: string | null
+          last_name?: string | null
           show_avatar_on_scorecard?: boolean
           updated_at?: string
           username?: string | null
@@ -52,8 +56,10 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          first_name?: string | null
           id?: string
           job_title?: string | null
+          last_name?: string | null
           show_avatar_on_scorecard?: boolean
           updated_at?: string
           username?: string | null

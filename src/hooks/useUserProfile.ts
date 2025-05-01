@@ -25,6 +25,12 @@ export function useUserProfile(userId?: string) {
         .eq("id", userId)
         .maybeSingle();
 
+      if (error) {
+        console.error("Error fetching profile:", error);
+        setLoading(false);
+        return;
+      }
+
       if (data) {
         // For backward compatibility with existing profiles
         let firstName = data.first_name || "";
