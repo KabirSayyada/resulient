@@ -8,6 +8,7 @@ import { AvatarSelector } from "@/components/profile/AvatarSelector";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { GuidedTour } from "@/components/onboarding/GuidedTour";
 
 export default function ProfileSetup() {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ export default function ProfileSetup() {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [showAvatar, setShowAvatar] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [profileCreated, setProfileCreated] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -54,7 +56,14 @@ export default function ProfileSetup() {
       title: "Profile Created!",
       description: "Welcome to ATS Resume Optimizer."
     });
-    navigate("/");
+    
+    // Set profile created flag to show guided tour
+    setProfileCreated(true);
+    
+    // Navigate to home page after a delay to allow guided tour to show
+    setTimeout(() => {
+      navigate("/");
+    }, 500);
   };
 
   return (
@@ -134,6 +143,9 @@ export default function ProfileSetup() {
           </Button>
         </form>
       </div>
+      
+      {/* Guided tour that shows when profile is created */}
+      {profileCreated && <GuidedTour forceOpen={true} />}
     </div>
   );
 }

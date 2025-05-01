@@ -20,10 +20,27 @@ interface TourStep {
   animationClass: string;
 }
 
-export const GuidedTour = () => {
-  const [showTour, setShowTour] = useLocalStorage('resulient-tour-completed', true);
+interface GuidedTourProps {
+  forceOpen?: boolean;
+  onClose?: () => void;
+}
+
+export const GuidedTour = ({ forceOpen, onClose }: GuidedTourProps) => {
+  // False means the tour has been completed, true means it hasn't been viewed yet
+  const [tourNotViewed, setTourNotViewed] = useLocalStorage('resulient-tour-not-viewed', true);
   const [currentStep, setCurrentStep] = useState(0);
   const [animating, setAnimating] = useState(false);
+  
+  // Determine if tour should be shown (either forced open or not viewed yet)
+  const [showTour, setShowTour] = useState(forceOpen || tourNotViewed);
+
+  // Update showTour if forceOpen changes
+  useEffect(() => {
+    if (forceOpen) {
+      setShowTour(true);
+      setCurrentStep(0);
+    }
+  }, [forceOpen]);
 
   const steps: TourStep[] = [
     {
@@ -65,7 +82,7 @@ export const GuidedTour = () => {
 
   const handleNext = () => {
     if (currentStep === steps.length - 1) {
-      setShowTour(false);
+      handleClose();
     } else {
       setAnimating(true);
       setTimeout(() => {
@@ -76,7 +93,7 @@ export const GuidedTour = () => {
   };
 
   const handleSkip = () => {
-    setShowTour(false);
+    handleClose();
   };
 
   const handlePrevious = () => {
@@ -89,16 +106,16 @@ export const GuidedTour = () => {
     }
   };
 
-  // Reverse the default behavior - useLocalStorage has initialized this to true if it doesn't exist
-  useEffect(() => {
-    // If value was never set before, show the tour
-    if (showTour === true) {
-      setShowTour(true);
-    }
-  }, []);
+  const handleClose = () => {
+    setShowTour(false);
+    setTourNotViewed(false); // Mark tour as viewed
+    if (onClose) onClose();
+  };
 
   return (
-    <Dialog open={showTour} onOpenChange={setShowTour}>
+    <Dialog open={showTour} onOpenChange={(open) => {
+      if (!open) handleClose();
+    }}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-white dark:bg-gray-950 border-0 shadow-2xl">
         <div className={`${steps[currentStep].bgColor} transition-all duration-500 ${animating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
           <DialogHeader className="pt-8 px-6">
