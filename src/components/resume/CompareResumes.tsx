@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ScoreData } from '@/types/resume';
 import { 
@@ -14,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { SuggestedSkills } from './components/SuggestedSkills';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CompareIcon } from "lucide-react";
+import { ArrowRight, GitCompare } from "lucide-react";
 import { 
   Select,
   SelectContent,

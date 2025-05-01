@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Star, FileText, Award, BarChart4, Sparkles, CompareIcon } from "lucide-react";
+import { ArrowRight, Star, FileText, Award, BarChart4, Sparkles, GitCompare } from "lucide-react";
 
 interface TourStep {
   title: string;
@@ -50,7 +50,7 @@ export const GuidedTour = () => {
     {
       title: "Compare Your Progress",
       description: "Use our powerful comparison tool to see how your resume has improved over time. Select any two scores to see a detailed side-by-side analysis.",
-      icon: <CompareIcon className="h-12 w-12 text-emerald-500" />,
+      icon: <GitCompare className="h-12 w-12 text-emerald-500" />,
       bgColor: "bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/40 dark:to-green-900/40",
       animationClass: "animate-fade-in"
     },

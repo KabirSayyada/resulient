@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ScoreData } from "@/types/resume";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
-import { ChevronDown, ChevronUp, Calendar, ArrowLeft, ArrowRight, CompareIcon } from "lucide-react";
+import { ChevronDown, ChevronUp, Calendar, ArrowLeft, ArrowRight, GitCompare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -102,7 +102,7 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
               variant="outline" 
               className="flex items-center gap-2 animate-fade-in"
             >
-              <CompareIcon className="h-4 w-4" />
+              <GitCompare className="h-4 w-4" />
               <span>Compare Scores</span>
             </Button>
           )}
