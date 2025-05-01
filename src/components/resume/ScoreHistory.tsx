@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ScoreData } from "@/types/resume";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
-import { ChevronDown, ChevronUp, Calendar, ArrowLeft, ArrowRight } from "lucide-react";
+import { ChevronDown, ChevronUp, Calendar, ArrowLeft, ArrowRight, CompareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -19,6 +19,7 @@ import {
   Tooltip, 
   Legend 
 } from "recharts";
+import { toast } from "@/hooks/use-toast";
 
 interface ScoreHistoryProps {
   scores: ScoreData[];
@@ -45,7 +46,11 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
     } else {
       // Only allow two scores at a time
       if (selectedScores.length >= 2) {
-        setSelectedScores([...selectedScores.slice(1), score]);
+        setSelectedScores([selectedScores[1], score]);
+        toast({
+          title: "Selection Updated",
+          description: "You can only compare two scores at a time.",
+        });
       } else {
         setSelectedScores([...selectedScores, score]);
       }
@@ -53,13 +58,22 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
   };
 
   const handleCompare = () => {
-    if (selectedScores.length < 2) {
-      // If less than 2 scores selected, select the first two scores automatically
+    if (selectedScores.length === 2) {
+      setCompareOpen(true);
+    } else if (selectedScores.length === 1) {
+      // If only one score is selected, automatically select the most recent other score
+      const otherScores = scores.filter(s => s.id !== selectedScores[0].id);
+      if (otherScores.length > 0) {
+        setSelectedScores([selectedScores[0], otherScores[0]]);
+        setCompareOpen(true);
+      }
+    } else {
+      // If no scores selected, select the two most recent scores
       if (scores.length >= 2) {
         setSelectedScores([scores[0], scores[1]]);
+        setCompareOpen(true);
       }
     }
-    setCompareOpen(true);
   };
 
   // Prepare data for the chart - last 10 entries only
@@ -78,7 +92,7 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
 
   return (
     <div className="space-y-8">
-      <Card className="border-t-4 border-t-indigo-500 shadow-md overflow-hidden">
+      <Card className="border-t-4 border-t-indigo-500 shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Your Progress Over Time</CardTitle>
           {scores.length >= 2 && (
@@ -86,11 +100,10 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
               onClick={handleCompare} 
               size="sm" 
               variant="outline" 
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 animate-fade-in"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <CompareIcon className="h-4 w-4" />
               <span>Compare Scores</span>
-              <ArrowRight className="h-4 w-4" />
             </Button>
           )}
         </CardHeader>
@@ -165,8 +178,8 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
                 onClick={handleCompare} 
                 size="sm" 
                 variant="outline"
-                disabled={selectedScores.length < 2}
-                className="flex items-center gap-1"
+                disabled={selectedScores.length < 1}
+                className="flex items-center gap-1 animate-fade-in"
               >
                 Compare Selected
               </Button>
@@ -175,11 +188,18 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
         </div>
         
         {scores.map((score, index) => (
-          <Card key={score.id || index} className="overflow-hidden">
+          <Card 
+            key={score.id || index} 
+            className={`overflow-hidden transition-all duration-300 ${
+              selectedScores.find(s => s.id === score.id) 
+                ? 'border-l-4 border-l-indigo-500 shadow-md' 
+                : 'hover:border-l-2 hover:border-l-indigo-200 dark:hover:border-l-indigo-800'
+            }`}
+          >
             <div 
-              className={`p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:bg-gray-50 dark:hover:bg-gray-800 gap-2 ${
+              className={`p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:bg-gray-50 dark:hover:bg-gray-800 gap-2 transition-all duration-200 ${
                 selectedScores.find(s => s.id === score.id) 
-                  ? 'bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-l-indigo-500' 
+                  ? 'bg-indigo-50 dark:bg-indigo-900/20' 
                   : ''
               }`}
             >
@@ -188,7 +208,7 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
                 onClick={() => toggleScoreSelection(score)}
               >
                 <div className="mr-4 flex-shrink-0">
-                  <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                  <div className={`h-10 w-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                     score.overallScore >= 80 ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400' : 
                     score.overallScore >= 60 ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/50 dark:text-yellow-400' : 
                     'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400'
@@ -220,7 +240,7 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
                   variant="ghost" 
                   size="sm" 
                   onClick={() => toggleExpand(index)}
-                  className="p-0 h-8 w-8 rounded-full"
+                  className="p-0 h-8 w-8 rounded-full transition-transform duration-200"
                 >
                   {expandedIndex === index ? (
                     <ChevronUp className="h-5 w-5 text-gray-400" />
@@ -232,7 +252,7 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
             </div>
 
             {expandedIndex === index && (
-              <div className="border-t border-gray-200 dark:border-gray-700">
+              <div className="border-t border-gray-200 dark:border-gray-700 animate-fade-in">
                 <CardContent className="pt-4 overflow-x-auto">
                   <ScoreBreakdown scoreData={score} />
                 </CardContent>
@@ -246,7 +266,8 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
       <CompareResumes 
         open={compareOpen} 
         onOpenChange={setCompareOpen} 
-        scores={selectedScores.length >= 2 ? selectedScores : scores.slice(0, 2)}
+        scores={scores}
+        preSelectedScores={selectedScores.length === 2 ? [selectedScores[0].id, selectedScores[1].id] : undefined}
       />
     </div>
   );
