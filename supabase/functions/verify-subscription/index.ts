@@ -87,7 +87,7 @@ serve(async (req) => {
       console.log("Subscription is active. Has access:", hasAccess, "Tier:", subscriptionTier);
     } else {
       // No active subscription found
-      console.log("No active subscription found");
+      console.log("No active subscription found for user ID:", user.id);
       hasAccess = false
     }
 

@@ -46,14 +46,16 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
     if (!user) return null;
     
     try {
-      // Query the user_subscriptions table directly
+      console.log("Checking database subscription for user:", user.id);
+      
+      // Query the user_subscriptions table directly with explicit conditions
+      const now = new Date().toISOString();
       const { data, error } = await supabase
         .from('user_subscriptions')
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'active')
-        .lte('start_date', new Date().toISOString())
-        .or(`end_date.is.null,end_date.gt.${new Date().toISOString()}`)
+        .or(`end_date.is.null,end_date.gt.${now}`)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -61,6 +63,12 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
       if (error) {
         console.error("Error checking subscription in database:", error);
         return null;
+      }
+      
+      if (data) {
+        console.log("Found active subscription in database:", data);
+      } else {
+        console.log("No active subscription found in database for user:", user.id);
       }
       
       return data;
@@ -82,7 +90,7 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
       
       // If we found an active subscription in the database, use that data
       if (dbSubscription) {
-        console.log("Found active subscription in database:", dbSubscription);
+        console.log("Using subscription from database:", dbSubscription);
         
         // Determine tier limits
         const tierLimits = getTierLimits(dbSubscription.subscription_tier as SubscriptionTier);
@@ -131,17 +139,23 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
         return;
       }
 
-      // Get additional subscription details
-      const { data: subData } = await supabase
-        .from('user_subscriptions')
-        .select('billing_cycle, gumroad_purchase_id, status')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // Get additional subscription details if we have a paid tier
+      let subData = null;
+      if (response.data.tier !== "free") {
+        const { data } = await supabase
+          .from('user_subscriptions')
+          .select('billing_cycle, gumroad_purchase_id, status')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+          
+        subData = data;
+      }
 
-      console.log("Subscription data:", subData, "Response data:", response.data);
+      console.log("Setting subscription from edge function. Tier:", response.data.tier, 
+                 "Extra data:", subData, "Response:", response.data);
 
       setSubscription({
         tier: response.data.tier,

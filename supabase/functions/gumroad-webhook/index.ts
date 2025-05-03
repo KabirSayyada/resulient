@@ -66,7 +66,7 @@ async function findUserByEmail(email: string): Promise<string | null> {
     }
     
     // Find the user with the matching email
-    const user = data.users.find(u => u.email === email);
+    const user = data.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
     
     if (user) {
       console.log("Found user ID for email:", user.id);
@@ -181,7 +181,7 @@ serve(async (req) => {
 
   try {
     // Log that we received a webhook
-    console.log("Received webhook with signature: ");
+    console.log("Received webhook");
     
     // Process webhook payload
     const formData = await req.formData();
@@ -216,7 +216,7 @@ serve(async (req) => {
     }
     
     // Parse the sale timestamp
-    const saleTimestamp = safeParseDate(payload.sale_timestamp);
+    const saleTimestamp = safeParseDate(payload.sale_timestamp || new Date().toISOString());
     if (!saleTimestamp) {
       throw new Error("Invalid sale timestamp: " + payload.sale_timestamp);
     }
@@ -254,8 +254,9 @@ serve(async (req) => {
     
     console.log("Created subscription:", subscription);
     
-    // Get the success URL from the payload
-    let redirectUrl = payload["url_params[success_url]"] || `${appUrl}/subscription-success?product=${productCode}`;
+    // Get the success URL from the payload or use default
+    const redirectUrl = payload["url_params[success_url]"] || 
+                       `${appUrl}/subscription-success?product=${productCode}`;
     console.log("Redirecting to:", redirectUrl);
     
     // Return an HTML page that will redirect the user to the success page

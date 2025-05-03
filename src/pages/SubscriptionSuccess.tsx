@@ -25,11 +25,15 @@ const SubscriptionSuccess = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return false;
         
+        console.log("Checking for active subscription for user ID:", user.id);
+        
+        const now = new Date().toISOString();
         const { data, error } = await supabase
           .from('user_subscriptions')
           .select('*')
           .eq('user_id', user.id)
           .eq('status', 'active')
+          .or(`end_date.is.null,end_date.gt.${now}`)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -46,6 +50,7 @@ const SubscriptionSuccess = () => {
           return true;
         }
         
+        console.log("No active subscription found for user ID:", user.id);
         return false;
       } catch (error) {
         console.error("Error in checkExistingSubscription:", error);
