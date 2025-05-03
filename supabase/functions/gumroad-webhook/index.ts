@@ -7,6 +7,9 @@ const supabaseUrl = Deno.env.get("SUPABASE_URL") || ""
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+// App URL for redirects
+const APP_URL = Deno.env.get("APP_URL") || "https://resulient.com"
+
 // CORS headers
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -191,7 +194,11 @@ serve(async (req) => {
     }
     
     return new Response(
-      JSON.stringify({ success: true, data: result }),
+      JSON.stringify({ 
+        success: true, 
+        data: result,
+        redirectUrl: `${APP_URL}/subscription-success?product=${productCode}`
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )
   } catch (error) {

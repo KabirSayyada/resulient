@@ -80,6 +80,8 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
         .limit(1)
         .maybeSingle();
 
+      console.log("Subscription data:", subData, "Response data:", response.data);
+
       setSubscription({
         tier: response.data.tier,
         hasAccess: response.data.hasAccess,
@@ -131,6 +133,7 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
   };
 
   const refreshSubscription = () => {
+    console.log("Refreshing subscription...");
     setSubscription(prev => ({ ...prev, isLoading: true }));
     verifySubscription();
   };

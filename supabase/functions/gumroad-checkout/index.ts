@@ -7,7 +7,7 @@ const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 // App URL for redirects
-const APP_URL = Deno.env.get("APP_URL") || "https://app.resulient.com"
+const APP_URL = Deno.env.get("APP_URL") || "https://resulient.com"
 
 // Gumroad product IDs with permalinks
 const GUMROAD_PRODUCTS = {
@@ -90,7 +90,7 @@ serve(async (req) => {
             if (profile.last_name) params.append("last_name", profile.last_name)
           }
           
-          // Add success redirect URL back to our app
+          // Add success redirect URL back to our app - note we're using the APP_URL here
           params.append("success_url", `${APP_URL}/subscription-success?product=${productId}`)
           
           // Return the checkout URL
@@ -144,7 +144,7 @@ serve(async (req) => {
       if (profile.last_name) params.append("last_name", profile.last_name)
     }
     
-    // Add success redirect URL back to our app
+    // Add success redirect URL back to our app - note we're using the APP_URL here
     params.append("success_url", `${APP_URL}/subscription-success?product=${productId}`)
     
     // Return the checkout URL

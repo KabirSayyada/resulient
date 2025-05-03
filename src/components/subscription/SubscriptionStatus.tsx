@@ -61,7 +61,9 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
     } catch (error) {
       console.error("Error refreshing subscription:", error);
     } finally {
-      setIsRefreshing(false);
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 1000);
     }
   };
 
@@ -94,6 +96,7 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
               onClick={handleRefresh} 
               className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
               title="Refresh subscription status"
+              disabled={isRefreshing}
             >
               <RefreshCw className={`h-4 w-4 text-gray-500 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>

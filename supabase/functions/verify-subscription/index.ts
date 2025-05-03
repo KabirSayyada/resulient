@@ -43,6 +43,9 @@ serve(async (req) => {
     const url = new URL(req.url)
     const requestedTier = url.searchParams.get("tier")
 
+    // Log for debugging
+    console.log("Verifying subscription for user:", user.id, "Requested tier:", requestedTier);
+
     // Get the user's active subscription
     const { data: subscription, error: subError } = await supabase
       .from("user_subscriptions")
@@ -52,6 +55,9 @@ serve(async (req) => {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle()
+
+    // Log subscription data for debugging
+    console.log("Subscription data:", subscription, "Error:", subError);
 
     // Determine subscription status
     let hasAccess = false
@@ -65,6 +71,7 @@ serve(async (req) => {
       // Check if the subscription has expired
       if (expiresAt && new Date(expiresAt) < new Date()) {
         // Subscription has expired
+        console.log("Subscription has expired:", expiresAt);
         hasAccess = false
       } else {
         // If a specific tier was requested, check if the user has access to that tier
@@ -80,9 +87,12 @@ serve(async (req) => {
           // No specific tier requested, user has access if they have any active subscription
           hasAccess = true
         }
+        
+        console.log("Subscription is active. Has access:", hasAccess, "Tier:", subscriptionTier);
       }
     } else {
       // No active subscription found
+      console.log("No active subscription found");
       hasAccess = false
     }
 

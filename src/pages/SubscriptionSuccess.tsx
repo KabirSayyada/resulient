@@ -5,25 +5,45 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Check, Loader2 } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
+import { toast } from "@/hooks/use-toast";
 
 const SubscriptionSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const productId = searchParams.get("product");
-  const { subscription } = useSubscription();
+  const { subscription, refreshSubscription } = useSubscription();
   const [loading, setLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
   
   useEffect(() => {
+    // Refresh subscription status immediately when page loads
+    refreshSubscription();
+    
     // Give time for the webhook to process and subscription to update
     const timer = setTimeout(() => {
       setLoading(false);
+      
+      // Check subscription status
+      if (subscription.tier === "free" && retryCount < 3) {
+        console.log("Subscription not active yet, refreshing...");
+        refreshSubscription();
+        setRetryCount(prev => prev + 1);
+      }
     }, 3000);
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [refreshSubscription, subscription.tier, retryCount]);
 
   const redirectToDashboard = () => {
     navigate("/");
+    
+    // Show welcome toast if subscription is active
+    if (subscription.tier !== "free") {
+      toast({
+        title: `Welcome to ${subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1)}!`,
+        description: "You now have access to all premium features.",
+      });
+    }
   };
 
   const getProductName = (productId: string | null) => {
@@ -40,6 +60,14 @@ const SubscriptionSuccess = () => {
   
   const isBillingCycleYearly = (productId: string | null) => {
     return productId?.includes("yearly") ?? false;
+  };
+
+  const handleManualRefresh = () => {
+    setLoading(true);
+    refreshSubscription();
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
   };
 
   return (
@@ -87,6 +115,15 @@ const SubscriptionSuccess = () => {
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 It may take a few minutes to activate. Please refresh the app or check back later.
               </p>
+              <Button 
+                onClick={handleManualRefresh} 
+                variant="outline" 
+                size="sm"
+                className="mt-2"
+              >
+                <Loader2 className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                Refresh Status
+              </Button>
             </div>
           )}
           
