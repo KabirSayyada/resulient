@@ -89,20 +89,35 @@ serve(async (req) => {
     
     // Get Supabase user ID from email
     const { data: userData, error: userError } = await supabase
-      .from("auth.users")
+      .from("users")
       .select("id")
       .eq("email", user_email)
       .maybeSingle()
       
     if (userError || !userData) {
       console.error("Error finding user by email:", userError)
-      return new Response(
-        JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      )
+      
+      // Try querying auth.users directly using service role
+      const { data: authUserData, error: authUserError } = await supabase.auth.admin.listUsers({
+        filters: {
+          email: user_email
+        }
+      })
+      
+      if (authUserError || !authUserData || authUserData.users.length === 0) {
+        console.error("Error finding user in auth.users:", authUserError)
+        return new Response(
+          JSON.stringify({ error: "User not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        )
+      }
+      
+      var supabaseUserId = authUserData.users[0].id
+    } else {
+      var supabaseUserId = userData.id
     }
     
-    const supabaseUserId = userData.id
+    console.log("Found user ID for email:", supabaseUserId)
     
     // Check if subscription already exists for this purchase
     const { data: existingSub, error: lookupError } = await supabase

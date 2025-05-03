@@ -3,7 +3,7 @@ import { useSubscription, SubscriptionTier } from "@/hooks/useSubscription";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, CheckCircle, CreditCard, Loader2 } from "lucide-react";
+import { CalendarIcon, CheckCircle, CreditCard, Loader2, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -13,8 +13,9 @@ interface SubscriptionStatusProps {
 }
 
 export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
-  const { subscription, checkout } = useSubscription();
+  const { subscription, checkout, refreshSubscription } = useSubscription();
   const [isUpgrading, setIsUpgrading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const getTierColor = (tier: SubscriptionTier) => {
     switch (tier) {
@@ -49,6 +50,21 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
     }
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      refreshSubscription();
+      toast({
+        title: "Subscription Status Refreshed",
+        description: "Your subscription information has been updated.",
+      });
+    } catch (error) {
+      console.error("Error refreshing subscription:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString(undefined, {
@@ -71,12 +87,21 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span>Your Subscription</span>
+        <div className="flex justify-between items-center">
+          <CardTitle className="flex items-center gap-2">
+            <span>Your Subscription</span>
+            <button 
+              onClick={handleRefresh} 
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+              title="Refresh subscription status"
+            >
+              <RefreshCw className={`h-4 w-4 text-gray-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
+          </CardTitle>
           <Badge className={getTierColor(subscription.tier)}>
             {subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1)}
           </Badge>
-        </CardTitle>
+        </div>
         <CardDescription>
           Manage your subscription and view your benefits
         </CardDescription>
@@ -90,6 +115,12 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
                 <span className="font-medium">Active subscription</span> - {subscription.billingCycle} billing
               </span>
             </div>
+            {subscription.purchaseId && (
+              <div className="flex items-center space-x-2 text-sm">
+                <CreditCard className="h-4 w-4 text-gray-500" />
+                <span>Purchase ID: {subscription.purchaseId.substring(0, 8)}...</span>
+              </div>
+            )}
             {subscription.expiresAt && (
               <div className="flex items-center space-x-2 text-sm">
                 <CalendarIcon className="h-4 w-4 text-gray-500" />

@@ -18,6 +18,7 @@ import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
 import Pricing from "./pages/Pricing";
+import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import IndustryLeaderboard from "./pages/IndustryLeaderboard";
 import { ThemeProvider } from "./components/theme/ThemeProvider";
 
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/profile-setup" element={<ProfileSetup />} />
               <Route path="/profile-edit" element={<ProfileEdit />} />
               <Route path="/pricing" element={<Pricing />} />
+              <Route path="/subscription-success" element={<SubscriptionSuccess />} />
               <Route
                 path="/"
                 element={
