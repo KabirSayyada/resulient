@@ -90,19 +90,23 @@ serve(async (req) => {
       product_id,
       permalink,
       product_permalink,
-      price,
-      recurrence,
+      short_product_id,
       purchaser_id,
       purchase_id,
       subscriber_id,
       user_id,
       user_email,
+      email,
       sale_id,
       refunded,
       sale_timestamp,
       event,
-      seller_id
+      seller_id,
+      resource_name
     } = body;
+    
+    // Use resource_name as event if event is not provided
+    const eventName = event || resource_name || "sale";
     
     // Verify this is from our Gumroad account
     if (seller_id && seller_id !== "pdzGrB3urFjHJyCfq4fMFg==") {
@@ -113,20 +117,31 @@ serve(async (req) => {
       );
     }
 
-    // Extract the product short code from permalink
-    let productCode;
-    if (permalink) {
+    // Extract the product short code - try multiple possible sources
+    let productCode = short_product_id || null;
+    
+    // If direct short_product_id not available, try to extract from permalinks
+    if (!productCode && permalink) {
       const permalinkMatch = permalink.match(/\/l\/([^\/]+)/);
       productCode = permalinkMatch ? permalinkMatch[1] : null;
-    } else if (product_permalink) {
+    } 
+    
+    if (!productCode && product_permalink) {
       const permalinkMatch = product_permalink.match(/\/l\/([^\/]+)/);
       productCode = permalinkMatch ? permalinkMatch[1] : null;
     }
     
+    // Last resort - extract directly if permalink is just the code
+    if (!productCode && permalink && !permalink.includes('/')) {
+      productCode = permalink;
+    }
+    
+    console.log("Extracted product code:", productCode);
+    
     if (!productCode || !PRODUCT_TIERS[productCode]) {
       console.error("Unknown product code:", productCode);
       return new Response(
-        JSON.stringify({ error: "Unknown product" }),
+        JSON.stringify({ error: "Unknown product", productCode, permalinkData: { permalink, product_permalink, short_product_id } }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       )
     }
@@ -135,13 +150,24 @@ serve(async (req) => {
     const { tier, cycle } = PRODUCT_TIERS[productCode]
     
     // Get status from event name
-    const status = EVENT_TO_STATUS[event] || "active"
+    const status = EVENT_TO_STATUS[eventName] || "active"
+    
+    // Get user email - could be in different fields depending on Gumroad's payload
+    const userEmail = email || user_email;
+    
+    if (!userEmail) {
+      console.error("No user email provided in webhook payload");
+      return new Response(
+        JSON.stringify({ error: "Missing user email" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      )
+    }
     
     // Get Supabase user ID from email
     const { data: userData, error: userError } = await supabase
       .from("users")
       .select("id")
-      .eq("email", user_email)
+      .eq("email", userEmail)
       .maybeSingle()
       
     if (userError || !userData) {
@@ -150,14 +176,14 @@ serve(async (req) => {
       // Try querying auth.users directly using service role
       const { data: authUserData, error: authUserError } = await supabase.auth.admin.listUsers({
         filters: {
-          email: user_email
+          email: userEmail
         }
       });
       
       if (authUserError || !authUserData || authUserData.users.length === 0) {
         console.error("Error finding user in auth.users:", authUserError);
         return new Response(
-          JSON.stringify({ error: "User not found" }),
+          JSON.stringify({ error: "User not found", email: userEmail }),
           { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         )
       }
@@ -188,7 +214,7 @@ serve(async (req) => {
           billing_cycle: cycle,
           gumroad_subscription_id: subscriber_id,
           gumroad_product_id: product_id,
-          last_webhook_event: event,
+          last_webhook_event: eventName,
           updated_at: new Date().toISOString(),
           // Set end_date for canceled/refunded subscriptions
           ...(status === "canceled" || status === "refunded" 
@@ -218,7 +244,7 @@ serve(async (req) => {
           gumroad_purchase_id: purchase_id,
           gumroad_subscription_id: subscriber_id,
           gumroad_product_id: product_id,
-          last_webhook_event: event,
+          last_webhook_event: eventName,
           start_date: sale_timestamp ? new Date(Number(sale_timestamp) * 1000).toISOString() : new Date().toISOString(),
           // Calculate end_date for yearly subscriptions (1 year from now)
           ...(cycle === "yearly" 
