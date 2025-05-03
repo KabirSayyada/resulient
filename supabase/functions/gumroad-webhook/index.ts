@@ -153,6 +153,20 @@ function getRedirectHtml(redirectUrl: string): string {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .button {
+      display: inline-block;
+      background: linear-gradient(to right, #4f46e5, #7c3aed);
+      color: white;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      text-decoration: none;
+      margin-top: 1rem;
+      transition: transform 0.2s;
+    }
+    .button:hover {
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body>
@@ -160,12 +174,23 @@ function getRedirectHtml(redirectUrl: string): string {
     <div class="logo">Resulient</div>
     <div class="spinner"></div>
     <div class="message">Payment successful! Redirecting you now...</div>
-    <p>If you're not redirected automatically, <a href="${redirectUrl}">click here</a>.</p>
+    <p>If you're not redirected automatically, <a href="${redirectUrl}" class="button">Click here to continue</a>.</p>
   </div>
   
   <script>
-    // Immediate redirect
-    window.location.href = "${redirectUrl}";
+    // Try multiple redirect approaches
+    setTimeout(function() {
+      window.location.href = "${redirectUrl}";
+    }, 500);
+    
+    // Fallback approach with form submission
+    setTimeout(function() {
+      var form = document.createElement('form');
+      form.method = 'GET';
+      form.action = "${redirectUrl}";
+      document.body.appendChild(form);
+      form.submit();
+    }, 1500);
   </script>
 </body>
 </html>
@@ -255,10 +280,11 @@ serve(async (req) => {
     
     // Get the success URL from the payload or use default with product code
     const redirectUrl = payload["url_params[success_url]"] || 
-                       `${appUrl}/subscription-success?product=${productCode}`;
+                      `${appUrl}/subscription-success?product=${productCode}`;
     console.log("Redirecting to:", redirectUrl);
     
-    // Return an HTML page that will IMMEDIATELY redirect the user to the success page
+    // For Gumroad, we need to return a simple 200 success response
+    // But we'll add a Location header to attempt a redirect
     return new Response(
       getRedirectHtml(redirectUrl),
       { 
@@ -268,7 +294,8 @@ serve(async (req) => {
           "Content-Type": "text/html",
           "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
           "Pragma": "no-cache",
-          "Expires": "0"
+          "Expires": "0",
+          "Location": redirectUrl // Add redirect header as a fallback
         } 
       }
     );
@@ -276,7 +303,6 @@ serve(async (req) => {
     console.error("Error processing webhook:", error);
     
     // Even on error, return a success response to Gumroad with redirect
-    // But include an HTML page with error information for debugging
     return new Response(
       getRedirectHtml(`${appUrl}/subscription-success`),
       { 
@@ -286,7 +312,8 @@ serve(async (req) => {
           "Content-Type": "text/html",
           "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
           "Pragma": "no-cache",
-          "Expires": "0"
+          "Expires": "0",
+          "Location": `${appUrl}/subscription-success` // Add redirect header as a fallback
         } 
       }
     );
