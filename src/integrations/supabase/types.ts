@@ -165,12 +165,71 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          billing_cycle: string
+          created_at: string
+          end_date: string | null
+          gumroad_product_id: string | null
+          gumroad_purchase_id: string | null
+          gumroad_subscription_id: string | null
+          id: string
+          last_webhook_event: string | null
+          start_date: string
+          status: string
+          subscription_tier: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_cycle: string
+          created_at?: string
+          end_date?: string | null
+          gumroad_product_id?: string | null
+          gumroad_purchase_id?: string | null
+          gumroad_subscription_id?: string | null
+          id?: string
+          last_webhook_event?: string | null
+          start_date?: string
+          status: string
+          subscription_tier: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_cycle?: string
+          created_at?: string
+          end_date?: string | null
+          gumroad_product_id?: string | null
+          gumroad_purchase_id?: string | null
+          gumroad_subscription_id?: string | null
+          id?: string
+          last_webhook_event?: string | null
+          start_date?: string
+          status?: string
+          subscription_tier?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      user_has_active_subscription: {
+        Args: { user_uuid: string; tier?: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

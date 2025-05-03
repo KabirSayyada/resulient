@@ -1,11 +1,16 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, CheckCircle, Star } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Check, CheckCircle, Loader2, Star } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { LegalFooter } from "@/components/layout/LegalFooter";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface PricingFeature {
   text: string;
@@ -20,6 +25,10 @@ interface PricingTier {
   features: PricingFeature[];
   badge?: string;
   popular?: boolean;
+  productId: {
+    monthly: string | null;
+    yearly: string | null;
+  };
 }
 
 const pricingTiers: PricingTier[] = [
@@ -37,7 +46,11 @@ const pricingTiers: PricingTier[] = [
       { text: "Report Downloads", included: false },
       { text: "Unlimited Optimizations", included: false },
     ],
-    badge: "Free Forever"
+    badge: "Free Forever",
+    productId: {
+      monthly: null,
+      yearly: null
+    }
   },
   {
     name: "Premium",
@@ -54,7 +67,11 @@ const pricingTiers: PricingTier[] = [
       { text: "Unlimited Downloads", included: false },
     ],
     badge: "Most Popular",
-    popular: true
+    popular: true,
+    productId: {
+      monthly: "premium-monthly",
+      yearly: "premium-yearly"
+    }
   },
   {
     name: "Platinum",
@@ -70,11 +87,73 @@ const pricingTiers: PricingTier[] = [
       { text: "Advanced Analytics", included: true },
       { text: "Early Access to New Features", included: true },
     ],
-    badge: "Best Value"
+    badge: "Best Value",
+    productId: {
+      monthly: "platinum-monthly",
+      yearly: "platinum-yearly"
+    }
   }
 ];
 
 const PricingPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { subscription, checkout } = useSubscription();
+  const [isYearly, setIsYearly] = useState(true);
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
+
+  const handlePurchase = async (tier: PricingTier) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in or create an account to subscribe.",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    try {
+      setLoadingTier(tier.name);
+      const productId = isYearly ? tier.productId.yearly : tier.productId.monthly;
+      
+      if (!productId) {
+        if (tier.name === "Free") {
+          toast({
+            title: "Free Tier",
+            description: "You're already on the free tier. No purchase necessary.",
+          });
+        }
+        setLoadingTier(null);
+        return;
+      }
+
+      const checkoutData = await checkout(productId);
+      
+      if (checkoutData?.checkoutUrl) {
+        window.location.href = checkoutData.checkoutUrl;
+      } else {
+        toast({
+          title: "Checkout Error",
+          description: "Unable to start checkout process. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Purchase error:", error);
+      toast({
+        title: "Payment Error",
+        description: "There was a problem initiating checkout. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingTier(null);
+    }
+  };
+
+  // Determine if user is already on a paid plan
+  const isCurrentSubscriber = subscription.tier !== "free" && !subscription.isLoading;
+  const currentTierName = subscription.tier === "premium" ? "Premium" : subscription.tier === "platinum" ? "Platinum" : "Free";
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950 dark:via-indigo-950 dark:to-purple-950 px-4 py-12">
       <div className="absolute top-4 right-4">
@@ -91,6 +170,31 @@ const PricingPage = () => {
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Getting your dream job shouldn't be a dream. We're changing that by making professional resume optimization accessible to everyone. Start with our free tier or unlock unlimited potential with our premium plans.
           </p>
+          
+          {isCurrentSubscriber && (
+            <div className="mt-6 inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-full shadow-sm border border-green-300 dark:border-green-700">
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <span className="font-medium text-green-800 dark:text-green-300">
+                You're currently on the <span className="font-bold">{currentTierName} Plan</span>
+              </span>
+            </div>
+          )}
+          
+          {/* Billing toggle */}
+          <div className="mt-8 flex items-center justify-center">
+            <span className={`mr-3 text-base ${!isYearly ? "font-bold" : "text-gray-600 dark:text-gray-400"}`}>Monthly</span>
+            <button
+              onClick={() => setIsYearly(!isYearly)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isYearly ? "bg-indigo-600" : "bg-gray-400"}`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isYearly ? "translate-x-6" : "translate-x-1"}`}
+              />
+            </button>
+            <span className={`ml-3 text-base ${isYearly ? "font-bold" : "text-gray-600 dark:text-gray-400"}`}>
+              Yearly <span className="text-xs font-semibold text-green-600 dark:text-green-400">(Save ~20%)</span>
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
@@ -130,12 +234,18 @@ const PricingPage = () => {
                   {tier.monthlyPrice ? (
                     <>
                       <div className="flex items-center justify-center gap-2">
-                        <span className="text-4xl font-bold dark:text-white">${tier.monthlyPrice}</span>
-                        <span className="text-gray-600 dark:text-gray-300">/month</span>
+                        <span className="text-4xl font-bold dark:text-white">
+                          ${isYearly ? tier.yearlyPrice : tier.monthlyPrice}
+                        </span>
+                        <span className="text-gray-600 dark:text-gray-300">
+                          {isYearly ? "/year" : "/month"}
+                        </span>
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        or ${tier.yearlyPrice}/year
-                      </div>
+                      {isYearly && (
+                        <div className="text-sm text-green-600 dark:text-green-400 mt-1">
+                          Save ${Math.round(tier.monthlyPrice! * 12 - tier.yearlyPrice!)} per year
+                        </div>
+                      )}
                     </>
                   ) : (
                     <span className="text-4xl font-bold dark:text-white">Free</span>
@@ -158,16 +268,26 @@ const PricingPage = () => {
               </CardContent>
               <CardFooter>
                 <Button
-                  asChild
+                  onClick={() => handlePurchase(tier)}
+                  disabled={loadingTier === tier.name || (subscription.tier === tier.name.toLowerCase() && subscription.tier !== "free")}
                   className={`w-full ${
                     tier.popular
                       ? 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600'
                       : ''
                   }`}
                 >
-                  <Link to="/auth">
-                    {tier.monthlyPrice ? 'Get Started' : 'Try for Free'}
-                  </Link>
+                  {loadingTier === tier.name ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : subscription.tier === tier.name.toLowerCase() && subscription.tier !== "free" ? (
+                    "Current Plan"
+                  ) : (
+                    <>
+                      {tier.monthlyPrice ? 'Get Started' : 'Try for Free'}
+                    </>
+                  )}
                 </Button>
               </CardFooter>
             </Card>
