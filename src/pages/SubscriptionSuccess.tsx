@@ -142,10 +142,10 @@ const SubscriptionSuccess = () => {
   }, []);
   
   // Function to check subscription status and handle polling logic
-  const checkSubscriptionStatus = () => {
+  const checkSubscriptionStatus = async () => {
     console.log(`Checking subscription status (attempt ${refreshAttempts + 1}/10)...`);
     refreshSubscription();
-    checkForNotifications();
+    await checkForNotifications();
     setRefreshAttempts(prev => prev + 1);
     
     // Check subscription data validity
