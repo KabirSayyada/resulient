@@ -95,7 +95,7 @@ function addOneMonth(date: Date): Date {
   return result;
 }
 
-// HTML template for successful redirect
+// Enhanced HTML template for immediate redirect
 function getRedirectHtml(redirectUrl: string): string {
   return `
 <!DOCTYPE html>
@@ -104,6 +104,7 @@ function getRedirectHtml(redirectUrl: string): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Redirecting to Resulient...</title>
+  <meta http-equiv="refresh" content="0;url=${redirectUrl}">
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -158,15 +159,13 @@ function getRedirectHtml(redirectUrl: string): string {
   <div class="container">
     <div class="logo">Resulient</div>
     <div class="spinner"></div>
-    <div class="message">Your subscription is being activated!</div>
-    <p>Redirecting you to your dashboard...</p>
+    <div class="message">Payment successful! Redirecting you now...</div>
+    <p>If you're not redirected automatically, <a href="${redirectUrl}">click here</a>.</p>
   </div>
   
   <script>
-    // Redirect after a short delay to allow the message to be seen
-    setTimeout(() => {
-      window.location.href = "${redirectUrl}";
-    }, 1500);
+    // Immediate redirect
+    window.location.href = "${redirectUrl}";
   </script>
 </body>
 </html>
@@ -254,26 +253,29 @@ serve(async (req) => {
     
     console.log("Created subscription:", subscription);
     
-    // Get the success URL from the payload or use default
+    // Get the success URL from the payload or use default with product code
     const redirectUrl = payload["url_params[success_url]"] || 
                        `${appUrl}/subscription-success?product=${productCode}`;
     console.log("Redirecting to:", redirectUrl);
     
-    // Return an HTML page that will redirect the user to the success page
+    // Return an HTML page that will IMMEDIATELY redirect the user to the success page
     return new Response(
       getRedirectHtml(redirectUrl),
       { 
         status: 200, 
         headers: { 
           ...corsHeaders, 
-          "Content-Type": "text/html" 
+          "Content-Type": "text/html",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0"
         } 
       }
     );
   } catch (error) {
     console.error("Error processing webhook:", error);
     
-    // Even on error, return a success response to Gumroad
+    // Even on error, return a success response to Gumroad with redirect
     // But include an HTML page with error information for debugging
     return new Response(
       getRedirectHtml(`${appUrl}/subscription-success`),
@@ -281,7 +283,10 @@ serve(async (req) => {
         status: 200,  // Still return 200 to Gumroad
         headers: { 
           ...corsHeaders, 
-          "Content-Type": "text/html" 
+          "Content-Type": "text/html",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0"
         } 
       }
     );

@@ -100,11 +100,7 @@ const SubscriptionSuccess = () => {
     if (subscription.tier !== "free") {
       console.log("Subscription active, stopping polling");
       setLoading(false);
-      toast({
-        title: "Subscription Activated",
-        description: `Your ${subscription.tier} subscription is now active.`,
-        variant: "default",
-      });
+      // Don't show toast to improve user experience
       return;
     }
     
@@ -248,7 +244,7 @@ const SubscriptionSuccess = () => {
                 Your subscription is being processed.
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                It may take a few minutes to activate. Please refresh the app or check back later.
+                It may take a few moments to activate. Please use the refresh button below.
               </p>
               <Button 
                 onClick={handleManualRefresh} 
