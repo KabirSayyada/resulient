@@ -10,6 +10,7 @@ interface ResumeScoringFormProps {
   setResumeContent: (content: string) => void;
   isScoring: boolean;
   onScore: () => void;
+  disableButton?: boolean;
 }
 
 export const ResumeScoringForm = ({
@@ -17,6 +18,7 @@ export const ResumeScoringForm = ({
   setResumeContent,
   isScoring,
   onScore,
+  disableButton
 }: ResumeScoringFormProps) => {
   const wordCount = resumeContent.trim().split(/\s+/).length;
   const isResumeTooLong = wordCount > 800;
@@ -37,7 +39,7 @@ export const ResumeScoringForm = ({
       <div className="flex justify-center">
         <Button
           onClick={onScore}
-          disabled={isScoring || !resumeContent || isResumeTooLong}
+          disabled={isScoring || !resumeContent || isResumeTooLong || disableButton}
           className="px-10 py-3 text-lg font-bold rounded-full shadow transition-all bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500"
         >
           {isScoring ? "Analyzing..." : "🕹️ Benchmark Resume"}

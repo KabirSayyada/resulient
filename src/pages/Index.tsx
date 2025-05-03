@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -21,6 +20,9 @@ import { LegalFooter } from "@/components/layout/LegalFooter";
 import { Button } from "@/components/ui/button";
 import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
 import { GuidedTour } from "@/components/onboarding/GuidedTour";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const { user, loading } = useAuth();

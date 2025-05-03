@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { useResumeScoring } from "@/hooks/useResumeScoring";
+import { useSubscription } from "@/hooks/useSubscription";
 import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,13 +17,15 @@ import { MainNavigation } from "@/components/resume/MainNavigation";
 import { LegalFooter } from "@/components/layout/LegalFooter";
 import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
 import { GuidedTour } from "@/components/onboarding/GuidedTour";
+import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [resumeContent, setResumeContent] = useState("");
   const [activeTab, setActiveTab] = useState("current");
-  const { scoreData, scoreHistory, setScoreHistory, isScoring, handleScoreResume } = useResumeScoring(user?.id);
+  const { scoreData, scoreHistory, setScoreHistory, isScoring, hasReachedLimit, handleScoreResume } = useResumeScoring(user?.id);
+  const { subscription } = useSubscription();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -92,8 +95,13 @@ const ResumeScoring = () => {
   }
 
   const onScore = () => {
-    handleScoreResume(resumeContent);
+    // Get daily limit based on subscription tier
+    const dailyLimit = subscription.limits.resumeScorings;
+    handleScoreResume(resumeContent, dailyLimit);
   };
+
+  // Feature requires premium or platinum for unlimited usage
+  const showUpgradeAlert = hasReachedLimit && subscription.tier === "free";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950 dark:text-white py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
@@ -152,6 +160,14 @@ const ResumeScoring = () => {
 
         <MainNavigation />
 
+        {showUpgradeAlert && (
+          <UseSubscriptionAlert 
+            subscriptionTier={subscription.tier} 
+            requiredTier="premium" 
+            message="You've reached your daily limit for resume scoring. Free users can perform 3 resume scorings per day. Upgrade to Premium or Platinum for unlimited usage."
+          />
+        )}
+
         <Tabs defaultValue="current" className="mb-8" onValueChange={setActiveTab}>
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 rounded-lg shadow overflow-hidden border border-indigo-200">
             <TabsTrigger value="current">New Analysis</TabsTrigger>
@@ -168,6 +184,7 @@ const ResumeScoring = () => {
                   setResumeContent={setResumeContent}
                   isScoring={isScoring}
                   onScore={onScore}
+                  disableButton={hasReachedLimit && subscription.tier === "free"}
                 />
               </CardContent>
             </Card>
