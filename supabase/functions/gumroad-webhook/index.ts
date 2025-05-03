@@ -145,7 +145,7 @@ serve(async (req) => {
     // If direct short_product_id not available, try to extract from permalinks
     if (!productCode && permalink) {
       const permalinkMatch = permalink.match(/\/l\/([^\/]+)/);
-      productCode = permalinkMatch ? permalinkMatch[1] : null;
+      productCode = permalinkMatch ? permalinkMatch[1] : permalink;
     } 
     
     if (!productCode && product_permalink) {
@@ -185,10 +185,8 @@ serve(async (req) => {
       )
     }
     
-    // We'll skip looking in profiles and go directly to auth.users since we know we're having issues
-    console.log("Looking up user by email in auth.users:", userEmail);
-    
     // Query auth.users directly using service role
+    console.log("Looking up user by email in auth.users:", userEmail);
     const { data: authUserData, error: authUserError } = await supabase.auth.admin.listUsers({
       filters: {
         email: userEmail
@@ -196,7 +194,7 @@ serve(async (req) => {
     });
     
     if (authUserError || !authUserData || authUserData.users.length === 0) {
-      console.error("Error finding user in auth.users:", authUserError);
+      console.error("Error finding user by email:", authUserError);
       return new Response(
         JSON.stringify({ error: "User not found", email: userEmail }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -216,7 +214,7 @@ serve(async (req) => {
     let result;
     
     // Calculate end date safely
-    const calculateEndDate = (cycle, timestamp) => {
+    const calculateEndDate = (cycle) => {
       try {
         const now = new Date();
         if (cycle === "yearly") {
@@ -263,6 +261,7 @@ serve(async (req) => {
           billing_cycle: cycle,
           gumroad_subscription_id: subscriber_id,
           gumroad_product_id: product_id,
+          gumroad_purchase_id: purchase_id,
           last_webhook_event: eventName,
           updated_at: new Date().toISOString(),
           // Set end_date for canceled/refunded subscriptions
@@ -284,7 +283,7 @@ serve(async (req) => {
     } else {
       // Create new subscription
       const startDate = parseTimestamp(sale_timestamp);
-      const endDate = calculateEndDate(cycle, startDate);
+      const endDate = calculateEndDate(cycle);
       
       const { data, error } = await supabase
         .from("user_subscriptions")
@@ -319,13 +318,89 @@ serve(async (req) => {
     
     console.log("Redirecting to:", fullRedirectUrl);
     
+    // Create HTML response with auto-redirect
+    if (req.headers.get("Accept")?.includes("text/html")) {
+      // If this is accessed directly in a browser, redirect immediately
+      const htmlResponse = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Redirecting to Resulient</title>
+            <meta http-equiv="refresh" content="0; URL=${fullRedirectUrl}">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <script>
+              // Direct browser to redirect immediately
+              window.location.href = "${fullRedirectUrl}";
+            </script>
+            <style>
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+                line-height: 1.4;
+                max-width: 800px;
+                margin: 20px auto;
+                padding: 0 20px;
+                color: #333;
+                background-color: #f9f9f9;
+                text-align: center;
+              }
+              h1 { color: #4338ca; }
+              p { margin: 1em 0; }
+              .redirect-box {
+                background-color: #fff;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                padding: 20px;
+                margin-top: 30px;
+              }
+              .btn {
+                display: inline-block;
+                background-color: #4338ca;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 4px;
+                text-decoration: none;
+                margin-top: 20px;
+                border: none;
+                cursor: pointer;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="redirect-box">
+              <h1>Your purchase was successful!</h1>
+              <p>You're being redirected to Resulient. If you aren't redirected automatically, please click the button below.</p>
+              <a href="${fullRedirectUrl}" class="btn">Continue to Resulient</a>
+            </div>
+          </body>
+        </html>
+      `;
+      
+      return new Response(htmlResponse, { 
+        status: 200,
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "text/html",
+          "Location": fullRedirectUrl 
+        } 
+      });
+    }
+    
+    // Default JSON response for API clients
     return new Response(
       JSON.stringify({ 
         success: true, 
         data: result,
         redirectUrl: fullRedirectUrl
       }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { 
+        status: 200, 
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "Location": fullRedirectUrl 
+        } 
+      }
     )
   } catch (error) {
     console.error("Error processing webhook:", error);

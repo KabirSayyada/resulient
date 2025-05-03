@@ -49,7 +49,10 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        setSubscription(prev => ({ ...prev, isLoading: false }));
+        return;
+      }
 
       const queryParams = requiredTier ? `?tier=${requiredTier}` : '';
       
@@ -60,7 +63,13 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
         tier: SubscriptionTier;
         expiresAt: string | null;
         limits: SubscriptionLimits;
-      }>('verify-subscription' + queryParams);
+      }>('verify-subscription' + queryParams, {
+        // Add a cache-busting timestamp to prevent caching issues
+        headers: {
+          'Cache-Control': 'no-cache',
+          'X-Timestamp': Date.now().toString()
+        }
+      });
 
       if (response.error) {
         console.error("Error verifying subscription:", response.error);
@@ -69,6 +78,7 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
           description: "Failed to verify your subscription status. Please try again.",
           variant: "destructive",
         });
+        setSubscription(prev => ({ ...prev, isLoading: false }));
         return;
       }
 

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Loader2, RefreshCw } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { toast } from "@/hooks/use-toast";
 
@@ -15,39 +15,73 @@ const SubscriptionSuccess = () => {
   const [loading, setLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const [refreshAttempts, setRefreshAttempts] = useState(0);
+  const [retryTimeoutId, setRetryTimeoutId] = useState<number | null>(null);
+  
+  // Enhanced polling logic with progressive backoff
+  useEffect(() => {
+    // Clear any existing timer when component unmounts or when effect reruns
+    return () => {
+      if (retryTimeoutId !== null) {
+        clearTimeout(retryTimeoutId);
+      }
+    };
+  }, [retryTimeoutId]);
   
   useEffect(() => {
     // Refresh subscription status immediately when page loads
     refreshSubscription();
     
-    // Set up polling to check for subscription updates
-    const pollingInterval = setInterval(() => {
-      if (refreshAttempts < 5) {
-        console.log(`Polling subscription status (attempt ${refreshAttempts + 1}/5)...`);
-        refreshSubscription();
-        setRefreshAttempts(prev => prev + 1);
-      } else {
-        clearInterval(pollingInterval);
-      }
-    }, 2000);
+    // Set up initial polling interval
+    const initialCheckDelay = 800; // First check after 800ms
     
-    // Give time for the webhook to process and subscription to update
-    const timer = setTimeout(() => {
+    const initialTimer = setTimeout(() => {
       setLoading(false);
-      
-      // Check subscription status
-      if (subscription.tier === "free" && retryCount < 3) {
-        console.log("Subscription not active yet, refreshing...");
-        refreshSubscription();
-        setRetryCount(prev => prev + 1);
-      }
-    }, 3000);
+      checkSubscriptionStatus();
+    }, initialCheckDelay);
+    
+    setRetryTimeoutId(initialTimer as unknown as number);
     
     return () => {
-      clearTimeout(timer);
-      clearInterval(pollingInterval);
+      if (initialTimer) clearTimeout(initialTimer);
     };
-  }, [refreshSubscription, subscription.tier, retryCount]);
+  }, []);
+  
+  // Function to check subscription status and handle polling logic
+  const checkSubscriptionStatus = () => {
+    console.log(`Checking subscription status (attempt ${refreshAttempts + 1}/10)...`);
+    refreshSubscription();
+    setRefreshAttempts(prev => prev + 1);
+    
+    // Check subscription data validity
+    if (subscription.tier !== "free") {
+      console.log("Subscription active, stopping polling");
+      setLoading(false);
+      toast({
+        title: "Subscription Activated",
+        description: `Your ${subscription.tier} subscription is now active.`,
+        variant: "default",
+      });
+      return;
+    }
+    
+    // Continue polling with progressive backoff if needed
+    if (refreshAttempts < 10) {
+      // Calculate next retry delay with progressive backoff
+      const nextDelay = Math.min(1000 * Math.pow(1.5, refreshAttempts), 10000); 
+      console.log(`Will retry in ${nextDelay}ms`);
+      
+      const timerId = setTimeout(() => {
+        setRetryCount(prev => prev + 1);
+        checkSubscriptionStatus();
+      }, nextDelay);
+      
+      setRetryTimeoutId(timerId as unknown as number);
+    } else {
+      // Stop polling after max attempts
+      setLoading(false);
+      console.log("Max polling attempts reached");
+    }
+  };
 
   const redirectToDashboard = () => {
     navigate("/");
@@ -84,7 +118,8 @@ const SubscriptionSuccess = () => {
     refreshSubscription();
     setTimeout(() => {
       setLoading(false);
-    }, 2000);
+      checkSubscriptionStatus();
+    }, 1500);
   };
 
   return (
@@ -138,7 +173,7 @@ const SubscriptionSuccess = () => {
                 size="sm"
                 className="mt-2"
               >
-                <Loader2 className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
                 Refresh Status
               </Button>
             </div>
