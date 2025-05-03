@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { generatePDFFromElement } from "@/utils/reportGenerationUtils";
+import { DownloadReportButton } from "./DownloadReportButton";
 
 interface DownloadReportSectionProps {
   completeReportRef: React.RefObject<HTMLDivElement>;
@@ -36,14 +37,10 @@ export const DownloadReportSection = ({ completeReportRef }: DownloadReportSecti
           <div className="text-center mb-2">
             <p className="text-sm text-gray-600">Save this report for your records or to share with others</p>
           </div>
-          <Button 
-            size="lg"
+          <DownloadReportButton
+            title="Download Full Report (PDF)"
             onClick={handleFullReportDownload}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transform transition hover:scale-105 flex items-center gap-3 w-full sm:w-auto justify-center"
-          >
-            <Download className="h-5 w-5" />
-            Download Full Report (PDF)
-          </Button>
+          />
         </div>
       </div>
     </div>

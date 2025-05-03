@@ -102,7 +102,10 @@ export const OptimizedResumeDisplay = ({
               <OptimizedResumeContent content={formattedResumeContent} />
             </div>
             
-            <DownloadReportButton onClick={handleOptimizationReportDownload} />
+            <DownloadReportButton
+              title="Download Full Report (PDF)"
+              onClick={handleOptimizationReportDownload}
+            />
           </CardContent>
         </Card>
         

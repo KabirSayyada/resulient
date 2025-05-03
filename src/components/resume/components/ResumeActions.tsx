@@ -8,7 +8,7 @@ import { generatePDFFromElement, handleDownloadTextReport } from "@/utils/report
 import { ScoreData } from "@/types/resume";
 import { exportElementAsImage } from "@/utils/imageExportUtils";
 import React, { useState } from "react";
-import { DownloadReportButton } from "./DownloadReportButton"; // ADD this for “Full Report (PDF)”
+import { DownloadReportButton } from "./DownloadReportButton"; // ADD this for "Full Report (PDF)"
 
 interface ResumeActionsProps {
   scoreCardRef: React.RefObject<HTMLDivElement>;
@@ -244,7 +244,10 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
         </div>
       </div>
       {/* Button for exporting full report PDF (add below all other export options) */}
-      <DownloadReportButton onClick={handleFullReportDownload} />
+      <DownloadReportButton 
+        title="Download Full Report (PDF)"
+        onClick={handleFullReportDownload} 
+      />
     </div>
   );
 };
