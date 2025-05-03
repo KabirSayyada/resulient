@@ -2,13 +2,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1"
 
-// Supabase client setup with service role key
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || ""
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
+const appUrl = Deno.env.get("APP_URL") || "https://resulient.com"
 const supabase = createClient(supabaseUrl, supabaseKey)
-
-// App URL for redirects
-const APP_URL = Deno.env.get("APP_URL") || "https://resulient.com"
 
 // CORS headers
 const corsHeaders = {
@@ -16,26 +13,164 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 }
 
-// Define subscription tiers and product IDs
-const PRODUCT_TIERS = {
-  // Premium Monthly
-  "ylaia": { tier: "premium", cycle: "monthly" },
-  // Premium Yearly
-  "dencp": { tier: "premium", cycle: "yearly" },
-  // Platinum Monthly
-  "tbfapo": { tier: "platinum", cycle: "monthly" },
-  // Platinum Yearly
-  "dcfjt": { tier: "platinum", cycle: "yearly" },
+// Helper function to safely parse a date string
+function safeParseDate(dateString: string): Date | null {
+  try {
+    const date = new Date(dateString);
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+    return date;
+  } catch (error) {
+    console.error("Error parsing date:", error);
+    return null;
+  }
 }
 
-// Map Gumroad event names to our subscription status
-const EVENT_TO_STATUS = {
-  "sale": "active",
-  "refund": "refunded",
-  "subscription_cancelled": "canceled",
-  "subscription_updated": "active",
-  "subscription_restarted": "active",
-  "subscription_failed": "failed",
+// Helper function to map Gumroad product codes to subscription tiers
+function getSubscriptionTier(productCode: string): { tier: string; cycle: string } {
+  const productMap: Record<string, { tier: string; cycle: string }> = {
+    // Premium Monthly
+    "ylaia": { tier: "premium", cycle: "monthly" },
+    "premium-monthly": { tier: "premium", cycle: "monthly" },
+    
+    // Premium Yearly
+    "dencp": { tier: "premium", cycle: "yearly" },
+    "premium-yearly": { tier: "premium", cycle: "yearly" },
+    
+    // Platinum Monthly
+    "tbfapo": { tier: "platinum", cycle: "monthly" },
+    "platinum-monthly": { tier: "platinum", cycle: "monthly" },
+    
+    // Platinum Yearly
+    "dcfjt": { tier: "platinum", cycle: "yearly" },
+    "platinum-yearly": { tier: "platinum", cycle: "yearly" },
+  };
+  
+  return productMap[productCode] || { tier: "premium", cycle: "monthly" };
+}
+
+// Helper function to find a user by email
+async function findUserByEmail(email: string): Promise<string | null> {
+  try {
+    // Query auth.users directly to find user by email
+    const { data, error } = await supabase.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000 // Adjust based on expected number of users
+    });
+    
+    if (error) {
+      console.error("Error querying users:", error);
+      return null;
+    }
+    
+    // Find the user with the matching email
+    const user = data.users.find(u => u.email === email);
+    
+    if (user) {
+      console.log("Found user ID for email:", user.id);
+      return user.id;
+    }
+    
+    console.log("No user found with email:", email);
+    return null;
+  } catch (error) {
+    console.error("Error finding user by email:", error);
+    return null;
+  }
+}
+
+// Helper function to add 1 year to a date
+function addOneYear(date: Date): Date {
+  const result = new Date(date);
+  result.setFullYear(result.getFullYear() + 1);
+  return result;
+}
+
+// Helper function to add 1 month to a date
+function addOneMonth(date: Date): Date {
+  const result = new Date(date);
+  result.setMonth(result.getMonth() + 1);
+  return result;
+}
+
+// HTML template for successful redirect
+function getRedirectHtml(redirectUrl: string): string {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting to Resulient...</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(to bottom right, #eef2ff, #e0e7ff);
+      color: #4338ca;
+      text-align: center;
+      padding: 0 20px;
+    }
+    .logo {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #4338ca, #6366f1, #ec4899);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .container {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      max-width: 500px;
+      width: 100%;
+    }
+    .message {
+      font-size: 1.125rem;
+      margin-bottom: 1.5rem;
+    }
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border-left-color: #4338ca;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">Resulient</div>
+    <div class="spinner"></div>
+    <div class="message">Your subscription is being activated!</div>
+    <p>Redirecting you to your dashboard...</p>
+  </div>
+  
+  <script>
+    // Redirect after a short delay to allow the message to be seen
+    setTimeout(() => {
+      window.location.href = "${redirectUrl}";
+    }, 1500);
+  </script>
+</body>
+</html>
+  `;
 }
 
 serve(async (req) => {
@@ -45,368 +180,109 @@ serve(async (req) => {
   }
 
   try {
-    const signature = req.headers.get("X-Gumroad-Signature") || ""
+    // Log that we received a webhook
+    console.log("Received webhook with signature: ");
     
-    // For logging during development/debugging
-    console.log("Received webhook with signature:", signature)
+    // Process webhook payload
+    const formData = await req.formData();
+    console.log("Received form data:", formData);
     
-    // Determine content type and parse body accordingly
-    const contentType = req.headers.get("content-type") || ""
-    
-    let formData;
-    let body;
-    
-    if (contentType.includes("application/json")) {
-      // Handle JSON data
-      body = await req.json();
-      console.log("Received JSON payload:", JSON.stringify(body));
-    } else if (contentType.includes("application/x-www-form-urlencoded")) {
-      // Handle form data
-      formData = await req.formData();
-      console.log("Received form data:", formData);
-      
-      // Convert form data to object
-      body = {};
-      for (const [key, value] of formData.entries()) {
-        body[key] = value;
-      }
-    } else {
-      // Try to get text body as a fallback
-      const textBody = await req.text();
-      console.log("Received raw text:", textBody);
-      
-      // Parse URL-encoded form data manually
-      const params = new URLSearchParams(textBody);
-      body = {};
-      for (const [key, value] of params.entries()) {
-        body[key] = value;
-      }
+    // Convert FormData to a regular object
+    const payload: Record<string, string> = {};
+    for (const [key, value] of formData.entries()) {
+      payload[key] = value.toString();
     }
     
-    console.log("Processed webhook payload:", JSON.stringify(body));
+    console.log("Processed webhook payload:", JSON.stringify(payload));
     
-    // Extract fields from the body
-    const {
-      product_id,
-      permalink,
-      product_permalink,
-      short_product_id,
-      purchaser_id,
-      purchase_id,
-      subscriber_id,
-      user_id,
-      user_email,
-      email,
-      sale_id,
-      refunded,
-      sale_timestamp,
-      event,
-      seller_id,
-      resource_name,
-      url_params
-    } = body;
-    
-    // Get success URL from url_params if available
-    let successUrl = `${APP_URL}/subscription-success`;
-    
-    // Try to get product code from url_params for redirect
-    let redirectProductCode = null;
-    
-    // Check if url_params exists and contains success_url
-    if (url_params && url_params.success_url) {
-      // Direct access if it's already a string
-      successUrl = url_params.success_url;
-    } else if (body["url_params[success_url]"]) {
-      // Form data format: url_params[success_url]
-      successUrl = body["url_params[success_url]"];
-    }
-
-    // Extract product code from success URL if present
-    const urlProductMatch = successUrl.match(/[?&]product=([^&]+)/);
-    if (urlProductMatch && urlProductMatch[1]) {
-      redirectProductCode = urlProductMatch[1];
-    }
-    
-    // Use resource_name as event if event is not provided
-    const eventName = event || resource_name || "sale";
-    
-    // Verify this is from our Gumroad account
-    if (seller_id && seller_id !== "pdzGrB3urFjHJyCfq4fMFg==") {
-      console.error("Invalid seller ID:", seller_id);
-      return new Response(
-        JSON.stringify({ error: "Invalid seller" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Extract the product short code - try multiple possible sources
-    let productCode = short_product_id || null;
-    
-    // If direct short_product_id not available, try to extract from permalinks
-    if (!productCode && permalink) {
-      const permalinkMatch = permalink.match(/\/l\/([^\/]+)/);
-      productCode = permalinkMatch ? permalinkMatch[1] : permalink;
-    } 
-    
-    if (!productCode && product_permalink) {
-      const permalinkMatch = product_permalink.match(/\/l\/([^\/]+)/);
-      productCode = permalinkMatch ? permalinkMatch[1] : null;
-    }
-    
-    // Last resort - extract directly if permalink is just the code
-    if (!productCode && permalink && !permalink.includes('/')) {
-      productCode = permalink;
-    }
-    
+    // Extract the product code from the permalink
+    const productCode = payload.permalink || payload.short_product_id || "";
     console.log("Extracted product code:", productCode);
     
-    if (!productCode || !PRODUCT_TIERS[productCode]) {
-      console.error("Unknown product code:", productCode);
-      return new Response(
-        JSON.stringify({ error: "Unknown product", productCode, permalinkData: { permalink, product_permalink, short_product_id } }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      )
-    }
-
-    // Get subscription details from product code
-    const { tier, cycle } = PRODUCT_TIERS[productCode]
+    // Get subscription details based on product code
+    const { tier, cycle } = getSubscriptionTier(productCode);
     
-    // Get status from event name
-    const status = EVENT_TO_STATUS[eventName] || "active"
-    
-    // Get user email - could be in different fields depending on Gumroad's payload
-    const userEmail = email || user_email;
-    
+    // Find the user associated with this email
+    const userEmail = payload.email;
     if (!userEmail) {
-      console.error("No user email provided in webhook payload");
-      return new Response(
-        JSON.stringify({ error: "Missing user email" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      )
+      throw new Error("No email address provided in webhook payload");
     }
     
-    // Query auth.users directly using service role
     console.log("Looking up user by email in auth.users:", userEmail);
-    const { data: authUserData, error: authUserError } = await supabase.auth.admin.listUsers({
-      filters: {
-        email: userEmail
-      }
-    });
+    const userId = await findUserByEmail(userEmail);
     
-    if (authUserError || !authUserData || authUserData.users.length === 0) {
-      console.error("Error finding user by email:", authUserError);
-      return new Response(
-        JSON.stringify({ error: "User not found", email: userEmail }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      )
+    if (!userId) {
+      throw new Error("Could not find user with email: " + userEmail);
     }
     
-    const supabaseUserId = authUserData.users[0].id;
-    console.log("Found user ID for email:", supabaseUserId);
+    // Parse the sale timestamp
+    const saleTimestamp = safeParseDate(payload.sale_timestamp);
+    if (!saleTimestamp) {
+      throw new Error("Invalid sale timestamp: " + payload.sale_timestamp);
+    }
     
-    // Check if subscription already exists for this purchase
-    const { data: existingSub, error: lookupError } = await supabase
-      .from("user_subscriptions")
-      .select("id, status")
-      .eq("gumroad_purchase_id", purchase_id)
-      .maybeSingle()
-      
-    let result;
-    
-    // Calculate end date safely
-    const calculateEndDate = (cycle) => {
-      try {
-        const now = new Date();
-        if (cycle === "yearly") {
-          const endDate = new Date(now);
-          endDate.setDate(now.getDate() + 365); // Add 1 year
-          return endDate.toISOString();
-        } else if (cycle === "monthly") {
-          const endDate = new Date(now);
-          endDate.setDate(now.getDate() + 30); // Add 30 days
-          return endDate.toISOString();
-        }
-        return null;
-      } catch (error) {
-        console.error("Error calculating end date:", error);
-        return null;
-      }
-    };
-    
-    // Parse timestamp safely
-    const parseTimestamp = (timestampStr) => {
-      try {
-        if (!timestampStr) return new Date().toISOString();
-        
-        // Check if it's a numeric timestamp (seconds since epoch)
-        if (/^\d+$/.test(timestampStr)) {
-          return new Date(Number(timestampStr) * 1000).toISOString();
-        }
-        
-        // Try parsing as ISO string
-        return new Date(timestampStr).toISOString();
-      } catch (error) {
-        console.error("Error parsing timestamp:", error, "Using current time instead");
-        return new Date().toISOString();
-      }
-    };
-    
-    if (existingSub) {
-      // Update existing subscription
-      const { data, error } = await supabase
-        .from("user_subscriptions")
-        .update({
-          status,
-          subscription_tier: tier,
-          billing_cycle: cycle,
-          gumroad_subscription_id: subscriber_id,
-          gumroad_product_id: product_id,
-          gumroad_purchase_id: purchase_id,
-          last_webhook_event: eventName,
-          updated_at: new Date().toISOString(),
-          // Set end_date for canceled/refunded subscriptions
-          ...(status === "canceled" || status === "refunded" 
-            ? { end_date: new Date().toISOString() } 
-            : {}),
-        })
-        .eq("id", existingSub.id)
-        .select()
-        .single()
-        
-      if (error) {
-        console.error("Error updating subscription:", error);
-        throw error;
-      }
-      
-      result = data;
-      console.log("Updated subscription:", result);
+    // Calculate subscription end date
+    let endDate: Date;
+    if (cycle === "yearly") {
+      endDate = addOneYear(saleTimestamp);
     } else {
-      // Create new subscription
-      const startDate = parseTimestamp(sale_timestamp);
-      const endDate = calculateEndDate(cycle);
-      
-      const { data, error } = await supabase
-        .from("user_subscriptions")
-        .insert({
-          user_id: supabaseUserId,
-          subscription_tier: tier,
-          billing_cycle: cycle,
-          status,
-          gumroad_purchase_id: purchase_id,
-          gumroad_subscription_id: subscriber_id,
-          gumroad_product_id: product_id,
-          last_webhook_event: eventName,
-          start_date: startDate,
-          end_date: endDate,
-        })
-        .select()
-        .single()
-        
-      if (error) {
-        console.error("Error creating subscription:", error);
-        throw error;
-      }
-      
-      result = data;
-      console.log("Created subscription:", result);
+      endDate = addOneMonth(saleTimestamp);
     }
     
-    // Use the product code from the URL parameters for redirection if available
-    // This ensures we redirect to the right product page
-    const redirectWithProduct = redirectProductCode || productCode;
-    const fullRedirectUrl = `${APP_URL}/subscription-success?product=${redirectWithProduct}`;
-    
-    console.log("Redirecting to:", fullRedirectUrl);
-    
-    // Create HTML response with auto-redirect
-    if (req.headers.get("Accept")?.includes("text/html")) {
-      // If this is accessed directly in a browser, redirect immediately
-      const htmlResponse = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <title>Redirecting to Resulient</title>
-            <meta http-equiv="refresh" content="0; URL=${fullRedirectUrl}">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <script>
-              // Direct browser to redirect immediately
-              window.location.href = "${fullRedirectUrl}";
-            </script>
-            <style>
-              body {
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-                line-height: 1.4;
-                max-width: 800px;
-                margin: 20px auto;
-                padding: 0 20px;
-                color: #333;
-                background-color: #f9f9f9;
-                text-align: center;
-              }
-              h1 { color: #4338ca; }
-              p { margin: 1em 0; }
-              .redirect-box {
-                background-color: #fff;
-                border-radius: 8px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                padding: 20px;
-                margin-top: 30px;
-              }
-              .btn {
-                display: inline-block;
-                background-color: #4338ca;
-                color: white;
-                padding: 10px 20px;
-                border-radius: 4px;
-                text-decoration: none;
-                margin-top: 20px;
-                border: none;
-                cursor: pointer;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="redirect-box">
-              <h1>Your purchase was successful!</h1>
-              <p>You're being redirected to Resulient. If you aren't redirected automatically, please click the button below.</p>
-              <a href="${fullRedirectUrl}" class="btn">Continue to Resulient</a>
-            </div>
-          </body>
-        </html>
-      `;
+    // Create a subscription record in the database
+    const { data: subscription, error } = await supabase
+      .from("user_subscriptions")
+      .insert({
+        user_id: userId,
+        subscription_tier: tier,
+        billing_cycle: cycle,
+        status: "active",
+        start_date: saleTimestamp.toISOString(),
+        end_date: endDate.toISOString(),
+        gumroad_product_id: payload.product_id,
+        gumroad_purchase_id: payload.sale_id,
+        gumroad_subscription_id: payload.subscription_id,
+        last_webhook_event: payload.resource_name
+      })
+      .select("*")
+      .single();
       
-      return new Response(htmlResponse, { 
-        status: 200,
-        headers: { 
-          ...corsHeaders, 
-          "Content-Type": "text/html",
-          "Location": fullRedirectUrl 
-        } 
-      });
+    if (error) {
+      console.error("Error creating subscription:", error);
+      throw new Error("Failed to create subscription: " + error.message);
     }
     
-    // Default JSON response for API clients
+    console.log("Created subscription:", subscription);
+    
+    // Get the success URL from the payload
+    let redirectUrl = payload["url_params[success_url]"] || `${appUrl}/subscription-success?product=${productCode}`;
+    console.log("Redirecting to:", redirectUrl);
+    
+    // Return an HTML page that will redirect the user to the success page
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        data: result,
-        redirectUrl: fullRedirectUrl
-      }),
+      getRedirectHtml(redirectUrl),
       { 
         status: 200, 
         headers: { 
           ...corsHeaders, 
-          "Content-Type": "application/json",
-          "Location": fullRedirectUrl 
+          "Content-Type": "text/html" 
         } 
       }
-    )
+    );
   } catch (error) {
     console.error("Error processing webhook:", error);
+    
+    // Even on error, return a success response to Gumroad
+    // But include an HTML page with error information for debugging
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    )
+      getRedirectHtml(`${appUrl}/subscription-success`),
+      { 
+        status: 200,  // Still return 200 to Gumroad
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "text/html" 
+        } 
+      }
+    );
   }
 })

@@ -8,7 +8,7 @@ import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft, FileText, Diamond } from "lucide-react";
 import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { supabase } from "@/integrations/supabase/client";
 import { ScoreData } from "@/types/resume";
@@ -18,6 +18,7 @@ import { LegalFooter } from "@/components/layout/LegalFooter";
 import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
 import { GuidedTour } from "@/components/onboarding/GuidedTour";
 import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
+import { SubscriptionTierIndicator } from "@/components/subscription/SubscriptionTierIndicator";
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
@@ -129,20 +130,38 @@ const ResumeScoring = () => {
                 Back
               </Link>
             </Button>
-            <UserMenuWithTheme />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <SubscriptionTierIndicator variant="badge" size="sm" />
+              <UserMenuWithTheme />
+            </div>
           </div>
         </div>
 
         {/* Info block for Resume Scoring */}
-        <div className="bg-gradient-to-br from-fuchsia-50 via-indigo-50 to-blue-50 dark:from-fuchsia-950 dark:via-indigo-950 dark:to-blue-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-md px-4 py-5 mb-6 sm:px-7 max-w-2xl mx-auto text-center">
-          <div className="text-lg sm:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-0">
-            <span className="text-fuchsia-700 dark:text-fuchsia-400 font-bold">New!</span> 
+        <div className={`bg-gradient-to-br ${subscription.tier === "premium" ? "from-blue-50 via-indigo-50 to-blue-100 dark:from-blue-950 dark:via-indigo-950 dark:to-blue-900 border-blue-200 dark:border-blue-800" : subscription.tier === "platinum" ? "from-purple-50 via-indigo-50 to-fuchsia-100 dark:from-purple-950 dark:via-indigo-950 dark:to-fuchsia-900 border-purple-200 dark:border-purple-800" : "from-fuchsia-50 via-indigo-50 to-blue-50 dark:from-fuchsia-950 dark:via-indigo-950 dark:to-blue-950 border-indigo-100 dark:border-indigo-800"} rounded-xl border shadow-md px-4 py-5 mb-6 sm:px-7 max-w-2xl mx-auto text-center transition-all duration-300`}>
+          <div className="text-lg sm:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-0 flex flex-wrap items-center justify-center gap-2">
+            {subscription.tier !== "free" && (
+              <SubscriptionTierIndicator variant="icon" size="lg" showTooltip={false} />
+            )}
+            <span className="text-fuchsia-700 dark:text-fuchsia-400 font-bold">
+              {subscription.tier !== "free" ? 
+                `${subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1)} Unlimited Access` : 
+                "New!"
+              } 
+            </span> 
             &nbsp;Unlock insights with <span className="text-fuchsia-700 dark:text-fuchsia-400 font-bold">Resulient Resume Scoring</span>
           </div>
           <p className="text-gray-700 dark:text-gray-300 text-sm mt-3 max-w-2xl mx-auto">
             Instantly compare your resume to <span className="font-bold text-indigo-700 dark:text-indigo-400">hundreds of thousands</span> of real career journeys. 
             Using Artificial Intelligence, Resulient shows you exactly where you stand among your competition—so you know how to outshine other applicants.
           </p>
+          {subscription.tier !== "free" && (
+            <div className="mt-3 text-sm font-medium text-indigo-700 dark:text-indigo-400">
+              {subscription.tier === "premium" ? 
+                "You have unlimited resume scoring with your Premium plan!" : 
+                "You have unlimited resume scoring with your Platinum plan!"}
+            </div>
+          )}
         </div>
         {/* End info block */}
 
@@ -175,8 +194,18 @@ const ResumeScoring = () => {
           </TabsList>
 
           <TabsContent value="current" className="space-y-6 mt-6">
-            <Card className="bg-gradient-to-br from-white via-blue-50 to-indigo-100 shadow-md border-t-4 border-t-indigo-500">
+            <Card className={`bg-gradient-to-br ${subscription.tier === "premium" ? "from-white via-blue-50 to-indigo-100 border-t-blue-500" : subscription.tier === "platinum" ? "from-white via-purple-50 to-indigo-100 border-t-purple-500" : "from-white via-blue-50 to-indigo-100 border-t-indigo-500"} shadow-md border-t-4 transition-all duration-300`}>
               <CardContent className="space-y-6 pt-6">
+                {subscription.tier !== "free" && (
+                  <div className="flex items-center justify-center gap-1 text-sm text-indigo-700 dark:text-indigo-400 font-medium">
+                    <Diamond className="h-4 w-4" />
+                    <span>
+                      {subscription.tier === "premium" ? 
+                        "Unlimited scoring with Premium" : 
+                        "Unlimited scoring with Platinum"}
+                    </span>
+                  </div>
+                )}
                 <ResumeScoringForm
                   scoringMode="resumeOnly"
                   setScoringMode={() => {}}

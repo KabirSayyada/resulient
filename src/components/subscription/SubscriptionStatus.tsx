@@ -3,7 +3,7 @@ import { useSubscription, SubscriptionTier } from "@/hooks/useSubscription";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, CheckCircle, CreditCard, Loader2, RefreshCw } from "lucide-react";
+import { CalendarIcon, CreditCard, Loader2, RefreshCw, Crown, Diamond, Star, BadgeCheck } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -25,6 +25,28 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
         return "bg-gradient-to-r from-blue-500 to-indigo-500 text-white";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
+    }
+  };
+
+  const getTierBgColor = (tier: SubscriptionTier) => {
+    switch (tier) {
+      case "platinum":
+        return "bg-gradient-to-br from-purple-50 via-indigo-50 to-fuchsia-50 dark:from-purple-950 dark:via-indigo-950 dark:to-fuchsia-950 border-purple-200 dark:border-purple-800";
+      case "premium":
+        return "bg-gradient-to-br from-blue-50 via-indigo-50 to-sky-50 dark:from-blue-950 dark:via-indigo-950 dark:to-sky-950 border-blue-200 dark:border-blue-800";
+      default:
+        return "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800";
+    }
+  };
+
+  const getTierIcon = (tier: SubscriptionTier) => {
+    switch (tier) {
+      case "platinum":
+        return <Crown className="h-6 w-6 text-purple-500 dark:text-purple-400" />;
+      case "premium":
+        return <Diamond className="h-6 w-6 text-blue-500 dark:text-blue-400" />;
+      default:
+        return <Star className="h-6 w-6 text-gray-400 dark:text-gray-600" />;
     }
   };
 
@@ -87,11 +109,12 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
   }
 
   return (
-    <Card className={className}>
+    <Card className={`${className} ${getTierBgColor(subscription.tier)}`}>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle className="flex items-center gap-2">
-            <span>Your Subscription</span>
+          <div className="flex items-center gap-2">
+            {getTierIcon(subscription.tier)}
+            <CardTitle>Your Subscription</CardTitle>
             <button 
               onClick={handleRefresh} 
               className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
@@ -100,8 +123,8 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
             >
               <RefreshCw className={`h-4 w-4 text-gray-500 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
-          </CardTitle>
-          <Badge className={getTierColor(subscription.tier)}>
+          </div>
+          <Badge className={`${getTierColor(subscription.tier)} shadow-sm`}>
             {subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1)}
           </Badge>
         </div>
@@ -113,7 +136,7 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
         {subscription.tier !== "free" ? (
           <>
             <div className="flex items-center space-x-2 text-sm">
-              <CheckCircle className="h-4 w-4 text-green-500" />
+              <BadgeCheck className="h-4 w-4 text-green-500" />
               <span>
                 <span className="font-medium">Active subscription</span> - {subscription.billingCycle} billing
               </span>
@@ -130,23 +153,44 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
                 <span>Renews on {formatDate(subscription.expiresAt)}</span>
               </div>
             )}
-            <div className="pt-2">
-              <h4 className="text-sm font-medium mb-2">Your Benefits:</h4>
-              <ul className="text-sm space-y-1 pl-5 list-disc">
+            <div className="pt-2 mt-4">
+              <h4 className="text-sm font-medium mb-2 flex items-center">
+                <Star className="h-4 w-4 mr-1 text-amber-500" /> 
+                Your Benefits:
+              </h4>
+              <ul className="text-sm space-y-2 pl-5">
                 {subscription.tier === "premium" || subscription.tier === "platinum" ? (
                   <>
-                    <li>Unlimited resume scorings</li>
-                    <li>Unlimited resume optimizations</li>
+                    <li className="flex items-start">
+                      <BadgeCheck className="h-4 w-4 text-green-500 mr-2 mt-0.5 shrink-0" />
+                      <span>Unlimited resume scorings</span>
+                    </li>
+                    <li className="flex items-start">
+                      <BadgeCheck className="h-4 w-4 text-green-500 mr-2 mt-0.5 shrink-0" />
+                      <span>Unlimited resume optimizations</span>
+                    </li>
                     {subscription.tier === "platinum" ? (
-                      <li>Unlimited report downloads</li>
+                      <li className="flex items-start">
+                        <BadgeCheck className="h-4 w-4 text-green-500 mr-2 mt-0.5 shrink-0" />
+                        <span>Unlimited report downloads</span>
+                      </li>
                     ) : (
-                      <li>10 report downloads daily</li>
+                      <li className="flex items-start">
+                        <BadgeCheck className="h-4 w-4 text-green-500 mr-2 mt-0.5 shrink-0" />
+                        <span>10 report downloads daily</span>
+                      </li>
                     )}
-                    <li>Priority support</li>
+                    <li className="flex items-start">
+                      <BadgeCheck className="h-4 w-4 text-green-500 mr-2 mt-0.5 shrink-0" />
+                      <span>Priority support</span>
+                    </li>
                   </>
                 ) : null}
                 {subscription.tier === "platinum" && (
-                  <li>Early access to new features</li>
+                  <li className="flex items-start">
+                    <BadgeCheck className="h-4 w-4 text-purple-500 mr-2 mt-0.5 shrink-0" />
+                    <span>Early access to new features</span>
+                  </li>
                 )}
               </ul>
             </div>
@@ -157,11 +201,23 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
               <span className="font-medium">Free Plan</span>
             </div>
             <div className="pt-2">
-              <h4 className="text-sm font-medium mb-2">Free Tier Limits:</h4>
-              <ul className="text-sm space-y-1 pl-5 list-disc">
-                <li>{subscription.limits.resumeScorings} resume scorings daily</li>
-                <li>{subscription.limits.resumeOptimizations} resume optimizations daily</li>
-                <li>Reports viewable online only (no downloads)</li>
+              <h4 className="text-sm font-medium mb-2 flex items-center">
+                <Star className="h-4 w-4 mr-1 text-gray-400" /> 
+                Free Tier Limits:
+              </h4>
+              <ul className="text-sm space-y-2 pl-5">
+                <li className="flex items-start">
+                  <BadgeCheck className="h-4 w-4 text-gray-400 mr-2 mt-0.5 shrink-0" />
+                  <span>{subscription.limits.resumeScorings} resume scorings daily</span>
+                </li>
+                <li className="flex items-start">
+                  <BadgeCheck className="h-4 w-4 text-gray-400 mr-2 mt-0.5 shrink-0" />
+                  <span>{subscription.limits.resumeOptimizations} resume optimizations daily</span>
+                </li>
+                <li className="flex items-start">
+                  <BadgeCheck className="h-4 w-4 text-gray-400 mr-2 mt-0.5 shrink-0" />
+                  <span>Reports viewable online only (no downloads)</span>
+                </li>
               </ul>
             </div>
           </>
@@ -169,7 +225,7 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
       </CardContent>
       <CardFooter>
         {subscription.tier === "free" ? (
-          <Button onClick={handleUpgrade} disabled={isUpgrading} className="w-full">
+          <Button onClick={handleUpgrade} disabled={isUpgrading} className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600">
             {isUpgrading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -177,7 +233,7 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
               </>
             ) : (
               <>
-                <CreditCard className="mr-2 h-4 w-4" />
+                <Diamond className="mr-2 h-4 w-4" />
                 Upgrade Your Plan
               </>
             )}
@@ -185,6 +241,7 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
         ) : (
           <Button asChild variant="outline" className="w-full">
             <Link to="/pricing">
+              <Diamond className="mr-2 h-4 w-4" />
               View Plans
             </Link>
           </Button>

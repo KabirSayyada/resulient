@@ -46,12 +46,14 @@ serve(async (req) => {
     // Log for debugging
     console.log("Verifying subscription for user:", user.id, "Requested tier:", requestedTier);
 
-    // Get the user's active subscription
+    // Query directly for active subscriptions that haven't expired
+    const now = new Date().toISOString();
     const { data: subscription, error: subError } = await supabase
       .from("user_subscriptions")
       .select("*")
       .eq("user_id", user.id)
       .eq("status", "active")
+      .or(`end_date.is.null,end_date.gt.${now}`)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle()
@@ -68,28 +70,21 @@ serve(async (req) => {
       subscriptionTier = subscription.subscription_tier
       expiresAt = subscription.end_date
       
-      // Check if the subscription has expired
-      if (expiresAt && new Date(expiresAt) < new Date()) {
-        // Subscription has expired
-        console.log("Subscription has expired:", expiresAt);
-        hasAccess = false
-      } else {
-        // If a specific tier was requested, check if the user has access to that tier
-        if (requestedTier) {
-          if (requestedTier === "premium") {
-            // Premium tier requires premium or platinum subscription
-            hasAccess = ["premium", "platinum"].includes(subscriptionTier)
-          } else if (requestedTier === "platinum") {
-            // Platinum tier requires platinum subscription
-            hasAccess = subscriptionTier === "platinum"
-          }
-        } else {
-          // No specific tier requested, user has access if they have any active subscription
-          hasAccess = true
+      // Check if a specific tier was requested
+      if (requestedTier) {
+        if (requestedTier === "premium") {
+          // Premium tier requires premium or platinum subscription
+          hasAccess = ["premium", "platinum"].includes(subscriptionTier)
+        } else if (requestedTier === "platinum") {
+          // Platinum tier requires platinum subscription
+          hasAccess = subscriptionTier === "platinum"
         }
-        
-        console.log("Subscription is active. Has access:", hasAccess, "Tier:", subscriptionTier);
+      } else {
+        // No specific tier requested, user has access if they have any active subscription
+        hasAccess = true
       }
+      
+      console.log("Subscription is active. Has access:", hasAccess, "Tier:", subscriptionTier);
     } else {
       // No active subscription found
       console.log("No active subscription found");
@@ -114,8 +109,13 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error verifying subscription:", error)
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ 
+        error: error.message,
+        tier: "free",  // Default to free tier on error
+        hasAccess: false,
+        limits: getDailyLimits("free")
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )
   }
 })

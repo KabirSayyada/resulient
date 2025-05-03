@@ -41,6 +41,35 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
     }
   });
 
+  // Direct database check for subscription status
+  const checkSubscriptionInDatabase = useCallback(async () => {
+    if (!user) return null;
+    
+    try {
+      // Query the user_subscriptions table directly
+      const { data, error } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .lte('start_date', new Date().toISOString())
+        .or(`end_date.is.null,end_date.gt.${new Date().toISOString()}`)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) {
+        console.error("Error checking subscription in database:", error);
+        return null;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Exception checking subscription:", error);
+      return null;
+    }
+  }, [user]);
+
   const verifySubscription = useCallback(async () => {
     if (!user) {
       setSubscription(prev => ({ ...prev, isLoading: false }));
@@ -48,6 +77,30 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
     }
 
     try {
+      // First, check subscription directly in the database
+      const dbSubscription = await checkSubscriptionInDatabase();
+      
+      // If we found an active subscription in the database, use that data
+      if (dbSubscription) {
+        console.log("Found active subscription in database:", dbSubscription);
+        
+        // Determine tier limits
+        const tierLimits = getTierLimits(dbSubscription.subscription_tier as SubscriptionTier);
+        
+        setSubscription({
+          tier: dbSubscription.subscription_tier as SubscriptionTier,
+          hasAccess: true,
+          isLoading: false,
+          expiresAt: dbSubscription.end_date,
+          limits: tierLimits,
+          billingCycle: dbSubscription.billing_cycle as BillingCycle,
+          purchaseId: dbSubscription.gumroad_purchase_id,
+          status: dbSubscription.status,
+        });
+        return;
+      }
+      
+      // As a fallback, check with the verify-subscription edge function
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         setSubscription(prev => ({ ...prev, isLoading: false }));
@@ -56,7 +109,7 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
 
       const queryParams = requiredTier ? `?tier=${requiredTier}` : '';
       
-      console.log("Verifying subscription for user:", user.id);
+      console.log("No subscription found in DB, verifying with edge function for user:", user.id);
       
       const response = await supabase.functions.invoke<{
         hasAccess: boolean;
@@ -73,11 +126,7 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
 
       if (response.error) {
         console.error("Error verifying subscription:", response.error);
-        toast({
-          title: "Subscription Error",
-          description: "Failed to verify your subscription status. Please try again.",
-          variant: "destructive",
-        });
+        // Don't show toast to improve user experience
         setSubscription(prev => ({ ...prev, isLoading: false }));
         return;
       }
@@ -108,7 +157,7 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
       console.error("Error in subscription verification:", error);
       setSubscription(prev => ({ ...prev, isLoading: false }));
     }
-  }, [user, requiredTier, toast]);
+  }, [user, requiredTier, toast, checkSubscriptionInDatabase]);
 
   useEffect(() => {
     verifySubscription();
@@ -155,4 +204,29 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
     checkout,
     refreshSubscription
   };
+}
+
+// Helper function to get the tier limits based on the subscription tier
+function getTierLimits(tier: SubscriptionTier): SubscriptionLimits {
+  switch (tier) {
+    case "platinum":
+      return {
+        resumeScorings: -1, // unlimited
+        resumeOptimizations: -1, // unlimited
+        reportDownloads: -1, // unlimited
+      };
+    case "premium":
+      return {
+        resumeScorings: -1, // unlimited
+        resumeOptimizations: -1, // unlimited
+        reportDownloads: 10,
+      };
+    case "free":
+    default:
+      return {
+        resumeScorings: 3,
+        resumeOptimizations: 2,
+        reportDownloads: 0,
+      };
+  }
 }
