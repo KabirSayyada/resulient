@@ -14,10 +14,22 @@ const SubscriptionSuccess = () => {
   const { subscription, refreshSubscription } = useSubscription();
   const [loading, setLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
+  const [refreshAttempts, setRefreshAttempts] = useState(0);
   
   useEffect(() => {
     // Refresh subscription status immediately when page loads
     refreshSubscription();
+    
+    // Set up polling to check for subscription updates
+    const pollingInterval = setInterval(() => {
+      if (refreshAttempts < 5) {
+        console.log(`Polling subscription status (attempt ${refreshAttempts + 1}/5)...`);
+        refreshSubscription();
+        setRefreshAttempts(prev => prev + 1);
+      } else {
+        clearInterval(pollingInterval);
+      }
+    }, 2000);
     
     // Give time for the webhook to process and subscription to update
     const timer = setTimeout(() => {
@@ -31,7 +43,10 @@ const SubscriptionSuccess = () => {
       }
     }, 3000);
     
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(pollingInterval);
+    };
   }, [refreshSubscription, subscription.tier, retryCount]);
 
   const redirectToDashboard = () => {
@@ -49,9 +64,11 @@ const SubscriptionSuccess = () => {
   const getProductName = (productId: string | null) => {
     if (!productId) return "Premium";
     
-    if (productId.startsWith("premium")) {
+    if (productId === "premium-monthly" || productId === "ylaia" || 
+        productId === "premium-yearly" || productId === "dencp") {
       return "Premium";
-    } else if (productId.startsWith("platinum")) {
+    } else if (productId === "platinum-monthly" || productId === "tbfapo" || 
+               productId === "platinum-yearly" || productId === "dcfjt") {
       return "Platinum";
     }
     
@@ -59,7 +76,7 @@ const SubscriptionSuccess = () => {
   };
   
   const isBillingCycleYearly = (productId: string | null) => {
-    return productId?.includes("yearly") ?? false;
+    return productId?.includes("yearly") || productId === "dencp" || productId === "dcfjt" || false;
   };
 
   const handleManualRefresh = () => {

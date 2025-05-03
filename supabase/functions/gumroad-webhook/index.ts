@@ -102,8 +102,30 @@ serve(async (req) => {
       sale_timestamp,
       event,
       seller_id,
-      resource_name
+      resource_name,
+      url_params
     } = body;
+    
+    // Get success URL from url_params if available
+    let successUrl = `${APP_URL}/subscription-success`;
+    
+    // Try to get product code from url_params for redirect
+    let redirectProductCode = null;
+    
+    // Check if url_params exists and contains success_url
+    if (url_params && url_params.success_url) {
+      // Direct access if it's already a string
+      successUrl = url_params.success_url;
+    } else if (body["url_params[success_url]"]) {
+      // Form data format: url_params[success_url]
+      successUrl = body["url_params[success_url]"];
+    }
+
+    // Extract product code from success URL if present
+    const urlProductMatch = successUrl.match(/[?&]product=([^&]+)/);
+    if (urlProductMatch && urlProductMatch[1]) {
+      redirectProductCode = urlProductMatch[1];
+    }
     
     // Use resource_name as event if event is not provided
     const eventName = event || resource_name || "sale";
@@ -163,36 +185,25 @@ serve(async (req) => {
       )
     }
     
-    // Get Supabase user ID from email
-    const { data: userData, error: userError } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("username", userEmail)
-      .maybeSingle()
-      
-    if (userError || !userData) {
-      console.error("Error finding user by email:", userError);
-      
-      // Try querying auth.users directly using service role
-      const { data: authUserData, error: authUserError } = await supabase.auth.admin.listUsers({
-        filters: {
-          email: userEmail
-        }
-      });
-      
-      if (authUserError || !authUserData || authUserData.users.length === 0) {
-        console.error("Error finding user in auth.users:", authUserError);
-        return new Response(
-          JSON.stringify({ error: "User not found", email: userEmail }),
-          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        )
+    // We'll skip looking in profiles and go directly to auth.users since we know we're having issues
+    console.log("Looking up user by email in auth.users:", userEmail);
+    
+    // Query auth.users directly using service role
+    const { data: authUserData, error: authUserError } = await supabase.auth.admin.listUsers({
+      filters: {
+        email: userEmail
       }
-      
-      var supabaseUserId = authUserData.users[0].id;
-    } else {
-      var supabaseUserId = userData.id;
+    });
+    
+    if (authUserError || !authUserData || authUserData.users.length === 0) {
+      console.error("Error finding user in auth.users:", authUserError);
+      return new Response(
+        JSON.stringify({ error: "User not found", email: userEmail }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      )
     }
     
+    const supabaseUserId = authUserData.users[0].id;
     console.log("Found user ID for email:", supabaseUserId);
     
     // Check if subscription already exists for this purchase
@@ -301,11 +312,18 @@ serve(async (req) => {
       console.log("Created subscription:", result);
     }
     
+    // Use the product code from the URL parameters for redirection if available
+    // This ensures we redirect to the right product page
+    const redirectWithProduct = redirectProductCode || productCode;
+    const fullRedirectUrl = `${APP_URL}/subscription-success?product=${redirectWithProduct}`;
+    
+    console.log("Redirecting to:", fullRedirectUrl);
+    
     return new Response(
       JSON.stringify({ 
         success: true, 
         data: result,
-        redirectUrl: `${APP_URL}/subscription-success?product=${productCode}`
+        redirectUrl: fullRedirectUrl
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )

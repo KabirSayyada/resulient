@@ -53,6 +53,8 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
 
       const queryParams = requiredTier ? `?tier=${requiredTier}` : '';
       
+      console.log("Verifying subscription for user:", user.id);
+      
       const response = await supabase.functions.invoke<{
         hasAccess: boolean;
         tier: SubscriptionTier;
