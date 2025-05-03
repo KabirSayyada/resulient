@@ -165,9 +165,9 @@ serve(async (req) => {
     
     // Get Supabase user ID from email
     const { data: userData, error: userError } = await supabase
-      .from("users")
+      .from("profiles")
       .select("id")
-      .eq("email", userEmail)
+      .eq("username", userEmail)
       .maybeSingle()
       
     if (userError || !userData) {
@@ -204,6 +204,44 @@ serve(async (req) => {
       
     let result;
     
+    // Calculate end date safely
+    const calculateEndDate = (cycle, timestamp) => {
+      try {
+        const now = new Date();
+        if (cycle === "yearly") {
+          const endDate = new Date(now);
+          endDate.setDate(now.getDate() + 365); // Add 1 year
+          return endDate.toISOString();
+        } else if (cycle === "monthly") {
+          const endDate = new Date(now);
+          endDate.setDate(now.getDate() + 30); // Add 30 days
+          return endDate.toISOString();
+        }
+        return null;
+      } catch (error) {
+        console.error("Error calculating end date:", error);
+        return null;
+      }
+    };
+    
+    // Parse timestamp safely
+    const parseTimestamp = (timestampStr) => {
+      try {
+        if (!timestampStr) return new Date().toISOString();
+        
+        // Check if it's a numeric timestamp (seconds since epoch)
+        if (/^\d+$/.test(timestampStr)) {
+          return new Date(Number(timestampStr) * 1000).toISOString();
+        }
+        
+        // Try parsing as ISO string
+        return new Date(timestampStr).toISOString();
+      } catch (error) {
+        console.error("Error parsing timestamp:", error, "Using current time instead");
+        return new Date().toISOString();
+      }
+    };
+    
     if (existingSub) {
       // Update existing subscription
       const { data, error } = await supabase
@@ -234,6 +272,9 @@ serve(async (req) => {
       console.log("Updated subscription:", result);
     } else {
       // Create new subscription
+      const startDate = parseTimestamp(sale_timestamp);
+      const endDate = calculateEndDate(cycle, startDate);
+      
       const { data, error } = await supabase
         .from("user_subscriptions")
         .insert({
@@ -245,14 +286,8 @@ serve(async (req) => {
           gumroad_subscription_id: subscriber_id,
           gumroad_product_id: product_id,
           last_webhook_event: eventName,
-          start_date: sale_timestamp ? new Date(Number(sale_timestamp) * 1000).toISOString() : new Date().toISOString(),
-          // Calculate end_date for yearly subscriptions (1 year from now)
-          ...(cycle === "yearly" 
-            ? { end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() } 
-            : // Calculate end_date for monthly subscriptions (1 month from now)
-              cycle === "monthly" 
-              ? { end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() } 
-              : {}),
+          start_date: startDate,
+          end_date: endDate,
         })
         .select()
         .single()
