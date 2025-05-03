@@ -95,108 +95,6 @@ function addOneMonth(date: Date): Date {
   return result;
 }
 
-// Enhanced HTML template for immediate redirect
-function getRedirectHtml(redirectUrl: string): string {
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Redirecting to Resulient...</title>
-  <meta http-equiv="refresh" content="0;url=${redirectUrl}">
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background: linear-gradient(to bottom right, #eef2ff, #e0e7ff);
-      color: #4338ca;
-      text-align: center;
-      padding: 0 20px;
-    }
-    .logo {
-      font-size: 2.5rem;
-      font-weight: 800;
-      margin-bottom: 1rem;
-      background: linear-gradient(to right, #4338ca, #6366f1, #ec4899);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .container {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 0.75rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      max-width: 500px;
-      width: 100%;
-    }
-    .message {
-      font-size: 1.125rem;
-      margin-bottom: 1.5rem;
-    }
-    .spinner {
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border-left-color: #4338ca;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 1.5rem auto;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .button {
-      display: inline-block;
-      background: linear-gradient(to right, #4f46e5, #7c3aed);
-      color: white;
-      font-weight: 500;
-      padding: 0.5rem 1rem;
-      border-radius: 0.375rem;
-      text-decoration: none;
-      margin-top: 1rem;
-      transition: transform 0.2s;
-    }
-    .button:hover {
-      transform: translateY(-1px);
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="logo">Resulient</div>
-    <div class="spinner"></div>
-    <div class="message">Payment successful! Redirecting you now...</div>
-    <p>If you're not redirected automatically, <a href="${redirectUrl}" class="button">Click here to continue</a>.</p>
-  </div>
-  
-  <script>
-    // Try multiple redirect approaches
-    setTimeout(function() {
-      window.location.href = "${redirectUrl}";
-    }, 500);
-    
-    // Fallback approach with form submission
-    setTimeout(function() {
-      var form = document.createElement('form');
-      form.method = 'GET';
-      form.action = "${redirectUrl}";
-      document.body.appendChild(form);
-      form.submit();
-    }, 1500);
-  </script>
-</body>
-</html>
-  `;
-}
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -278,44 +176,49 @@ serve(async (req) => {
     
     console.log("Created subscription:", subscription);
     
-    // Get the success URL from the payload or use default with product code
-    const redirectUrl = payload["url_params[success_url]"] || 
-                      `${appUrl}/subscription-success?product=${productCode}`;
-    console.log("Redirecting to:", redirectUrl);
+    // Create a notification record to indicate successful processing
+    const notification = {
+      user_id: userId,
+      purchase_id: payload.sale_id || "",
+      product_code: productCode,
+      timestamp: new Date().toISOString(),
+      email: userEmail,
+      processed: true
+    };
     
-    // For Gumroad, we need to return a simple 200 success response
-    // But we'll add a Location header to attempt a redirect
-    return new Response(
-      getRedirectHtml(redirectUrl),
-      { 
-        status: 200, 
-        headers: { 
-          ...corsHeaders, 
-          "Content-Type": "text/html",
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0",
-          "Location": redirectUrl // Add redirect header as a fallback
-        } 
-      }
-    );
+    // Store the notification for the frontend to poll
+    const { error: notifyError } = await supabase
+      .from("subscription_notifications")
+      .insert(notification);
+      
+    if (notifyError) {
+      console.error("Error creating notification:", notifyError);
+    } else {
+      console.log("Created subscription notification for frontend polling");
+    }
+    
+    // Respond with success to Gumroad without trying to redirect
+    // This is crucial - we're not trying to redirect the user from here anymore
+    return new Response(JSON.stringify({ success: true }), { 
+      status: 200, 
+      headers: { 
+        ...corsHeaders, 
+        "Content-Type": "application/json"
+      } 
+    });
   } catch (error) {
     console.error("Error processing webhook:", error);
     
-    // Even on error, return a success response to Gumroad with redirect
-    return new Response(
-      getRedirectHtml(`${appUrl}/subscription-success`),
-      { 
-        status: 200,  // Still return 200 to Gumroad
-        headers: { 
-          ...corsHeaders, 
-          "Content-Type": "text/html",
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0",
-          "Location": `${appUrl}/subscription-success` // Add redirect header as a fallback
-        } 
-      }
-    );
+    // Return a success response to Gumroad (they only care about 200 status)
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: error instanceof Error ? error.message : String(error) 
+    }), { 
+      status: 200, 
+      headers: { 
+        ...corsHeaders, 
+        "Content-Type": "application/json"
+      } 
+    });
   }
 })
