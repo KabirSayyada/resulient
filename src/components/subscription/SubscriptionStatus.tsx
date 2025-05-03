@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarIcon, CheckCircle, CreditCard, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 
 interface SubscriptionStatusProps {
   className?: string;
@@ -29,10 +30,20 @@ export function SubscriptionStatus({ className }: SubscriptionStatusProps) {
   const handleUpgrade = async () => {
     setIsUpgrading(true);
     try {
-      // Redirect to pricing page for now
-      window.location.href = "/pricing";
+      const checkoutData = await checkout("premium-monthly");
+      if (checkoutData?.checkoutUrl) {
+        window.location.href = checkoutData.checkoutUrl;
+      } else {
+        // Fallback to pricing page if checkout fails
+        window.location.href = "/pricing";
+        toast({
+          title: "Redirecting to Plans",
+          description: "You'll be able to choose your subscription plan.",
+        });
+      }
     } catch (error) {
       console.error("Error upgrading:", error);
+      window.location.href = "/pricing";
     } finally {
       setIsUpgrading(false);
     }

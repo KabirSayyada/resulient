@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -130,6 +129,7 @@ const PricingPage = () => {
       const checkoutData = await checkout(productId);
       
       if (checkoutData?.checkoutUrl) {
+        // Success - redirect to Gumroad
         window.location.href = checkoutData.checkoutUrl;
       } else {
         toast({

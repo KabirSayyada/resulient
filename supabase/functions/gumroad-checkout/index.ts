@@ -47,10 +47,67 @@ serve(async (req) => {
       )
     }
 
-    // Get the product from the query params
+    // Parse the request URL to get the product parameter
     const url = new URL(req.url)
     const productId = url.searchParams.get("product")
+    
+    // If request body is provided, try to use that instead
+    if (!productId && req.body) {
+      try {
+        const body = await req.json()
+        if (body.productId) {
+          const productId = body.productId
+          if (!GUMROAD_PRODUCTS[productId]) {
+            return new Response(
+              JSON.stringify({ error: "Invalid product" }),
+              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            )
+          }
+          
+          // Get the user profile to include name in checkout
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("first_name, last_name")
+            .eq("id", user.id)
+            .single()
 
+          if (profileError) {
+            console.error("Error fetching profile:", profileError)
+          }
+
+          // Construct the checkout URL with pre-filled data
+          const checkoutUrl = new URL(GUMROAD_PRODUCTS[productId])
+          
+          // Add optional params for custom fields
+          const params = new URLSearchParams()
+          params.append("email", user.email || "")
+          
+          if (profile) {
+            if (profile.first_name) params.append("first_name", profile.first_name)
+            if (profile.last_name) params.append("last_name", profile.last_name)
+          }
+          
+          // Return the checkout URL
+          return new Response(
+            JSON.stringify({ 
+              checkoutUrl: `${checkoutUrl.toString()}?${params.toString()}`,
+              price: getPriceFromProductId(productId)
+            }),
+            { 
+              status: 200, 
+              headers: { 
+                ...corsHeaders, 
+                "Content-Type": "application/json" 
+              } 
+            }
+          )
+        }
+      } catch (e) {
+        console.error("Error parsing request body:", e)
+      }
+    }
+
+    // Get the product from the query params as a fallback
     if (!productId || !GUMROAD_PRODUCTS[productId]) {
       return new Response(
         JSON.stringify({ error: "Invalid product" }),
