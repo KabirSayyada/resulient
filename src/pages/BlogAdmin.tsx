@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BlogLayout } from '@/components/blog/BlogLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,6 +8,7 @@ import { BlogPost } from '@/types/blog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BlogAdminForm } from '@/components/blog/BlogAdminForm';
+import { BlogInitialization } from '@/components/blog/BlogAdmin/BlogInitialization';
 import { 
   Table,
   TableBody,
@@ -157,71 +159,79 @@ export default function BlogAdmin() {
           </>
         ) : (
           <>
-            <div className="flex justify-between items-center mb-6">
-              <div className="relative w-full max-w-sm">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search posts..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="md:col-span-2">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="relative w-full max-w-sm">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search posts..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Button onClick={() => setShowNewPostForm(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    New Post
+                  </Button>
+                </div>
+                
+                <Tabs defaultValue="all" className="mb-6">
+                  <TabsList>
+                    <TabsTrigger value="all">All Posts ({posts.length})</TabsTrigger>
+                    <TabsTrigger value="published">Published ({publishedPosts.length})</TabsTrigger>
+                    <TabsTrigger value="drafts">Drafts ({draftPosts.length})</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="all">
+                    <PostsTable 
+                      posts={filteredPosts}
+                      onEdit={(post) => {
+                        setSelectedPost(post);
+                        setShowEditPostForm(true);
+                      }}
+                      onDelete={(post) => {
+                        setSelectedPost(post);
+                        setShowDeleteDialog(true);
+                      }}
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="published">
+                    <PostsTable 
+                      posts={publishedPosts}
+                      onEdit={(post) => {
+                        setSelectedPost(post);
+                        setShowEditPostForm(true);
+                      }}
+                      onDelete={(post) => {
+                        setSelectedPost(post);
+                        setShowDeleteDialog(true);
+                      }}
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="drafts">
+                    <PostsTable 
+                      posts={draftPosts}
+                      onEdit={(post) => {
+                        setSelectedPost(post);
+                        setShowEditPostForm(true);
+                      }}
+                      onDelete={(post) => {
+                        setSelectedPost(post);
+                        setShowDeleteDialog(true);
+                      }}
+                    />
+                  </TabsContent>
+                </Tabs>
               </div>
-              <Button onClick={() => setShowNewPostForm(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                New Post
-              </Button>
+              
+              <div>
+                <BlogInitialization />
+              </div>
             </div>
-            
-            <Tabs defaultValue="all" className="mb-6">
-              <TabsList>
-                <TabsTrigger value="all">All Posts ({posts.length})</TabsTrigger>
-                <TabsTrigger value="published">Published ({publishedPosts.length})</TabsTrigger>
-                <TabsTrigger value="drafts">Drafts ({draftPosts.length})</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="all">
-                <PostsTable 
-                  posts={filteredPosts}
-                  onEdit={(post) => {
-                    setSelectedPost(post);
-                    setShowEditPostForm(true);
-                  }}
-                  onDelete={(post) => {
-                    setSelectedPost(post);
-                    setShowDeleteDialog(true);
-                  }}
-                />
-              </TabsContent>
-              
-              <TabsContent value="published">
-                <PostsTable 
-                  posts={publishedPosts}
-                  onEdit={(post) => {
-                    setSelectedPost(post);
-                    setShowEditPostForm(true);
-                  }}
-                  onDelete={(post) => {
-                    setSelectedPost(post);
-                    setShowDeleteDialog(true);
-                  }}
-                />
-              </TabsContent>
-              
-              <TabsContent value="drafts">
-                <PostsTable 
-                  posts={draftPosts}
-                  onEdit={(post) => {
-                    setSelectedPost(post);
-                    setShowEditPostForm(true);
-                  }}
-                  onDelete={(post) => {
-                    setSelectedPost(post);
-                    setShowDeleteDialog(true);
-                  }}
-                />
-              </TabsContent>
-            </Tabs>
           </>
         )}
         

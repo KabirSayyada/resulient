@@ -21,7 +21,7 @@ export const generateSitemap = async () => {
   const { data: blogPosts } = await supabase
     .from('published_blog_posts')
     .select('slug')
-    .not('published_at', 'is', null);
+    .eq('published_at', 'is', 'not.null');
   
   // Fetch all blog categories
   const { data: categories } = await supabase
