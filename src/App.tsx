@@ -17,11 +17,12 @@ import Legal from "@/pages/Legal";
 import Pricing from "@/pages/Pricing";
 import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
 import SubscriptionDetails from "@/pages/SubscriptionDetails";
-// New blog imports
+// Blog imports
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
 import BlogCategory from "@/pages/BlogCategory";
 import BlogAdmin from "@/pages/BlogAdmin";
+import { Sitemap } from "@/components/blog/Sitemap";
 
 function App() {
   return (
@@ -45,6 +46,8 @@ function App() {
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/blog/category/:category" element={<BlogCategory />} />
         <Route path="/blog/admin" element={<BlogAdmin />} />
+        {/* SEO routes */}
+        <Route path="/sitemap.xml" element={<Sitemap />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />

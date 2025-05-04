@@ -62,7 +62,7 @@ export function MainNavigation() {
           <NavigationMenuLink asChild>
             <Link
               to="/blog"
-              className={navigationMenuTriggerStyle()}
+              className={`${navigationMenuTriggerStyle()} font-medium text-primary hover:text-primary/90`}
             >
               Blog
             </Link>

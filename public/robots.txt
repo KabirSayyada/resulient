@@ -14,8 +14,10 @@ Disallow: /profile-setup
 Allow: /
 Allow: /pricing
 Allow: /resume-scoring
-Allow: /terms-of-service
-Allow: /privacy-policy
+Allow: /terms
+Allow: /privacy
 Allow: /refund-policy
+Allow: /legal
 Allow: /blog
 Allow: /blog/
+
