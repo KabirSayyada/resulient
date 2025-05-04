@@ -51,10 +51,6 @@ const SubscriptionSuccess = () => {
         }
         
         console.log("No active subscription found for user ID:", user.id);
-        
-        // Check for new subscription notifications
-        await checkForNotifications();
-        
         return false;
       } catch (error) {
         console.error("Error in checkExistingSubscription:", error);
@@ -64,49 +60,6 @@ const SubscriptionSuccess = () => {
     
     checkExistingSubscription();
   }, [refreshSubscription]);
-  
-  // Check for notifications of successful subscriptions
-  const checkForNotifications = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return false;
-      
-      console.log("Checking for subscription notifications for user ID:", user.id);
-      
-      const { data, error } = await supabase
-        .from('subscription_notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('processed', true)
-        .order('timestamp', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-        
-      if (error) {
-        console.error("Error checking subscription notifications:", error);
-        return false;
-      }
-      
-      if (data) {
-        console.log("Recent subscription notification found:", data);
-        refreshSubscription();
-        setLoading(false);
-        
-        // Delete the notification as it's been processed
-        await supabase
-          .from('subscription_notifications')
-          .delete()
-          .eq('id', data.id);
-          
-        return true;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error("Error checking for notifications:", error);
-      return false;
-    }
-  };
   
   // Enhanced polling logic with progressive backoff
   useEffect(() => {
@@ -122,36 +75,32 @@ const SubscriptionSuccess = () => {
     // Refresh subscription status immediately when page loads
     refreshSubscription();
     
-    // Set up polling for subscription status
-    const pollInterval = setInterval(() => {
-      checkSubscriptionStatus();
-    }, 2000);
+    // Set up initial polling interval
+    const initialCheckDelay = 800; // First check after 800ms
     
-    // Initial check after a short delay
     const initialTimer = setTimeout(() => {
       setLoading(false);
       checkSubscriptionStatus();
-    }, 800);
+    }, initialCheckDelay);
     
     setRetryTimeoutId(initialTimer as unknown as number);
     
     return () => {
       if (initialTimer) clearTimeout(initialTimer);
-      clearInterval(pollInterval);
     };
   }, []);
   
   // Function to check subscription status and handle polling logic
-  const checkSubscriptionStatus = async () => {
+  const checkSubscriptionStatus = () => {
     console.log(`Checking subscription status (attempt ${refreshAttempts + 1}/10)...`);
     refreshSubscription();
-    await checkForNotifications();
     setRefreshAttempts(prev => prev + 1);
     
     // Check subscription data validity
     if (subscription.tier !== "free") {
       console.log("Subscription active, stopping polling");
       setLoading(false);
+      // Don't show toast to improve user experience
       return;
     }
     
@@ -207,7 +156,6 @@ const SubscriptionSuccess = () => {
   const handleManualRefresh = () => {
     setLoading(true);
     refreshSubscription();
-    checkForNotifications();
     setTimeout(() => {
       setLoading(false);
       checkSubscriptionStatus();
