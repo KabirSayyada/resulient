@@ -65,10 +65,10 @@ const ResumeScoring = () => {
             overallScore: item.overall_score,
             skillsAlignment: item.skills_breadth || 0,
             WorkExperience: item.experience_duration || 0,
-            // Use the correct fields with proper fallbacks
-            Achievements: item.achievements_score || item.experience_duration || 0,
-            EducationQuality: item.education_score || item.content_structure || 0,
-            Certifications: item.certifications_score || item.ats_readiness || 0,
+            // Use the specific fields with proper fallbacks
+            Achievements: item.achievements_score || 0,
+            EducationQuality: item.education_score || 0,
+            Certifications: item.certifications_score || 0,
             ContentStructure: item.content_structure || 0,
             keywordRelevance: item.keyword_relevance || 0,
             Industry: item.industry || "",

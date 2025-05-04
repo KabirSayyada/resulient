@@ -20,13 +20,13 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
 
   // Map percentile number to appropriate text
   const getPercentileText = (value: number): string => {
-    if (value <= 1) return "Top 1%";
-    if (value <= 5) return "Top 5%";
-    if (value <= 10) return "Top 10%";
-    if (value <= 25) return "Top 25%";
-    if (value <= 50) return "Above Average";
-    if (value <= 65) return "Average";
-    if (value <= 75) return "Below Average";
+    if (value >= 99) return "Top 1%";
+    if (value >= 95) return "Top 5%";
+    if (value >= 90) return "Top 10%";
+    if (value >= 75) return "Top 25%";
+    if (value >= 65) return "Above Average";
+    if (value >= 50) return "Average";
+    if (value >= 30) return "Below Average";
     return "Bottom 25%";
   };
 
