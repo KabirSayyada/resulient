@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -86,7 +87,7 @@ export const useResumeScoring = (userId: string | undefined) => {
       }
       
       if (data && data.length > 0) {
-        return data[0];
+        return data[0] as ResumeScoreRecord;
       }
       
       return null;

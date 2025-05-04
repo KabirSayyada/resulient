@@ -60,7 +60,7 @@ const ResumeScoring = () => {
             return "Bottom 25%";
           })();
 
-          // Create a properly structured ScoreData object with all fields
+          // Create a properly structured ScoreData object with all fields, handling missing fields
           return {
             overallScore: item.overall_score,
             skillsAlignment: item.skills_breadth || 0,
@@ -81,7 +81,7 @@ const ResumeScoring = () => {
             missingQualifications: [],
             timestamp: new Date(item.created_at).toLocaleString(),
             id: item.id,
-            scoringMode: "resumeOnly",
+            scoringMode: (item.scoring_mode as "resumeOnly" | "jobDescription") || "resumeOnly",
           };
         });
         
