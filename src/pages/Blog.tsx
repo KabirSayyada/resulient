@@ -4,14 +4,18 @@ import { BlogCard } from '@/components/blog/BlogCard';
 import { useBlogPosts } from '@/hooks/useBlogPosts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Helmet } from 'react-helmet-async';
-import { Search } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
+import { initializeBlogContent } from '@/utils/blogInitializer';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function Blog() {
-  const { posts, isLoading } = useBlogPosts();
+  const { posts, isLoading, error } = useBlogPosts();
   const [searchQuery, setSearchQuery] = useState('');
+  const [initializing, setInitializing] = useState(false);
+  const { toast } = useToast();
 
   const filteredPosts = posts.filter(post => {
     const searchLower = searchQuery.toLowerCase();
@@ -22,6 +26,42 @@ export default function Blog() {
       (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchLower)))
     );
   });
+
+  // Initialize blog content if no posts are found
+  const handleInitializeBlog = async () => {
+    try {
+      setInitializing(true);
+      const result = await initializeBlogContent();
+      
+      if (result.categoriesInitialized || result.postsInitialized) {
+        toast({
+          title: "Blog content initialized",
+          description: "Blog posts and categories have been created. Refresh the page to see them.",
+          variant: "default",
+        });
+        
+        // Refresh the page after a short delay
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        toast({
+          title: "Blog content already exists",
+          description: "The blog posts and categories already exist in the database.",
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      console.error("Error initializing blog content:", error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize blog content. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setInitializing(false);
+    }
+  };
 
   return (
     <>
@@ -72,14 +112,24 @@ export default function Blog() {
             <p className="text-muted-foreground mb-4">
               {searchQuery 
                 ? "No articles match your search criteria. Try different keywords."
-                : "There are no articles published yet. Check back soon!"}
+                : "There are no articles published yet. Click below to initialize the blog with content."}
             </p>
-            {searchQuery && (
+            {searchQuery ? (
               <Button 
                 variant="outline" 
                 onClick={() => setSearchQuery('')}
               >
                 Clear Search
+              </Button>
+            ) : (
+              <Button 
+                variant="default" 
+                onClick={handleInitializeBlog}
+                disabled={initializing}
+                className="flex items-center gap-2"
+              >
+                {initializing && <RefreshCw className="h-4 w-4 animate-spin" />}
+                Initialize Blog Content
               </Button>
             )}
           </div>

@@ -51,10 +51,10 @@ export function MainNavigation() {
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <Link
-              to="/pricing"
+              to="/subscription"
               className={navigationMenuTriggerStyle()}
             >
-              Pricing
+              Subscription
             </Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
