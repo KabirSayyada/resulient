@@ -41,7 +41,7 @@ serve(async (req) => {
     const { data: blogPosts, error: postsError } = await supabaseClient
       .from('published_blog_posts')
       .select('slug')
-      .is('published_at', 'not.null')
+      .not('published_at', 'is', null)
     
     if (postsError) {
       console.error('Error fetching blog posts:', postsError)
