@@ -13,9 +13,9 @@ export function BlogInitialization() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Blog Initialization</CardTitle>
+          <CardTitle>Blog Management</CardTitle>
           <CardDescription>
-            Initialize your blog with categories and posts
+            Manage your blog categories and create new posts
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -24,7 +24,7 @@ export function BlogInitialization() {
               <Info className="h-4 w-4" />
               <AlertTitle>Blog Status</AlertTitle>
               <AlertDescription>
-                Your blog has {posts.length} published posts. These are now visible to search engines and visitors.
+                You have {posts.length} published posts. These are visible to search engines and visitors.
               </AlertDescription>
             </Alert>
           )}

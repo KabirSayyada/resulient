@@ -22,7 +22,7 @@ export function InitializeBlogPosts() {
     if (!user) {
       toast({
         title: "Authentication Required",
-        description: "You must be logged in to initialize blog posts.",
+        description: "You must be logged in to create blog posts.",
         variant: "destructive",
       });
       return;
@@ -36,15 +36,15 @@ export function InitializeBlogPosts() {
       if (success) {
         toast({
           title: "Success!",
-          description: "Initial blog posts have been created successfully.",
+          description: "Blog posts have been created and published successfully.",
         });
         setIsComplete(true);
       }
     } catch (error) {
-      console.error("Error initializing blog posts:", error);
+      console.error("Error creating blog posts:", error);
       toast({
         title: "Error",
-        description: "Failed to initialize blog posts. Please try again later.",
+        description: "Failed to create blog posts. Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -55,15 +55,15 @@ export function InitializeBlogPosts() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Initialize Blog Content</CardTitle>
+        <CardTitle>Create Sample Blog Content</CardTitle>
         <CardDescription>
-          Create foundational blog posts to launch your blog with educational content and tactical guides.
+          Add pre-written blog posts to populate your blog with educational content.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-muted-foreground mb-4">
           This will create 8 SEO-optimized blog posts covering resume optimization, job searching, and career development topics.
-          Each post includes proper heading structure, meta descriptions, and featured images.
+          Each post will be immediately published and visible to your visitors.
         </p>
         <ul className="list-disc pl-5 mb-4 space-y-1 text-sm text-muted-foreground">
           <li>How to Optimize Your Resume for ATS Systems in 2025</li>
@@ -86,7 +86,7 @@ export function InitializeBlogPosts() {
             ? "Creating Posts..." 
             : isComplete 
               ? "Posts Created" 
-              : "Initialize Blog Content"}
+              : "Create Sample Blog Posts"}
         </Button>
       </CardFooter>
     </Card>
