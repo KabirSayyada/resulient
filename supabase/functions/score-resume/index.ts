@@ -96,6 +96,9 @@ Format your response ONLY as a valid JSON object with these fields:
 
     try {
       const scoreData = JSON.parse(content);
+      
+      // Log the complete score data for debugging
+      console.log("AI response data:", JSON.stringify(scoreData, null, 2));
 
       return new Response(
         JSON.stringify(scoreData),

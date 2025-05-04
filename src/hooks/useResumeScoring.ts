@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -195,7 +196,7 @@ export const useResumeScoring = (userId: string | undefined) => {
       setScoreHistory([newScoreData, ...scoreHistory]);
       
       try {
-        // Store ALL score fields in the database
+        // Store ALL score fields in the database with proper field mapping
         const { error } = await supabase
           .from("resume_scores")
           .insert({

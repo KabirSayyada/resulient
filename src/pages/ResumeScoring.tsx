@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -60,12 +61,14 @@ const ResumeScoring = () => {
             return "Bottom 25%";
           })();
 
+          console.log("Raw item data:", item);
+          
           // Create a properly structured ScoreData object with all fields, handling missing fields
           return {
             overallScore: item.overall_score,
             skillsAlignment: item.skills_breadth || 0,
             WorkExperience: item.experience_duration || 0,
-            // Use the specific fields with proper fallbacks
+            // Map directly to the dedicated fields, now that we've added them to the database
             Achievements: item.achievements_score || 0,
             EducationQuality: item.education_score || 0,
             Certifications: item.certifications_score || 0,

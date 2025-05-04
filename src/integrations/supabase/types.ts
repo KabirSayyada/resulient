@@ -113,11 +113,16 @@ export type Database = {
       }
       resume_scores: {
         Row: {
+          achievements_score: number | null
           ats_readiness: number
+          certifications_score: number | null
           content_structure: number
           created_at: string
+          education_score: number | null
+          elite_indicators: string[] | null
           experience_duration: number
           id: string
+          improvement_tips: string[] | null
           industry: string
           job_description: string
           keyword_relevance: number
@@ -125,16 +130,22 @@ export type Database = {
           percentile: number
           resume_content: string
           scoring_mode: string | null
+          similar_resumes: number | null
           skills_breadth: number
           suggested_skills: string[] | null
           user_id: string
         }
         Insert: {
+          achievements_score?: number | null
           ats_readiness: number
+          certifications_score?: number | null
           content_structure: number
           created_at?: string
+          education_score?: number | null
+          elite_indicators?: string[] | null
           experience_duration: number
           id?: string
+          improvement_tips?: string[] | null
           industry: string
           job_description: string
           keyword_relevance: number
@@ -142,16 +153,22 @@ export type Database = {
           percentile: number
           resume_content: string
           scoring_mode?: string | null
+          similar_resumes?: number | null
           skills_breadth: number
           suggested_skills?: string[] | null
           user_id: string
         }
         Update: {
+          achievements_score?: number | null
           ats_readiness?: number
+          certifications_score?: number | null
           content_structure?: number
           created_at?: string
+          education_score?: number | null
+          elite_indicators?: string[] | null
           experience_duration?: number
           id?: string
+          improvement_tips?: string[] | null
           industry?: string
           job_description?: string
           keyword_relevance?: number
@@ -159,6 +176,7 @@ export type Database = {
           percentile?: number
           resume_content?: string
           scoring_mode?: string | null
+          similar_resumes?: number | null
           skills_breadth?: number
           suggested_skills?: string[] | null
           user_id?: string
