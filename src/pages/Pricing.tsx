@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PricingFeature {
   text: string;
@@ -37,12 +39,13 @@ const pricingTiers: PricingTier[] = [
     monthlyPrice: null,
     yearlyPrice: null,
     features: [
-      { text: "3 Resume Scorings Daily", included: true },
-      { text: "2 Resume Optimizations Daily", included: true },
+      { text: "2 Resume Scorings Daily", included: true }, // Updated from 3 to 2
+      { text: "1 Resume Optimization Daily", included: true }, // Updated from 2 to 1
       { text: "Detailed Reports (View Only)", included: true },
       { text: "Daily Reset of Credits", included: true },
       { text: "Basic Support", included: true },
       { text: "Report Downloads", included: false },
+      { text: "Resume Comparison", included: false }, // Added this feature
       { text: "Unlimited Optimizations", included: false },
     ],
     badge: "Free Forever",
@@ -63,6 +66,7 @@ const pricingTiers: PricingTier[] = [
       { text: "Priority Support", included: true },
       { text: "All Free Features", included: true },
       { text: "Advanced Analytics", included: true },
+      { text: "Resume Comparison", included: false }, // Added and marked as not included
       { text: "Unlimited Downloads", included: false },
     ],
     badge: "Most Popular",
@@ -81,6 +85,7 @@ const pricingTiers: PricingTier[] = [
       { text: "Unlimited Resume Scorings", included: true },
       { text: "Unlimited Resume Optimizations", included: true },
       { text: "Unlimited Report Downloads", included: true },
+      { text: "Resume Comparison Tool", included: true }, // Added and marked as included
       { text: "Priority Support", included: true },
       { text: "All Premium Features", included: true },
       { text: "Advanced Analytics", included: true },
@@ -98,7 +103,7 @@ const PricingPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { subscription, checkout } = useSubscription();
-  const [isYearly, setIsYearly] = useState(true);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
 
   const handlePurchase = async (tier: PricingTier) => {
@@ -113,7 +118,7 @@ const PricingPage = () => {
 
     try {
       setLoadingTier(tier.name);
-      const productId = isYearly ? tier.productId.yearly : tier.productId.monthly;
+      const productId = billingCycle === 'yearly' ? tier.productId.yearly : tier.productId.monthly;
       
       if (!productId) {
         if (tier.name === "Free") {
@@ -180,20 +185,24 @@ const PricingPage = () => {
             </div>
           )}
           
-          {/* Billing toggle */}
-          <div className="mt-8 flex items-center justify-center">
-            <span className={`mr-3 text-base ${!isYearly ? "font-bold" : "text-gray-600 dark:text-gray-400"}`}>Monthly</span>
-            <button
-              onClick={() => setIsYearly(!isYearly)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isYearly ? "bg-indigo-600" : "bg-gray-400"}`}
+          {/* New improved billing cycle selector using Tabs */}
+          <div className="mt-8">
+            <Tabs 
+              defaultValue="yearly" 
+              value={billingCycle}
+              onValueChange={(value) => setBillingCycle(value as 'monthly' | 'yearly')}
+              className="max-w-xs mx-auto"
             >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isYearly ? "translate-x-6" : "translate-x-1"}`}
-              />
-            </button>
-            <span className={`ml-3 text-base ${isYearly ? "font-bold" : "text-gray-600 dark:text-gray-400"}`}>
-              Yearly <span className="text-xs font-semibold text-green-600 dark:text-green-400">(Save ~20%)</span>
-            </span>
+              <TabsList className="grid grid-cols-2 w-full">
+                <TabsTrigger value="monthly" className="relative px-6">
+                  Monthly
+                </TabsTrigger>
+                <TabsTrigger value="yearly" className="relative px-6">
+                  Yearly
+                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">Save 20%</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
         </div>
 
@@ -235,13 +244,13 @@ const PricingPage = () => {
                     <>
                       <div className="flex items-center justify-center gap-2">
                         <span className="text-4xl font-bold dark:text-white">
-                          ${isYearly ? tier.yearlyPrice : tier.monthlyPrice}
+                          ${billingCycle === 'yearly' ? tier.yearlyPrice : tier.monthlyPrice}
                         </span>
                         <span className="text-gray-600 dark:text-gray-300">
-                          {isYearly ? "/year" : "/month"}
+                          {billingCycle === 'yearly' ? "/year" : "/month"}
                         </span>
                       </div>
-                      {isYearly && (
+                      {billingCycle === 'yearly' && (
                         <div className="text-sm text-green-600 dark:text-green-400 mt-1">
                           Save ${Math.round(tier.monthlyPrice! * 12 - tier.yearlyPrice!)} per year
                         </div>

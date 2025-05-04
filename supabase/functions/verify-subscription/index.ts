@@ -153,8 +153,8 @@ function getDailyLimits(tier: string) {
     case "free":
     default:
       return {
-        resumeScorings: 3,
-        resumeOptimizations: 2,
+        resumeScorings: 2, // Updated from 3 to 2
+        resumeOptimizations: 1, // Updated from 2 to 1
         reportDownloads: 0,
       }
   }
