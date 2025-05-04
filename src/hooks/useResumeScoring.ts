@@ -3,7 +3,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSupabaseFunction } from "@/hooks/useSupabaseFunction";
-import { ScoreData } from "@/types/resume";
+import { ScoreData, ResumeScoreRecord } from "@/types/resume";
 
 const calculatePercentile = (score: number): string => {
   if (score >= 90) return "Top 1%";
@@ -195,37 +195,42 @@ export const useResumeScoring = (userId: string | undefined) => {
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
       
-      // Store ALL score fields in the database
-      const { error } = await supabase
-        .from("resume_scores")
-        .insert({
-          user_id: userId,
-          overall_score: newScoreData.overallScore,
-          skills_breadth: newScoreData.skillsAlignment,
-          experience_duration: newScoreData.WorkExperience,
-          achievements_score: newScoreData.Achievements,
-          education_score: newScoreData.EducationQuality,
-          certifications_score: newScoreData.Certifications,
-          content_structure: newScoreData.ContentStructure,
-          keyword_relevance: newScoreData.keywordRelevance,
-          industry: newScoreData.Industry,
-          percentile: percentileToNumber(calculatedPercentile),
-          similar_resumes: newScoreData.numSimilarResumes,
-          suggested_skills: newScoreData.suggestedSkills,
-          elite_indicators: newScoreData.eliteIndicatorsFound,
-          improvement_tips: newScoreData.improvementTips,
-          resume_content: resumeContent,
-          job_description: '',
-          ats_readiness: 0,
-          scoring_mode: "resumeOnly"
-        });
-      
-      if (error) {
-        console.error("Error saving score:", error);
+      try {
+        // Store ALL score fields in the database
+        const { error } = await supabase
+          .from("resume_scores")
+          .insert({
+            user_id: userId,
+            overall_score: newScoreData.overallScore,
+            skills_breadth: newScoreData.skillsAlignment,
+            experience_duration: newScoreData.WorkExperience,
+            achievements_score: newScoreData.Achievements,
+            education_score: newScoreData.EducationQuality,
+            certifications_score: newScoreData.Certifications,
+            content_structure: newScoreData.ContentStructure,
+            keyword_relevance: newScoreData.keywordRelevance,
+            industry: newScoreData.Industry,
+            percentile: percentileToNumber(calculatedPercentile),
+            similar_resumes: newScoreData.numSimilarResumes,
+            suggested_skills: newScoreData.suggestedSkills,
+            elite_indicators: newScoreData.eliteIndicatorsFound,
+            improvement_tips: newScoreData.improvementTips,
+            resume_content: resumeContent,
+            job_description: '',
+            ats_readiness: 0,
+            scoring_mode: "resumeOnly"
+          });
+        
+        if (error) {
+          console.error("Error saving score:", error);
+          throw error;
+        }
+      } catch (dbError) {
+        console.error("Database error when saving score:", dbError);
         // If we get a database error, check if it's related to missing columns
-        if (error.message.includes("column") && error.message.includes("does not exist")) {
-          console.log("Some columns might be missing in the database schema. Falling back to basic storage");
-          // Try again with only essential fields
+        console.log("Falling back to basic storage with required fields only");
+        // Try again with only essential fields
+        try {
           const { error: fallbackError } = await supabase
             .from("resume_scores")
             .insert({
@@ -247,6 +252,8 @@ export const useResumeScoring = (userId: string | undefined) => {
           if (fallbackError) {
             console.error("Error saving score with fallback method:", fallbackError);
           }
+        } catch (fallbackError) {
+          console.error("Even fallback storage failed:", fallbackError);
         }
       }
       

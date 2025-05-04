@@ -23,5 +23,32 @@ export interface ScoreData {
   missingQualifications?: QualificationGap[];
   timestamp: string;
   id: string;
-  scoringMode?: "resumeOnly";
+  scoringMode?: "resumeOnly" | "jobDescription";
+}
+
+// Interface to help with type safety when accessing Supabase resume_scores table
+export interface ResumeScoreRecord {
+  ats_readiness: number;
+  content_structure: number;
+  created_at: string;
+  experience_duration: number;
+  id: string;
+  industry: string;
+  job_description: string;
+  keyword_relevance: number;
+  overall_score: number;
+  percentile: number;
+  resume_content: string;
+  scoring_mode: string | null;
+  skills_breadth: number;
+  suggested_skills: string[] | null;
+  user_id: string;
+  
+  // These fields might not exist in all records but we need to access them
+  achievements_score?: number;
+  education_score?: number;
+  certifications_score?: number;
+  similar_resumes?: number;
+  elite_indicators?: string[];
+  improvement_tips?: string[];
 }

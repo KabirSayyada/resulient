@@ -7,7 +7,7 @@ import { SubscriptionTierIndicator } from "@/components/subscription/Subscriptio
 
 interface ScoreHeaderProps {
   industry: string;
-  percentile: number;
+  percentile: number | string;
   scoringMode: "resumeOnly" | "jobDescription";
 }
 

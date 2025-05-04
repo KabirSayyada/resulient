@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -11,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, FileText, Diamond } from "lucide-react";
 import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { supabase } from "@/integrations/supabase/client";
-import { ScoreData } from "@/types/resume";
+import { ScoreData, ResumeScoreRecord } from "@/types/resume";
 import { Button } from "@/components/ui/button";
 import { MainNavigation } from "@/components/resume/MainNavigation";
 import { LegalFooter } from "@/components/layout/LegalFooter";
@@ -47,7 +46,7 @@ const ResumeScoring = () => {
       if (error) throw error;
 
       if (data) {
-        const formattedHistory: ScoreData[] = data.map((item) => {
+        const formattedHistory: ScoreData[] = data.map((item: ResumeScoreRecord) => {
           // Convert numeric percentile to text representation
           const percentileString = (() => {
             const percentile = item.percentile || 50;
@@ -66,7 +65,7 @@ const ResumeScoring = () => {
             overallScore: item.overall_score,
             skillsAlignment: item.skills_breadth || 0,
             WorkExperience: item.experience_duration || 0,
-            // Use the correct fields or fallbacks where needed
+            // Use the correct fields with proper fallbacks
             Achievements: item.achievements_score || item.experience_duration || 0,
             EducationQuality: item.education_score || item.content_structure || 0,
             Certifications: item.certifications_score || item.ats_readiness || 0,
@@ -76,7 +75,7 @@ const ResumeScoring = () => {
             percentile: percentileString,
             numSimilarResumes: item.similar_resumes || 12000,
             suggestedSkills: item.suggested_skills || [],
-            eliteIndicatorsFound: item.elite_indicators || item.suggested_skills || [],
+            eliteIndicatorsFound: item.elite_indicators || [],
             improvementTips: item.improvement_tips || 
               (item.suggested_skills?.map(s => `Add ${s} to your resume`) || []),
             missingQualifications: [],
