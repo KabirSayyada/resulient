@@ -10,12 +10,14 @@ import { Helmet } from 'react-helmet-async';
 import { Search, RefreshCw } from 'lucide-react';
 import { initializeBlogContent } from '@/utils/blogInitializer';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Blog() {
   const { posts, isLoading, error } = useBlogPosts();
   const [searchQuery, setSearchQuery] = useState('');
   const [initializing, setInitializing] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth(); // Get the current user
 
   const filteredPosts = posts.filter(post => {
     const searchLower = searchQuery.toLowerCase();
@@ -27,7 +29,7 @@ export default function Blog() {
     );
   });
 
-  // Initialize blog content if no posts are found
+  // Initialize blog content if no posts are found - Only available to admin
   const handleInitializeBlog = async () => {
     try {
       setInitializing(true);
@@ -112,7 +114,7 @@ export default function Blog() {
             <p className="text-muted-foreground mb-4">
               {searchQuery 
                 ? "No articles match your search criteria. Try different keywords."
-                : "There are no articles published yet. Click below to initialize the blog with content."}
+                : "There are no articles published yet."}
             </p>
             {searchQuery ? (
               <Button 
@@ -121,7 +123,7 @@ export default function Blog() {
               >
                 Clear Search
               </Button>
-            ) : (
+            ) : user ? (
               <Button 
                 variant="default" 
                 onClick={handleInitializeBlog}
@@ -131,7 +133,7 @@ export default function Blog() {
                 {initializing && <RefreshCw className="h-4 w-4 animate-spin" />}
                 Initialize Blog Content
               </Button>
-            )}
+            ) : null}
           </div>
         )}
       </BlogLayout>

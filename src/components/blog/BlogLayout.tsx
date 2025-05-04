@@ -16,6 +16,10 @@ interface BlogLayoutProps {
 export function BlogLayout({ children, title }: BlogLayoutProps) {
   const { categories, isLoading } = useBlogCategories();
   const { user } = useAuth();
+  
+  // Check if user is admin - this is a simplified check
+  // In a real application, you might want to check for a specific user ID or role
+  const isAdmin = user?.email === 'admin@example.com'; // Replace with your actual admin email
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -69,8 +73,8 @@ export function BlogLayout({ children, title }: BlogLayoutProps) {
                 </ScrollArea>
               </div>
                 
-              {/* Admin link (if authenticated) */}
-              {user && (
+              {/* Admin link (only visible to admin users) */}
+              {isAdmin && (
                 <div>
                   <h3 className="font-semibold text-lg mb-2">Admin</h3>
                   <Separator className="my-2" />
