@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,11 +34,14 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
     isLoading: true,
     expiresAt: null,
     limits: {
-      resumeScorings: 3,
-      resumeOptimizations: 2,
+      resumeScorings: 2, // Updated to 2 for free tier
+      resumeOptimizations: 1, // Updated to 1 for free tier
       reportDownloads: 0,
     }
   });
+
+  // Track if we already called verifySubscription to prevent loops
+  const [verificationAttempted, setVerificationAttempted] = useState(false);
 
   // Direct database check for subscription status
   const checkSubscriptionInDatabase = useCallback(async () => {
@@ -79,8 +81,10 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
   }, [user]);
 
   const verifySubscription = useCallback(async () => {
+    // Don't proceed if there's no user
     if (!user) {
       setSubscription(prev => ({ ...prev, isLoading: false }));
+      setVerificationAttempted(true);
       return;
     }
 
@@ -105,6 +109,7 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
           purchaseId: dbSubscription.gumroad_purchase_id,
           status: dbSubscription.status,
         });
+        setVerificationAttempted(true);
         return;
       }
       
@@ -112,6 +117,7 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         setSubscription(prev => ({ ...prev, isLoading: false }));
+        setVerificationAttempted(true);
         return;
       }
 
@@ -134,8 +140,8 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
 
       if (response.error) {
         console.error("Error verifying subscription:", response.error);
-        // Don't show toast to improve user experience
         setSubscription(prev => ({ ...prev, isLoading: false }));
+        setVerificationAttempted(true);
         return;
       }
 
@@ -167,15 +173,21 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
         purchaseId: subData?.gumroad_purchase_id,
         status: subData?.status,
       });
+      setVerificationAttempted(true);
     } catch (error) {
       console.error("Error in subscription verification:", error);
       setSubscription(prev => ({ ...prev, isLoading: false }));
+      setVerificationAttempted(true);
     }
-  }, [user, requiredTier, toast, checkSubscriptionInDatabase]);
+  }, [user, requiredTier, checkSubscriptionInDatabase]);
 
   useEffect(() => {
-    verifySubscription();
-  }, [verifySubscription, location.pathname]);
+    // Only call verifySubscription if we haven't attempted it yet
+    // or when location changes (page navigation)
+    if (!verificationAttempted || location.pathname !== location.pathname) {
+      verifySubscription();
+    }
+  }, [verifySubscription, location.pathname, verificationAttempted]);
 
   const checkout = async (productId: string) => {
     try {
@@ -210,7 +222,8 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
   const refreshSubscription = () => {
     console.log("Refreshing subscription...");
     setSubscription(prev => ({ ...prev, isLoading: true }));
-    verifySubscription();
+    setVerificationAttempted(false); // Reset the flag to allow verification again
+    // The useEffect will pick up this change and call verifySubscription
   };
 
   return {

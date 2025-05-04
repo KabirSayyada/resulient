@@ -59,9 +59,12 @@ const SubscriptionDetails = () => {
       return;
     }
     
-    // Refresh subscription data when the page loads
-    refreshSubscription();
-  }, [user, authLoading, navigate, refreshSubscription]);
+    // Only refresh subscription once when the component mounts
+    // This prevents the infinite loop
+    if (!subscription.isLoading) {
+      refreshSubscription();
+    }
+  }, [user, authLoading, navigate]); // Remove refreshSubscription from dependency array
   
   if (authLoading || subscription.isLoading) {
     return (
