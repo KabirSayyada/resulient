@@ -17,3 +17,5 @@ Allow: /resume-scoring
 Allow: /terms-of-service
 Allow: /privacy-policy
 Allow: /refund-policy
+Allow: /blog
+Allow: /blog/
