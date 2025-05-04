@@ -31,9 +31,9 @@ export function SubscriptionTierIndicator({
     
     switch (tier) {
       case "platinum":
-        return <Crown className={`${iconSize} text-purple-500 dark:text-purple-400`} />;
+        return <Crown className={`${iconSize} ${tier === "platinum" ? "text-purple-500 dark:text-purple-400" : "text-gray-400 dark:text-gray-600"}`} />;
       case "premium":
-        return <Diamond className={`${iconSize} text-blue-500 dark:text-blue-400`} />;
+        return <Diamond className={`${iconSize} ${tier === "premium" ? "text-blue-500 dark:text-blue-400" : "text-gray-400 dark:text-gray-600"}`} />;
       default:
         return <Star className={`${iconSize} text-gray-400 dark:text-gray-600`} />;
     }
@@ -42,9 +42,9 @@ export function SubscriptionTierIndicator({
   const getTierColor = (tier: SubscriptionTier) => {
     switch (tier) {
       case "platinum":
-        return "from-purple-500 to-indigo-600 text-white border-purple-400";
+        return "from-purple-500 to-indigo-600 text-white border-purple-400 shadow-purple-200 dark:shadow-purple-900/20";
       case "premium":
-        return "from-blue-500 to-indigo-500 text-white border-blue-400";
+        return "from-blue-500 to-indigo-500 text-white border-blue-400 shadow-blue-200 dark:shadow-blue-900/20";
       default:
         return "from-gray-200 to-gray-300 text-gray-700 dark:from-gray-700 dark:to-gray-800 dark:text-gray-300 border-gray-300 dark:border-gray-600";
     }
@@ -97,10 +97,10 @@ export function SubscriptionTierIndicator({
   if (variant === "badge") {
     const content = (
       <Badge 
-        className={`bg-gradient-to-r ${getTierColor(subscription.tier)} hover:opacity-90 transition-opacity ${className}`}
+        className={`bg-gradient-to-r ${getTierColor(subscription.tier)} hover:opacity-90 transition-opacity border shadow-sm ${className}`}
       >
         {getTierIcon(subscription.tier)}
-        <span className={`ml-1 ${size === "sm" ? "text-xs" : "text-sm"}`}>{getBadgeText(subscription.tier)}</span>
+        <span className={`ml-1 ${size === "sm" ? "text-xs" : "text-sm"} font-semibold`}>{getBadgeText(subscription.tier)}</span>
       </Badge>
     );
     
@@ -130,7 +130,7 @@ export function SubscriptionTierIndicator({
   
   // Full display with text and icon
   const content = (
-    <div className={`flex items-center gap-1.5 ${subscription.tier !== "free" ? "text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-gray-400"} ${className}`}>
+    <div className={`flex items-center gap-1.5 ${subscription.tier === "platinum" ? "text-purple-700 dark:text-purple-300" : subscription.tier === "premium" ? "text-blue-700 dark:text-blue-300" : "text-gray-600 dark:text-gray-400"} ${className}`}>
       {getTierIcon(subscription.tier)}
       <span className={`font-medium ${size === "sm" ? "text-xs" : size === "lg" ? "text-base" : "text-sm"}`}>
         {getBadgeText(subscription.tier)} Plan

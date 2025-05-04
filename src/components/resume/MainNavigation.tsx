@@ -4,13 +4,24 @@ import { Button } from "@/components/ui/button";
 import { FileText, BarChart2, Trophy } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export const MainNavigation = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
+  const { subscription } = useSubscription();
   const isAtHomePage = location.pathname === "/";
   const isAtScoringPage = location.pathname === "/resume-scoring";
   const isAtLeaderboardPage = location.pathname === "/industry-leaderboard";
+
+  const getButtonGradient = () => {
+    if (subscription.tier === "platinum") {
+      return "from-purple-500 to-indigo-500";
+    } else if (subscription.tier === "premium") {
+      return "from-blue-500 to-indigo-500";
+    }
+    return "from-indigo-500 to-fuchsia-500";
+  };
 
   return (
     <div className="flex flex-wrap gap-3 justify-center sm:justify-start mb-6 mt-2">
@@ -20,7 +31,7 @@ export const MainNavigation = () => {
         asChild
         className={`flex items-center gap-2 ${
           isAtHomePage 
-            ? "bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white font-semibold" 
+            ? `bg-gradient-to-r ${getButtonGradient()} text-white font-semibold` 
             : "border-indigo-300"
         }`}
       >
@@ -35,7 +46,7 @@ export const MainNavigation = () => {
         asChild
         className={`flex items-center gap-2 ${
           isAtScoringPage 
-            ? "bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white font-semibold" 
+            ? `bg-gradient-to-r ${getButtonGradient()} text-white font-semibold` 
             : "border-indigo-300"
         }`}
       >
@@ -50,7 +61,7 @@ export const MainNavigation = () => {
         asChild
         className={`flex items-center gap-2 ${
           isAtLeaderboardPage 
-            ? "bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white font-semibold" 
+            ? `bg-gradient-to-r ${getButtonGradient()} text-white font-semibold` 
             : "border-indigo-300"
         }`}
       >

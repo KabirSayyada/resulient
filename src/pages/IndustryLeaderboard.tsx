@@ -9,11 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { ScoreData } from "@/types/resume";
 import { useState } from "react";
 import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
+import { useSubscription } from "@/hooks/useSubscription";
+import { SubscriptionTierIndicator } from "@/components/subscription/SubscriptionTierIndicator";
 
 const IndustryLeaderboard = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [latestScore, setLatestScore] = useState<ScoreData | null>(null);
+  const { subscription } = useSubscription();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -83,7 +86,13 @@ const IndustryLeaderboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950 py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
+    <div className={`min-h-screen bg-gradient-to-br ${
+      subscription.tier === "premium" 
+        ? "from-indigo-100 via-blue-50 to-indigo-100 dark:from-indigo-950 dark:via-blue-950 dark:to-indigo-950" 
+        : subscription.tier === "platinum" 
+          ? "from-purple-50 via-indigo-100 to-purple-50 dark:from-purple-950 dark:via-indigo-950 dark:to-purple-950" 
+          : "from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950"
+    } py-4 sm:py-8 px-3 sm:px-6 lg:px-8 transition-colors duration-300`}>
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
           <div className="flex items-center gap-2 sm:gap-4">
@@ -94,8 +103,22 @@ const IndustryLeaderboard = () => {
               Industry Leaderboard
             </span>
           </div>
-          <UserMenuWithTheme />
+          <div className="flex items-center gap-2">
+            <SubscriptionTierIndicator variant="badge" size="md" className="animate-fade-in" />
+            <UserMenuWithTheme />
+          </div>
         </div>
+
+        {/* Subscription Tier Banner - highly visible */}
+        {subscription.tier !== "free" && (
+          <div className={`mb-6 py-2 px-4 rounded-lg shadow-md border animate-fade-in text-center ${
+            subscription.tier === "premium" 
+              ? "bg-blue-100 border-blue-300 text-blue-800 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-200" 
+              : "bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-900 dark:border-purple-700 dark:text-purple-200"
+          }`}>
+            <SubscriptionTierIndicator variant="full" size="lg" showTooltip={false} className="justify-center" />
+          </div>
+        )}
 
         <MainNavigation />
 

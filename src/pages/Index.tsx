@@ -23,11 +23,13 @@ import { GuidedTour } from "@/components/onboarding/GuidedTour";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
 import { supabase } from "@/integrations/supabase/client";
+import { SubscriptionTierIndicator } from "@/components/subscription/SubscriptionTierIndicator";
 
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { subscription } = useSubscription();
 
   const [jobDescription, setJobDescription] = useState("");
   const [resumeContent, setResumeContent] = useState("");
@@ -121,7 +123,13 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
+    <div className={`min-h-screen py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${
+      subscription.tier === "premium" 
+        ? "bg-gradient-to-br from-blue-50 via-gray-50 to-indigo-50 dark:from-blue-950 dark:via-gray-900 dark:to-indigo-950" 
+        : subscription.tier === "platinum" 
+          ? "bg-gradient-to-br from-purple-50 via-gray-50 to-indigo-50 dark:from-purple-950 dark:via-gray-900 dark:to-indigo-950" 
+          : "bg-gray-50 dark:bg-gray-900"
+    }`}>
       <div className="max-w-4xl mx-auto">
         {/* Brand Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
@@ -133,8 +141,22 @@ const Index = () => {
               ATS Resume Optimization
             </span>
           </div>
-          <UserMenuWithTheme />
+          <div className="flex items-center gap-2">
+            <SubscriptionTierIndicator variant="badge" size="md" className="animate-fade-in" />
+            <UserMenuWithTheme />
+          </div>
         </div>
+
+        {/* Subscription Tier Banner - highly visible */}
+        {subscription.tier !== "free" && (
+          <div className={`mb-6 py-2 px-4 rounded-lg shadow-md border animate-fade-in text-center ${
+            subscription.tier === "premium" 
+              ? "bg-blue-100 border-blue-300 text-blue-800 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-200" 
+              : "bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-900 dark:border-purple-700 dark:text-purple-200"
+          }`}>
+            <SubscriptionTierIndicator variant="full" size="lg" showTooltip={false} className="justify-center" />
+          </div>
+        )}
 
         {/* NEW: About section, styled and responsive */}
         <div className="bg-gradient-to-br from-fuchsia-50 via-indigo-50 to-yellow-50 dark:from-fuchsia-950 dark:via-indigo-950 dark:to-yellow-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-md px-4 py-5 mb-5 sm:mb-8 sm:px-6 mx-auto max-w-2xl text-center">
@@ -184,7 +206,13 @@ const Index = () => {
             <Button 
               onClick={handleOptimizeResume} 
               disabled={optimizing || !resumeContent || !jobDescription}
-              className="px-7 py-3 text-lg font-bold rounded-full shadow transition-all bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500"
+              className={`px-7 py-3 text-lg font-bold rounded-full shadow transition-all ${
+                subscription.tier === "premium" 
+                  ? "bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600" 
+                  : subscription.tier === "platinum" 
+                    ? "bg-gradient-to-r from-purple-500 to-indigo-400 hover:from-purple-600 hover:to-indigo-500" 
+                    : "bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500"
+              }`}
             >
               {optimizing ? "Optimizing..." : "Optimize Resume"}
             </Button>

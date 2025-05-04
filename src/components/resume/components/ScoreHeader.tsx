@@ -2,6 +2,8 @@
 import { Award } from "lucide-react";
 import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useSubscription } from "@/hooks/useSubscription";
+import { SubscriptionTierIndicator } from "@/components/subscription/SubscriptionTierIndicator";
 
 interface ScoreHeaderProps {
   industry: string;
@@ -14,6 +16,8 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
   percentile,
   scoringMode
 }) => {
+  const { subscription } = useSubscription();
+
   // Map percentile number to appropriate text
   const getPercentileText = (value: number): string => {
     if (value <= 1) return "Top 1%";
@@ -26,12 +30,26 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
     return "Bottom 25%";
   };
 
+  const getBgGradient = () => {
+    if (subscription.tier === "platinum") {
+      return "from-purple-300 via-indigo-300 to-blue-300";
+    } else if (subscription.tier === "premium") {
+      return "from-blue-300 via-indigo-300 to-blue-300";
+    }
+    return "from-indigo-400 via-fuchsia-300 to-blue-300";
+  };
+
   return (
     <CardHeader 
-      className="pdf-header flex flex-col items-center justify-center gap-2 bg-gradient-to-r from-indigo-400 via-fuchsia-300 to-blue-300 py-6 animate-fade-in"
+      className={`pdf-header flex flex-col items-center justify-center gap-2 bg-gradient-to-r ${getBgGradient()} py-6 animate-fade-in`}
       style={{ backgroundColor: '#9b87f5' }} // More prominent backup color for PDF export
     >
-      <Award className="text-yellow-400 w-12 h-12 drop-shadow-lg mb-1" />
+      <div className="flex items-center gap-2">
+        <Award className="text-yellow-400 w-12 h-12 drop-shadow-lg" />
+        {subscription.tier !== "free" && (
+          <SubscriptionTierIndicator variant="badge" size="lg" showTooltip={false} />
+        )}
+      </div>
       <CardTitle className="text-2xl font-black text-indigo-900 drop-shadow">
         Resume Scorecard
       </CardTitle>

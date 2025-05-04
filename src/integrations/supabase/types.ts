@@ -165,6 +165,36 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_notifications: {
+        Row: {
+          email: string
+          id: string
+          processed: boolean
+          product_code: string
+          purchase_id: string
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          email: string
+          id?: string
+          processed?: boolean
+          product_code: string
+          purchase_id: string
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          email?: string
+          id?: string
+          processed?: boolean
+          product_code?: string
+          purchase_id?: string
+          timestamp?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           billing_cycle: string
