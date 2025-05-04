@@ -15,7 +15,7 @@ export interface ScoreData {
   ContentStructure: number;
   keywordRelevance: number;
   Industry: string;
-  percentile: string;  // Changed from number to string to accommodate textual rankings
+  percentile: string;  // Can be textual ranking like "Top 1%" or "Above Average"
   numSimilarResumes: number;
   suggestedSkills: string[];
   eliteIndicatorsFound: string[];

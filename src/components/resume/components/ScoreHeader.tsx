@@ -30,6 +30,14 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
     return "Bottom 25%";
   };
 
+  // Display the percentile text directly if it's a string, or calculate it if it's a number
+  const displayPercentile = (percentile: number | string): string => {
+    if (typeof percentile === 'string') {
+      return percentile;
+    }
+    return getPercentileText(percentile);
+  };
+
   const getBgGradient = () => {
     if (subscription.tier === "platinum") {
       return "from-purple-300 via-indigo-300 to-blue-300";
@@ -58,7 +66,7 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
       </span>
       <Badge variant="secondary" className="mt-1 bg-fuchsia-100 text-fuchsia-700 font-bold text-xs rounded-full px-4 py-1 shadow animate-pulse">
         {scoringMode === "resumeOnly"
-          ? getPercentileText(percentile)
+          ? displayPercentile(percentile)
           : "Job Fit Score"}
       </Badge>
     </CardHeader>

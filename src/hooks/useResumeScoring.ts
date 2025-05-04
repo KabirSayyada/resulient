@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -119,19 +120,19 @@ export const useResumeScoring = (userId: string | undefined) => {
           overallScore: existingScore.overall_score,
           skillsAlignment: existingScore.skills_breadth || 0,
           WorkExperience: existingScore.experience_duration || 0,
-          Achievements: existingScore.experience_duration || 0,
-          EducationQuality: existingScore.content_structure || 0,
-          Certifications: existingScore.ats_readiness || 0,
+          Achievements: existingScore.achievements_score || 0,
+          EducationQuality: existingScore.education_score || 0,
+          Certifications: existingScore.certifications_score || 0,
           ContentStructure: existingScore.content_structure || 0,
           keywordRelevance: existingScore.keyword_relevance || 0,
           Industry: existingScore.industry || "",
           percentile: calculatedPercentile,
-          numSimilarResumes: existingScore.percentile || 12000,
+          numSimilarResumes: existingScore.similar_resumes || 12000,
           suggestedSkills: existingScore.suggested_skills || [],
-          eliteIndicatorsFound: existingScore.suggested_skills || [],
-          improvementTips: existingScore.suggested_skills?.map(s => `Add ${s} to your resume`) || [],
+          eliteIndicatorsFound: existingScore.elite_indicators || [],
+          improvementTips: existingScore.improvement_tips || [],
           missingQualifications: [],
-          timestamp: new Date().toLocaleString(),
+          timestamp: new Date(existingScore.created_at).toLocaleString(),
           id: existingScore.id,
           scoringMode: "resumeOnly",
         };
@@ -194,8 +195,7 @@ export const useResumeScoring = (userId: string | undefined) => {
       setScoreData(newScoreData);
       setScoreHistory([newScoreData, ...scoreHistory]);
       
-      // Fix the database error by commenting out non-existent fields
-      // and remove the "similar_resumes" field that doesn't exist
+      // Store ALL score fields in the database
       const { error } = await supabase
         .from("resume_scores")
         .insert({
@@ -203,18 +203,17 @@ export const useResumeScoring = (userId: string | undefined) => {
           overall_score: newScoreData.overallScore,
           skills_breadth: newScoreData.skillsAlignment,
           experience_duration: newScoreData.WorkExperience,
-          // Commenting out fields causing errors
-          // achievements_score: newScoreData.Achievements,
-          // education_score: newScoreData.EducationQuality,
-          // certifications_score: newScoreData.Certifications,
+          achievements_score: newScoreData.Achievements,
+          education_score: newScoreData.EducationQuality,
+          certifications_score: newScoreData.Certifications,
           content_structure: newScoreData.ContentStructure,
           keyword_relevance: newScoreData.keywordRelevance,
           industry: newScoreData.Industry,
           percentile: percentileToNumber(calculatedPercentile),
-          // similar_resumes: newScoreData.numSimilarResumes, // Removing this field as it doesn't exist
+          similar_resumes: newScoreData.numSimilarResumes,
           suggested_skills: newScoreData.suggestedSkills,
-          // elite_indicators: newScoreData.eliteIndicatorsFound,
-          // improvement_tips: newScoreData.improvementTips,
+          elite_indicators: newScoreData.eliteIndicatorsFound,
+          improvement_tips: newScoreData.improvementTips,
           resume_content: resumeContent,
           job_description: '',
           ats_readiness: 0,
@@ -223,6 +222,32 @@ export const useResumeScoring = (userId: string | undefined) => {
       
       if (error) {
         console.error("Error saving score:", error);
+        // If we get a database error, check if it's related to missing columns
+        if (error.message.includes("column") && error.message.includes("does not exist")) {
+          console.log("Some columns might be missing in the database schema. Falling back to basic storage");
+          // Try again with only essential fields
+          const { error: fallbackError } = await supabase
+            .from("resume_scores")
+            .insert({
+              user_id: userId,
+              overall_score: newScoreData.overallScore,
+              skills_breadth: newScoreData.skillsAlignment,
+              experience_duration: newScoreData.WorkExperience,
+              content_structure: newScoreData.ContentStructure,
+              keyword_relevance: newScoreData.keywordRelevance,
+              industry: newScoreData.Industry,
+              percentile: percentileToNumber(calculatedPercentile),
+              suggested_skills: newScoreData.suggestedSkills,
+              resume_content: resumeContent,
+              job_description: '',
+              ats_readiness: 0,
+              scoring_mode: "resumeOnly"
+            });
+          
+          if (fallbackError) {
+            console.error("Error saving score with fallback method:", fallbackError);
+          }
+        }
       }
       
       toast({

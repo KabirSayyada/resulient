@@ -48,39 +48,46 @@ const ResumeScoring = () => {
 
       if (data) {
         const formattedHistory: ScoreData[] = data.map((item) => {
+          // Convert numeric percentile to text representation
           const percentileString = (() => {
             const percentile = item.percentile || 50;
-            if (percentile >= 99) return "1";
-            if (percentile >= 95) return "5";
-            if (percentile >= 90) return "10";
-            if (percentile >= 75) return "25";
+            if (percentile >= 99) return "Top 1%";
+            if (percentile >= 95) return "Top 5%";
+            if (percentile >= 90) return "Top 10%";
+            if (percentile >= 75) return "Top 25%";
             if (percentile >= 65) return "Above Average";
             if (percentile >= 45) return "Average";
             if (percentile >= 30) return "Below Average";
-            return "Bottom 25";
+            return "Bottom 25%";
           })();
 
+          // Create a properly structured ScoreData object with all fields
           return {
             overallScore: item.overall_score,
             skillsAlignment: item.skills_breadth || 0,
             WorkExperience: item.experience_duration || 0,
-            Achievements: item.experience_duration || 0,
-            EducationQuality: item.content_structure || 0,
-            Certifications: item.ats_readiness || 0,
+            // Use the correct fields or fallbacks where needed
+            Achievements: item.achievements_score || item.experience_duration || 0,
+            EducationQuality: item.education_score || item.content_structure || 0,
+            Certifications: item.certifications_score || item.ats_readiness || 0,
             ContentStructure: item.content_structure || 0,
             keywordRelevance: item.keyword_relevance || 0,
             Industry: item.industry || "",
             percentile: percentileString,
-            numSimilarResumes: item.percentile || 12000,
+            numSimilarResumes: item.similar_resumes || 12000,
             suggestedSkills: item.suggested_skills || [],
-            eliteIndicatorsFound: item.suggested_skills || [],
-            improvementTips: item.suggested_skills?.map(s => `Add ${s} to your resume`) || [],
+            eliteIndicatorsFound: item.elite_indicators || item.suggested_skills || [],
+            improvementTips: item.improvement_tips || 
+              (item.suggested_skills?.map(s => `Add ${s} to your resume`) || []),
+            missingQualifications: [],
             timestamp: new Date(item.created_at).toLocaleString(),
             id: item.id,
             scoringMode: "resumeOnly",
           };
         });
+        
         setScoreHistory(formattedHistory);
+        console.log("Loaded score history:", formattedHistory);
       }
     } catch (error) {
       console.error("Error fetching score history:", error);
