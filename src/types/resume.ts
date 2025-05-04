@@ -44,7 +44,7 @@ export interface ResumeScoreRecord {
   suggested_skills: string[] | null;
   user_id: string;
   
-  // These fields might not exist in all records but we need to access them
+  // Add these optional fields that might not exist in all database records
   achievements_score?: number;
   education_score?: number;
   certifications_score?: number;
