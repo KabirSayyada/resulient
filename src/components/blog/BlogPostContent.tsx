@@ -64,8 +64,8 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
         {post.category && (
           <>
             <Separator orientation="vertical" className="h-4" />
-            <Badge variant="secondary" asChild>
-              <Link to={`/blog/category/${post.category}`}>
+            <Badge variant="secondary">
+              <Link to={`/blog/category/${post.category}`} className="hover:no-underline">
                 {post.category}
               </Link>
             </Badge>
