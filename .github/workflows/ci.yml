@@ -21,6 +21,9 @@ jobs:
       - name: Copy index.html to 404.html
         run: cp dist/index.html dist/404.html
 
+      - name: Copy sitemap.xml to dist directory
+        run: cp sitemap.xml dist/sitemap.xml
+
       - name: Copy favicon files to dist
         run: |
           mkdir -p dist/lovable-uploads
