@@ -5,6 +5,7 @@ import { useState } from "react";
 import { initializeBlogContent } from "@/utils/blogInitializer";
 import { createAtsBlogPost } from "@/data/createAtsBlogPost";
 import { createCareerBlogPost } from "@/utils/createCareerBlogPost";
+import { createJobSearchPost } from "@/utils/createJobSearchPost";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -12,6 +13,8 @@ export function BlogInitialization() {
   const [isLoadingDefault, setIsLoadingDefault] = useState(false);
   const [isLoadingAts, setIsLoadingAts] = useState(false);
   const [isLoadingCareer, setIsLoadingCareer] = useState(false);
+  const [isLoadingJobSearch, setIsLoadingJobSearch] = useState(false);
+  const [isLoadingAll, setIsLoadingAll] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -91,6 +94,70 @@ export function BlogInitialization() {
     }
   };
 
+  const handleCreateJobSearchPost = async () => {
+    setIsLoadingJobSearch(true);
+    try {
+      const result = await createJobSearchPost(user?.id || "");
+      if (result) {
+        toast({
+          title: "Success",
+          description: "Job search strategy post created successfully",
+        });
+      } else {
+        toast({
+          title: "Note",
+          description: "Job search strategy post already exists",
+        });
+      }
+    } catch (error) {
+      console.error("Error creating job search post:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create job search post",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingJobSearch(false);
+    }
+  };
+
+  const handleCreateAllPosts = async () => {
+    setIsLoadingAll(true);
+    try {
+      const userId = user?.id || "";
+      
+      // Create all posts in parallel
+      const results = await Promise.all([
+        createAtsBlogPost(userId),
+        createCareerBlogPost(),
+        createJobSearchPost(userId)
+      ]);
+      
+      const createdCount = results.filter(result => result === true).length;
+      
+      if (createdCount > 0) {
+        toast({
+          title: "Success",
+          description: `Created ${createdCount} blog posts successfully`,
+        });
+      } else {
+        toast({
+          title: "Note",
+          description: "All blog posts already exist",
+        });
+      }
+    } catch (error) {
+      console.error("Error creating all blog posts:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create all blog posts",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingAll(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -115,11 +182,25 @@ export function BlogInitialization() {
         
         <div>
           <p className="text-sm text-muted-foreground mb-2">
+            Create all sample blog posts at once
+          </p>
+          <Button 
+            onClick={handleCreateAllPosts} 
+            disabled={isLoadingAll || isLoadingAts || isLoadingCareer || isLoadingJobSearch}
+            variant="secondary"
+            className="w-full"
+          >
+            {isLoadingAll ? "Creating..." : "Create All Sample Posts"}
+          </Button>
+        </div>
+        
+        <div>
+          <p className="text-sm text-muted-foreground mb-2">
             Create sample ATS blog post
           </p>
           <Button 
             onClick={handleCreateAtsBlogPost} 
-            disabled={isLoadingAts}
+            disabled={isLoadingAts || isLoadingAll}
             variant="outline"
             className="w-full"
           >
@@ -133,11 +214,25 @@ export function BlogInitialization() {
           </p>
           <Button 
             onClick={handleCreateCareerBlogPost} 
-            disabled={isLoadingCareer}
+            disabled={isLoadingCareer || isLoadingAll}
             variant="outline"
             className="w-full"
           >
             {isLoadingCareer ? "Creating..." : "Create Career Sample Post"}
+          </Button>
+        </div>
+
+        <div>
+          <p className="text-sm text-muted-foreground mb-2">
+            Create job search strategy blog post
+          </p>
+          <Button 
+            onClick={handleCreateJobSearchPost} 
+            disabled={isLoadingJobSearch || isLoadingAll}
+            variant="outline"
+            className="w-full"
+          >
+            {isLoadingJobSearch ? "Creating..." : "Create Job Search Post"}
           </Button>
         </div>
       </CardContent>
