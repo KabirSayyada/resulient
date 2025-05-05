@@ -63,52 +63,29 @@ export const createSeoOptimizedPosts = async () => {
       // Calculate reading time
       const readingTime = calculateReadingTime(post.content);
 
-      // Construct the data object for the 'published_blog_posts' table
-      const publishedPostData = {
-        id: post.id,
-        created_at: post.created_at,
-        updated_at: post.updated_at,
-        title: post.title,
-        slug: post.slug,
-        content: post.content,
-        excerpt: post.excerpt,
-        category: post.category,
-        tags: post.tags,
-        featured_image: post.featured_image,
-        author_id: post.author_id,
-        author_first_name: author?.first_name || null,
-        author_last_name: author?.last_name || null,
-        author_avatar_url: author?.avatar_url || null,
-        author_job_title: author?.job_title || null,
-        reading_time: readingTime,
-        published_at: post.published_at || new Date().toISOString(), // Set published_at to current time
-        seo_title: post.seo_title || post.title,
-        seo_description: post.seo_description || post.excerpt,
-        seo_keywords: post.seo_keywords || post.tags?.join(', ') || null,
-      };
-
-      // Fixed: Wrap the publishedPostData in an array when inserting
-      const { error: insertError } = await supabase
-        .from('published_blog_posts')
-        .insert([publishedPostData]);
-
-      if (insertError) {
-        console.error(`Error publishing post ${post.id}: ${insertError.message}`);
-        continue; // Skip to the next post
-      }
-
-      // Update the original 'blog_posts' table to mark the post as published
+      // Update the original blog_posts entry first to mark it as published
+      // and update the reading_time, seo fields if needed
+      const publishTime = new Date().toISOString();
       const { error: updateError } = await supabase
         .from('blog_posts')
-        .update({ published_at: new Date().toISOString() })
+        .update({
+          published_at: publishTime,
+          reading_time: readingTime,
+          seo_title: post.seo_title || post.title,
+          seo_description: post.seo_description || post.excerpt,
+          seo_keywords: post.seo_keywords || post.tags?.join(', ') || null,
+        })
         .eq('id', post.id);
 
       if (updateError) {
-        console.error(`Error updating post ${post.id} in blog_posts: ${updateError.message}`);
-      } else {
-        console.log(`Successfully processed and published post ${post.id}`);
+        console.error(`Error updating post ${post.id}: ${updateError.message}`);
+        continue; // Skip to the next post
       }
+
+      console.log(`Successfully published post ${post.id}`);
     }
+
+    console.log(`Finished processing ${unpublishedPosts.length} posts.`);
   } catch (error: any) {
     console.error('Error creating SEO-optimized blog posts:', error);
   }
