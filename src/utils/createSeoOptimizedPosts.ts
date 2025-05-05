@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { BlogPost } from "@/types/blog";
 import { calculateReadingTime } from "@/utils/blogUtils";
@@ -23,17 +24,15 @@ export const createSeoOptimizedPosts = async () => {
         tags,
         featured_image,
         author_id,
-        published,
         published_at,
         seo_title,
         seo_description,
         seo_keywords,
-        author:authors (
+        author:profiles (
           id,
           first_name,
           last_name,
           avatar_url,
-          bio,
           job_title
         )
       `)
@@ -48,17 +47,17 @@ export const createSeoOptimizedPosts = async () => {
       return;
     }
 
-    // Filter out posts that are already published
-    const newPosts = blogPosts.filter(post => !post.published);
+    // Filter out posts that are already published to the published_blog_posts view
+    const unpublishedPosts = blogPosts.filter(post => !post.published_at);
 
-    if (newPosts.length === 0) {
+    if (unpublishedPosts.length === 0) {
       console.log('No new blog posts to process.');
       return;
     }
 
-    // Process each new blog post
-    for (const post of newPosts) {
-      // Extract author information from the nested 'authors' object
+    // Process each unpublished blog post
+    for (const post of unpublishedPosts) {
+      // Extract author information from the nested 'profiles' object
       const author = post.author ? post.author[0] : null;
 
       // Calculate reading time
@@ -80,7 +79,6 @@ export const createSeoOptimizedPosts = async () => {
         author_first_name: author?.first_name || null,
         author_last_name: author?.last_name || null,
         author_avatar_url: author?.avatar_url || null,
-        author_bio: author?.bio || null,
         author_job_title: author?.job_title || null,
         reading_time: readingTime,
         published_at: post.published_at || new Date().toISOString(), // Set published_at to current time
@@ -102,7 +100,7 @@ export const createSeoOptimizedPosts = async () => {
       // Update the original 'blog_posts' table to mark the post as published
       const { error: updateError } = await supabase
         .from('blog_posts')
-        .update({ published: true })
+        .update({ published_at: new Date().toISOString() })
         .eq('id', post.id);
 
       if (updateError) {
