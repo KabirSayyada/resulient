@@ -6,12 +6,14 @@ import { initializeBlogContent } from "@/utils/blogInitializer";
 import { createAtsBlogPost } from "@/data/createAtsBlogPost";
 import { createCareerBlogPost } from "@/utils/createCareerBlogPost";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export function BlogInitialization() {
   const [isLoadingDefault, setIsLoadingDefault] = useState(false);
   const [isLoadingAts, setIsLoadingAts] = useState(false);
   const [isLoadingCareer, setIsLoadingCareer] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleInitializeBlog = async () => {
     setIsLoadingDefault(true);
@@ -36,8 +38,8 @@ export function BlogInitialization() {
   const handleCreateAtsBlogPost = async () => {
     setIsLoadingAts(true);
     try {
-      // Pass an empty string as a fallback user ID if needed
-      const result = await createAtsBlogPost();
+      // Pass the user ID from the auth context, or a fallback empty string if user is not available
+      const result = await createAtsBlogPost(user?.id || "");
       if (result) {
         toast({
           title: "Success",
