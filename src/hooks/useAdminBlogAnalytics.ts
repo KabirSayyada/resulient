@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -12,7 +11,7 @@ type AnalyticsFilters = {
   dateRange?: DateRange;
   postId?: string;
   category?: string;
-  refetchTrigger?: number; // Add this property to the type
+  refetchTrigger?: number; 
 };
 
 export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
@@ -27,12 +26,13 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
   const { toast } = useToast();
   
   // Use a ref to track if we've already shown an error toast
-  // This prevents the same error toast from appearing multiple times
   const hasShownErrorToast = useRef(false);
   
   // Use a ref to track if the component is mounted
-  // This prevents state updates after the component unmounts
   const isMounted = useRef(true);
+  
+  // Keep track of the active fetch operation
+  const fetchingRef = useRef(false);
 
   useEffect(() => {
     // Reset the error toast flag when filters change
@@ -52,6 +52,11 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
     const abortController = new AbortController();
     
     const fetchAnalytics = async () => {
+      // Prevent multiple concurrent fetches
+      if (fetchingRef.current) return;
+      
+      fetchingRef.current = true;
+      
       try {
         if (!isMounted.current) return;
         
@@ -84,11 +89,10 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
         
         if (viewsError) throw viewsError;
         
-        // Fetch unique visitors - use count of distinct visitor_ids
+        // Fetch unique visitors - count distinct visitor_ids
         let uniqueVisitorsQuery = supabase
           .from('blog_analytics')
-          .select('visitor_id')
-          .not('visitor_id', 'is', null);
+          .select('visitor_id');
           
         if (fromDate && toDate) {
           uniqueVisitorsQuery = uniqueVisitorsQuery.gte('visit_timestamp', fromDate).lte('visit_timestamp', toDate);
@@ -110,7 +114,7 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
           }
         });
         
-        // Fetch popular posts
+        // Fetch blog posts first
         const { data: postsData, error: postsError } = await supabase
           .from('blog_posts')
           .select(`
@@ -123,41 +127,42 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
         
         if (postsError) throw postsError;
         
-        // Get analytics data for each post
-        const popularPostPromises = (postsData || []).map(async (post) => {
-          const { count, error } = await supabase
-            .from('blog_analytics')
-            .select('*', { count: 'exact' })
-            .eq('post_id', post.id);
+        // Get analytics counts for each post in a single efficient query
+        const postCounts = await Promise.all(
+          (postsData || []).map(async (post) => {
+            const { count, error } = await supabase
+              .from('blog_analytics')
+              .select('*', { count: 'exact' })
+              .eq('post_id', post.id);
+              
+            if (error) {
+              console.error(`Error fetching count for post ${post.id}:`, error);
+              return { ...post, count: 0 };
+            }
             
-          return {
-            id: post.id,
-            title: post.title,
-            slug: post.slug,
-            category: post.category || 'Uncategorized',
-            count: count || 0
-          };
-        });
-        
-        // Use Promise.all to wait for all queries to complete
-        const popularPostsWithCounts = await Promise.all(popularPostPromises);
+            return {
+              id: post.id,
+              title: post.title,
+              slug: post.slug,
+              category: post.category || 'Uncategorized',
+              count: count || 0
+            };
+          })
+        );
         
         // Sort posts by view count
-        const sortedPosts = popularPostsWithCounts
+        const sortedPosts = postCounts
           .sort((a, b) => b.count - a.count)
           .slice(0, 10);
         
-        // Fetch average time on page and scroll depth
+        // Fetch interactions data (time on page, scroll depth)
         const { data: interactionsData, error: interactionsError } = await supabase
           .from('blog_user_interactions')
-          .select(`
-            time_on_page,
-            scroll_depth
-          `);
+          .select('time_on_page, scroll_depth');
         
         if (interactionsError) throw interactionsError;
         
-        // Calculate averages safely
+        // Calculate averages
         let totalTime = 0;
         let totalScroll = 0;
         let timeCount = 0;
@@ -212,7 +217,7 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
           })
         );
         
-        // Update state with all fetched data
+        // Update state only if component is still mounted
         if (isMounted.current) {
           setPageViews(totalViews || 0);
           setUniqueVisitors(uniqueVisitorIds.size || 0);
@@ -241,6 +246,9 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
             hasShownErrorToast.current = true;
           }
         }
+      } finally {
+        // Reset the fetching flag
+        fetchingRef.current = false;
       }
     };
     

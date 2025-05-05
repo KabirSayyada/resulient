@@ -70,7 +70,7 @@ export function BlogAnalyticsDashboard() {
       from: startOfDay(dateRange.from),
       to: endOfDay(dateRange.to),
     },
-    // Use refetchTrigger instead of _refetchKey to force re-fetch
+    // Use refetchTrigger to force re-fetch
     refetchTrigger: refetchTrigger,
   });
   
