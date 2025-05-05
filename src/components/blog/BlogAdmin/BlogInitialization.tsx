@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -6,6 +5,7 @@ import { initializeBlogContent } from "@/utils/blogInitializer";
 import { createAtsBlogPost } from "@/data/createAtsBlogPost";
 import { createCareerBlogPost } from "@/utils/createCareerBlogPost";
 import { createJobSearchPost } from "@/utils/createJobSearchPost";
+import { createResumeATSTipsPost, createResumeCommonMistakesPost, createAllResumeTipsPosts } from "@/utils/createResumeTipsPosts";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -14,6 +14,9 @@ export function BlogInitialization() {
   const [isLoadingAts, setIsLoadingAts] = useState(false);
   const [isLoadingCareer, setIsLoadingCareer] = useState(false);
   const [isLoadingJobSearch, setIsLoadingJobSearch] = useState(false);
+  const [isLoadingResumeTips1, setIsLoadingResumeTips1] = useState(false);
+  const [isLoadingResumeTips2, setIsLoadingResumeTips2] = useState(false);
+  const [isLoadingAllResumeTips, setIsLoadingAllResumeTips] = useState(false);
   const [isLoadingAll, setIsLoadingAll] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -146,6 +149,114 @@ export function BlogInitialization() {
     }
   };
 
+  const handleCreateResumeATSTipsPost = async () => {
+    if (!user?.id) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to create a blog post",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoadingResumeTips1(true);
+    try {
+      const result = await createResumeATSTipsPost(user.id);
+      if (result) {
+        toast({
+          title: "Success",
+          description: "Resume ATS tips post created successfully",
+        });
+      } else {
+        toast({
+          title: "Note",
+          description: "Resume ATS tips post already exists",
+        });
+      }
+    } catch (error) {
+      console.error("Error creating resume tips post:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create resume tips post",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingResumeTips1(false);
+    }
+  };
+
+  const handleCreateResumeCommonMistakesPost = async () => {
+    if (!user?.id) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to create a blog post",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoadingResumeTips2(true);
+    try {
+      const result = await createResumeCommonMistakesPost(user.id);
+      if (result) {
+        toast({
+          title: "Success",
+          description: "Resume mistakes post created successfully",
+        });
+      } else {
+        toast({
+          title: "Note",
+          description: "Resume mistakes post already exists",
+        });
+      }
+    } catch (error) {
+      console.error("Error creating resume mistakes post:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create resume mistakes post",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingResumeTips2(false);
+    }
+  };
+
+  const handleCreateAllResumeTipsPosts = async () => {
+    if (!user?.id) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to create blog posts",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoadingAllResumeTips(true);
+    try {
+      const createdCount = await createAllResumeTipsPosts(user.id);
+      if (createdCount > 0) {
+        toast({
+          title: "Success",
+          description: `Created ${createdCount} resume tips blog posts successfully`,
+        });
+      } else {
+        toast({
+          title: "Note",
+          description: "All resume tips blog posts already exist",
+        });
+      }
+    } catch (error) {
+      console.error("Error creating resume tips posts:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create resume tips posts",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingAllResumeTips(false);
+    }
+  };
+
   const handleCreateAllPosts = async () => {
     if (!user?.id) {
       toast({
@@ -164,7 +275,9 @@ export function BlogInitialization() {
       const results = await Promise.all([
         createAtsBlogPost(userId),
         createCareerBlogPost(userId),
-        createJobSearchPost(userId)
+        createJobSearchPost(userId),
+        createResumeATSTipsPost(userId),
+        createResumeCommonMistakesPost(userId)
       ]);
       
       const createdCount = results.filter(result => result !== null).length;
@@ -220,7 +333,7 @@ export function BlogInitialization() {
           </p>
           <Button 
             onClick={handleCreateAllPosts} 
-            disabled={isLoadingAll || isLoadingAts || isLoadingCareer || isLoadingJobSearch}
+            disabled={isLoadingAll || isLoadingAts || isLoadingCareer || isLoadingJobSearch || isLoadingResumeTips1 || isLoadingResumeTips2 || isLoadingAllResumeTips}
             variant="secondary"
             className="w-full"
           >
@@ -230,44 +343,71 @@ export function BlogInitialization() {
         
         <div>
           <p className="text-sm text-muted-foreground mb-2">
-            Create sample ATS blog post
+            Create resume optimization posts
           </p>
-          <Button 
-            onClick={handleCreateAtsBlogPost} 
-            disabled={isLoadingAts || isLoadingAll}
-            variant="outline"
-            className="w-full"
-          >
-            {isLoadingAts ? "Creating..." : "Create ATS Sample Post"}
-          </Button>
-        </div>
-        
-        <div>
-          <p className="text-sm text-muted-foreground mb-2">
-            Create career development blog post
-          </p>
-          <Button 
-            onClick={handleCreateCareerBlogPost} 
-            disabled={isLoadingCareer || isLoadingAll}
-            variant="outline"
-            className="w-full"
-          >
-            {isLoadingCareer ? "Creating..." : "Create Career Sample Post"}
-          </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <Button 
+              onClick={handleCreateResumeATSTipsPost} 
+              disabled={isLoadingResumeTips1 || isLoadingAll || isLoadingAllResumeTips}
+              variant="outline"
+              className="w-full"
+            >
+              {isLoadingResumeTips1 ? "Creating..." : "Create ATS Tips Post"}
+            </Button>
+            <Button 
+              onClick={handleCreateResumeCommonMistakesPost} 
+              disabled={isLoadingResumeTips2 || isLoadingAll || isLoadingAllResumeTips}
+              variant="outline"
+              className="w-full"
+            >
+              {isLoadingResumeTips2 ? "Creating..." : "Create Resume Mistakes Post"}
+            </Button>
+          </div>
+          <div className="mt-2">
+            <Button 
+              onClick={handleCreateAllResumeTipsPosts} 
+              disabled={isLoadingAllResumeTips || isLoadingResumeTips1 || isLoadingResumeTips2 || isLoadingAll}
+              variant="outline"
+              className="w-full"
+            >
+              {isLoadingAllResumeTips ? "Creating..." : "Create All Resume Tips Posts"}
+            </Button>
+          </div>
         </div>
 
         <div>
           <p className="text-sm text-muted-foreground mb-2">
-            Create job search strategy blog post
+            Create other career-related posts
           </p>
-          <Button 
-            onClick={handleCreateJobSearchPost} 
-            disabled={isLoadingJobSearch || isLoadingAll}
-            variant="outline"
-            className="w-full"
-          >
-            {isLoadingJobSearch ? "Creating..." : "Create Job Search Post"}
-          </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <Button 
+              onClick={handleCreateAtsBlogPost} 
+              disabled={isLoadingAts || isLoadingAll}
+              variant="outline"
+              className="w-full"
+            >
+              {isLoadingAts ? "Creating..." : "Create ATS Sample Post"}
+            </Button>
+            
+            <Button 
+              onClick={handleCreateCareerBlogPost} 
+              disabled={isLoadingCareer || isLoadingAll}
+              variant="outline"
+              className="w-full"
+            >
+              {isLoadingCareer ? "Creating..." : "Create Career Sample Post"}
+            </Button>
+          </div>
+          <div className="mt-2">
+            <Button 
+              onClick={handleCreateJobSearchPost} 
+              disabled={isLoadingJobSearch || isLoadingAll}
+              variant="outline"
+              className="w-full"
+            >
+              {isLoadingJobSearch ? "Creating..." : "Create Job Search Post"}
+            </Button>
+          </div>
         </div>
       </CardContent>
       <CardFooter>

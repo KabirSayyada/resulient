@@ -32,3 +32,26 @@ export function generateSlug(text: string): string {
     .replace(/-+/g, '-')      // Remove consecutive hyphens
     .trim();                  // Trim whitespace
 }
+
+/**
+ * Utility function to create slug from title
+ * @param title Post title
+ * @returns URL-friendly slug
+ */
+export function slugify(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+}
+
+/**
+ * Extract plain text from HTML content
+ * @param html HTML content
+ * @returns Plain text without HTML tags
+ */
+export function getPlainTextFromHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '');
+}

@@ -1,5 +1,6 @@
 
 import { useParams, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { BlogLayout } from '@/components/blog/BlogLayout';
 import { useBlogPost } from '@/hooks/useBlogPosts';
 import { BlogPostContent } from '@/components/blog/BlogPostContent';
@@ -19,6 +20,19 @@ export default function BlogPost() {
   const description = post?.excerpt || 'Read this article on the Resulient blog';
   const keywords = post?.seo_keywords || 'resume, career, job search';
   const ogImage = post?.featured_image || undefined;
+  
+  // Track page view with Google Analytics
+  useEffect(() => {
+    if (post && window.gtag) {
+      window.gtag('event', 'view_item', {
+        'event_category': 'Blog',
+        'event_label': post.title,
+        'item_id': post.id,
+        'item_name': post.title,
+        'item_category': post.category || 'Uncategorized'
+      });
+    }
+  }, [post]);
 
   return (
     <>
