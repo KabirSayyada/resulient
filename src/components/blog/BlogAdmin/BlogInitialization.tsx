@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { initializeBlogData } from "@/utils/blogInitializer";
+import { initializeBlogContent } from "@/utils/blogInitializer";
 import { createAtsBlogPost } from "@/data/createAtsBlogPost";
 import { createCareerBlogPost } from "@/utils/createCareerBlogPost";
 import { useToast } from "@/components/ui/use-toast";
@@ -16,7 +16,7 @@ export function BlogInitialization() {
   const handleInitializeBlog = async () => {
     setIsLoadingDefault(true);
     try {
-      await initializeBlogData();
+      await initializeBlogContent();
       toast({
         title: "Success",
         description: "Blog initialized with default data",
