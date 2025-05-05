@@ -30,3 +30,12 @@ export function generateSlug(title: string): string {
     .replace(/-+/g, '-')      // Replace multiple hyphens with single hyphen
     .trim();
 }
+
+/**
+ * Alias for generateSlug to maintain compatibility with existing code
+ * @param title The title to generate a slug from
+ * @returns A URL-friendly slug
+ */
+export function slugify(title: string): string {
+  return generateSlug(title);
+}

@@ -23,7 +23,7 @@ export default function BlogPost() {
   
   // Track page view with Google Analytics
   useEffect(() => {
-    if (post && window.gtag) {
+    if (post && typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'view_item', {
         'event_category': 'Blog',
         'event_label': post.title,
