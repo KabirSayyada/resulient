@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BlogLayout } from '@/components/blog/BlogLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -51,7 +52,7 @@ import {
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function BlogAdmin() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const { getAllPosts, deletePost, isLoading } = useBlogAdmin();
   const navigate = useNavigate();
   
@@ -62,17 +63,14 @@ export default function BlogAdmin() {
   const [showEditPostForm, setShowEditPostForm] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
-  // Temporarily removing admin check to allow access
-  // const isAdmin = user?.email === 'admin@example.com';
-  
-  // // Redirect if not authenticated or not admin
-  // if (!loading && (!user || !isAdmin)) {
-  //   return <Navigate to="/blog" />;
-  // }
+  // Check if user is an admin, redirect to blog if not
+  if (!loading && (!user || !isAdmin())) {
+    return <Navigate to="/blog" />;
+  }
   
   // Fetch all posts on mount
   useEffect(() => {
-    if (user) {
+    if (user && isAdmin()) {
       fetchPosts();
     }
   }, [user]);
@@ -113,6 +111,20 @@ export default function BlogAdmin() {
       fetchPosts();
     }
   };
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <BlogLayout title="Blog Administration">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="text-center">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em]"></div>
+            <p className="mt-4">Loading...</p>
+          </div>
+        </div>
+      </BlogLayout>
+    );
+  }
   
   return (
     <>
