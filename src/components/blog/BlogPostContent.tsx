@@ -64,21 +64,23 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
         {post.category && (
           <>
             <Separator orientation="vertical" className="h-4" />
-            <Badge variant="secondary">
-              {post.category}
+            <Badge variant="secondary" asChild>
+              <Link to={`/blog/category/${post.category}`}>
+                {post.category}
+              </Link>
             </Badge>
           </>
         )}
       </div>
 
       <div 
-        className="prose prose-lg dark:prose-invert max-w-none"
+        className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-semibold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-h4:text-lg prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-lg prose-img:my-8 prose-blockquote:border-l-4 prose-blockquote:border-primary/50 prose-blockquote:pl-4 prose-blockquote:py-1 prose-blockquote:italic space-y-6"
         dangerouslySetInnerHTML={{ __html: post.content }}
       />
 
       {post.tags && post.tags.length > 0 && (
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold mb-2">Tags</h3>
+        <div className="mt-12">
+          <h3 className="text-lg font-semibold mb-2">Related Topics</h3>
           <div className="flex flex-wrap gap-2">
             {post.tags.map((tag, index) => (
               <Badge key={index} variant="outline">

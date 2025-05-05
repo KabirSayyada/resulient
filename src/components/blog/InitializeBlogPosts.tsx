@@ -1,7 +1,8 @@
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { createInitialBlogPosts } from '@/data/blogPosts';
+import { createAtsBlogPost } from '@/data/createAtsBlogPost';
 import { Button } from '@/components/ui/button';
 import { 
   Card, 
@@ -52,6 +53,39 @@ export function InitializeBlogPosts() {
     }
   };
 
+  const handleCreateAtsBlogPost = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to create a blog post.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      const success = await createAtsBlogPost(user.id);
+      
+      if (success) {
+        toast({
+          title: "Success!",
+          description: "The ATS blog post has been created and published successfully.",
+        });
+      }
+    } catch (error) {
+      console.error("Error creating ATS blog post:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create the ATS blog post. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -62,31 +96,37 @@ export function InitializeBlogPosts() {
       </CardHeader>
       <CardContent>
         <p className="text-muted-foreground mb-4">
-          This will create 8 SEO-optimized blog posts covering resume optimization, job searching, and career development topics.
+          This will create professionally written SEO-optimized blog posts covering resume optimization, job searching, and career development topics.
           Each post will be immediately published and visible to your visitors.
         </p>
         <ul className="list-disc pl-5 mb-4 space-y-1 text-sm text-muted-foreground">
           <li>How to Optimize Your Resume for ATS Systems in 2025</li>
           <li>10 Resume Mistakes That Are Costing You Job Interviews</li>
           <li>How to Write a Resume That Stands Out in 2025</li>
-          <li>The Ultimate Guide to Using Keywords in Your Resume</li>
-          <li>7 Resume Formatting Tips to Increase Your Interview Chances</li>
-          <li>How to Write a Cover Letter That Gets You Noticed</li>
-          <li>Maximizing LinkedIn for Your Job Search: A Complete Guide</li>
-          <li>The Future of Resumes: AI, Automation, and How to Stay Ahead</li>
+          <li>And more...</li>
         </ul>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col space-y-2">
+        <Button 
+          onClick={handleCreateAtsBlogPost} 
+          disabled={isLoading}
+          className="w-full"
+        >
+          {isLoading 
+            ? "Creating ATS Blog Post..." 
+            : "Create ATS Systems Blog Post"}
+        </Button>
         <Button 
           onClick={handleInitialize} 
           disabled={isLoading || isComplete}
           className="w-full"
+          variant="outline"
         >
           {isLoading 
             ? "Creating Posts..." 
             : isComplete 
               ? "Posts Created" 
-              : "Create Sample Blog Posts"}
+              : "Create All Sample Blog Posts"}
         </Button>
       </CardFooter>
     </Card>

@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Helmet } from 'react-helmet-async';
-import { Search } from 'lucide-react';
+import { Search, FileText } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Blog() {
   const { posts, isLoading, error } = useBlogPosts();
@@ -68,20 +69,23 @@ export default function Blog() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <h3 className="text-xl font-semibold mb-2">No articles found</h3>
-            <p className="text-muted-foreground mb-4">
-              {searchQuery 
-                ? "No articles match your search criteria. Try different keywords."
-                : "There are no articles published yet. Check back soon for new content."}
-            </p>
-            {searchQuery && (
-              <Button 
-                variant="outline" 
-                onClick={() => setSearchQuery('')}
-              >
-                Clear Search
-              </Button>
-            )}
+            <div className="flex flex-col items-center justify-center text-muted-foreground">
+              <FileText className="h-12 w-12 mb-4 opacity-50" />
+              <h3 className="text-xl font-semibold mb-2">No articles found</h3>
+              <p className="text-muted-foreground mb-4 max-w-md">
+                {searchQuery 
+                  ? "No articles match your search criteria. Try different keywords."
+                  : "We're preparing some great content for you. Check back soon for new articles!"}
+              </p>
+              {searchQuery && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => setSearchQuery('')}
+                >
+                  Clear Search
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </BlogLayout>
