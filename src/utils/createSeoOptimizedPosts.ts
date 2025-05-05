@@ -88,12 +88,13 @@ export const createSeoOptimizedPosts = async () => {
       };
 
       // Insert the processed post into the 'published_blog_posts' table
-      const { error: insertError } = await supabase
+      // Use upsert instead of insert to handle cases where the post might already exist
+      const { error: upsertError } = await supabase
         .from('published_blog_posts')
-        .insert([publishedPostData]);
+        .upsert([publishedPostData], { onConflict: 'id' });
 
-      if (insertError) {
-        console.error(`Error inserting post ${post.id} into published_blog_posts:`, insertError);
+      if (upsertError) {
+        console.error(`Error publishing post ${post.id}: ${upsertError.message}`);
         continue; // Skip to the next post
       }
 
@@ -104,7 +105,7 @@ export const createSeoOptimizedPosts = async () => {
         .eq('id', post.id);
 
       if (updateError) {
-        console.error(`Error updating post ${post.id} in blog_posts:`, updateError);
+        console.error(`Error updating post ${post.id} in blog_posts: ${updateError.message}`);
       } else {
         console.log(`Successfully processed and published post ${post.id}`);
       }
