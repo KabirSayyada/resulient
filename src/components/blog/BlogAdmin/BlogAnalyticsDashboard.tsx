@@ -1,12 +1,11 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { useAdminBlogAnalytics } from "@/hooks/useAdminBlogAnalytics";
-import { ChartContainer } from "@/components/ui/chart";
 import { 
   BarChart, 
   Bar, 
@@ -31,7 +30,8 @@ import {
   MousePointerClick, 
   Share2, 
   MailCheck, 
-  AlertTriangle 
+  AlertTriangle,
+  RefreshCw
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -46,6 +46,14 @@ export function BlogAnalyticsDashboard() {
     from: subDays(new Date(), 30),
     to: new Date(),
   });
+  
+  // Re-fetch trigger
+  const [refetchTrigger, setRefetchTrigger] = useState<number>(0);
+  
+  // Handler for manual refresh
+  const handleRefresh = useCallback(() => {
+    setRefetchTrigger(prev => prev + 1);
+  }, []);
   
   // Get analytics data
   const {
@@ -62,6 +70,8 @@ export function BlogAnalyticsDashboard() {
       from: startOfDay(dateRange.from),
       to: endOfDay(dateRange.to),
     },
+    // Add refetchTrigger as a dependency to force re-fetch
+    _refetchKey: refetchTrigger,
   });
   
   // Format date range for display
@@ -85,16 +95,26 @@ export function BlogAnalyticsDashboard() {
   // Colors for the pie chart
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
   
-  // Show error state if there was an error
+  // Show error state if there was an error and not loading
   if (error && !isLoading) {
     return (
-      <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Error loading analytics</AlertTitle>
-        <AlertDescription>
-          There was a problem fetching the analytics data. Please try again later.
-        </AlertDescription>
-      </Alert>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold tracking-tight">Blog Analytics</h2>
+          <Button onClick={handleRefresh} variant="outline" size="sm">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Retry
+          </Button>
+        </div>
+        
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Error loading analytics</AlertTitle>
+          <AlertDescription>
+            There was a problem fetching the analytics data. Please try again later.
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
   
@@ -103,33 +123,40 @@ export function BlogAnalyticsDashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold tracking-tight">Blog Analytics</h2>
         
-        {/* Date range picker */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-full sm:w-auto justify-start text-left font-normal">
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateRangeText}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="end">
-            <Calendar
-              mode="range"
-              selected={{
-                from: dateRange.from,
-                to: dateRange.to,
-              }}
-              onSelect={(selected) => {
-                if (selected?.from && selected?.to) {
-                  setDateRange({
-                    from: selected.from,
-                    to: selected.to,
-                  });
-                }
-              }}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+        <div className="flex gap-2 w-full sm:w-auto">
+          {/* Date range picker */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full sm:w-auto justify-start text-left font-normal">
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateRangeText}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="range"
+                selected={{
+                  from: dateRange.from,
+                  to: dateRange.to,
+                }}
+                onSelect={(selected) => {
+                  if (selected?.from && selected?.to) {
+                    setDateRange({
+                      from: selected.from,
+                      to: selected.to,
+                    });
+                  }
+                }}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          
+          {/* Refresh button */}
+          <Button onClick={handleRefresh} variant="outline" size="icon">
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
       
       {/* Metrics Overview */}
@@ -337,16 +364,20 @@ export function BlogAnalyticsDashboard() {
                       </TableHeader>
                       <TableBody>
                         {conversionEvents.slice(0, 10).map((event) => {
-                          if (!event || !event.event_type || !event.blog_analytics) {
+                          if (!event || !event.event_type) {
                             return null;
                           }
+                          
+                          // Handle case where blog_analytics is null or undefined
+                          const pagePath = event.blog_analytics?.page_path || 'Unknown';
+                          
                           return (
                             <TableRow key={event.id}>
                               <TableCell className="font-medium">
                                 {event.event_type.replace('_', ' ')}
                               </TableCell>
                               <TableCell>
-                                {event.blog_analytics.page_path}
+                                {pagePath}
                               </TableCell>
                               <TableCell>
                                 {format(new Date(event.event_timestamp), 'PPp')}

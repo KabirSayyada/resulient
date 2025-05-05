@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -24,10 +24,36 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
+  
+  // Use a ref to track if we've already shown an error toast
+  // This prevents the same error toast from appearing multiple times
+  const hasShownErrorToast = useRef(false);
+  
+  // Use a ref to track if the component is mounted
+  // This prevents state updates after the component unmounts
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    // Reset the error toast flag when filters change
+    hasShownErrorToast.current = false;
+    
+    // Set isMounted to true when the hook is first used
+    isMounted.current = true;
+    
+    // Clean up function to set isMounted to false when the component unmounts
+    return () => {
+      isMounted.current = false;
+    };
+  }, [filters]);
+
+  useEffect(() => {
+    // Create an abort controller to cancel fetch requests if needed
+    const abortController = new AbortController();
+    
     const fetchAnalytics = async () => {
       try {
+        if (!isMounted.current) return;
+        
         setIsLoading(true);
         setError(null);
         
@@ -60,7 +86,7 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
         // Fetch unique visitors - use count of distinct visitor_ids
         let uniqueVisitorsQuery = supabase
           .from('blog_analytics')
-          .select('visitor_id', { count: 'exact' })
+          .select('visitor_id')
           .not('visitor_id', 'is', null);
           
         if (fromDate && toDate) {
@@ -71,7 +97,6 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
           uniqueVisitorsQuery = uniqueVisitorsQuery.eq('post_id', filters.postId);
         }
         
-        // Count distinct visitor IDs (this query gets all records, but we'll count unique IDs in JS)
         const { data: visitorData, error: uniqueError } = await uniqueVisitorsQuery;
         
         if (uniqueError) throw uniqueError;
@@ -98,22 +123,23 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
         if (postsError) throw postsError;
         
         // Get analytics data for each post
-        const popularPostsWithCounts = await Promise.all(
-          (postsData || []).map(async (post) => {
-            const { count, error } = await supabase
-              .from('blog_analytics')
-              .select('*', { count: 'exact' })
-              .eq('post_id', post.id);
-              
-            return {
-              id: post.id,
-              title: post.title,
-              slug: post.slug,
-              category: post.category || 'Uncategorized',
-              count: count || 0
-            };
-          })
-        );
+        const popularPostPromises = (postsData || []).map(async (post) => {
+          const { count, error } = await supabase
+            .from('blog_analytics')
+            .select('*', { count: 'exact' })
+            .eq('post_id', post.id);
+            
+          return {
+            id: post.id,
+            title: post.title,
+            slug: post.slug,
+            category: post.category || 'Uncategorized',
+            count: count || 0
+          };
+        });
+        
+        // Use Promise.all to wait for all queries to complete
+        const popularPostsWithCounts = await Promise.all(popularPostPromises);
         
         // Sort posts by view count
         const sortedPosts = popularPostsWithCounts
@@ -158,40 +184,71 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
             event_type,
             event_timestamp,
             event_data,
-            analytics_id,
-            blog_analytics:analytics_id(
-              id,
-              page_path,
-              post_id
-            )
+            analytics_id
           `)
           .order('event_timestamp', { ascending: false })
           .limit(50);
         
         if (eventsError) throw eventsError;
         
+        // For each conversion event, fetch the associated blog_analytics record
+        const eventsWithAnalytics = await Promise.all(
+          (eventsData || []).map(async (event) => {
+            if (!event.analytics_id) {
+              return { ...event, blog_analytics: null };
+            }
+            
+            const { data, error } = await supabase
+              .from('blog_analytics')
+              .select('id, page_path, post_id')
+              .eq('id', event.analytics_id)
+              .single();
+            
+            return {
+              ...event,
+              blog_analytics: error ? null : data
+            };
+          })
+        );
+        
         // Update state with all fetched data
-        setPageViews(totalViews || 0);
-        setUniqueVisitors(uniqueVisitorIds.size || 0);
-        setPopularPosts(sortedPosts || []);
-        setTimeOnPageAvg(avgTime);
-        setScrollDepthAvg(avgScroll);
-        setConversionEvents(eventsData || []);
+        if (isMounted.current) {
+          setPageViews(totalViews || 0);
+          setUniqueVisitors(uniqueVisitorIds.size || 0);
+          setPopularPosts(sortedPosts || []);
+          setTimeOnPageAvg(avgTime);
+          setScrollDepthAvg(avgScroll);
+          setConversionEvents(eventsWithAnalytics || []);
+          setError(null);
+          setIsLoading(false);
+        }
         
       } catch (err) {
         console.error('Error fetching analytics:', err);
-        setError(err as Error);
-        toast({
-          title: 'Error',
-          description: 'Failed to fetch analytics data',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
+        
+        if (isMounted.current) {
+          setError(err as Error);
+          setIsLoading(false);
+          
+          // Only show the error toast once
+          if (!hasShownErrorToast.current) {
+            toast({
+              title: 'Error',
+              description: 'Failed to fetch analytics data',
+              variant: 'destructive',
+            });
+            hasShownErrorToast.current = true;
+          }
+        }
       }
     };
     
     fetchAnalytics();
+    
+    // Clean up function
+    return () => {
+      abortController.abort();
+    };
   }, [filters, toast]);
 
   return {
