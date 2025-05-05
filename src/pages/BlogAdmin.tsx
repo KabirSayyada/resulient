@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BlogLayout } from '@/components/blog/BlogLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -49,6 +48,7 @@ import {
   FileText,
   BarChart
 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function BlogAdmin() {
   const { user, loading } = useAuth();

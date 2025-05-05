@@ -20,8 +20,12 @@ export function useBlogAnalytics(postId?: string) {
     maxScrollPercent.current = 0;
     
     const trackView = async () => {
-      const id = await trackPageView(location.pathname, postId);
-      setAnalyticsId(id);
+      try {
+        const id = await trackPageView(location.pathname, postId);
+        setAnalyticsId(id);
+      } catch (error) {
+        console.error('Error tracking page view:', error);
+      }
     };
     
     trackView();
@@ -63,8 +67,12 @@ export function useBlogAnalytics(postId?: string) {
     const recordInteraction = async () => {
       if (!analyticsId) return;
       
-      const timeOnPage = Math.floor((Date.now() - startTime.current) / 1000); // in seconds
-      await trackUserInteraction(analyticsId, timeOnPage, maxScrollPercent.current);
+      try {
+        const timeOnPage = Math.floor((Date.now() - startTime.current) / 1000); // in seconds
+        await trackUserInteraction(analyticsId, timeOnPage, maxScrollPercent.current);
+      } catch (error) {
+        console.error('Error recording user interaction:', error);
+      }
     };
 
     // Record data when user is about to leave

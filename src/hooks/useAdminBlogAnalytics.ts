@@ -60,9 +60,9 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
         // Fetch unique visitors
         let uniqueVisitorsQuery = supabase
           .from('blog_analytics')
-          .select('visitor_id', { count: 'exact', head: true })
-          .distinct();
+          .select('visitor_id', { count: 'exact', head: true });
           
+        // Use a separate query to filter and count distinct visitor IDs
         if (fromDate && toDate) {
           uniqueVisitorsQuery = uniqueVisitorsQuery.gte('visit_timestamp', fromDate).lte('visit_timestamp', toDate);
         }
@@ -76,7 +76,7 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
         if (uniqueError) throw uniqueError;
         
         // Fetch popular posts
-        const { data: popularPostsData, error: popularError } = await supabase
+        const { data: postsData, error: postsError } = await supabase
           .from('blog_analytics')
           .select(`
             post_id,
@@ -87,40 +87,39 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
               category
             )
           `)
-          .filter('post_id', 'not.is', null)
-          .then(response => {
-            if (response.error) throw response.error;
-            
-            // Count views per post
-            const postCounts: Record<string, { 
-              count: number; 
-              title: string; 
-              slug: string;
-              category: string;
-            }> = {};
-            
-            response.data.forEach(item => {
-              const postId = item.post_id as string;
-              const post = item.published_blog_posts as any;
-              
-              if (!postCounts[postId]) {
-                postCounts[postId] = { 
-                  count: 0, 
-                  title: post.title,
-                  slug: post.slug,
-                  category: post.category
-                };
-              }
-              
-              postCounts[postId].count++;
-            });
-            
-            // Convert to array and sort
-            return Object.entries(postCounts).map(([id, data]) => ({
-              id,
-              ...data
-            })).sort((a, b) => b.count - a.count).slice(0, 10);
-          });
+          .filter('post_id', 'not.is', null);
+          
+        if (postsError) throw postsError;
+        
+        // Count views per post manually
+        const postCounts: Record<string, { 
+          count: number; 
+          title: string; 
+          slug: string;
+          category: string;
+        }> = {};
+        
+        postsData.forEach(item => {
+          const postId = item.post_id as string;
+          const post = item.published_blog_posts as any;
+          
+          if (!postCounts[postId]) {
+            postCounts[postId] = { 
+              count: 0, 
+              title: post.title,
+              slug: post.slug,
+              category: post.category
+            };
+          }
+          
+          postCounts[postId].count++;
+        });
+        
+        // Convert to array and sort
+        const popularPostsData = Object.entries(postCounts).map(([id, data]) => ({
+          id,
+          ...data
+        })).sort((a, b) => b.count - a.count).slice(0, 10);
         
         // Fetch average time on page and scroll depth
         const { data: interactionsData, error: interactionsError } = await supabase

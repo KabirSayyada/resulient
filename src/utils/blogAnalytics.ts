@@ -58,7 +58,7 @@ export const trackPageView = async (pagePath: string, postId?: string): Promise<
       return null;
     }
     
-    return data.id;
+    return data?.id || null;
   } catch (err) {
     console.error('Exception tracking page view:', err);
     return null;
