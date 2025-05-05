@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from 'react';
 import { generateSitemap } from '@/utils/sitemapGenerator';
-import { Helmet } from 'react-helmet-async';
 
 export function Sitemap() {
   const [sitemap, setSitemap] = useState<string>('');
@@ -19,16 +18,20 @@ export function Sitemap() {
     fetchSitemap();
   }, []);
 
+  // Set XML Content-Type and serve the XML content
+  useEffect(() => {
+    if (sitemap) {
+      document.querySelector('meta[http-equiv="Content-Type"]')?.remove();
+      const meta = document.createElement('meta');
+      meta.setAttribute('http-equiv', 'Content-Type');
+      meta.setAttribute('content', 'text/xml; charset=UTF-8');
+      document.head.appendChild(meta);
+    }
+  }, [sitemap]);
+
   if (!sitemap) {
     return null;
   }
 
-  return (
-    <>
-      <Helmet>
-        <meta httpEquiv="Content-Type" content="text/xml; charset=UTF-8" />
-      </Helmet>
-      <div dangerouslySetInnerHTML={{ __html: sitemap }} />
-    </>
-  );
+  return <pre dangerouslySetInnerHTML={{ __html: sitemap }} />;
 }

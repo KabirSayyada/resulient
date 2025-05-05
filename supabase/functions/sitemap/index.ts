@@ -38,7 +38,6 @@ serve(async (req) => {
       { path: '/privacy', priority: 0.7, changefreq: 'monthly' },
       { path: '/refund-policy', priority: 0.7, changefreq: 'monthly' },
       { path: '/legal', priority: 0.7, changefreq: 'monthly' },
-      { path: '/industry-leaderboard', priority: 0.8, changefreq: 'weekly' },
     ];
     
     // Fetch all published blog posts
