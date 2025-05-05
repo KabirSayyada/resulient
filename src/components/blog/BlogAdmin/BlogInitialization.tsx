@@ -39,10 +39,18 @@ export function BlogInitialization() {
   };
 
   const handleCreateAtsBlogPost = async () => {
+    if (!user?.id) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to create a blog post",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoadingAts(true);
     try {
-      // Pass the user ID from the auth context, or a fallback empty string if user is not available
-      const result = await createAtsBlogPost(user?.id || "");
+      const result = await createAtsBlogPost(user.id);
       if (result) {
         toast({
           title: "Success",
@@ -67,10 +75,18 @@ export function BlogInitialization() {
   };
 
   const handleCreateCareerBlogPost = async () => {
+    if (!user?.id) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to create a blog post",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoadingCareer(true);
     try {
-      // Since createCareerBlogPost doesn't require a user_id parameter based on its implementation
-      const result = await createCareerBlogPost();
+      const result = await createCareerBlogPost(user.id);
       if (result) {
         toast({
           title: "Success",
@@ -95,9 +111,18 @@ export function BlogInitialization() {
   };
 
   const handleCreateJobSearchPost = async () => {
+    if (!user?.id) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to create a blog post",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoadingJobSearch(true);
     try {
-      const result = await createJobSearchPost(user?.id || "");
+      const result = await createJobSearchPost(user.id);
       if (result) {
         toast({
           title: "Success",
@@ -122,18 +147,27 @@ export function BlogInitialization() {
   };
 
   const handleCreateAllPosts = async () => {
+    if (!user?.id) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to create blog posts",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoadingAll(true);
     try {
-      const userId = user?.id || "";
+      const userId = user.id;
       
       // Create all posts in parallel
       const results = await Promise.all([
         createAtsBlogPost(userId),
-        createCareerBlogPost(),
+        createCareerBlogPost(userId),
         createJobSearchPost(userId)
       ]);
       
-      const createdCount = results.filter(result => result === true).length;
+      const createdCount = results.filter(result => result !== null).length;
       
       if (createdCount > 0) {
         toast({

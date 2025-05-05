@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export async function createCareerBlogPost() {
+export async function createCareerBlogPost(userId: string) {
   try {
     // Check if the post already exists to avoid duplicates
     const { data: existingPosts } = await supabase
@@ -169,7 +169,7 @@ export async function createCareerBlogPost() {
 </ul>
       `,
       featured_image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
-      author_id: "00000000-0000-0000-0000-000000000000", // Will be updated with actual user ID
+      author_id: userId, // Use the provided user ID
       category: "career-development",
       tags: ["job search", "interview tips", "resume optimization", "career advice", "networking", "linkedin"],
       published_at: now,
