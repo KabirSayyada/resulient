@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreData } from "@/types/resume";
 import { useAuth } from "@/hooks/useAuth";
@@ -118,7 +119,7 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
           eliteIndicators={scoreData.eliteIndicatorsFound}
         />
 
-        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-x-8 gap-y-2 w-full mt-2`}>
+        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-x-6 gap-y-2 w-full mt-2`}>
           <ScoreMetric
             icon={<Star className="w-4 h-4 text-yellow-500" />}
             label="Skills (25%)"
@@ -165,8 +166,7 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
 
         <div className="my-4 text-indigo-800 text-center w-full">
           <div className="font-semibold text-sm mb-1">Suggested Skills to Add:</div>
-          <div className="text-xs font-bold text-fuchsia-700 mb-1 px-2 w-full pdf-skills-text"
-               style={{ whiteSpace: 'normal', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+          <div className="text-xs font-bold text-fuchsia-700 mb-1 px-2 w-full pdf-skills-text break-words">
             {scoreData.suggestedSkills && scoreData.suggestedSkills.length > 0 
               ? scoreData.suggestedSkills.join(", ") 
               : "No additional skills suggested"}

@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -71,14 +70,26 @@
   * {
     @apply border-border;
   }
+  
+  html, body {
+    @apply overflow-x-hidden scroll-smooth;
+    width: 100%;
+    max-width: 100%;
+  }
+  
   body {
     @apply bg-background text-foreground;
+  }
+  
+  /* Prevent horizontal overflow */
+  #root {
+    @apply w-full overflow-x-hidden;
   }
 }
 
 /* Blog content styling */
 .blog-content {
-  @apply space-y-6 text-base leading-relaxed;
+  @apply space-y-6 text-base leading-relaxed max-w-full overflow-x-hidden;
 }
 
 .blog-content p {
@@ -114,7 +125,7 @@
 }
 
 .blog-content img {
-  @apply rounded-lg my-8 w-full;
+  @apply rounded-lg my-8 max-w-full;
 }
 
 .blog-content .callout {
@@ -158,4 +169,35 @@
 
 .prose .blog-content a {
   @apply text-primary no-underline hover:underline;
+}
+
+/* Make images responsive and prevent overflow */
+img {
+  @apply max-w-full h-auto;
+}
+
+/* Ensure tables don't cause horizontal overflow */
+table {
+  @apply table-auto w-full max-w-full;
+  display: block;
+  overflow-x: auto;
+}
+
+/* Ensure pre blocks don't overflow */
+pre {
+  @apply max-w-full overflow-x-auto whitespace-pre-wrap;
+}
+
+/* Ensure all flex containers respect container boundaries */
+.flex, .flex-col, .flex-row {
+  @apply max-w-full;
+}
+
+/* Blog content specific overrides to prevent overflow */
+.blog-content img {
+  @apply rounded-lg my-8 max-w-full;
+}
+
+.blog-content pre {
+  @apply overflow-x-auto max-w-full;
 }
