@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ScoreData } from '@/types/resume';
 import { 
