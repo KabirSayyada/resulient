@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { generateSlug, calculateReadingTime } from "@/utils/blogUtils";
+import { calculateReadingTime } from "@/utils/blogUtils";
 
 export async function createJobSearchPost(userId: string) {
   // Check if post already exists to avoid duplication
@@ -205,7 +205,8 @@ export async function createJobSearchPost(userId: string) {
       updated_at: now,
       seo_title: seoTitle,
       seo_description: seoDescription,
-      seo_keywords: seoKeywords
+      seo_keywords: seoKeywords,
+      reading_time: readingTime
     })
     .select()
     .single();

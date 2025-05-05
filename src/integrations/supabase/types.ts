@@ -156,6 +156,7 @@ export type Database = {
           featured_image: string | null
           id: string
           published_at: string | null
+          reading_time: number | null
           seo_description: string | null
           seo_keywords: string | null
           seo_title: string | null
@@ -173,6 +174,7 @@ export type Database = {
           featured_image?: string | null
           id?: string
           published_at?: string | null
+          reading_time?: number | null
           seo_description?: string | null
           seo_keywords?: string | null
           seo_title?: string | null
@@ -190,6 +192,7 @@ export type Database = {
           featured_image?: string | null
           id?: string
           published_at?: string | null
+          reading_time?: number | null
           seo_description?: string | null
           seo_keywords?: string | null
           seo_title?: string | null
@@ -497,6 +500,7 @@ export type Database = {
           featured_image: string | null
           id: string | null
           published_at: string | null
+          reading_time: number | null
           seo_description: string | null
           seo_keywords: string | null
           seo_title: string | null

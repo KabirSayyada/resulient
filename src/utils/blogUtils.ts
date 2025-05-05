@@ -1,57 +1,32 @@
 
 /**
- * Calculate estimated reading time in minutes
- * Average reading speed: 200-250 words per minute
- * @param content HTML content of the blog post
- * @returns estimated reading time in minutes
+ * Calculates the reading time of content in minutes
+ * @param content The text content to calculate reading time for
+ * @returns Reading time in minutes
  */
 export function calculateReadingTime(content: string): number {
-  // Strip HTML tags
-  const text = content.replace(/<[^>]*>/g, '');
+  // Average reading speed (words per minute)
+  const wordsPerMinute = 200;
   
-  // Count words (split by spaces)
-  const words = text.split(/\s+/).filter(Boolean).length;
+  // Count words (split by spaces and filter empty strings)
+  const words = content.split(/\s+/).filter(Boolean).length;
   
-  // Calculate reading time (assume 225 words per minute)
-  const readingTimeMinutes = Math.ceil(words / 225);
+  // Calculate reading time in minutes, with a minimum of 1 minute
+  const readingTime = Math.max(1, Math.ceil(words / wordsPerMinute));
   
-  // Return at least 1 minute
-  return Math.max(1, readingTimeMinutes);
+  return readingTime;
 }
 
 /**
- * Generate a clean, SEO-friendly URL slug from a string
- * @param text The text to convert to a slug
+ * Generates a slug from a title
+ * @param title The title to generate a slug from
  * @returns A URL-friendly slug
  */
-export function generateSlug(text: string): string {
-  return text
+export function generateSlug(title: string): string {
+  return title
     .toLowerCase()
     .replace(/[^\w\s-]/g, '') // Remove special characters
     .replace(/\s+/g, '-')     // Replace spaces with hyphens
-    .replace(/-+/g, '-')      // Remove consecutive hyphens
-    .trim();                  // Trim whitespace
-}
-
-/**
- * Utility function to create slug from title
- * @param title Post title
- * @returns URL-friendly slug
- */
-export function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
+    .replace(/-+/g, '-')      // Replace multiple hyphens with single hyphen
     .trim();
-}
-
-/**
- * Extract plain text from HTML content
- * @param html HTML content
- * @returns Plain text without HTML tags
- */
-export function getPlainTextFromHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '');
 }

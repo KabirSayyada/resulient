@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { calculateReadingTime } from '@/utils/blogUtils';
 
 export async function createAtsBlogPost(userId: string) {
   try {
@@ -30,14 +31,8 @@ export async function createAtsBlogPost(userId: string) {
       categoryData = newCategory;
     }
 
-    // Create the blog post about ATS systems
-    const { error: postError } = await supabase
-      .from('blog_posts')
-      .insert({
-        title: 'How ATS Systems Reject Resumes: What You Need to Know',
-        slug: 'how-ats-systems-reject-resumes',
-        excerpt: 'Learn why Applicant Tracking Systems (ATS) might be rejecting your resume and the exact steps you can take to ensure your application makes it past the digital gatekeepers.',
-        content: `
+    // Create the blog post content
+    const postContent = `
 <div class="blog-content">
   <p class="lead">In today's competitive job market, your resume needs to impress not just human recruiters but also the software that screens applications before they ever reach human eyes. Applicant Tracking Systems (ATS) are used by an estimated 99% of Fortune 500 companies and 75% of all employers. Understanding how these systems work—and why they reject resumes—could be the difference between landing an interview and never getting a response.</p>
   
@@ -177,7 +172,31 @@ export async function createAtsBlogPost(userId: string) {
     <p>Try our <a href="/">Resume Optimization Tool</a> today and increase your interview chances by up to 70%.</p>
   </div>
 </div>
-        `,
+    `;
+
+    // Calculate reading time for the content
+    const readingTime = calculateReadingTime(postContent);
+
+    // Check if the post already exists to avoid duplicates
+    const { data: existingPosts } = await supabase
+      .from('blog_posts')
+      .select('id')
+      .eq('slug', 'how-ats-systems-reject-resumes')
+      .maybeSingle();
+    
+    if (existingPosts) {
+      console.log('ATS blog post already exists');
+      return false;
+    }
+
+    // Create the blog post
+    const { error: postError } = await supabase
+      .from('blog_posts')
+      .insert({
+        title: "How ATS Systems Reject Resumes: What You Need to Know",
+        slug: "how-ats-systems-reject-resumes",
+        excerpt: "Learn why Applicant Tracking Systems (ATS) might be rejecting your resume and the exact steps you can take to ensure your application makes it past the digital gatekeepers.",
+        content: postContent,
         featured_image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
         author_id: userId,
         category: 'resume-tips',
@@ -185,7 +204,8 @@ export async function createAtsBlogPost(userId: string) {
         published_at: new Date().toISOString(),
         seo_title: 'How ATS Systems Reject Resumes: What You Need to Know in 2025',
         seo_description: 'Discover why ATS systems reject 75% of resumes and learn proven strategies to optimize your resume to pass automated screenings and land more interviews.',
-        seo_keywords: 'ATS resume, applicant tracking system, resume rejection, optimize resume for ATS, ATS friendly resume, resume keywords, ATS screening'
+        seo_keywords: 'ATS resume, applicant tracking system, resume rejection, optimize resume for ATS, ATS friendly resume, resume keywords, ATS screening',
+        reading_time: readingTime
       });
 
     if (postError) {
