@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -27,7 +28,7 @@ export function BlogInitialization() {
       await initializeBlogContent();
       toast({
         title: "Success",
-        description: "Blog initialized with default data",
+        description: "Blog initialized with default categories",
       });
     } catch (error) {
       console.error("Error initializing blog data:", error);
@@ -310,26 +311,26 @@ export function BlogInitialization() {
       <CardHeader>
         <CardTitle>Blog Management</CardTitle>
         <CardDescription>
-          Initialize your blog with sample data or create individual sample posts
+          Initialize your blog or create individual content posts
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
           <p className="text-sm text-muted-foreground mb-2">
-            Create initial blog categories and demo data
+            Create initial blog categories and structure
           </p>
           <Button 
             onClick={handleInitializeBlog} 
             disabled={isLoadingDefault}
             className="w-full"
           >
-            {isLoadingDefault ? "Initializing..." : "Initialize Blog"}
+            {isLoadingDefault ? "Initializing..." : "Initialize Blog Categories"}
           </Button>
         </div>
         
         <div>
           <p className="text-sm text-muted-foreground mb-2">
-            Create all sample blog posts at once
+            Create multiple blog posts at once
           </p>
           <Button 
             onClick={handleCreateAllPosts} 
@@ -337,7 +338,7 @@ export function BlogInitialization() {
             variant="secondary"
             className="w-full"
           >
-            {isLoadingAll ? "Creating..." : "Create All Sample Posts"}
+            {isLoadingAll ? "Creating..." : "Create All Posts"}
           </Button>
         </div>
         
@@ -377,7 +378,7 @@ export function BlogInitialization() {
 
         <div>
           <p className="text-sm text-muted-foreground mb-2">
-            Create other career-related posts
+            Create career-related posts
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <Button 
@@ -386,7 +387,7 @@ export function BlogInitialization() {
               variant="outline"
               className="w-full"
             >
-              {isLoadingAts ? "Creating..." : "Create ATS Sample Post"}
+              {isLoadingAts ? "Creating..." : "Create ATS Post"}
             </Button>
             
             <Button 
@@ -395,7 +396,7 @@ export function BlogInitialization() {
               variant="outline"
               className="w-full"
             >
-              {isLoadingCareer ? "Creating..." : "Create Career Sample Post"}
+              {isLoadingCareer ? "Creating..." : "Create Career Post"}
             </Button>
           </div>
           <div className="mt-2">

@@ -89,14 +89,14 @@ export function InitializeBlogPosts() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create Sample Blog Content</CardTitle>
+        <CardTitle>Create Blog Content</CardTitle>
         <CardDescription>
-          Add pre-written blog posts to populate your blog with educational content.
+          Add professionally written blog posts about resume optimization and career development.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-muted-foreground mb-4">
-          This will create professionally written SEO-optimized blog posts covering resume optimization, job searching, and career development topics.
+          Create SEO-optimized blog posts covering resume optimization, job searching, and career development topics.
           Each post will be immediately published and visible to your visitors.
         </p>
         <ul className="list-disc pl-5 mb-4 space-y-1 text-sm text-muted-foreground">
@@ -126,7 +126,7 @@ export function InitializeBlogPosts() {
             ? "Creating Posts..." 
             : isComplete 
               ? "Posts Created" 
-              : "Create All Sample Blog Posts"}
+              : "Create All Blog Posts"}
         </Button>
       </CardFooter>
     </Card>

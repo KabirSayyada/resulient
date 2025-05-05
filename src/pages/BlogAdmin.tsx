@@ -45,9 +45,19 @@ import {
   Trash2, 
   Eye, 
   Search,
-  FileText
+  FileText,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function BlogAdmin() {
   const { user, loading, isAdmin } = useAuth();
@@ -60,6 +70,10 @@ export default function BlogAdmin() {
   const [showNewPostForm, setShowNewPostForm] = useState(false);
   const [showEditPostForm, setShowEditPostForm] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage] = useState(10); // Show 10 posts per page
   
   // Check if user is an admin, redirect to blog if not
   if (!loading && (!user || !isAdmin())) {
@@ -98,6 +112,21 @@ export default function BlogAdmin() {
   const draftPosts = filteredPosts.filter(
     post => post.published_at === null
   );
+  
+  // Get current posts for pagination
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const paginatePublished = publishedPosts.slice(indexOfFirstPost, indexOfLastPost);
+  const paginateDrafts = draftPosts.slice(indexOfFirstPost, indexOfLastPost);
+  const paginateAll = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
+  
+  // Change page
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  
+  // Calculate total pages
+  const totalPagesAll = Math.ceil(filteredPosts.length / postsPerPage);
+  const totalPagesPublished = Math.ceil(publishedPosts.length / postsPerPage);
+  const totalPagesDrafts = Math.ceil(draftPosts.length / postsPerPage);
   
   // Handle post deletion
   const handleDeletePost = async () => {
@@ -199,7 +228,7 @@ export default function BlogAdmin() {
                       </Button>
                     </div>
                     
-                    <Tabs defaultValue="all" className="mb-6">
+                    <Tabs defaultValue="all" className="mb-6" onValueChange={() => setCurrentPage(1)}>
                       <TabsList>
                         <TabsTrigger value="all">All Posts ({posts.length})</TabsTrigger>
                         <TabsTrigger value="published">Published ({publishedPosts.length})</TabsTrigger>
@@ -208,7 +237,7 @@ export default function BlogAdmin() {
                       
                       <TabsContent value="all">
                         <PostsTable 
-                          posts={filteredPosts}
+                          posts={paginateAll}
                           onEdit={(post) => {
                             setSelectedPost(post);
                             setShowEditPostForm(true);
@@ -218,11 +247,19 @@ export default function BlogAdmin() {
                             setShowDeleteDialog(true);
                           }}
                         />
+                        
+                        {totalPagesAll > 1 && (
+                          <BlogPagination 
+                            currentPage={currentPage}
+                            totalPages={totalPagesAll}
+                            onPageChange={paginate}
+                          />
+                        )}
                       </TabsContent>
                       
                       <TabsContent value="published">
                         <PostsTable 
-                          posts={publishedPosts}
+                          posts={paginatePublished}
                           onEdit={(post) => {
                             setSelectedPost(post);
                             setShowEditPostForm(true);
@@ -232,11 +269,19 @@ export default function BlogAdmin() {
                             setShowDeleteDialog(true);
                           }}
                         />
+                        
+                        {totalPagesPublished > 1 && (
+                          <BlogPagination 
+                            currentPage={currentPage}
+                            totalPages={totalPagesPublished}
+                            onPageChange={paginate}
+                          />
+                        )}
                       </TabsContent>
                       
                       <TabsContent value="drafts">
                         <PostsTable 
-                          posts={draftPosts}
+                          posts={paginateDrafts}
                           onEdit={(post) => {
                             setSelectedPost(post);
                             setShowEditPostForm(true);
@@ -246,6 +291,14 @@ export default function BlogAdmin() {
                             setShowDeleteDialog(true);
                           }}
                         />
+                        
+                        {totalPagesDrafts > 1 && (
+                          <BlogPagination 
+                            currentPage={currentPage}
+                            totalPages={totalPagesDrafts}
+                            onPageChange={paginate}
+                          />
+                        )}
                       </TabsContent>
                     </Tabs>
                   </div>
@@ -269,7 +322,7 @@ export default function BlogAdmin() {
                       <div>
                         <h3 className="text-lg font-medium mb-2">Blog Initialization</h3>
                         <p className="text-sm text-muted-foreground mb-4">
-                          Initialize your blog with default categories and sample posts
+                          Initialize your blog with categories and professional content
                         </p>
                         <BlogInitialization />
                       </div>
@@ -398,5 +451,100 @@ function PostsTable({ posts, onEdit, onDelete }: PostsTableProps) {
         </TableBody>
       </Table>
     </div>
+  );
+}
+
+interface BlogPaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+function BlogPagination({ currentPage, totalPages, onPageChange }: BlogPaginationProps) {
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    
+    // Always show first page
+    if (currentPage > 2) {
+      pageNumbers.push(1);
+    }
+    
+    // Show ellipsis if needed
+    if (currentPage > 3) {
+      pageNumbers.push('ellipsis-start');
+    }
+    
+    // Show pages around current page
+    for (let i = Math.max(1, currentPage - 1); i <= Math.min(totalPages, currentPage + 1); i++) {
+      pageNumbers.push(i);
+    }
+    
+    // Show ellipsis if needed
+    if (currentPage < totalPages - 2) {
+      pageNumbers.push('ellipsis-end');
+    }
+    
+    // Always show last page
+    if (currentPage < totalPages - 1) {
+      pageNumbers.push(totalPages);
+    }
+    
+    return pageNumbers;
+  };
+  
+  return (
+    <Pagination className="mt-4 mb-2">
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious 
+            href="#" 
+            onClick={(e) => {
+              e.preventDefault();
+              if (currentPage > 1) onPageChange(currentPage - 1);
+            }} 
+            aria-disabled={currentPage === 1}
+            className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+          />
+        </PaginationItem>
+        
+        {getPageNumbers().map((page, index) => {
+          if (page === 'ellipsis-start' || page === 'ellipsis-end') {
+            return (
+              <PaginationItem key={`ellipsis-${index}`}>
+                <span className="px-4 py-2">...</span>
+              </PaginationItem>
+            );
+          }
+          
+          return (
+            <PaginationItem key={index}>
+              <PaginationLink 
+                href="#" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  onPageChange(page as number);
+                }}
+                isActive={currentPage === page}
+              >
+                {page}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        })}
+        
+        <PaginationItem>
+          <PaginationNext 
+            href="#" 
+            onClick={(e) => {
+              e.preventDefault();
+              if (currentPage < totalPages) onPageChange(currentPage + 1);
+            }}
+            aria-disabled={currentPage === totalPages}
+            className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
   );
 }
