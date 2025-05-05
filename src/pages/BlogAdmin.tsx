@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BlogAdminForm } from '@/components/blog/BlogAdminForm';
 import { BlogInitialization } from '@/components/blog/BlogAdmin/BlogInitialization';
-import { BlogAnalyticsDashboard } from '@/components/blog/BlogAdmin/BlogAnalyticsDashboard';
 import { 
   Table,
   TableBody,
@@ -46,8 +45,7 @@ import {
   Trash2, 
   Eye, 
   Search,
-  FileText,
-  BarChart
+  FileText
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -179,7 +177,6 @@ export default function BlogAdmin() {
             <Tabs defaultValue="posts" className="mb-6">
               <TabsList>
                 <TabsTrigger value="posts">Posts</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
               
@@ -257,10 +254,6 @@ export default function BlogAdmin() {
                     <BlogInitialization />
                   </div>
                 </div>
-              </TabsContent>
-              
-              <TabsContent value="analytics">
-                <BlogAnalyticsDashboard />
               </TabsContent>
               
               <TabsContent value="settings">
