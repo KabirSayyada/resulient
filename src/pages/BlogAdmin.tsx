@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BlogLayout } from '@/components/blog/BlogLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -59,14 +60,13 @@ export default function BlogAdmin() {
   const [showEditPostForm, setShowEditPostForm] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
-  // Check if user is admin - simplified check
-  // Replace with your admin email or a more sophisticated role check
-  const isAdmin = user?.email === 'admin@example.com';
+  // Temporarily removing admin check to allow access
+  // const isAdmin = user?.email === 'admin@example.com';
   
-  // Redirect if not authenticated or not admin
-  if (!loading && (!user || !isAdmin)) {
-    return <Navigate to="/blog" />;
-  }
+  // // Redirect if not authenticated or not admin
+  // if (!loading && (!user || !isAdmin)) {
+  //   return <Navigate to="/blog" />;
+  // }
   
   // Fetch all posts on mount
   useEffect(() => {
