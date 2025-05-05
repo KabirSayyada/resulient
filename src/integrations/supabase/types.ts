@@ -30,6 +30,63 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_analytics: {
+        Row: {
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          is_unique: boolean | null
+          page_path: string
+          post_id: string | null
+          referrer: string | null
+          session_id: string | null
+          user_agent: string | null
+          visit_timestamp: string
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          is_unique?: boolean | null
+          page_path: string
+          post_id?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          visit_timestamp?: string
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          is_unique?: boolean | null
+          page_path?: string
+          post_id?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          visit_timestamp?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_analytics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_analytics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "published_blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_categories: {
         Row: {
           created_at: string
@@ -53,6 +110,41 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      blog_conversion_events: {
+        Row: {
+          analytics_id: string | null
+          created_at: string | null
+          event_data: Json | null
+          event_timestamp: string
+          event_type: string
+          id: string
+        }
+        Insert: {
+          analytics_id?: string | null
+          created_at?: string | null
+          event_data?: Json | null
+          event_timestamp?: string
+          event_type: string
+          id?: string
+        }
+        Update: {
+          analytics_id?: string | null
+          created_at?: string | null
+          event_data?: Json | null
+          event_timestamp?: string
+          event_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_conversion_events_analytics_id_fkey"
+            columns: ["analytics_id"]
+            isOneToOne: false
+            referencedRelation: "blog_analytics"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       blog_posts: {
         Row: {
@@ -112,6 +204,41 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_user_interactions: {
+        Row: {
+          analytics_id: string | null
+          created_at: string | null
+          id: string
+          interactions: Json | null
+          scroll_depth: number | null
+          time_on_page: number | null
+        }
+        Insert: {
+          analytics_id?: string | null
+          created_at?: string | null
+          id?: string
+          interactions?: Json | null
+          scroll_depth?: number | null
+          time_on_page?: number | null
+        }
+        Update: {
+          analytics_id?: string | null
+          created_at?: string | null
+          id?: string
+          interactions?: Json | null
+          scroll_depth?: number | null
+          time_on_page?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_user_interactions_analytics_id_fkey"
+            columns: ["analytics_id"]
+            isOneToOne: false
+            referencedRelation: "blog_analytics"
             referencedColumns: ["id"]
           },
         ]

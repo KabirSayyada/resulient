@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BlogAdminForm } from '@/components/blog/BlogAdminForm';
 import { BlogInitialization } from '@/components/blog/BlogAdmin/BlogInitialization';
+import { BlogAnalyticsDashboard } from '@/components/blog/BlogAdmin/BlogAnalyticsDashboard';
 import { 
   Table,
   TableBody,
@@ -45,7 +46,8 @@ import {
   Trash2, 
   Eye, 
   Search,
-  FileText
+  FileText,
+  BarChart
 } from 'lucide-react';
 
 export default function BlogAdmin() {
@@ -162,79 +164,115 @@ export default function BlogAdmin() {
           </>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div className="md:col-span-2">
-                <div className="flex justify-between items-center mb-4">
-                  <div className="relative w-full max-w-sm">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search posts..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <Button onClick={() => setShowNewPostForm(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    New Post
-                  </Button>
-                </div>
-                
-                <Tabs defaultValue="all" className="mb-6">
-                  <TabsList>
-                    <TabsTrigger value="all">All Posts ({posts.length})</TabsTrigger>
-                    <TabsTrigger value="published">Published ({publishedPosts.length})</TabsTrigger>
-                    <TabsTrigger value="drafts">Drafts ({draftPosts.length})</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="all">
-                    <PostsTable 
-                      posts={filteredPosts}
-                      onEdit={(post) => {
-                        setSelectedPost(post);
-                        setShowEditPostForm(true);
-                      }}
-                      onDelete={(post) => {
-                        setSelectedPost(post);
-                        setShowDeleteDialog(true);
-                      }}
-                    />
-                  </TabsContent>
-                  
-                  <TabsContent value="published">
-                    <PostsTable 
-                      posts={publishedPosts}
-                      onEdit={(post) => {
-                        setSelectedPost(post);
-                        setShowEditPostForm(true);
-                      }}
-                      onDelete={(post) => {
-                        setSelectedPost(post);
-                        setShowDeleteDialog(true);
-                      }}
-                    />
-                  </TabsContent>
-                  
-                  <TabsContent value="drafts">
-                    <PostsTable 
-                      posts={draftPosts}
-                      onEdit={(post) => {
-                        setSelectedPost(post);
-                        setShowEditPostForm(true);
-                      }}
-                      onDelete={(post) => {
-                        setSelectedPost(post);
-                        setShowDeleteDialog(true);
-                      }}
-                    />
-                  </TabsContent>
-                </Tabs>
-              </div>
+            <Tabs defaultValue="posts" className="mb-6">
+              <TabsList>
+                <TabsTrigger value="posts">Posts</TabsTrigger>
+                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                <TabsTrigger value="settings">Settings</TabsTrigger>
+              </TabsList>
               
-              <div>
-                <BlogInitialization />
-              </div>
-            </div>
+              <TabsContent value="posts">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2">
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="relative w-full max-w-sm">
+                        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search posts..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                      <Button onClick={() => setShowNewPostForm(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        New Post
+                      </Button>
+                    </div>
+                    
+                    <Tabs defaultValue="all" className="mb-6">
+                      <TabsList>
+                        <TabsTrigger value="all">All Posts ({posts.length})</TabsTrigger>
+                        <TabsTrigger value="published">Published ({publishedPosts.length})</TabsTrigger>
+                        <TabsTrigger value="drafts">Drafts ({draftPosts.length})</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="all">
+                        <PostsTable 
+                          posts={filteredPosts}
+                          onEdit={(post) => {
+                            setSelectedPost(post);
+                            setShowEditPostForm(true);
+                          }}
+                          onDelete={(post) => {
+                            setSelectedPost(post);
+                            setShowDeleteDialog(true);
+                          }}
+                        />
+                      </TabsContent>
+                      
+                      <TabsContent value="published">
+                        <PostsTable 
+                          posts={publishedPosts}
+                          onEdit={(post) => {
+                            setSelectedPost(post);
+                            setShowEditPostForm(true);
+                          }}
+                          onDelete={(post) => {
+                            setSelectedPost(post);
+                            setShowDeleteDialog(true);
+                          }}
+                        />
+                      </TabsContent>
+                      
+                      <TabsContent value="drafts">
+                        <PostsTable 
+                          posts={draftPosts}
+                          onEdit={(post) => {
+                            setSelectedPost(post);
+                            setShowEditPostForm(true);
+                          }}
+                          onDelete={(post) => {
+                            setSelectedPost(post);
+                            setShowDeleteDialog(true);
+                          }}
+                        />
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+                  
+                  <div>
+                    <BlogInitialization />
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="analytics">
+                <BlogAnalyticsDashboard />
+              </TabsContent>
+              
+              <TabsContent value="settings">
+                <div className="max-w-2xl">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Blog Settings</CardTitle>
+                      <CardDescription>
+                        Configure your blog settings and preferences
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <h3 className="text-lg font-medium mb-2">Blog Initialization</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Initialize your blog with default categories and sample posts
+                        </p>
+                        <BlogInitialization />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
           </>
         )}
         

@@ -5,10 +5,14 @@ import { useBlogPost } from '@/hooks/useBlogPosts';
 import { BlogPostContent } from '@/components/blog/BlogPostContent';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Helmet } from 'react-helmet-async';
+import { useBlogAnalytics } from '@/hooks/useBlogAnalytics';
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const { post, isLoading, error } = useBlogPost(slug || '');
+  
+  // Track page view with analytics
+  useBlogAnalytics(post?.id);
 
   if (error) {
     return <Navigate to="/blog" />;

@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 import { useBlogPosts } from '@/hooks/useBlogPosts';
+import { useBlogAnalytics } from '@/hooks/useBlogAnalytics';
+import { trackConversion } from '@/utils/blogAnalytics';
 
 interface BlogPostContentProps {
   post: BlogPost;
@@ -18,6 +20,7 @@ interface BlogPostContentProps {
 export function BlogPostContent({ post }: BlogPostContentProps) {
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const { posts } = useBlogPosts();
+  const { analyticsId, EVENT_TYPES } = useBlogAnalytics(post.id);
   
   useEffect(() => {
     // Find posts with the same category or matching tags
@@ -47,6 +50,10 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
     : 'Unknown Author';
 
   const handleShare = () => {
+    if (analyticsId) {
+      trackConversion(analyticsId, EVENT_TYPES.SHARE, { post_id: post.id });
+    }
+    
     if (navigator.share) {
       navigator.share({
         title: post.title,
@@ -61,6 +68,26 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
           alert('URL copied to clipboard!');
         })
         .catch((error) => console.log('Error copying to clipboard', error));
+    }
+  };
+
+  const handleNewsletterSignup = (e: React.FormEvent) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const email = new FormData(form).get('email') as string;
+    
+    if (analyticsId) {
+      trackConversion(analyticsId, EVENT_TYPES.NEWSLETTER_SIGNUP, { email });
+    }
+    
+    // Display success message
+    alert(`Thank you for subscribing with ${email}!`);
+    form.reset();
+  };
+
+  const handleExternalLinkClick = (url: string) => {
+    if (analyticsId) {
+      trackConversion(analyticsId, EVENT_TYPES.EXTERNAL_LINK_CLICK, { url });
     }
   };
 
@@ -136,7 +163,12 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
 
       <div 
         className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-semibold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-h4:text-lg prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-lg prose-img:my-8 prose-blockquote:border-l-4 prose-blockquote:border-primary/50 prose-blockquote:pl-4 prose-blockquote:py-1 prose-blockquote:italic space-y-6"
-        dangerouslySetInnerHTML={{ __html: post.content }}
+        dangerouslySetInnerHTML={{ 
+          __html: post.content.replace(
+            /<a\s+(?:[^>]*?\s+)?href=(["'])(https?:\/\/[^"']+)\1/g, 
+            `<a href="$2" onclick="window.handleExternalLinkClick('$2'); return true;"` 
+          ) 
+        }}
       />
 
       {post.tags && post.tags.length > 0 && (
@@ -184,9 +216,10 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
       <div className="my-12 p-6 bg-muted rounded-lg">
         <h3 className="text-xl font-bold mb-2">Stay Updated</h3>
         <p className="mb-4">Get the latest career tips and insights delivered straight to your inbox.</p>
-        <form className="flex flex-col sm:flex-row gap-2" onSubmit={(e) => e.preventDefault()}>
+        <form className="flex flex-col sm:flex-row gap-2" onSubmit={handleNewsletterSignup}>
           <input 
             type="email" 
+            name="email"
             placeholder="Your email address" 
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
             required
@@ -197,3 +230,14 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
     </article>
   );
 }
+
+// Add this to the window object to allow the onclick handler to work
+// @ts-ignore
+window.handleExternalLinkClick = (url: string) => {
+  const post = document.querySelector('article')?.getAttribute('data-post-id');
+  const analyticsId = document.querySelector('article')?.getAttribute('data-analytics-id');
+  
+  if (analyticsId) {
+    trackConversion(analyticsId, 'external_link_click', { url, post_id: post });
+  }
+};
