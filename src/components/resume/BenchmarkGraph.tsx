@@ -1,6 +1,7 @@
 
 import { ChartContainer } from "@/components/ui/chart";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BenchmarkGraphProps {
   percentile: number; // e.g. 22 (top 22%)
@@ -35,10 +36,11 @@ export const BenchmarkGraph = ({
   numSimilar
 }: BenchmarkGraphProps) => {
   const { data, userP } = createDistributionData(numSimilar, percentile);
+  const isMobile = useIsMobile();
 
   return (
     <div className="w-full flex flex-col items-center my-6">
-      <div className="font-semibold text-sm text-indigo-800 mb-2 text-center">
+      <div className="font-semibold text-sm text-indigo-800 mb-2 text-center px-3">
         Where you stand vs. estimated <span className="font-bold">{numSimilar.toLocaleString()}</span> {numSimilar === 1 ? 'resume' : 'resumes'} in this industry
       </div>
       <div className="w-full max-w-md h-44 rounded-xl bg-indigo-50 p-2 relative z-0">
@@ -47,21 +49,27 @@ export const BenchmarkGraph = ({
           user: { label: "You", color: "#d946ef" }
         }}>
           <ResponsiveContainer width="100%" height={160}>
-            <AreaChart data={data} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+            <AreaChart data={data} margin={{ 
+              top: 20, 
+              right: isMobile ? 10 : 20, 
+              bottom: 20, 
+              left: isMobile ? 10 : 20 
+            }}>
               <XAxis
                 dataKey="percentile"
                 type="number"
                 domain={[0, 100]}
-                ticks={[0, 20, 40, 60, 80, 100]}
+                ticks={isMobile ? [0, 50, 100] : [0, 20, 40, 60, 80, 100]}
                 tickFormatter={t => `${100 - t}`}
                 label={{
                   value: "Percentile (Top ⟶ Bottom)",
                   position: "insideBottom",
                   offset: -5,
-                  style: { fill: "#6D28D9", fontSize: 12 }
+                  style: { fill: "#6D28D9", fontSize: isMobile ? 10 : 12 }
                 }}
                 stroke="#ddd"
                 axisLine={false}
+                tick={{ fontSize: isMobile ? 10 : 12 }}
               />
               <YAxis hide />
               <Tooltip 
@@ -84,7 +92,7 @@ export const BenchmarkGraph = ({
                   position: "top",
                   fill: "#d946ef",
                   fontWeight: 600,
-                  fontSize: 13
+                  fontSize: isMobile ? 11 : 13
                 }}
               />
               <defs>
