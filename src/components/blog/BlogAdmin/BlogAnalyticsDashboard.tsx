@@ -1,5 +1,4 @@
-
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
@@ -47,13 +46,22 @@ export function BlogAnalyticsDashboard() {
     to: new Date(),
   });
   
-  // Re-fetch trigger
+  // Re-fetch trigger state
   const [refetchTrigger, setRefetchTrigger] = useState<number>(0);
+  
+  // Error visibility control
+  const [errorVisible, setErrorVisible] = useState<boolean>(true);
   
   // Handler for manual refresh
   const handleRefresh = useCallback(() => {
     setRefetchTrigger(prev => prev + 1);
+    setErrorVisible(true);
   }, []);
+  
+  // Reset error visibility after refresh
+  useEffect(() => {
+    setErrorVisible(true);
+  }, [refetchTrigger]);
   
   // Get analytics data
   const {
@@ -70,8 +78,7 @@ export function BlogAnalyticsDashboard() {
       from: startOfDay(dateRange.from),
       to: endOfDay(dateRange.to),
     },
-    // Use refetchTrigger to force re-fetch
-    refetchTrigger: refetchTrigger,
+    refetchTrigger,
   });
   
   // Format date range for display
@@ -95,8 +102,8 @@ export function BlogAnalyticsDashboard() {
   // Colors for the pie chart
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
   
-  // Show error state if there was an error and not loading
-  if (error && !isLoading) {
+  // Show error state if there was an error, not loading, and error is visible
+  if (error && !isLoading && errorVisible) {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
@@ -112,6 +119,14 @@ export function BlogAnalyticsDashboard() {
           <AlertTitle>Error loading analytics</AlertTitle>
           <AlertDescription>
             There was a problem fetching the analytics data. Please try again later.
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-2" 
+              onClick={() => setErrorVisible(false)}
+            >
+              Show dashboard anyway
+            </Button>
           </AlertDescription>
         </Alert>
       </div>

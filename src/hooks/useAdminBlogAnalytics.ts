@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -33,6 +34,9 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
   
   // Keep track of the active fetch operation
   const fetchingRef = useRef(false);
+  
+  // Last fetch error reference to prevent showing duplicate toasts
+  const lastErrorRef = useRef<string>('');
 
   useEffect(() => {
     // Reset the error toast flag when filters change
@@ -227,28 +231,43 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
           setConversionEvents(eventsWithAnalytics || []);
           setError(null);
           setIsLoading(false);
+          
+          // Clear last error when successful
+          lastErrorRef.current = '';
+          hasShownErrorToast.current = false;
         }
         
       } catch (err) {
-        console.error('Error fetching analytics:', err);
+        const error = err as Error;
+        console.error('Error fetching analytics:', error);
         
+        // Only update state and show toast if component is still mounted
+        // and if it's a new error (to prevent toast spam)
         if (isMounted.current) {
-          setError(err as Error);
+          setError(error);
           setIsLoading(false);
           
-          // Only show the error toast once
-          if (!hasShownErrorToast.current) {
+          // Get error message
+          const errorMessage = error.message || 'Unknown error';
+          
+          // Only show the toast if this is a new error or we haven't shown one yet
+          if (!hasShownErrorToast.current || errorMessage !== lastErrorRef.current) {
             toast({
               title: 'Error',
               description: 'Failed to fetch analytics data',
               variant: 'destructive',
             });
+            
+            // Record that we've shown a toast for this error
             hasShownErrorToast.current = true;
+            lastErrorRef.current = errorMessage;
           }
         }
       } finally {
-        // Reset the fetching flag
-        fetchingRef.current = false;
+        // Reset the fetching flag with a small delay to prevent immediate retries
+        setTimeout(() => {
+          fetchingRef.current = false;
+        }, 1000);
       }
     };
     
