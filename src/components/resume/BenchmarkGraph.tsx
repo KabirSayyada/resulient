@@ -43,17 +43,17 @@ export const BenchmarkGraph = ({
       <div className="font-semibold text-sm text-indigo-800 mb-2 text-center px-3">
         Where you stand vs. estimated <span className="font-bold">{numSimilar.toLocaleString()}</span> {numSimilar === 1 ? 'resume' : 'resumes'} in this industry
       </div>
-      <div className="w-full max-w-md h-48 sm:h-44 rounded-xl bg-indigo-50 p-2 relative z-0">
+      <div className="w-full max-w-md h-44 rounded-xl bg-indigo-50 p-2 relative z-0">
         <ChartContainer config={{
           resumes: { label: "Competitive Resumes", color: "#a78bfa" },
           user: { label: "You", color: "#d946ef" }
         }}>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={160}>
             <AreaChart data={data} margin={{ 
               top: 20, 
-              right: isMobile ? 5 : 20, 
+              right: isMobile ? 10 : 20, 
               bottom: 20, 
-              left: isMobile ? 0 : 20 
+              left: isMobile ? 10 : 20 
             }}>
               <XAxis
                 dataKey="percentile"
@@ -65,22 +65,16 @@ export const BenchmarkGraph = ({
                   value: "Percentile (Top ⟶ Bottom)",
                   position: "insideBottom",
                   offset: -5,
-                  style: { fill: "#6D28D9", fontSize: isMobile ? 11 : 12 }
+                  style: { fill: "#6D28D9", fontSize: isMobile ? 10 : 12 }
                 }}
                 stroke="#ddd"
                 axisLine={false}
-                tick={{ fontSize: isMobile ? 11 : 12 }}
+                tick={{ fontSize: isMobile ? 10 : 12 }}
               />
               <YAxis hide />
               <Tooltip 
-                contentStyle={{ 
-                  fontSize: 12, 
-                  backgroundColor: "white", 
-                  border: "1px solid #e2e8f0",
-                  zIndex: 1000
-                }} 
+                contentStyle={{ fontSize: 12, backgroundColor: "white", border: "1px solid #e2e8f0" }} 
                 formatter={(_, n) => [_, n === "resumes" ? "Resumes" : "You"]}
-                wrapperStyle={{ zIndex: 1000 }}
               />
               <Area
                 type="monotone"
@@ -98,7 +92,7 @@ export const BenchmarkGraph = ({
                   position: "top",
                   fill: "#d946ef",
                   fontWeight: 600,
-                  fontSize: isMobile ? 12 : 13
+                  fontSize: isMobile ? 11 : 13
                 }}
               />
               <defs>

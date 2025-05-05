@@ -26,7 +26,7 @@ export const IndustryLeaderboardSection = ({ scoreData }: IndustryLeaderboardSec
     <div className="space-y-6 mt-6">
       <Card className="p-4 sm:p-6 bg-white shadow-lg border-t-4 border-t-indigo-500">
         <h2 className="text-xl sm:text-2xl font-bold text-indigo-800 mb-4">Industry Performance Overview</h2>
-        <div className="h-[350px] w-full">
+        <div className="h-[300px] sm:h-[400px] w-full">
           <ChartContainer
             config={{
               score: {
@@ -42,7 +42,7 @@ export const IndustryLeaderboardSection = ({ scoreData }: IndustryLeaderboardSec
             <BarChart 
               data={chartData} 
               margin={isMobile ? 
-                { top: 20, right: 0, left: -15, bottom: 70 } :
+                { top: 20, right: 10, left: 0, bottom: 70 } :
                 { top: 20, right: 30, left: 20, bottom: 60 }
               }
             >
@@ -51,27 +51,22 @@ export const IndustryLeaderboardSection = ({ scoreData }: IndustryLeaderboardSec
                 dataKey="name" 
                 angle={-45} 
                 textAnchor="end" 
-                height={isMobile ? 90 : 60} 
+                height={isMobile ? 80 : 60} 
                 interval={0} 
-                tick={{ fontSize: isMobile ? 11 : 12 }}
-                tickMargin={isMobile ? 25 : 10}
-                tickSize={isMobile ? 5 : 6}
+                tick={{ fontSize: isMobile ? 10 : 12 }}
+                tickMargin={isMobile ? 15 : 10}
               />
               <YAxis 
                 domain={[0, 100]} 
-                width={isMobile ? 40 : 40}
-                tick={{ fontSize: isMobile ? 11 : 12 }}
-                tickCount={isMobile ? 5 : 6}
+                width={isMobile ? 30 : 40}
+                tick={{ fontSize: isMobile ? 10 : 12 }}
               />
-              <Tooltip 
-                contentStyle={{ fontSize: isMobile ? 12 : 14 }}
-                wrapperStyle={{ zIndex: 1000 }}
-              />
+              <Tooltip />
               <Bar 
                 dataKey="score" 
                 fill="#818cf8" 
                 radius={[4, 4, 0, 0]}
-                maxBarSize={isMobile ? 40 : 60}
+                maxBarSize={isMobile ? 25 : 60}
               >
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.isUser ? "#e879f9" : "#818cf8"} />
