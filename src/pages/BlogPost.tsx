@@ -17,9 +17,10 @@ export default function BlogPost() {
 
   // SEO content
   const title = post ? `${post.title} | Resulient Blog` : 'Blog Post | Resulient';
-  const description = post?.excerpt || 'Read this article on the Resulient blog';
+  const description = post?.seo_description || post?.excerpt || 'Read this article on the Resulient blog';
   const keywords = post?.seo_keywords || 'resume, career, job search';
   const ogImage = post?.featured_image || undefined;
+  const canonicalUrl = `https://resulient.ai/blog/${slug}`;
   
   // Track page view with Google Analytics
   useEffect(() => {
@@ -29,10 +30,19 @@ export default function BlogPost() {
         'event_label': post.title,
         'item_id': post.id,
         'item_name': post.title,
-        'item_category': post.category || 'Uncategorized'
+        'item_category': post.category || 'Uncategorized',
+        'page_location': window.location.href,
+        'page_title': title
+      });
+      
+      // Track page view
+      window.gtag('event', 'page_view', {
+        page_title: title,
+        page_location: window.location.href,
+        page_path: `/blog/${slug}`
       });
     }
-  }, [post]);
+  }, [post, slug, title]);
 
   return (
     <>
@@ -40,16 +50,31 @@ export default function BlogPost() {
         <title>{title}</title>
         <meta name="description" content={description} />
         <meta name="keywords" content={keywords} />
+        <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={`https://resulient.ai/blog/${slug}`} />
         {ogImage && <meta property="og:image" content={ogImage} />}
+        
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={canonicalUrl} />
+        <meta property="twitter:title" content={title} />
+        <meta property="twitter:description" content={description} />
+        {ogImage && <meta property="twitter:image" content={ogImage} />}
+        
+        {/* Article specific metadata */}
         {post && post.published_at && (
           <meta property="article:published_time" content={post.published_at} />
         )}
         {post && post.updated_at && (
           <meta property="article:modified_time" content={post.updated_at} />
+        )}
+        {post && post.category && (
+          <meta property="article:section" content={post.category} />
         )}
         {post && post.tags && post.tags.map((tag, index) => (
           <meta key={index} property="article:tag" content={tag} />

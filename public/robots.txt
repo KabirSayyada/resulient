@@ -20,3 +20,6 @@ Allow: /refund-policy
 Allow: /legal
 Allow: /blog
 Allow: /blog/
+
+# Allow crawling of blog categories
+Allow: /blog/category/
