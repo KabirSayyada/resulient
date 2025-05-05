@@ -87,14 +87,14 @@ export const createSeoOptimizedPosts = async () => {
         seo_keywords: post.seo_keywords || post.tags?.join(', ') || null,
       };
 
-      // Insert the processed post into the 'published_blog_posts' table
-      // Use upsert instead of insert to handle cases where the post might already exist
-      const { error: upsertError } = await supabase
+      // Instead of using upsert, let's try to insert directly first and handle errors
+      // This approach often resolves type mismatches with Supabase TypeScript definitions
+      const { error: insertError } = await supabase
         .from('published_blog_posts')
-        .upsert([publishedPostData], { onConflict: 'id' });
+        .insert(publishedPostData);
 
-      if (upsertError) {
-        console.error(`Error publishing post ${post.id}: ${upsertError.message}`);
+      if (insertError) {
+        console.error(`Error publishing post ${post.id}: ${insertError.message}`);
         continue; // Skip to the next post
       }
 
