@@ -33,4 +33,3 @@ jobs:
           github_token: ${{ secrets.GH_PAT }}
           publish_dir: ./dist
           cname: resulient.com
-          force_orphan: true
