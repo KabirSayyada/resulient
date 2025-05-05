@@ -50,7 +50,7 @@ export default function Blog() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[...Array(4)].map((_, index) => (
               <div key={index} className="space-y-3">
                 <Skeleton className="h-48 w-full" />
@@ -62,17 +62,17 @@ export default function Blog() {
             ))}
           </div>
         ) : filteredPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredPosts.map((post) => (
               <BlogCard key={post.id} post={post} />
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
+          <div className="text-center py-8 sm:py-12">
             <div className="flex flex-col items-center justify-center text-muted-foreground">
-              <FileText className="h-12 w-12 mb-4 opacity-50" />
+              <FileText className="h-10 w-10 mb-4 opacity-50" />
               <h3 className="text-xl font-semibold mb-2">No articles found</h3>
-              <p className="text-muted-foreground mb-4 max-w-md">
+              <p className="text-muted-foreground mb-4 max-w-md px-4">
                 {searchQuery 
                   ? "No articles match your search criteria. Try different keywords."
                   : "We're preparing some great content for you. Check back soon for new articles!"}

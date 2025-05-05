@@ -41,9 +41,9 @@ export function AuthForm() {
   };
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit} autoComplete="on">
+    <form className="space-y-4" onSubmit={handleSubmit} autoComplete="on">
       <div>
-        <label className="block mb-1 font-semibold text-gray-700" htmlFor="email">
+        <label className="block mb-1 font-semibold text-gray-700 dark:text-gray-300 text-sm" htmlFor="email">
           Email
         </label>
         <div className="relative">
@@ -62,7 +62,7 @@ export function AuthForm() {
         </div>
       </div>
       <div>
-        <label className="block mb-1 font-semibold text-gray-700" htmlFor="password">
+        <label className="block mb-1 font-semibold text-gray-700 dark:text-gray-300 text-sm" htmlFor="password">
           Password
         </label>
         <div className="relative">
@@ -92,7 +92,7 @@ export function AuthForm() {
       <div className="text-center mt-4">
         <button
           type="button"
-          className="text-primary font-semibold underline underline-offset-4"
+          className="text-primary font-semibold text-sm underline underline-offset-4"
           onClick={() => setMode(mode === "login" ? "signup" : "login")}
           disabled={submitting}
         >

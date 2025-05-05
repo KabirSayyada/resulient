@@ -38,7 +38,7 @@ export default function BlogCategory() {
       </Helmet>
 
       <BlogLayout title={categoryData ? categoryData.name : 'Category'}>
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Link to="/blog">
             <Button variant="ghost" className="mb-4">
               <ChevronLeft className="mr-2 h-4 w-4" />
@@ -47,7 +47,7 @@ export default function BlogCategory() {
           </Link>
           
           {categoryData?.description && (
-            <p className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground mt-2 text-sm sm:text-base px-1">
               {categoryData.description}
             </p>
           )}
@@ -72,9 +72,9 @@ export default function BlogCategory() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
+          <div className="text-center py-8 sm:py-12">
             <h3 className="text-xl font-semibold mb-2">No articles found</h3>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-muted-foreground mb-4 px-4">
               There are no articles in this category yet. Check back soon!
             </p>
             <Button variant="outline" asChild>

@@ -6,6 +6,7 @@ import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from '@/hooks/useAuth';
 import { HelmetProvider } from 'react-helmet-async';
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
 // Initialize Google Analytics page view tracking
 const trackPageView = () => {
@@ -33,9 +34,11 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       <HelmetProvider>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </ThemeProvider>
       </HelmetProvider>
     </BrowserRouter>
   </React.StrictMode>
