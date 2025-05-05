@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 /**
  * Custom hook that automatically dismisses any active toasts
@@ -10,11 +10,12 @@ import { toast } from '@/hooks/use-toast';
  */
 export const useHideToasterOnPathChange = () => {
   const location = useLocation();
+  const { dismiss } = useToast();
 
   useEffect(() => {
     // Dismiss all toasts when the path changes
-    toast.dismiss();
-  }, [location.pathname]);
+    dismiss();
+  }, [location.pathname, dismiss]);
 
   return null;
 };
