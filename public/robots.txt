@@ -5,10 +5,18 @@ Allow: /
 # Sitemaps
 Sitemap: https://resulient.ai/sitemap.xml
 
-# Prevent crawling of authentication pages
+# Prevent crawling of authentication and user account pages
 Disallow: /auth
 Disallow: /profile-edit
 Disallow: /profile-setup
+Disallow: /login
+Disallow: /register
+Disallow: /subscription-details
+Disallow: /subscription-success
+
+# Prevent crawling of admin areas
+Disallow: /blog/admin
+Disallow: /admin/
 
 # Allow crawling of main pages
 Allow: /
@@ -21,5 +29,9 @@ Allow: /legal
 Allow: /blog
 Allow: /blog/
 
-# Allow crawling of blog categories
+# Allow crawling of blog content
 Allow: /blog/category/
+Allow: /blog/category/interview-preparation
+Allow: /blog/category/job-search-strategy
+Allow: /blog/category/resume-tips
+Allow: /blog/category/career-development

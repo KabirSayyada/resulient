@@ -15,32 +15,37 @@ export default function BlogPost() {
     return <Navigate to="/blog" />;
   }
 
-  // SEO content
+  // SEO content with improved metadata
   const title = post ? `${post.title} | Resulient Blog` : 'Blog Post | Resulient';
-  const description = post?.seo_description || post?.excerpt || 'Read this article on the Resulient blog';
-  const keywords = post?.seo_keywords || 'resume, career, job search';
-  const ogImage = post?.featured_image || undefined;
+  const description = post?.seo_description || post?.excerpt || 'Read this informative article on the Resulient blog';
+  const keywords = post?.seo_keywords || post?.tags?.join(', ') || 'resume, career, job search, interview preparation';
+  const ogImage = post?.featured_image || 'https://resulient.ai/og-image.jpg';
   const canonicalUrl = `https://resulient.ai/blog/${slug}`;
+  const publishedDate = post?.published_at || '';
+  const modifiedDate = post?.updated_at || '';
   
   // Track page view with Google Analytics
   useEffect(() => {
-    if (post && typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'view_item', {
-        'event_category': 'Blog',
-        'event_label': post.title,
-        'item_id': post.id,
-        'item_name': post.title,
-        'item_category': post.category || 'Uncategorized',
-        'page_location': window.location.href,
-        'page_title': title
-      });
-      
-      // Track page view
-      window.gtag('event', 'page_view', {
-        page_title: title,
-        page_location: window.location.href,
-        page_path: `/blog/${slug}`
-      });
+    if (post && typeof window !== 'undefined') {
+      // Check if gtag is available
+      if (window.gtag) {
+        window.gtag('event', 'view_item', {
+          'event_category': 'Blog',
+          'event_label': post.title,
+          'item_id': post.id,
+          'item_name': post.title,
+          'item_category': post.category || 'Uncategorized',
+          'page_location': window.location.href,
+          'page_title': title
+        });
+        
+        // Track page view
+        window.gtag('event', 'page_view', {
+          page_title: title,
+          page_location: window.location.href,
+          page_path: `/blog/${slug}`
+        });
+      }
     }
   }, [post, slug, title]);
 
@@ -57,28 +62,33 @@ export default function BlogPost() {
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        {ogImage && <meta property="og:image" content={ogImage} />}
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:site_name" content="Resulient" />
         
         {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content={canonicalUrl} />
         <meta property="twitter:title" content={title} />
         <meta property="twitter:description" content={description} />
-        {ogImage && <meta property="twitter:image" content={ogImage} />}
+        <meta property="twitter:image" content={ogImage} />
         
         {/* Article specific metadata */}
-        {post && post.published_at && (
-          <meta property="article:published_time" content={post.published_at} />
+        {publishedDate && (
+          <meta property="article:published_time" content={publishedDate} />
         )}
-        {post && post.updated_at && (
-          <meta property="article:modified_time" content={post.updated_at} />
+        {modifiedDate && (
+          <meta property="article:modified_time" content={modifiedDate} />
         )}
         {post && post.category && (
           <meta property="article:section" content={post.category} />
         )}
-        {post && post.tags && post.tags.map((tag, index) => (
+        {post && post.tags && post.tags.map((tag: string, index: number) => (
           <meta key={index} property="article:tag" content={tag} />
         ))}
+        
+        {/* Additional SEO tags */}
+        <meta name="author" content={`${post?.author_first_name || ''} ${post?.author_last_name || ''}`} />
+        <meta name="robots" content="index, follow" />
       </Helmet>
 
       <BlogLayout>
