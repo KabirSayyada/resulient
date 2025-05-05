@@ -18,6 +18,7 @@ export interface BlogPost {
   author_first_name?: string | null;
   author_last_name?: string | null;
   author_avatar_url?: string | null;
+  reading_time?: number;
 }
 
 export interface BlogCategory {

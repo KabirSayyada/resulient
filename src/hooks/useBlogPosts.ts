@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BlogPost } from '@/types/blog';
 import { useToast } from '@/components/ui/use-toast';
+import { calculateReadingTime } from '@/utils/blogUtils';
 
 export function useBlogPosts() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -25,7 +26,13 @@ export function useBlogPosts() {
           throw error;
         }
         
-        setPosts(data as BlogPost[]);
+        // Calculate reading time for each post
+        const postsWithReadingTime = data.map(post => ({
+          ...post,
+          reading_time: calculateReadingTime(post.content)
+        })) as BlogPost[];
+        
+        setPosts(postsWithReadingTime);
       } catch (err) {
         console.error('Error fetching blog posts:', err);
         setError(err as Error);
@@ -71,7 +78,17 @@ export function useBlogPost(slug: string) {
           throw error;
         }
         
-        setPost(data as BlogPost);
+        if (data) {
+          // Calculate reading time
+          const postWithReadingTime = {
+            ...data,
+            reading_time: calculateReadingTime(data.content)
+          } as BlogPost;
+          
+          setPost(postWithReadingTime);
+        } else {
+          setPost(null);
+        }
       } catch (err) {
         console.error('Error fetching blog post:', err);
         setError(err as Error);
@@ -117,7 +134,13 @@ export function useCategoryPosts(categorySlug: string) {
           throw error;
         }
         
-        setPosts(data as BlogPost[]);
+        // Calculate reading time for each post
+        const postsWithReadingTime = data.map(post => ({
+          ...post,
+          reading_time: calculateReadingTime(post.content)
+        })) as BlogPost[];
+        
+        setPosts(postsWithReadingTime);
       } catch (err) {
         console.error('Error fetching category posts:', err);
         setError(err as Error);
