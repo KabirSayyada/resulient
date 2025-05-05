@@ -5,16 +5,10 @@
   height="32"
   viewBox="0 0 32 32"
   fill="none"
-  stroke="currentColor"
-  stroke-width="2"
-  stroke-linecap="round"
-  stroke-linejoin="round"
 >
-  <!-- Chain (broken) -->
-  <path d="M10,16 L4,16 M28,16 L22,16" stroke="#4F46E5" />
-  <path d="M16,10 L16,4 M16,28 L16,22" stroke="#4F46E5" />
-  <!-- Hammer head -->
-  <path d="M14,12 L20,18" stroke="#4F46E5" stroke-width="3" />
-  <!-- Hammer handle -->
-  <path d="M18,16 L24,10" stroke="#4F46E5" stroke-width="2" />
+  <!-- Favicon representing water/ocean waves -->
+  <rect width="32" height="32" rx="4" fill="#E5F3F8" />
+  <path d="M6 20C10 16 14 24 18 20C22 16 26 24 30 20" stroke="#0D99FF" stroke-width="2" stroke-linecap="round" />
+  <path d="M6 14C10 10 14 18 18 14C22 10 26 18 30 14" stroke="#0D99FF" stroke-width="2" stroke-linecap="round" />
+  <path d="M6 26C10 22 14 30 18 26C22 22 26 30 30 26" stroke="#0D99FF" stroke-width="2" stroke-linecap="round" />
 </svg>

@@ -1,3 +1,4 @@
+
 name: Deploy to GitHub Pages
 
 on:
@@ -20,6 +21,11 @@ jobs:
       - name: Copy index.html to 404.html
         run: cp dist/index.html dist/404.html
 
+      - name: Copy favicon files to dist
+        run: |
+          mkdir -p dist/lovable-uploads
+          cp public/lovable-uploads/* dist/lovable-uploads/ || true
+
       - name: Debug build output
         run: |
           echo "Listing contents of the root directory..."
@@ -33,3 +39,4 @@ jobs:
           github_token: ${{ secrets.GH_PAT }}
           publish_dir: ./dist
           cname: resulient.com
+
