@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { ScoreData } from "@/types/resume";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScoreBreakdown } from "./ScoreBreakdown";
-import { ChevronDown, ChevronUp, Calendar, ArrowLeft, ArrowRight, GitCompare } from "lucide-react";
+import { ChevronDown, ChevronUp, Calendar, ArrowLeft, ArrowRight, GitCompare, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -20,6 +19,8 @@ import {
   Legend 
 } from "recharts";
 import { toast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ScoreHistoryProps {
   scores: ScoreData[];
@@ -29,6 +30,7 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [compareOpen, setCompareOpen] = useState(false);
   const [selectedScores, setSelectedScores] = useState<ScoreData[]>([]);
+  const isMobile = useIsMobile();
 
   const toggleExpand = (index: number) => {
     setExpandedIndex(expandedIndex === index ? null : index);
@@ -92,6 +94,15 @@ export const ScoreHistory = ({ scores }: ScoreHistoryProps) => {
 
   return (
     <div className="space-y-8">
+      {isMobile && (
+        <Alert variant="default" className="bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-200 mb-4 border-blue-200 dark:border-blue-700">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            For the best experience viewing these charts, consider using a desktop device which provides a more detailed visualization.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <Card className="border-t-4 border-t-indigo-500 shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Your Progress Over Time</CardTitle>

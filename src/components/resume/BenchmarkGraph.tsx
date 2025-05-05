@@ -108,6 +108,11 @@ export const BenchmarkGraph = ({
       <div className="mt-4 text-center text-xs text-indigo-700 bg-indigo-50 px-3 py-1 rounded shadow-sm max-w-md w-full z-10 relative">
         <strong>Top {formatPercentile(percentile)}%</strong> — you're outperforming nearly <strong>{Math.round((100 - percentile) / 100 * numSimilar).toLocaleString()}</strong> others!
       </div>
+      {isMobile && (
+        <div className="mt-2 text-xs text-center text-blue-700 bg-blue-50 px-3 py-1 rounded shadow-sm max-w-md w-full">
+          Charts display better on desktop devices
+        </div>
+      )}
     </div>
   );
 };

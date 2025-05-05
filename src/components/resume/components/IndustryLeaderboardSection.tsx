@@ -6,6 +6,8 @@ import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { generateLeaderboardData } from "@/utils/leaderboardUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface IndustryLeaderboardSectionProps {
   scoreData: ScoreData;
@@ -24,6 +26,15 @@ export const IndustryLeaderboardSection = ({ scoreData }: IndustryLeaderboardSec
 
   return (
     <div className="space-y-6 mt-6">
+      {isMobile && (
+        <Alert variant="default" className="bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-200 mb-4 border-blue-200 dark:border-blue-700">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Charts display better on desktop devices. For the best experience viewing these charts, consider using a larger screen.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <Card className="p-4 sm:p-6 bg-white shadow-lg border-t-4 border-t-indigo-500">
         <h2 className="text-xl sm:text-2xl font-bold text-indigo-800 mb-4">Industry Performance Overview</h2>
         <div className="h-[300px] sm:h-[400px] w-full">
