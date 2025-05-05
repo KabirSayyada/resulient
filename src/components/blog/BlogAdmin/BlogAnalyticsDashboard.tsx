@@ -30,10 +30,12 @@ import {
   Clock, 
   MousePointerClick, 
   Share2, 
-  MailCheck 
+  MailCheck, 
+  AlertTriangle 
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function BlogAnalyticsDashboard() {
   // Date range state for filtering
@@ -54,6 +56,7 @@ export function BlogAnalyticsDashboard() {
     timeOnPageAvg,
     scrollDepthAvg,
     isLoading,
+    error
   } = useAdminBlogAnalytics({
     dateRange: {
       from: startOfDay(dateRange.from),
@@ -67,7 +70,8 @@ export function BlogAnalyticsDashboard() {
     : `${format(dateRange.from, 'PPP')} - ${format(dateRange.to, 'PPP')}`;
   
   // Group conversion events by type for the pie chart
-  const conversionsByType = conversionEvents.reduce<Record<string, number>>((acc, event) => {
+  const conversionsByType = (conversionEvents || []).reduce<Record<string, number>>((acc, event) => {
+    if (!event?.event_type) return acc;
     const type = event.event_type;
     acc[type] = (acc[type] || 0) + 1;
     return acc;
@@ -80,6 +84,19 @@ export function BlogAnalyticsDashboard() {
   
   // Colors for the pie chart
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+  
+  // Show error state if there was an error
+  if (error && !isLoading) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error loading analytics</AlertTitle>
+        <AlertDescription>
+          There was a problem fetching the analytics data. Please try again later.
+        </AlertDescription>
+      </Alert>
+    );
+  }
   
   return (
     <div className="space-y-6">
@@ -172,7 +189,7 @@ export function BlogAnalyticsDashboard() {
                     </div>
                   ))}
                 </div>
-              ) : popularPosts.length > 0 ? (
+              ) : popularPosts && popularPosts.length > 0 ? (
                 <div className="space-y-8">
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
@@ -184,11 +201,11 @@ export function BlogAnalyticsDashboard() {
                         <XAxis 
                           dataKey="title" 
                           tick={{ fontSize: 10 }}
-                          tickFormatter={(value) => value.length > 20 ? `${value.substring(0, 20)}...` : value}
+                          tickFormatter={(value) => value && value.length > 20 ? `${value.substring(0, 20)}...` : value}
                         />
                         <YAxis />
                         <Tooltip 
-                          formatter={(value, name) => [value, 'Views']}
+                          formatter={(value) => [value, 'Views']}
                           labelFormatter={(label) => `Post: ${label}`}
                         />
                         <Legend />
@@ -249,7 +266,7 @@ export function BlogAnalyticsDashboard() {
                     <Skeleton key={i} className="h-12 w-full" />
                   ))}
                 </div>
-              ) : conversionEvents.length > 0 ? (
+              ) : conversionEvents && conversionEvents.length > 0 ? (
                 <div className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="h-64">
@@ -319,19 +336,24 @@ export function BlogAnalyticsDashboard() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {conversionEvents.slice(0, 10).map((event) => (
-                          <TableRow key={event.id}>
-                            <TableCell className="font-medium">
-                              {event.event_type.replace('_', ' ')}
-                            </TableCell>
-                            <TableCell>
-                              {event.blog_analytics.page_path}
-                            </TableCell>
-                            <TableCell>
-                              {format(new Date(event.event_timestamp), 'PPp')}
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                        {conversionEvents.slice(0, 10).map((event) => {
+                          if (!event || !event.event_type || !event.blog_analytics) {
+                            return null;
+                          }
+                          return (
+                            <TableRow key={event.id}>
+                              <TableCell className="font-medium">
+                                {event.event_type.replace('_', ' ')}
+                              </TableCell>
+                              <TableCell>
+                                {event.blog_analytics.page_path}
+                              </TableCell>
+                              <TableCell>
+                                {format(new Date(event.event_timestamp), 'PPp')}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>

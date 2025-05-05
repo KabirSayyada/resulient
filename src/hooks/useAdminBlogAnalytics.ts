@@ -57,10 +57,11 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
         
         if (viewsError) throw viewsError;
         
-        // Fetch unique visitors - corrected the approach to get count of distinct visitor IDs
+        // Fetch unique visitors - use count of distinct visitor_ids
         let uniqueVisitorsQuery = supabase
           .from('blog_analytics')
-          .select('visitor_id', { count: 'exact' });
+          .select('visitor_id', { count: 'exact' })
+          .not('visitor_id', 'is', null);
           
         if (fromDate && toDate) {
           uniqueVisitorsQuery = uniqueVisitorsQuery.gte('visit_timestamp', fromDate).lte('visit_timestamp', toDate);
@@ -70,58 +71,54 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
           uniqueVisitorsQuery = uniqueVisitorsQuery.eq('post_id', filters.postId);
         }
         
-        const { count: visitorCount, error: uniqueError } = await uniqueVisitorsQuery;
+        // Count distinct visitor IDs (this query gets all records, but we'll count unique IDs in JS)
+        const { data: visitorData, error: uniqueError } = await uniqueVisitorsQuery;
         
         if (uniqueError) throw uniqueError;
         
+        // Count unique visitor IDs
+        const uniqueVisitorIds = new Set();
+        visitorData?.forEach(record => {
+          if (record.visitor_id) {
+            uniqueVisitorIds.add(record.visitor_id);
+          }
+        });
+        
         // Fetch popular posts
-        const { data: popularPostsData, error: postsError } = await supabase
-          .from('blog_analytics')
+        const { data: postsData, error: postsError } = await supabase
+          .from('blog_posts')
           .select(`
-            post_id,
-            page_path,
-            published_blog_posts:post_id(
-              id,
-              title,
-              slug,
-              category
-            )
+            id,
+            title,
+            slug,
+            category
           `)
-          .not('post_id', 'is', null);
+          .order('created_at', { ascending: false });
         
         if (postsError) throw postsError;
         
-        // Process and count views per post
-        const postCounts: Record<string, { 
-          count: number; 
-          title: string; 
-          slug: string;
-          category: string;
-        }> = {};
-        
-        popularPostsData?.forEach(item => {
-          if (!item.post_id || !item.published_blog_posts) return;
-          
-          const postId = item.post_id;
-          const post = item.published_blog_posts as any;
-          
-          if (!postCounts[postId]) {
-            postCounts[postId] = { 
-              count: 0, 
-              title: post.title || 'Unknown',
-              slug: post.slug || '',
-              category: post.category || 'Uncategorized'
+        // Get analytics data for each post
+        const popularPostsWithCounts = await Promise.all(
+          (postsData || []).map(async (post) => {
+            const { count, error } = await supabase
+              .from('blog_analytics')
+              .select('*', { count: 'exact' })
+              .eq('post_id', post.id);
+              
+            return {
+              id: post.id,
+              title: post.title,
+              slug: post.slug,
+              category: post.category || 'Uncategorized',
+              count: count || 0
             };
-          }
-          
-          postCounts[postId].count++;
-        });
+          })
+        );
         
-        // Convert to array and sort
-        const popularPostsArr = Object.entries(postCounts).map(([id, data]) => ({
-          id,
-          ...data
-        })).sort((a, b) => b.count - a.count).slice(0, 10);
+        // Sort posts by view count
+        const sortedPosts = popularPostsWithCounts
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10);
         
         // Fetch average time on page and scroll depth
         const { data: interactionsData, error: interactionsError } = await supabase
@@ -175,8 +172,8 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
         
         // Update state with all fetched data
         setPageViews(totalViews || 0);
-        setUniqueVisitors(visitorCount || 0);
-        setPopularPosts(popularPostsArr || []);
+        setUniqueVisitors(uniqueVisitorIds.size || 0);
+        setPopularPosts(sortedPosts || []);
         setTimeOnPageAvg(avgTime);
         setScrollDepthAvg(avgScroll);
         setConversionEvents(eventsData || []);
