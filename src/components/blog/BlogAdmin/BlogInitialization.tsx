@@ -9,6 +9,8 @@ import { createJobSearchPost } from "@/utils/createJobSearchPost";
 import { createResumeATSTipsPost, createResumeCommonMistakesPost, createAllResumeTipsPosts } from "@/utils/createResumeTipsPosts";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CreateNewBlogPosts } from "@/components/blog/CreateNewBlogPosts";
 
 export function BlogInitialization() {
   const [isLoadingDefault, setIsLoadingDefault] = useState(false);
@@ -311,109 +313,125 @@ export function BlogInitialization() {
       <CardHeader>
         <CardTitle>Blog Management</CardTitle>
         <CardDescription>
-          Initialize your blog or create individual content posts
+          Create and organize your blog content
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <p className="text-sm text-muted-foreground mb-2">
-            Create initial blog categories and structure
-          </p>
-          <Button 
-            onClick={handleInitializeBlog} 
-            disabled={isLoadingDefault}
-            className="w-full"
-          >
-            {isLoadingDefault ? "Initializing..." : "Initialize Blog Categories"}
-          </Button>
-        </div>
-        
-        <div>
-          <p className="text-sm text-muted-foreground mb-2">
-            Create multiple blog posts at once
-          </p>
-          <Button 
-            onClick={handleCreateAllPosts} 
-            disabled={isLoadingAll || isLoadingAts || isLoadingCareer || isLoadingJobSearch || isLoadingResumeTips1 || isLoadingResumeTips2 || isLoadingAllResumeTips}
-            variant="secondary"
-            className="w-full"
-          >
-            {isLoadingAll ? "Creating..." : "Create All Posts"}
-          </Button>
-        </div>
-        
-        <div>
-          <p className="text-sm text-muted-foreground mb-2">
-            Create resume optimization posts
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <Button 
-              onClick={handleCreateResumeATSTipsPost} 
-              disabled={isLoadingResumeTips1 || isLoadingAll || isLoadingAllResumeTips}
-              variant="outline"
-              className="w-full"
-            >
-              {isLoadingResumeTips1 ? "Creating..." : "Create ATS Tips Post"}
-            </Button>
-            <Button 
-              onClick={handleCreateResumeCommonMistakesPost} 
-              disabled={isLoadingResumeTips2 || isLoadingAll || isLoadingAllResumeTips}
-              variant="outline"
-              className="w-full"
-            >
-              {isLoadingResumeTips2 ? "Creating..." : "Create Resume Mistakes Post"}
-            </Button>
-          </div>
-          <div className="mt-2">
-            <Button 
-              onClick={handleCreateAllResumeTipsPosts} 
-              disabled={isLoadingAllResumeTips || isLoadingResumeTips1 || isLoadingResumeTips2 || isLoadingAll}
-              variant="outline"
-              className="w-full"
-            >
-              {isLoadingAllResumeTips ? "Creating..." : "Create All Resume Tips Posts"}
-            </Button>
-          </div>
-        </div>
-
-        <div>
-          <p className="text-sm text-muted-foreground mb-2">
-            Create career-related posts
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <Button 
-              onClick={handleCreateAtsBlogPost} 
-              disabled={isLoadingAts || isLoadingAll}
-              variant="outline"
-              className="w-full"
-            >
-              {isLoadingAts ? "Creating..." : "Create ATS Post"}
-            </Button>
+        <Tabs defaultValue="new-content">
+          <TabsList className="mb-4 w-full">
+            <TabsTrigger value="new-content">New Content</TabsTrigger>
+            <TabsTrigger value="existing">Basic Posts</TabsTrigger>
+            <TabsTrigger value="initialize">Categories</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="new-content">
+            <CreateNewBlogPosts />
+          </TabsContent>
+          
+          <TabsContent value="existing">
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">
+                Create multiple blog posts at once
+              </p>
+              <Button 
+                onClick={handleCreateAllPosts} 
+                disabled={isLoadingAll || isLoadingAts || isLoadingCareer || isLoadingJobSearch || isLoadingResumeTips1 || isLoadingResumeTips2 || isLoadingAllResumeTips}
+                variant="secondary"
+                className="w-full"
+              >
+                {isLoadingAll ? "Creating..." : "Create All Basic Posts"}
+              </Button>
+            </div>
             
-            <Button 
-              onClick={handleCreateCareerBlogPost} 
-              disabled={isLoadingCareer || isLoadingAll}
-              variant="outline"
-              className="w-full"
-            >
-              {isLoadingCareer ? "Creating..." : "Create Career Post"}
-            </Button>
-          </div>
-          <div className="mt-2">
-            <Button 
-              onClick={handleCreateJobSearchPost} 
-              disabled={isLoadingJobSearch || isLoadingAll}
-              variant="outline"
-              className="w-full"
-            >
-              {isLoadingJobSearch ? "Creating..." : "Create Job Search Post"}
-            </Button>
-          </div>
-        </div>
+            <div className="mt-4">
+              <p className="text-sm text-muted-foreground mb-2">
+                Create resume optimization posts
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <Button 
+                  onClick={handleCreateResumeATSTipsPost} 
+                  disabled={isLoadingResumeTips1 || isLoadingAll || isLoadingAllResumeTips}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isLoadingResumeTips1 ? "Creating..." : "Create ATS Tips Post"}
+                </Button>
+                <Button 
+                  onClick={handleCreateResumeCommonMistakesPost} 
+                  disabled={isLoadingResumeTips2 || isLoadingAll || isLoadingAllResumeTips}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isLoadingResumeTips2 ? "Creating..." : "Create Resume Mistakes Post"}
+                </Button>
+              </div>
+              <div className="mt-2">
+                <Button 
+                  onClick={handleCreateAllResumeTipsPosts} 
+                  disabled={isLoadingAllResumeTips || isLoadingResumeTips1 || isLoadingResumeTips2 || isLoadingAll}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isLoadingAllResumeTips ? "Creating..." : "Create All Resume Tips Posts"}
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <p className="text-sm text-muted-foreground mb-2">
+                Create career-related posts
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <Button 
+                  onClick={handleCreateAtsBlogPost} 
+                  disabled={isLoadingAts || isLoadingAll}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isLoadingAts ? "Creating..." : "Create ATS Post"}
+                </Button>
+                
+                <Button 
+                  onClick={handleCreateCareerBlogPost} 
+                  disabled={isLoadingCareer || isLoadingAll}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isLoadingCareer ? "Creating..." : "Create Career Post"}
+                </Button>
+              </div>
+              <div className="mt-2">
+                <Button 
+                  onClick={handleCreateJobSearchPost} 
+                  disabled={isLoadingJobSearch || isLoadingAll}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isLoadingJobSearch ? "Creating..." : "Create Job Search Post"}
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="initialize">
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">
+                Create initial blog categories and structure
+              </p>
+              <Button 
+                onClick={handleInitializeBlog} 
+                disabled={isLoadingDefault}
+                className="w-full"
+              >
+                {isLoadingDefault ? "Initializing..." : "Initialize Blog Categories"}
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
       <CardFooter>
         <p className="text-xs text-muted-foreground">
-          Note: Initializing will not overwrite existing data
+          Note: Creating posts will not overwrite existing content with the same title
         </p>
       </CardFooter>
     </Card>

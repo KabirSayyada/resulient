@@ -13,10 +13,13 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
+import { createMultipleBlogPosts } from '@/utils/blogPostCreator';
 
 export function InitializeBlogPosts() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingAts, setIsLoadingAts] = useState(false);
+  const [isLoadingNew, setIsLoadingNew] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
 
   const handleInitialize = async () => {
@@ -64,7 +67,7 @@ export function InitializeBlogPosts() {
     }
 
     try {
-      setIsLoading(true);
+      setIsLoadingAts(true);
       
       const success = await createAtsBlogPost(user.id);
       
@@ -72,6 +75,11 @@ export function InitializeBlogPosts() {
         toast({
           title: "Success!",
           description: "The ATS blog post has been created and published successfully.",
+        });
+      } else {
+        toast({
+          title: "Note",
+          description: "The ATS blog post already exists.",
         });
       }
     } catch (error) {
@@ -82,7 +90,45 @@ export function InitializeBlogPosts() {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsLoadingAts(false);
+    }
+  };
+
+  const handleCreateNewPosts = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to create blog posts.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsLoadingNew(true);
+      
+      const createdCount = await createMultipleBlogPosts(user.id);
+      
+      if (createdCount > 0) {
+        toast({
+          title: "Success!",
+          description: `Created ${createdCount} high-quality blog posts.`,
+        });
+      } else {
+        toast({
+          title: "Note",
+          description: "No new blog posts were created. They may already exist.",
+        });
+      }
+    } catch (error) {
+      console.error("Error creating new blog posts:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create new blog posts. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingNew(false);
     }
   };
 
@@ -102,17 +148,27 @@ export function InitializeBlogPosts() {
         <ul className="list-disc pl-5 mb-4 space-y-1 text-sm text-muted-foreground">
           <li>How to Optimize Your Resume for ATS Systems in 2025</li>
           <li>10 Resume Mistakes That Are Costing You Job Interviews</li>
-          <li>How to Write a Resume That Stands Out in 2025</li>
-          <li>And more...</li>
+          <li>Career Development and Professional Growth Guidance</li>
+          <li>Interview Preparation and STAR Method Techniques</li>
         </ul>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2">
         <Button 
-          onClick={handleCreateAtsBlogPost} 
-          disabled={isLoading}
+          onClick={handleCreateNewPosts} 
+          disabled={isLoadingNew}
           className="w-full"
         >
-          {isLoading 
+          {isLoadingNew 
+            ? "Creating Professional Blog Posts..." 
+            : "Create High-Quality Blog Content"}
+        </Button>
+        <Button 
+          onClick={handleCreateAtsBlogPost} 
+          disabled={isLoadingAts}
+          className="w-full"
+          variant="outline"
+        >
+          {isLoadingAts 
             ? "Creating ATS Blog Post..." 
             : "Create ATS Systems Blog Post"}
         </Button>
@@ -126,7 +182,7 @@ export function InitializeBlogPosts() {
             ? "Creating Posts..." 
             : isComplete 
               ? "Posts Created" 
-              : "Create All Blog Posts"}
+              : "Create Basic Blog Posts"}
         </Button>
       </CardFooter>
     </Card>
