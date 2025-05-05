@@ -36,23 +36,23 @@ const AuthPage = () => {
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-primary dark:text-primary-foreground mb-2 mt-2">Welcome Back!</h2>
           <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
-            Join <span className="text-fuchsia-700 dark:text-fuchsia-400 font-bold">Resulient</span> and unlock the superpower of a resume that stands out!<br className="hidden sm:block" />
+            Join <span className="text-fuchsia-700 dark:text-fuchsia-400 font-bold">Resulient</span> and enhance your resume quality!<br className="hidden sm:block" />
             With Resulient, you'll:
           </p>
           <ul className="mt-3 mb-0 space-y-1 text-left text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 font-medium ml-4 sm:ml-6">
-            <li>• Discover how your resume measures up, instantly</li>
-            <li>• Get tailored suggestions to beat any ATS or recruiter</li>
-            <li>• Access your resume progress and scoring history</li>
+            <li>• Get instant feedback on your resume quality</li>
+            <li>• Receive personalized recommendations to improve visibility</li>
+            <li>• Track your resume improvements over time</li>
           </ul>
         </div>
         <AuthForm />
         <div className="mt-8 text-xs text-center text-gray-400 dark:text-gray-500">
           By signing up, you agree to our{" "}
-          <Link to="/terms-of-service" className="text-primary hover:underline">
+          <Link to="/terms" className="text-primary hover:underline">
             Terms of Service
           </Link>
           ,{" "}
-          <Link to="/privacy-policy" className="text-primary hover:underline">
+          <Link to="/privacy" className="text-primary hover:underline">
             Privacy Policy
           </Link>
           , and{" "}
