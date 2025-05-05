@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, LockKeyhole } from "lucide-react";
+import { Loader2, Mail, LockKeyhole, AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type Mode = "login" | "signup";
 
@@ -13,11 +14,13 @@ export function AuthForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setError(null);
 
     try {
       if (mode === "login") {
@@ -30,6 +33,7 @@ export function AuthForm() {
         toast({ title: "Sign up successful", description: "Check your inbox to confirm your email." });
       }
     } catch (error: any) {
+      setError(error?.message || "Authentication failed. Please try again.");
       toast({
         title: "Error",
         description: error?.message || "Authentication failed.",
@@ -42,8 +46,15 @@ export function AuthForm() {
 
   return (
     <form className="space-y-5" onSubmit={handleSubmit} autoComplete="on">
+      {error && (
+        <Alert variant="destructive" className="bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-300 border border-red-200 dark:border-red-800">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
       <div>
-        <label className="block mb-1 font-semibold text-gray-700" htmlFor="email">
+        <label className="block mb-1 font-semibold text-gray-700 dark:text-gray-300 text-sm" htmlFor="email">
           Email
         </label>
         <div className="relative">
@@ -62,7 +73,7 @@ export function AuthForm() {
         </div>
       </div>
       <div>
-        <label className="block mb-1 font-semibold text-gray-700" htmlFor="password">
+        <label className="block mb-1 font-semibold text-gray-700 dark:text-gray-300 text-sm" htmlFor="password">
           Password
         </label>
         <div className="relative">
@@ -80,6 +91,9 @@ export function AuthForm() {
             disabled={submitting}
           />
         </div>
+        <p className="text-xs text-gray-500 mt-1">
+          {mode === "signup" ? "Minimum 6 characters required" : "Enter your password"}
+        </p>
       </div>
       <Button
         type="submit"
@@ -92,7 +106,7 @@ export function AuthForm() {
       <div className="text-center mt-4">
         <button
           type="button"
-          className="text-primary font-semibold underline underline-offset-4"
+          className="text-primary font-semibold hover:underline underline-offset-4"
           onClick={() => setMode(mode === "login" ? "signup" : "login")}
           disabled={submitting}
         >

@@ -34,6 +34,7 @@ export default function Blog() {
         <meta property="og:description" content="Read the latest articles about resume optimization, job search strategies, career advice and industry insights from Resulient's experts." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://resulient.ai/blog" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Helmet>
 
       <BlogLayout title="Latest Articles">
@@ -50,7 +51,7 @@ export default function Blog() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[...Array(4)].map((_, index) => (
               <div key={index} className="space-y-3">
                 <Skeleton className="h-48 w-full" />
@@ -62,7 +63,7 @@ export default function Blog() {
             ))}
           </div>
         ) : filteredPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredPosts.map((post) => (
               <BlogCard key={post.id} post={post} />
             ))}
@@ -72,7 +73,7 @@ export default function Blog() {
             <div className="flex flex-col items-center justify-center text-muted-foreground">
               <FileText className="h-12 w-12 mb-4 opacity-50" />
               <h3 className="text-xl font-semibold mb-2">No articles found</h3>
-              <p className="text-muted-foreground mb-4 max-w-md">
+              <p className="text-muted-foreground mb-4 max-w-md mx-auto px-4">
                 {searchQuery 
                   ? "No articles match your search criteria. Try different keywords."
                   : "We're preparing some great content for you. Check back soon for new articles!"}

@@ -1,58 +1,66 @@
 
-import { Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import Index from "@/pages/Index";
-import Auth from "@/pages/Auth";
-import NotFound from "@/pages/NotFound";
-import ResumeScoring from "@/pages/ResumeScoring";
-import ProfileSetup from "@/pages/ProfileSetup";
-import ProfileEdit from "@/pages/ProfileEdit";
-import IndustryLeaderboard from "@/pages/IndustryLeaderboard";
-import TermsOfService from "@/pages/TermsOfService";
-import PrivacyPolicy from "@/pages/PrivacyPolicy";
-import RefundPolicy from "@/pages/RefundPolicy";
-import Legal from "@/pages/Legal";
-import Pricing from "@/pages/Pricing";
-import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
-import SubscriptionDetails from "@/pages/SubscriptionDetails";
-// Blog imports
-import Blog from "@/pages/Blog";
-import BlogPost from "@/pages/BlogPost";
-import BlogCategory from "@/pages/BlogCategory";
-import BlogAdmin from "@/pages/BlogAdmin";
-import { Sitemap } from "@/components/blog/Sitemap";
+import { lazy, Suspense, useEffect } from "react";
+import { useHideToasterOnPathChange } from "@/hooks/useHideToasterOnPathChange";
+import { Loader2 } from "lucide-react";
+
+// Import pages
+const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth"));
+const ResumeScoring = lazy(() => import("./pages/ResumeScoring"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogCategory = lazy(() => import("./pages/BlogCategory"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const BlogAdmin = lazy(() => import("./pages/BlogAdmin"));
+const Legal = lazy(() => import("./pages/Legal"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 function App() {
+  const location = useLocation();
+  
+  // Track page views
+  useEffect(() => {
+    if (window.gtag) {
+      window.gtag("config", "G-ZB5NWGMDTS", {
+        page_path: location.pathname + location.search,
+      });
+    }
+  }, [location]);
+  
+  useHideToasterOnPathChange();
+
   return (
-    <ThemeProvider>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/profile-setup" element={<ProfileSetup />} />
-        <Route path="/profile-edit" element={<ProfileEdit />} />
-        <Route path="/resume-scoring" element={<ResumeScoring />} />
-        <Route path="/industry-leaderboard" element={<IndustryLeaderboard />} />
-        <Route path="/terms" element={<TermsOfService />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/refund-policy" element={<RefundPolicy />} />
-        <Route path="/legal" element={<Legal />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/subscription-success" element={<SubscriptionSuccess />} />
-        <Route path="/subscription" element={<SubscriptionDetails />} />
-        {/* Blog routes */}
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/:slug" element={<BlogPost />} />
-        <Route path="/blog/category/:category" element={<BlogCategory />} />
-        <Route path="/blog/admin" element={<BlogAdmin />} />
-        {/* SEO routes */}
-        <Route path="/sitemap.xml" element={<Sitemap />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+    <>
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center min-h-screen">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        }
+      >
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/resume-scoring" element={<ResumeScoring />} />
+          
+          {/* Blog routes */}
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/category/:categorySlug" element={<BlogCategory />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/blog/admin" element={<BlogAdmin />} />
+          
+          {/* Legal pages */}
+          <Route path="/terms-of-service" element={<Legal key="terms" />} />
+          <Route path="/privacy-policy" element={<Legal key="privacy" />} />
+          <Route path="/refund-policy" element={<Legal key="refund" />} />
+          
+          {/* 404 page */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
       <Toaster />
-      <Sonner />
-    </ThemeProvider>
+    </>
   );
 }
 

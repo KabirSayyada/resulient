@@ -59,16 +59,16 @@ export default function BlogPost() {
       <BlogLayout>
         {isLoading ? (
           <div className="space-y-4">
-            <Skeleton className="h-8 w-3/4" />
-            <div className="flex items-center space-x-4">
+            <Skeleton className="h-8 w-full sm:w-3/4" />
+            <div className="flex flex-wrap items-center gap-4">
               <Skeleton className="h-10 w-10 rounded-full" />
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 w-32" />
             </div>
-            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-48 sm:h-64 w-full" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-full sm:w-5/6" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-full" />
           </div>
