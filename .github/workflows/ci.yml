@@ -21,9 +21,6 @@ jobs:
       - name: Copy index.html to 404.html
         run: cp dist/index.html dist/404.html
 
-      - name: Copy sitemap.xml to dist directory
-        run: cp sitemap.xml dist/
-
       - name: Copy favicon files to dist
         run: |
           mkdir -p dist/lovable-uploads
@@ -42,3 +39,4 @@ jobs:
           github_token: ${{ secrets.GH_PAT }}
           publish_dir: ./dist
           cname: resulient.com
+

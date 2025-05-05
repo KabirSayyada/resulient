@@ -21,7 +21,6 @@ export function Sitemap() {
   // Set XML Content-Type and serve the XML content
   useEffect(() => {
     if (sitemap) {
-      // Set content type using meta tag
       document.querySelector('meta[http-equiv="Content-Type"]')?.remove();
       const meta = document.createElement('meta');
       meta.setAttribute('http-equiv', 'Content-Type');
