@@ -36,6 +36,7 @@ export function BlogInitialization() {
   const handleCreateAtsBlogPost = async () => {
     setIsLoadingAts(true);
     try {
+      // Pass an empty string as a fallback user ID if needed
       const result = await createAtsBlogPost();
       if (result) {
         toast({
@@ -63,6 +64,7 @@ export function BlogInitialization() {
   const handleCreateCareerBlogPost = async () => {
     setIsLoadingCareer(true);
     try {
+      // Since createCareerBlogPost doesn't require a user_id parameter based on its implementation
       const result = await createCareerBlogPost();
       if (result) {
         toast({
