@@ -19,8 +19,8 @@ export default function BlogPost() {
   const title = post ? `${post.title} | Resulient Blog` : 'Blog Post | Resulient';
   const description = post?.seo_description || post?.excerpt || 'Read this informative article on the Resulient blog';
   const keywords = post?.seo_keywords || post?.tags?.join(', ') || 'resume, career, job search, interview preparation';
-  const ogImage = post?.featured_image || 'https://resulient.ai/og-image.jpg';
-  const canonicalUrl = `https://resulient.ai/blog/${slug}`;
+  const ogImage = post?.featured_image || 'https://resulient.com/og-image.jpg';
+  const canonicalUrl = `https://resulient.com/blog/${slug}`;
   const publishedDate = post?.published_at || '';
   const modifiedDate = post?.updated_at || '';
   

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const generateSitemap = async () => {
   try {
     // Base URL of the website
-    const baseUrl = 'https://resulient.ai';
+    const baseUrl = 'https://resulient.com';
     
     // Current date for lastmod
     const currentDate = new Date().toISOString().split('T')[0];

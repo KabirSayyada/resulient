@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Sitemaps
-Sitemap: https://resulient.ai/sitemap.xml
+Sitemap: https://resulient.com/sitemap.xml
 
 # Prevent crawling of authentication and user account pages
 Disallow: /auth
