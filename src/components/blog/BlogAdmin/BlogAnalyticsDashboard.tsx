@@ -70,8 +70,8 @@ export function BlogAnalyticsDashboard() {
       from: startOfDay(dateRange.from),
       to: endOfDay(dateRange.to),
     },
-    // Add refetchTrigger as a dependency to force re-fetch
-    _refetchKey: refetchTrigger,
+    // Use refetchTrigger instead of _refetchKey to force re-fetch
+    refetchTrigger: refetchTrigger,
   });
   
   // Format date range for display

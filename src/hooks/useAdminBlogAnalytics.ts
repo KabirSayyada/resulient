@@ -12,6 +12,7 @@ type AnalyticsFilters = {
   dateRange?: DateRange;
   postId?: string;
   category?: string;
+  refetchTrigger?: number; // Add this property to the type
 };
 
 export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
