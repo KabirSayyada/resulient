@@ -57,12 +57,11 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
         
         if (viewsError) throw viewsError;
         
-        // Fetch unique visitors
+        // Fetch unique visitors - corrected the approach to get count of distinct visitor IDs
         let uniqueVisitorsQuery = supabase
           .from('blog_analytics')
-          .select('visitor_id', { count: 'exact', head: true });
+          .select('visitor_id', { count: 'exact' });
           
-        // Use a separate query to filter and count distinct visitor IDs
         if (fromDate && toDate) {
           uniqueVisitorsQuery = uniqueVisitorsQuery.gte('visit_timestamp', fromDate).lte('visit_timestamp', toDate);
         }
@@ -71,27 +70,28 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
           uniqueVisitorsQuery = uniqueVisitorsQuery.eq('post_id', filters.postId);
         }
         
-        const { count: totalUnique, error: uniqueError } = await uniqueVisitorsQuery;
+        const { count: visitorCount, error: uniqueError } = await uniqueVisitorsQuery;
         
         if (uniqueError) throw uniqueError;
         
         // Fetch popular posts
-        const { data: postsData, error: postsError } = await supabase
+        const { data: popularPostsData, error: postsError } = await supabase
           .from('blog_analytics')
           .select(`
             post_id,
-            published_blog_posts!inner (
+            page_path,
+            published_blog_posts:post_id(
               id,
               title,
               slug,
               category
             )
           `)
-          .filter('post_id', 'not.is', null);
-          
+          .not('post_id', 'is', null);
+        
         if (postsError) throw postsError;
         
-        // Count views per post manually
+        // Process and count views per post
         const postCounts: Record<string, { 
           count: number; 
           title: string; 
@@ -99,16 +99,18 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
           category: string;
         }> = {};
         
-        postsData.forEach(item => {
-          const postId = item.post_id as string;
+        popularPostsData?.forEach(item => {
+          if (!item.post_id || !item.published_blog_posts) return;
+          
+          const postId = item.post_id;
           const post = item.published_blog_posts as any;
           
           if (!postCounts[postId]) {
             postCounts[postId] = { 
               count: 0, 
-              title: post.title,
-              slug: post.slug,
-              category: post.category
+              title: post.title || 'Unknown',
+              slug: post.slug || '',
+              category: post.category || 'Uncategorized'
             };
           }
           
@@ -116,7 +118,7 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
         });
         
         // Convert to array and sort
-        const popularPostsData = Object.entries(postCounts).map(([id, data]) => ({
+        const popularPostsArr = Object.entries(postCounts).map(([id, data]) => ({
           id,
           ...data
         })).sort((a, b) => b.count - a.count).slice(0, 10);
@@ -126,25 +128,30 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
           .from('blog_user_interactions')
           .select(`
             time_on_page,
-            scroll_depth,
-            analytics_id,
-            blog_analytics!inner (id)
+            scroll_depth
           `);
         
         if (interactionsError) throw interactionsError;
         
-        // Calculate averages
+        // Calculate averages safely
         let totalTime = 0;
         let totalScroll = 0;
-        let count = interactionsData.length;
+        let timeCount = 0;
+        let scrollCount = 0;
         
-        interactionsData.forEach(interaction => {
-          if (interaction.time_on_page) totalTime += interaction.time_on_page;
-          if (interaction.scroll_depth) totalScroll += interaction.scroll_depth;
+        interactionsData?.forEach(interaction => {
+          if (interaction.time_on_page) {
+            totalTime += interaction.time_on_page;
+            timeCount++;
+          }
+          if (interaction.scroll_depth) {
+            totalScroll += interaction.scroll_depth;
+            scrollCount++;
+          }
         });
         
-        const avgTime = count > 0 ? Math.round(totalTime / count) : 0;
-        const avgScroll = count > 0 ? Math.round(totalScroll / count) : 0;
+        const avgTime = timeCount > 0 ? Math.round(totalTime / timeCount) : 0;
+        const avgScroll = scrollCount > 0 ? Math.round(totalScroll / scrollCount) : 0;
         
         // Fetch conversion events
         const { data: eventsData, error: eventsError } = await supabase
@@ -155,10 +162,10 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
             event_timestamp,
             event_data,
             analytics_id,
-            blog_analytics!inner (
+            blog_analytics:analytics_id(
               id,
-              post_id,
-              page_path
+              page_path,
+              post_id
             )
           `)
           .order('event_timestamp', { ascending: false })
@@ -168,8 +175,8 @@ export function useAdminBlogAnalytics(filters: AnalyticsFilters = {}) {
         
         // Update state with all fetched data
         setPageViews(totalViews || 0);
-        setUniqueVisitors(totalUnique || 0);
-        setPopularPosts(popularPostsData || []);
+        setUniqueVisitors(visitorCount || 0);
+        setPopularPosts(popularPostsArr || []);
         setTimeOnPageAvg(avgTime);
         setScrollDepthAvg(avgScroll);
         setConversionEvents(eventsData || []);
