@@ -191,19 +191,19 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
   };
 
   return (
-    <div className="bg-gradient-to-tr from-yellow-50 via-fuchsia-50 to-indigo-50 border border-fuchsia-100 rounded-2xl shadow-lg p-6 transition-all group hover:shadow-xl">
-      <label className="block text-sm font-semibold text-fuchsia-700 mb-2 group-hover:text-indigo-600 transition-all">
+    <div className="bg-gradient-to-tr from-yellow-50 via-fuchsia-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border border-fuchsia-100 dark:border-gray-700 rounded-2xl shadow-lg p-6 transition-all group hover:shadow-xl">
+      <label className="block text-sm font-semibold text-fuchsia-700 dark:text-fuchsia-400 mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-all">
         Your Resume
       </label>
       {/* PASTED resume tip */}
       <div className="mb-3">
-        <div className="text-xs text-fuchsia-700 bg-fuchsia-50 border border-fuchsia-200 rounded px-3 py-2 mb-0">
+        <div className="text-xs text-fuchsia-700 dark:text-fuchsia-400 bg-fuchsia-50 dark:bg-gray-800 border border-fuchsia-200 dark:border-gray-700 rounded px-3 py-2 mb-0">
           <span className="font-semibold">Tip:</span> If you paste your resume, add extra blank lines (press Enter twice) between sections like <b>EDUCATION</b>, <b>EXPERIENCE</b>, etc. This helps group information for best analysis.
         </div>
       </div>
       <Textarea
         placeholder="Paste your current resume content here or upload a file..."
-        className="min-h-[200px] font-mono text-sm bg-white/80 border border-indigo-100 rounded-lg shadow-inner focus:ring-2 focus:ring-fuchsia-300 focus:border-indigo-500 transition-all"
+        className="min-h-[200px] font-mono text-sm bg-white/80 dark:bg-gray-800 border border-indigo-100 dark:border-gray-700 rounded-lg shadow-inner focus:ring-2 focus:ring-fuchsia-300 dark:focus:ring-fuchsia-700 focus:border-indigo-500 dark:focus:border-indigo-700 transition-all text-gray-800 dark:text-gray-200"
         value={inputMode === "uploaded" ? "" : resumeContent}
         onChange={handleTextareaChange}
         onFocus={handleTextareaFocus}
@@ -211,7 +211,7 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
       />
 
       <div className="mt-4 flex items-center gap-4 flex-wrap">
-        <label className="flex items-center px-4 py-2 bg-gradient-to-br from-indigo-100 via-fuchsia-50 to-yellow-50 text-indigo-600 rounded-md shadow cursor-pointer hover:bg-fuchsia-100 border border-fuchsia-200">
+        <label className="flex items-center px-4 py-2 bg-gradient-to-br from-indigo-100 via-fuchsia-50 to-yellow-50 dark:from-indigo-900 dark:via-fuchsia-900 dark:to-gray-800 text-indigo-600 dark:text-indigo-300 rounded-md shadow cursor-pointer hover:bg-fuchsia-100 dark:hover:bg-gray-700 border border-fuchsia-200 dark:border-gray-600">
           <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M16 16v6H8v-6m8 0a4 4 0 10-8 0m8 0V8a4 4 0 10-8 0v8"></path></svg>
           <span>Upload Resume</span>
           <input
@@ -222,16 +222,16 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
           />
         </label>
         {uploadStatus && (
-          <span className="ml-1 text-sm text-gray-600">{uploadStatus}</span>
+          <span className="ml-1 text-sm text-gray-600 dark:text-gray-400">{uploadStatus}</span>
         )}
-        <div className="text-xs text-gray-500 ml-1">
+        <div className="text-xs text-gray-500 dark:text-gray-400 ml-1">
           Supported formats: PDF, TXT
         </div>
         {/* Show a visual indicator if a resume was uploaded and parsed */}
         {showUploadSuccess && (
-          <span className="inline-flex items-center px-3 py-1 ml-2 rounded-full bg-green-100 border border-green-300 text-green-800 text-xs font-semibold">
+          <span className="inline-flex items-center px-3 py-1 ml-2 rounded-full bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700 text-green-800 dark:text-green-200 text-xs font-semibold">
             <svg
-              className="h-4 w-4 mr-1 text-green-500"
+              className="h-4 w-4 mr-1 text-green-500 dark:text-green-400"
               viewBox="0 0 20 20"
               fill="currentColor"
               aria-hidden="true"
@@ -244,7 +244,7 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
             </svg>
             Resume uploaded and parsed successfully!
             <button
-              className="ml-2 text-xs text-indigo-500 underline"
+              className="ml-2 text-xs text-indigo-500 dark:text-indigo-400 underline"
               type="button"
               onClick={resetUploadState}
               tabIndex={-1}
