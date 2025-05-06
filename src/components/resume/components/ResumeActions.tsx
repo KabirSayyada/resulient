@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { FileDown, FileText, Facebook, Twitter, Linkedin, FileType } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -149,7 +150,7 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
       // Fallback: Open social URLs with image in clipboard or instruct user to paste
       let shareUrl = "";
       const shareText = "Check out my resume scorecard from Resulient! 🚀 How does yours compare?";
-      const shareImage = "/lovable-uploads/f9fefb3b-54f2-4f28-bf70-dc66aa84e9e0.png"; // Use the new image for sharing
+      const shareImage = "/lovable-uploads/2f15a536-6c8b-4812-b04f-13e247804a93.png"; // Updated to use the new image
       
       if (platform === "linkedin") {
         shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}`;
