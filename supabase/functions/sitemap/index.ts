@@ -25,7 +25,7 @@ serve(async (req) => {
     // Base URL of the website
     const baseUrl = 'https://resulient.com'
     
-    // Current date for lastmod
+    // Current date for lastmod - use the new date in the desired format
     const currentDate = new Date().toISOString().split('T')[0];
     
     // Static routes with priority and change frequency

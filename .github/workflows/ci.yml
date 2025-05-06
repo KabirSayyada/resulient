@@ -23,6 +23,14 @@ jobs:
 
       - name: Copy sitemap.xml to dist directory
         run: cp sitemap.xml dist/sitemap.xml
+        
+      - name: Create robots.txt if it doesn't exist
+        run: |
+          if [ ! -f dist/robots.txt ]; then
+            echo "User-agent: *" > dist/robots.txt
+            echo "Allow: /" >> dist/robots.txt
+            echo "Sitemap: https://resulient.com/sitemap.xml" >> dist/robots.txt
+          fi
 
       - name: Copy favicon files to dist
         run: |
