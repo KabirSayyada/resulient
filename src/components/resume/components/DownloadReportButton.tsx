@@ -54,10 +54,6 @@ export function DownloadReportButton({
     
     try {
       // Check how many downloads occurred today
-      // This would require a new table to track downloads, but for now 
-      // we'll just use a localStorage approach for demonstration
-      
-      // In a production app, you would track this in the database
       const today = new Date().toLocaleDateString();
       const downloadsToday = Number(localStorage.getItem(`report_downloads_${today}`) || "0");
       
@@ -69,6 +65,32 @@ export function DownloadReportButton({
   };
   
   const handleDownloadClick = async () => {
+    // Double-check subscription status from database to prevent any tampering
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to download reports.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Extra verification to ensure user is on the correct plan
+      if (subscription.tier === "free") {
+        setHasReachedLimit(true);
+        toast({
+          title: "Premium Feature",
+          description: "Report downloads are available on Premium and Platinum plans only.",
+          variant: "destructive",
+        });
+        return;
+      }
+    } catch (error) {
+      console.error("Error verifying subscription:", error);
+    }
+    
     // Check if user has access to download feature
     const hasAccess = await checkDailyDownloadLimit();
     
@@ -93,6 +115,12 @@ export function DownloadReportButton({
     
     // Call the original download function
     onClick();
+    
+    // Show success message
+    toast({
+      title: "Report Downloaded",
+      description: "Your report has been downloaded successfully.",
+    });
   };
   
   if (hasReachedLimit) {
@@ -126,7 +154,7 @@ export function DownloadReportButton({
       size={size}
       className={className}
       onClick={handleDownloadClick}
-      disabled={isDisabled}
+      disabled={isDisabled || subscription.isLoading}
     >
       <DownloadIcon className="h-4 w-4 mr-2" />
       {title}

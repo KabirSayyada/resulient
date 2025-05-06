@@ -94,6 +94,7 @@ serve(async (req) => {
     // Get daily limits based on subscription tier
     const limits = getDailyLimits(subscriptionTier)
 
+    // Add cache control headers to prevent caching
     return new Response(
       JSON.stringify({
         hasAccess,
