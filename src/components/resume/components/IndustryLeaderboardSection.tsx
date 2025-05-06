@@ -27,7 +27,7 @@ export const IndustryLeaderboardSection = ({ scoreData }: IndustryLeaderboardSec
   return (
     <div className="space-y-6 mt-6">
       {isMobile && (
-        <Alert variant="default" className="bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-200 mb-4 border-blue-200 dark:border-blue-700">
+        <Alert variant="default" className="bg-blue-50 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 mb-4 border-blue-200 dark:border-blue-700">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Charts display better on desktop devices. For the best experience viewing these charts, consider using a larger screen.
@@ -35,8 +35,8 @@ export const IndustryLeaderboardSection = ({ scoreData }: IndustryLeaderboardSec
         </Alert>
       )}
       
-      <Card className="p-4 sm:p-6 bg-white shadow-lg border-t-4 border-t-indigo-500">
-        <h2 className="text-xl sm:text-2xl font-bold text-indigo-800 mb-4">Industry Performance Overview</h2>
+      <Card className="p-4 sm:p-6 bg-white dark:bg-gray-800 shadow-lg border-t-4 border-t-indigo-500">
+        <h2 className="text-xl sm:text-2xl font-bold text-indigo-800 dark:text-indigo-200 mb-4">Industry Performance Overview</h2>
         <div className="h-[300px] sm:h-[400px] w-full">
           <ChartContainer
             config={{
@@ -57,7 +57,7 @@ export const IndustryLeaderboardSection = ({ scoreData }: IndustryLeaderboardSec
                 { top: 20, right: 30, left: 20, bottom: 60 }
               }
             >
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" className="dark:stroke-gray-700" />
               <XAxis 
                 dataKey="name" 
                 angle={-45} 
@@ -66,13 +66,21 @@ export const IndustryLeaderboardSection = ({ scoreData }: IndustryLeaderboardSec
                 interval={0} 
                 tick={{ fontSize: isMobile ? 10 : 12 }}
                 tickMargin={isMobile ? 15 : 10}
+                className="dark:fill-gray-300"
               />
               <YAxis 
                 domain={[0, 100]} 
                 width={isMobile ? 30 : 40}
                 tick={{ fontSize: isMobile ? 10 : 12 }}
+                className="dark:fill-gray-300"
               />
-              <Tooltip />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'var(--background)',
+                  borderColor: 'var(--border)',
+                  color: 'var(--foreground)'
+                }}
+              />
               <Bar 
                 dataKey="score" 
                 fill="#818cf8" 

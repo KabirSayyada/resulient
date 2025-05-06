@@ -19,7 +19,7 @@ export const SuggestedSkills = ({
 }: SuggestedSkillsProps) => {
   if (!skills || skills.length === 0) {
     return (
-      <div className="text-gray-500 italic text-center p-4">
+      <div className="text-gray-500 dark:text-gray-400 italic text-center p-4">
         No skills suggested
       </div>
     );
@@ -35,13 +35,13 @@ export const SuggestedSkills = ({
             key={index}
             className={`flex items-center justify-between gap-2 p-2 rounded-md transition-all duration-200 ${
               isSelected 
-                ? 'bg-indigo-100 dark:bg-indigo-800/50 border-l-2 border-l-indigo-500' 
+                ? 'bg-indigo-100 dark:bg-indigo-800/50 border-l-2 border-l-indigo-500 dark:border-l-indigo-400' 
                 : 'bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-800/40'
             }`}
           >
             <div className="flex items-center gap-2">
               <BadgeCheck className="h-4 w-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
-              <span className="text-sm">{skill}</span>
+              <span className="text-sm text-gray-800 dark:text-gray-200">{skill}</span>
             </div>
             
             {selectable && onSelect && (

@@ -21,7 +21,7 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
   const isCachedResult = scoreData.id && !scoreData.id.includes("newly-generated");
 
   return (
-    <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-10 animate-fade-in overflow-hidden">
+    <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 dark:from-gray-800 dark:via-indigo-900/50 dark:to-blue-900/50 relative mt-10 animate-fade-in overflow-hidden">
       <CachedResultIndicator isCached={isCachedResult} />
       
       <div className="flex flex-col items-center justify-center py-6 px-2 sm:px-6">

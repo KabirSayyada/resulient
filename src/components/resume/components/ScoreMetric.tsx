@@ -26,19 +26,19 @@ export const ScoreMetric = ({
     (value / maxValue) >= 0.8;
   
   // Determine color based on score quality
-  const textColor = missing ? 'text-red-600' : 
-                    isExcellent ? 'text-green-600' : 
-                    (value / maxValue) >= 0.5 ? 'text-indigo-800' : 'text-red-600';
+  const textColor = missing ? 'text-red-600 dark:text-red-400' : 
+                    isExcellent ? 'text-green-600 dark:text-green-400' : 
+                    (value / maxValue) >= 0.5 ? 'text-indigo-800 dark:text-indigo-300' : 'text-red-600 dark:text-red-400';
   
   // Value text color
-  const valueColor = missing ? 'text-red-700' : 
-                     isExcellent ? 'text-green-700' : 
-                     (value / maxValue) >= 0.5 ? 'text-indigo-900' : 'text-red-700';
+  const valueColor = missing ? 'text-red-700 dark:text-red-300' : 
+                     isExcellent ? 'text-green-700 dark:text-green-300' : 
+                     (value / maxValue) >= 0.5 ? 'text-indigo-900 dark:text-indigo-200' : 'text-red-700 dark:text-red-300';
   
   // Max value text color
-  const maxValueColor = missing ? 'text-red-600' : 
-                        isExcellent ? 'text-green-600' : 
-                        (value / maxValue) >= 0.5 ? 'text-fuchsia-800' : 'text-red-600';
+  const maxValueColor = missing ? 'text-red-600 dark:text-red-400' : 
+                        isExcellent ? 'text-green-600 dark:text-green-400' : 
+                        (value / maxValue) >= 0.5 ? 'text-fuchsia-800 dark:text-fuchsia-300' : 'text-red-600 dark:text-red-400';
 
   return (
     <div className={`flex items-center gap-1 ${textColor}`}>
@@ -48,8 +48,8 @@ export const ScoreMetric = ({
         {value}
       </span>
       <span className={`text-sm ${maxValueColor} font-extrabold`}>/{maxValue}</span>
-      {missing && <AlertTriangle className="w-3 h-3 text-red-500 ml-1" />}
-      {isExcellent && !missing && <CheckCircle className="w-3 h-3 text-green-500 ml-1" />}
+      {missing && <AlertTriangle className="w-3 h-3 text-red-500 dark:text-red-400 ml-1" />}
+      {isExcellent && !missing && <CheckCircle className="w-3 h-3 text-green-500 dark:text-green-400 ml-1" />}
     </div>
   );
 };

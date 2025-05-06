@@ -113,8 +113,8 @@ const IndustryLeaderboard = () => {
         {subscription.tier !== "free" && (
           <div className={`mb-6 py-2 px-4 rounded-lg shadow-md border animate-fade-in text-center ${
             subscription.tier === "premium" 
-              ? "bg-blue-100 border-blue-300 text-blue-800 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-200" 
-              : "bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-900 dark:border-purple-700 dark:text-purple-200"
+              ? "bg-blue-100 border-blue-300 text-blue-800 dark:bg-blue-900/40 dark:border-blue-700 dark:text-blue-200" 
+              : "bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-900/40 dark:border-purple-700 dark:text-purple-200"
           }`}>
             <SubscriptionTierIndicator variant="full" size="lg" showTooltip={false} className="justify-center" />
           </div>
