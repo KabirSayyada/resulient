@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { FileDown, FileText, Facebook, Twitter, Linkedin, FileType } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -141,17 +140,21 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
         await (navigator as any).share({
           files: [file],
           title: "Check out my resume scorecard!",
-          text: "Check out my resume scorecard! How does yours compare?",
+          text: "Check out my resume scorecard from Resulient! How does yours compare?",
+          url: "https://resulient.com/"
         });
         return;
       }
 
       // Fallback: Open social URLs with image in clipboard or instruct user to paste
       let shareUrl = "";
+      const shareText = "Check out my resume scorecard from Resulient! 🚀 How does yours compare?";
+      const shareImage = "/lovable-uploads/f9fefb3b-54f2-4f28-bf70-dc66aa84e9e0.png"; // Use the new image for sharing
+      
       if (platform === "linkedin") {
         shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin)}`;
       } else if (platform === "twitter") {
-        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent("Check out my resume scorecard! 🚀 How does yours compare?")}&url=${encodeURIComponent(window.location.origin)}`;
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(window.location.origin)}`;
       } else if (platform === "facebook") {
         shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin)}`;
       }

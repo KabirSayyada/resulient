@@ -19,7 +19,7 @@ export default function BlogPost() {
   const title = post ? `${post.title} | Resulient Blog` : 'Blog Post | Resulient';
   const description = post?.seo_description || post?.excerpt || 'Read this informative article on the Resulient blog';
   const keywords = post?.seo_keywords || post?.tags?.join(', ') || 'resume, career, job search, interview preparation';
-  const ogImage = post?.featured_image || '/lovable-uploads/1dd36c74-5344-4c37-bc8c-ab4094237ae2.png';
+  const ogImage = post?.featured_image || '/lovable-uploads/f9fefb3b-54f2-4f28-bf70-dc66aa84e9e0.png';
   const canonicalUrl = `https://resulient.com/blog/${slug}`;
   const publishedDate = post?.published_at || '';
   const modifiedDate = post?.updated_at || '';
@@ -30,7 +30,7 @@ export default function BlogPost() {
     "@type": "BlogPosting",
     "headline": post.title,
     "description": description,
-    "image": post.featured_image || '/lovable-uploads/1dd36c74-5344-4c37-bc8c-ab4094237ae2.png',
+    "image": post.featured_image || '/lovable-uploads/f9fefb3b-54f2-4f28-bf70-dc66aa84e9e0.png',
     "author": {
       "@type": "Person",
       "name": `${post.author_first_name || ''} ${post.author_last_name || ''}`.trim() || 'Resulient',

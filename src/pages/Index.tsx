@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -62,7 +63,7 @@ const Index = () => {
       "worstRating": "1"
     },
     "featureList": "ATS optimization, Keyword analysis, Resume scoring, Personalized suggestions",
-    "screenshot": "/lovable-uploads/1dd36c74-5344-4c37-bc8c-ab4094237ae2.png",
+    "screenshot": "/lovable-uploads/f9fefb3b-54f2-4f28-bf70-dc66aa84e9e0.png",
     "softwareHelp": "https://resulient.com/help",
     "softwareVersion": "2.0"
   };
@@ -193,7 +194,7 @@ const Index = () => {
         <meta property="og:url" content="https://resulient.com/" />
         <meta property="og:title" content="Resulient | AI-Powered Resume Optimization & ATS Scoring" />
         <meta property="og:description" content="Transform your job search with Resulient's AI-powered resume optimization tool. Get past ATS systems and land more interviews with data-driven improvements." />
-        <meta property="og:image" content="/lovable-uploads/1dd36c74-5344-4c37-bc8c-ab4094237ae2.png" />
+        <meta property="og:image" content="/lovable-uploads/f9fefb3b-54f2-4f28-bf70-dc66aa84e9e0.png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="1200" />
         <meta property="og:site_name" content="Resulient" />
@@ -203,7 +204,7 @@ const Index = () => {
         <meta name="twitter:site" content="@lovable_dev" />
         <meta name="twitter:title" content="Resulient | AI-Powered Resume Optimization" />
         <meta name="twitter:description" content="Beat ATS systems and land more interviews with our AI-powered tool" />
-        <meta name="twitter:image" content="/lovable-uploads/1dd36c74-5344-4c37-bc8c-ab4094237ae2.png" />
+        <meta name="twitter:image" content="/lovable-uploads/f9fefb3b-54f2-4f28-bf70-dc66aa84e9e0.png" />
         
         {/* Structured data for the main application */}
         <script type="application/ld+json">
