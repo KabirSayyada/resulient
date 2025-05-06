@@ -62,7 +62,7 @@ const Index = () => {
       "worstRating": "1"
     },
     "featureList": "ATS optimization, Keyword analysis, Resume scoring, Personalized suggestions",
-    "screenshot": "https://resulient.com/og-image.jpg",
+    "screenshot": "/lovable-uploads/1dd36c74-5344-4c37-bc8c-ab4094237ae2.png",
     "softwareHelp": "https://resulient.com/help",
     "softwareVersion": "2.0"
   };
@@ -187,6 +187,23 @@ const Index = () => {
         <title>Resulient | AI-Powered Resume Optimization & ATS Scoring</title>
         <meta name="description" content="Transform your job search with Resulient's AI-powered resume optimization tool. Get past ATS systems and land more interviews with data-driven improvements." />
         <link rel="canonical" href="https://resulient.com/" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://resulient.com/" />
+        <meta property="og:title" content="Resulient | AI-Powered Resume Optimization & ATS Scoring" />
+        <meta property="og:description" content="Transform your job search with Resulient's AI-powered resume optimization tool. Get past ATS systems and land more interviews with data-driven improvements." />
+        <meta property="og:image" content="/lovable-uploads/1dd36c74-5344-4c37-bc8c-ab4094237ae2.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="1200" />
+        <meta property="og:site_name" content="Resulient" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@lovable_dev" />
+        <meta name="twitter:title" content="Resulient | AI-Powered Resume Optimization" />
+        <meta name="twitter:description" content="Beat ATS systems and land more interviews with our AI-powered tool" />
+        <meta name="twitter:image" content="/lovable-uploads/1dd36c74-5344-4c37-bc8c-ab4094237ae2.png" />
         
         {/* Structured data for the main application */}
         <script type="application/ld+json">
