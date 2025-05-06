@@ -24,6 +24,36 @@ export default function BlogPost() {
   const publishedDate = post?.published_at || '';
   const modifiedDate = post?.updated_at || '';
   
+  // Prepare structured data for BlogPosting schema
+  const structuredData = post ? {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": description,
+    "image": post.featured_image || 'https://resulient.com/og-image.jpg',
+    "author": {
+      "@type": "Person",
+      "name": `${post.author_first_name || ''} ${post.author_last_name || ''}`.trim() || 'Resulient',
+      "url": "https://resulient.com/about"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Resulient",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://resulient.com/favicon.png"
+      }
+    },
+    "datePublished": post.published_at || new Date().toISOString(),
+    "dateModified": post.updated_at || new Date().toISOString(),
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": canonicalUrl
+    },
+    "keywords": post.tags?.join(', ') || keywords,
+    "articleSection": post.category || "Career Development"
+  } : null;
+  
   // Track page view with Google Analytics
   useEffect(() => {
     if (post && typeof window !== 'undefined') {
@@ -64,6 +94,9 @@ export default function BlogPost() {
         <meta property="og:description" content={description} />
         <meta property="og:image" content={ogImage} />
         <meta property="og:site_name" content="Resulient" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:locale" content="en_US" />
         
         {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
@@ -71,6 +104,7 @@ export default function BlogPost() {
         <meta property="twitter:title" content={title} />
         <meta property="twitter:description" content={description} />
         <meta property="twitter:image" content={ogImage} />
+        <meta property="twitter:creator" content="@lovable_dev" />
         
         {/* Article specific metadata */}
         {publishedDate && (
@@ -89,6 +123,13 @@ export default function BlogPost() {
         {/* Additional SEO tags */}
         <meta name="author" content={`${post?.author_first_name || ''} ${post?.author_last_name || ''}`} />
         <meta name="robots" content="index, follow" />
+        
+        {/* Structured data / Schema.org BlogPosting */}
+        {structuredData && (
+          <script type="application/ld+json">
+            {JSON.stringify(structuredData)}
+          </script>
+        )}
       </Helmet>
 
       <BlogLayout>

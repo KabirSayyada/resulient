@@ -26,13 +26,14 @@ export function Sitemap() {
   return (
     <>
       <Helmet>
-        <meta http-equiv="Content-Type" content="text/xml; charset=UTF-8" />
+        <meta httpEquiv="Content-Type" content="text/xml; charset=UTF-8" />
+        <title>Sitemap - Resulient</title>
       </Helmet>
       <div style={{ display: 'none' }}>
         <pre dangerouslySetInnerHTML={{ __html: sitemap }} />
       </div>
-      {/* This renders the raw XML content */}
-      {typeof document !== 'undefined' && document.write(sitemap)}
+      {/* This ensures proper rendering of XML content */}
+      {typeof document !== 'undefined' && document.open('text/xml') && document.write(sitemap) && document.close()}
     </>
   );
 }
