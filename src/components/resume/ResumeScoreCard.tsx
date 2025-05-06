@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreData } from "@/types/resume";
 import { useAuth } from "@/hooks/useAuth";
@@ -100,7 +101,7 @@ export const ResumeScoreCard = ({ scoreData }: ResumeScoreCardProps) => {
       </div>
       <ScoreHeader 
         industry={scoreData.Industry}
-        percentile={getPercentileNumeric(scoreData.percentile)}
+        percentile={scoreData.percentile}
         scoringMode={scoreData.scoringMode || "resumeOnly"}
       />
       <CardContent className="py-6 px-4 flex flex-col items-center gap-4">
