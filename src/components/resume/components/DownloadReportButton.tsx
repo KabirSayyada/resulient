@@ -31,6 +31,17 @@ export function DownloadReportButton({
   const checkDailyDownloadLimit = async (): Promise<boolean> => {
     if (!subscription || subscription.isLoading) return false;
     
+    // For platinum tier - unlimited downloads
+    if (subscription.tier === "platinum") {
+      return true;
+    }
+    
+    // For free tier - no downloads allowed
+    if (subscription.tier === "free") {
+      return false;
+    }
+    
+    // For premium tier - limited downloads per day
     if (subscription.limits.reportDownloads === -1) {
       // User has unlimited downloads
       return true;
