@@ -19,6 +19,16 @@ export function Sitemap() {
     fetchSitemap();
   }, []);
 
+  useEffect(() => {
+    // Only run this effect when sitemap is available and we're in the browser
+    if (sitemap && typeof document !== 'undefined') {
+      // Proper way to write XML to document
+      document.open('text/xml');
+      document.write(sitemap);
+      document.close();
+    }
+  }, [sitemap]);
+
   if (!sitemap) {
     return null;
   }
@@ -32,8 +42,6 @@ export function Sitemap() {
       <div style={{ display: 'none' }}>
         <pre dangerouslySetInnerHTML={{ __html: sitemap }} />
       </div>
-      {/* This ensures proper rendering of XML content */}
-      {typeof document !== 'undefined' && document.open('text/xml') && document.write(sitemap) && document.close()}
     </>
   );
 }
