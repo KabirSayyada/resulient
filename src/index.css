@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -79,6 +80,18 @@
   img {
     @apply max-w-full h-auto;
   }
+}
+
+/* Add custom styles for better dark mode support in resume inputs */
+.dark .font-mono, 
+.dark textarea.font-mono, 
+.dark input.font-mono {
+  @apply text-gray-100;
+}
+
+.dark textarea::placeholder,
+.dark input::placeholder {
+  @apply text-gray-400;
 }
 
 /* Blog content styling */
