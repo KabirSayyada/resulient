@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BlogAdminForm } from '@/components/blog/BlogAdminForm';
 import { BlogInitialization } from '@/components/blog/BlogAdmin/BlogInitialization';
+import { CreateEnhancedBlogPosts } from '@/components/blog/CreateEnhancedBlogPosts';
 import { 
   Table,
   TableBody,
@@ -303,7 +304,17 @@ export default function BlogAdmin() {
                     </Tabs>
                   </div>
                   
-                  <div>
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Quick Actions</CardTitle>
+                        <CardDescription>Manage your blog content</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <CreateEnhancedBlogPosts />
+                      </CardContent>
+                    </Card>
+                    
                     <BlogInitialization />
                   </div>
                 </div>
@@ -318,13 +329,21 @@ export default function BlogAdmin() {
                         Configure your blog settings and preferences
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-6">
                       <div>
                         <h3 className="text-lg font-medium mb-2">Blog Initialization</h3>
                         <p className="text-sm text-muted-foreground mb-4">
                           Initialize your blog with categories and professional content
                         </p>
                         <BlogInitialization />
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-lg font-medium mb-2">Enhanced Blog Content</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Create high-quality, SEO-optimized blog posts
+                        </p>
+                        <CreateEnhancedBlogPosts />
                       </div>
                     </CardContent>
                   </Card>
