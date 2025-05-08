@@ -24,6 +24,11 @@ export default function BlogPost() {
   const publishedDate = post?.published_at || '';
   const modifiedDate = post?.updated_at || '';
   
+  // Get author name with fallback
+  const authorName = post?.author_first_name && post?.author_last_name 
+    ? `${post.author_first_name} ${post.author_last_name}` 
+    : 'Resulient';
+  
   // Prepare structured data for BlogPosting schema
   const structuredData = post ? {
     "@context": "https://schema.org",
@@ -33,7 +38,7 @@ export default function BlogPost() {
     "image": post.featured_image || '/lovable-uploads/2f15a536-6c8b-4812-b04f-13e247804a93.png',
     "author": {
       "@type": "Person",
-      "name": `${post.author_first_name || ''} ${post.author_last_name || ''}`.trim() || 'Resulient',
+      "name": authorName,
       "url": "https://resulient.com/about"
     },
     "publisher": {
@@ -121,7 +126,7 @@ export default function BlogPost() {
         ))}
         
         {/* Additional SEO tags */}
-        <meta name="author" content={`${post?.author_first_name || ''} ${post?.author_last_name || ''}`} />
+        <meta name="author" content={authorName} />
         <meta name="robots" content="index, follow" />
         
         {/* Structured data / Schema.org BlogPosting */}

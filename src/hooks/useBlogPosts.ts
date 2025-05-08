@@ -16,23 +16,44 @@ export function useBlogPosts() {
       try {
         setIsLoading(true);
         
-        // Use the published_blog_posts view to get posts with author info
+        // Use a join with profiles to get author information
         const { data, error } = await supabase
-          .from('published_blog_posts')
-          .select('*')
+          .from('blog_posts')
+          .select(`
+            *,
+            profiles:author_id (
+              first_name,
+              last_name,
+              avatar_url
+            )
+          `)
+          .eq('published_at', 'is not', null)
           .order('published_at', { ascending: false });
         
         if (error) {
           throw error;
         }
         
-        // Calculate reading time for each post
-        const postsWithReadingTime = data.map(post => ({
-          ...post,
-          reading_time: calculateReadingTime(post.content)
-        })) as BlogPost[];
+        // Process the joined data to flatten the author information
+        const processedPosts = data.map(post => {
+          // Calculate reading time for each post
+          const readingTime = calculateReadingTime(post.content);
+          
+          // Extract profile info if it exists
+          const authorProfile = post.profiles || {};
+          
+          return {
+            ...post,
+            reading_time: readingTime,
+            author_first_name: authorProfile.first_name || null,
+            author_last_name: authorProfile.last_name || null,
+            author_avatar_url: authorProfile.avatar_url || null,
+            // Remove the profiles object as we've extracted what we need
+            profiles: undefined
+          };
+        }) as BlogPost[];
         
-        setPosts(postsWithReadingTime);
+        setPosts(processedPosts);
       } catch (err) {
         console.error('Error fetching blog posts:', err);
         setError(err as Error);
@@ -68,9 +89,17 @@ export function useBlogPost(slug: string) {
       try {
         setIsLoading(true);
         
+        // Use a join with profiles to get author information
         const { data, error } = await supabase
-          .from('published_blog_posts')
-          .select('*')
+          .from('blog_posts')
+          .select(`
+            *,
+            profiles:author_id (
+              first_name,
+              last_name,
+              avatar_url
+            )
+          `)
           .eq('slug', slug)
           .maybeSingle();
         
@@ -79,13 +108,23 @@ export function useBlogPost(slug: string) {
         }
         
         if (data) {
+          // Process the post data to flatten the author information
+          const authorProfile = data.profiles || {};
+          
           // Calculate reading time
-          const postWithReadingTime = {
+          const readingTime = calculateReadingTime(data.content);
+          
+          const processedPost = {
             ...data,
-            reading_time: calculateReadingTime(data.content)
+            reading_time: readingTime,
+            author_first_name: authorProfile.first_name || null,
+            author_last_name: authorProfile.last_name || null,
+            author_avatar_url: authorProfile.avatar_url || null,
+            // Remove the profiles object as we've extracted what we need
+            profiles: undefined
           } as BlogPost;
           
-          setPost(postWithReadingTime);
+          setPost(processedPost);
         } else {
           setPost(null);
         }
@@ -124,23 +163,45 @@ export function useCategoryPosts(categorySlug: string) {
       try {
         setIsLoading(true);
         
+        // Use a join with profiles to get author information
         const { data, error } = await supabase
-          .from('published_blog_posts')
-          .select('*')
+          .from('blog_posts')
+          .select(`
+            *,
+            profiles:author_id (
+              first_name,
+              last_name,
+              avatar_url
+            )
+          `)
           .eq('category', categorySlug)
+          .eq('published_at', 'is not', null)
           .order('published_at', { ascending: false });
         
         if (error) {
           throw error;
         }
         
-        // Calculate reading time for each post
-        const postsWithReadingTime = data.map(post => ({
-          ...post,
-          reading_time: calculateReadingTime(post.content)
-        })) as BlogPost[];
+        // Process the joined data to flatten the author information
+        const processedPosts = data.map(post => {
+          // Calculate reading time for each post
+          const readingTime = calculateReadingTime(post.content);
+          
+          // Extract profile info if it exists
+          const authorProfile = post.profiles || {};
+          
+          return {
+            ...post,
+            reading_time: readingTime,
+            author_first_name: authorProfile.first_name || null,
+            author_last_name: authorProfile.last_name || null,
+            author_avatar_url: authorProfile.avatar_url || null,
+            // Remove the profiles object as we've extracted what we need
+            profiles: undefined
+          };
+        }) as BlogPost[];
         
-        setPosts(postsWithReadingTime);
+        setPosts(processedPosts);
       } catch (err) {
         console.error('Error fetching category posts:', err);
         setError(err as Error);

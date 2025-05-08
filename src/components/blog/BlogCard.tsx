@@ -16,6 +16,7 @@ export function BlogCard({ post }: BlogCardProps) {
     ? formatDistanceToNow(new Date(post.published_at), { addSuffix: true })
     : '';
   
+  // Handle author information with more robust fallbacks
   const authorInitials = post.author_first_name && post.author_last_name
     ? `${post.author_first_name.charAt(0)}${post.author_last_name.charAt(0)}`
     : 'AU';
@@ -64,7 +65,7 @@ export function BlogCard({ post }: BlogCardProps) {
             <div className="flex items-center space-x-2">
               <Avatar className="h-6 w-6">
                 {post.author_avatar_url ? (
-                  <AvatarImage src={post.author_avatar_url} />
+                  <AvatarImage src={post.author_avatar_url} alt={authorName} />
                 ) : (
                   <AvatarFallback>{authorInitials}</AvatarFallback>
                 )}
