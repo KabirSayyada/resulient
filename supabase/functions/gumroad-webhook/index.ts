@@ -17,11 +17,7 @@ const corsHeaders = {
 function safeParseDate(dateString: string): Date | null {
   try {
     const date = new Date(dateString);
-    // Check if date is valid
-    if (isNaN(date.getTime())) {
-      return null;
-    }
-    return date;
+    return isNaN(date.getTime()) ? null : date;
   } catch (error) {
     console.error("Error parsing date:", error);
     return null;
@@ -56,10 +52,9 @@ async function findUserByEmail(email: string): Promise<string | null> {
   try {
     console.log("Looking up user by email:", email);
     
-    // Query auth.users directly to find user by email
     const { data, error } = await supabase.auth.admin.listUsers({
       page: 1,
-      perPage: 1000 // Adjust based on expected number of users
+      perPage: 1000
     });
     
     if (error) {
@@ -67,7 +62,6 @@ async function findUserByEmail(email: string): Promise<string | null> {
       return null;
     }
     
-    // Find the user with the matching email
     const user = data.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
     
     if (user) {
@@ -83,117 +77,32 @@ async function findUserByEmail(email: string): Promise<string | null> {
   }
 }
 
-// Helper function to add 1 year to a date
+// Date helper functions
 function addOneYear(date: Date): Date {
   const result = new Date(date);
   result.setFullYear(result.getFullYear() + 1);
   return result;
 }
 
-// Helper function to add 1 month to a date
 function addOneMonth(date: Date): Date {
   const result = new Date(date);
   result.setMonth(result.getMonth() + 1);
   return result;
 }
 
-// Enhanced HTML template for immediate redirect
+// Simple redirect HTML
 function getRedirectHtml(redirectUrl: string): string {
   return `
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Redirecting to Resulient...</title>
   <meta http-equiv="refresh" content="0;url=${redirectUrl}">
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background: linear-gradient(to bottom right, #eef2ff, #e0e7ff);
-      color: #4338ca;
-      text-align: center;
-      padding: 0 20px;
-    }
-    .logo {
-      font-size: 2.5rem;
-      font-weight: 800;
-      margin-bottom: 1rem;
-      background: linear-gradient(to right, #4338ca, #6366f1, #ec4899);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .container {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 0.75rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      max-width: 500px;
-      width: 100%;
-    }
-    .message {
-      font-size: 1.125rem;
-      margin-bottom: 1.5rem;
-    }
-    .spinner {
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border-left-color: #4338ca;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 1.5rem auto;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .button {
-      display: inline-block;
-      background: linear-gradient(to right, #4f46e5, #7c3aed);
-      color: white;
-      font-weight: 500;
-      padding: 0.5rem 1rem;
-      border-radius: 0.375rem;
-      text-decoration: none;
-      margin-top: 1rem;
-      transition: transform 0.2s;
-    }
-    .button:hover {
-      transform: translateY(-1px);
-    }
-  </style>
+  <title>Redirecting...</title>
 </head>
 <body>
-  <div class="container">
-    <div class="logo">Resulient</div>
-    <div class="spinner"></div>
-    <div class="message">Payment successful! Redirecting you now...</div>
-    <p>If you're not redirected automatically, <a href="${redirectUrl}" class="button">Click here to continue</a>.</p>
-  </div>
-  
-  <script>
-    // Try multiple redirect approaches
-    setTimeout(function() {
-      window.location.href = "${redirectUrl}";
-    }, 500);
-    
-    // Fallback approach with form submission
-    setTimeout(function() {
-      var form = document.createElement('form');
-      form.method = 'GET';
-      form.action = "${redirectUrl}";
-      document.body.appendChild(form);
-      form.submit();
-    }, 1500);
-  </script>
+  <p>Redirecting to <a href="${redirectUrl}">${redirectUrl}</a>...</p>
+  <script>window.location.href = "${redirectUrl}";</script>
 </body>
 </html>
   `;
@@ -206,91 +115,34 @@ serve(async (req) => {
   }
 
   try {
-    // Log that we received a webhook
     console.log("Received webhook request:", req.method, req.url);
     
-    // Get request content type
-    const contentType = req.headers.get("content-type") || "";
-    console.log("Content-Type:", contentType);
-    
-    let payload: Record<string, string> = {};
-    
-    // Process webhook payload based on content type
-    if (contentType.includes("application/json")) {
-      // Handle JSON payload
-      const jsonData = await req.json();
-      console.log("Received JSON data:", JSON.stringify(jsonData));
-      
-      // Convert JSON to expected format
-      if (typeof jsonData === "object" && jsonData !== null) {
-        for (const [key, value] of Object.entries(jsonData)) {
-          payload[key] = String(value);
-        }
-      }
-    } else if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
-      // Handle form data
-      try {
-        const formData = await req.formData();
-        console.log("Received form data");
-        
-        // Convert FormData to a regular object
-        for (const [key, value] of formData.entries()) {
-          payload[key] = value.toString();
-        }
-      } catch (error) {
-        console.error("Error parsing form data:", error);
-        // Try fallback to text parsing if formData fails
-        const text = await req.text();
-        console.log("Received text data:", text);
-        
-        // Parse URL-encoded form data
-        if (text) {
-          const params = new URLSearchParams(text);
-          for (const [key, value] of params.entries()) {
-            payload[key] = value;
-          }
-        }
-      }
-    } else {
-      // Fallback to text parsing
+    // Parse the webhook payload as JSON - Gumroad always sends JSON
+    let payload;
+    try {
+      payload = await req.json();
+      console.log("Received webhook payload:", JSON.stringify(payload));
+    } catch (error) {
+      console.error("Error parsing JSON payload:", error);
+      // If JSON parsing fails, try to get the raw text
       const text = await req.text();
-      console.log("Received text data:", text);
-      
-      try {
-        // Try to parse as JSON first
-        const jsonData = JSON.parse(text);
-        for (const [key, value] of Object.entries(jsonData)) {
-          payload[key] = String(value);
-        }
-      } catch (jsonError) {
-        // If not JSON, try as URL-encoded
-        try {
-          const params = new URLSearchParams(text);
-          for (const [key, value] of params.entries()) {
-            payload[key] = value;
-          }
-        } catch (urlError) {
-          console.error("Failed to parse payload:", urlError);
-          throw new Error("Could not parse webhook payload in any supported format");
-        }
-      }
+      console.log("Raw payload text:", text);
+      throw new Error("Failed to parse webhook payload as JSON");
     }
     
-    console.log("Processed webhook payload:", JSON.stringify(payload));
-    
-    // Verify this is a Gumroad webhook
-    if (!payload.email && !payload.sale_id && !payload.product_id) {
+    // Verify this is a Gumroad webhook with required fields
+    if (!payload.email || !payload.sale_id) {
       console.error("Invalid webhook payload - missing required fields");
-      throw new Error("Invalid webhook payload - not a valid Gumroad webhook");
+      throw new Error("Invalid webhook payload - missing required fields");
     }
     
-    // Extract the product code from the permalink or product_id
+    // Extract the product code (permalink is the product code in Gumroad)
     const productCode = payload.permalink || payload.short_product_id || "";
-    console.log("Extracted product code:", productCode);
+    console.log("Product code:", productCode);
     
     // Get subscription details based on product code
     const { tier, cycle } = getSubscriptionTier(productCode);
-    console.log("Subscription details:", { tier, cycle });
+    console.log("Subscription tier:", tier, "cycle:", cycle);
     
     // Find the user associated with this email
     const userEmail = payload.email;
@@ -298,7 +150,6 @@ serve(async (req) => {
       throw new Error("No email address provided in webhook payload");
     }
     
-    console.log("Looking up user by email in auth.users:", userEmail);
     const userId = await findUserByEmail(userEmail);
     
     if (!userId) {
@@ -331,17 +182,13 @@ serve(async (req) => {
       endDate = addOneMonth(saleTimestamp);
     }
     
-    console.log("Creating subscription record with data:", {
+    console.log("Creating subscription record:", {
       user_id: userId,
       subscription_tier: tier,
       billing_cycle: cycle,
-      status: "active",
       start_date: saleTimestamp.toISOString(),
       end_date: endDate.toISOString(),
-      gumroad_product_id: payload.product_id,
-      gumroad_purchase_id: payload.sale_id,
-      gumroad_subscription_id: payload.subscription_id,
-      last_webhook_event: payload.resource_name
+      sale_id: payload.sale_id
     });
     
     // Create a subscription record in the database
@@ -369,7 +216,7 @@ serve(async (req) => {
     
     console.log("Created subscription:", subscription);
     
-    // Also create a notification record for tracking
+    // Create a notification record for tracking
     await supabase
       .from("subscription_notifications")
       .insert({
@@ -380,13 +227,12 @@ serve(async (req) => {
         user_id: userId,
       });
     
-    // Get the success URL from the payload or use default with product code
-    const redirectUrl = payload["url_params[success_url]"] || 
-                      `${appUrl}/subscription-success?product=${productCode}`;
+    // Return a success response with redirect
+    const redirectUrl = payload.success_url || 
+                       `${appUrl}/subscription-success?product=${productCode}`;
+    
     console.log("Redirecting to:", redirectUrl);
     
-    // For Gumroad, we need to return a simple 200 success response
-    // But we'll add a Location header to attempt a redirect
     return new Response(
       getRedirectHtml(redirectUrl),
       { 
@@ -394,28 +240,22 @@ serve(async (req) => {
         headers: { 
           ...corsHeaders, 
           "Content-Type": "text/html",
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0",
-          "Location": redirectUrl // Add redirect header as a fallback
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Location": redirectUrl
         } 
       }
     );
   } catch (error) {
     console.error("Error processing webhook:", error);
     
-    // Even on error, return a success response to Gumroad with redirect
+    // Even on error, return a success response to Gumroad
     return new Response(
-      getRedirectHtml(`${appUrl}/subscription-success`),
+      JSON.stringify({ status: "error", message: error.message }),
       { 
         status: 200,  // Still return 200 to Gumroad
         headers: { 
           ...corsHeaders, 
-          "Content-Type": "text/html",
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0",
-          "Location": `${appUrl}/subscription-success` // Add redirect header as a fallback
+          "Content-Type": "application/json"
         } 
       }
     );
