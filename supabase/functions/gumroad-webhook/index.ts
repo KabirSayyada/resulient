@@ -205,26 +205,90 @@ serve(async (req) => {
 
   try {
     // Log that we received a webhook
-    console.log("Received webhook");
+    console.log("Received webhook request:", req.method, req.url);
     
-    // Process webhook payload
-    const formData = await req.formData();
-    console.log("Received form data:", formData);
+    // Get request content type
+    const contentType = req.headers.get("content-type") || "";
+    console.log("Content-Type:", contentType);
     
-    // Convert FormData to a regular object
-    const payload: Record<string, string> = {};
-    for (const [key, value] of formData.entries()) {
-      payload[key] = value.toString();
+    let payload: Record<string, string> = {};
+    
+    // Process webhook payload based on content type
+    if (contentType.includes("application/json")) {
+      // Handle JSON payload
+      const jsonData = await req.json();
+      console.log("Received JSON data:", JSON.stringify(jsonData));
+      
+      // Convert JSON to expected format
+      if (typeof jsonData === "object" && jsonData !== null) {
+        for (const [key, value] of Object.entries(jsonData)) {
+          payload[key] = String(value);
+        }
+      }
+    } else if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
+      // Handle form data
+      try {
+        const formData = await req.formData();
+        console.log("Received form data");
+        
+        // Convert FormData to a regular object
+        for (const [key, value] of formData.entries()) {
+          payload[key] = value.toString();
+        }
+      } catch (error) {
+        console.error("Error parsing form data:", error);
+        // Try fallback to text parsing if formData fails
+        const text = await req.text();
+        console.log("Received text data:", text);
+        
+        // Parse URL-encoded form data
+        if (text) {
+          const params = new URLSearchParams(text);
+          for (const [key, value] of params.entries()) {
+            payload[key] = value;
+          }
+        }
+      }
+    } else {
+      // Fallback to text parsing
+      const text = await req.text();
+      console.log("Received text data:", text);
+      
+      try {
+        // Try to parse as JSON first
+        const jsonData = JSON.parse(text);
+        for (const [key, value] of Object.entries(jsonData)) {
+          payload[key] = String(value);
+        }
+      } catch (jsonError) {
+        // If not JSON, try as URL-encoded
+        try {
+          const params = new URLSearchParams(text);
+          for (const [key, value] of params.entries()) {
+            payload[key] = value;
+          }
+        } catch (urlError) {
+          console.error("Failed to parse payload:", urlError);
+          throw new Error("Could not parse webhook payload in any supported format");
+        }
+      }
     }
     
     console.log("Processed webhook payload:", JSON.stringify(payload));
     
-    // Extract the product code from the permalink
+    // Verify this is a Gumroad webhook
+    if (!payload.email && !payload.sale_id && !payload.product_id) {
+      console.error("Invalid webhook payload - missing required fields");
+      throw new Error("Invalid webhook payload - not a valid Gumroad webhook");
+    }
+    
+    // Extract the product code from the permalink or product_id
     const productCode = payload.permalink || payload.short_product_id || "";
     console.log("Extracted product code:", productCode);
     
     // Get subscription details based on product code
     const { tier, cycle } = getSubscriptionTier(productCode);
+    console.log("Subscription details:", { tier, cycle });
     
     // Find the user associated with this email
     const userEmail = payload.email;
@@ -236,6 +300,18 @@ serve(async (req) => {
     const userId = await findUserByEmail(userEmail);
     
     if (!userId) {
+      console.error("Could not find user with email:", userEmail);
+      // Create notification record even if user is not found
+      await supabase
+        .from("subscription_notifications")
+        .insert({
+          email: userEmail,
+          purchase_id: payload.sale_id,
+          product_code: productCode,
+          processed: false,
+          user_id: null,
+        });
+      
       throw new Error("Could not find user with email: " + userEmail);
     }
     
@@ -252,6 +328,19 @@ serve(async (req) => {
     } else {
       endDate = addOneMonth(saleTimestamp);
     }
+    
+    console.log("Creating subscription record with data:", {
+      user_id: userId,
+      subscription_tier: tier,
+      billing_cycle: cycle,
+      status: "active",
+      start_date: saleTimestamp.toISOString(),
+      end_date: endDate.toISOString(),
+      gumroad_product_id: payload.product_id,
+      gumroad_purchase_id: payload.sale_id,
+      gumroad_subscription_id: payload.subscription_id,
+      last_webhook_event: payload.resource_name
+    });
     
     // Create a subscription record in the database
     const { data: subscription, error } = await supabase
@@ -277,6 +366,17 @@ serve(async (req) => {
     }
     
     console.log("Created subscription:", subscription);
+    
+    // Also create a notification record for tracking
+    await supabase
+      .from("subscription_notifications")
+      .insert({
+        email: userEmail,
+        purchase_id: payload.sale_id,
+        product_code: productCode,
+        processed: true,
+        user_id: userId,
+      });
     
     // Get the success URL from the payload or use default with product code
     const redirectUrl = payload["url_params[success_url]"] || 
