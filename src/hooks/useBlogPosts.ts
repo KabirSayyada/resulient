@@ -42,12 +42,19 @@ export function useBlogPosts() {
           // Extract profile info if it exists
           const authorProfile = post.profiles || {};
           
+          // Type assertion to access nested properties safely
+          const typedProfile = authorProfile as { 
+            first_name?: string | null, 
+            last_name?: string | null, 
+            avatar_url?: string | null 
+          };
+          
           return {
             ...post,
             reading_time: readingTime,
-            author_first_name: authorProfile.first_name || null,
-            author_last_name: authorProfile.last_name || null,
-            author_avatar_url: authorProfile.avatar_url || null,
+            author_first_name: typedProfile.first_name || null,
+            author_last_name: typedProfile.last_name || null,
+            author_avatar_url: typedProfile.avatar_url || null,
             // Remove the profiles object as we've extracted what we need
             profiles: undefined
           };
@@ -111,15 +118,22 @@ export function useBlogPost(slug: string) {
           // Process the post data to flatten the author information
           const authorProfile = data.profiles || {};
           
+          // Type assertion to access nested properties safely
+          const typedProfile = authorProfile as { 
+            first_name?: string | null, 
+            last_name?: string | null, 
+            avatar_url?: string | null 
+          };
+          
           // Calculate reading time
           const readingTime = calculateReadingTime(data.content);
           
           const processedPost = {
             ...data,
             reading_time: readingTime,
-            author_first_name: authorProfile.first_name || null,
-            author_last_name: authorProfile.last_name || null,
-            author_avatar_url: authorProfile.avatar_url || null,
+            author_first_name: typedProfile.first_name || null,
+            author_last_name: typedProfile.last_name || null,
+            author_avatar_url: typedProfile.avatar_url || null,
             // Remove the profiles object as we've extracted what we need
             profiles: undefined
           } as BlogPost;
@@ -190,12 +204,19 @@ export function useCategoryPosts(categorySlug: string) {
           // Extract profile info if it exists
           const authorProfile = post.profiles || {};
           
+          // Type assertion to access nested properties safely
+          const typedProfile = authorProfile as { 
+            first_name?: string | null, 
+            last_name?: string | null, 
+            avatar_url?: string | null 
+          };
+          
           return {
             ...post,
             reading_time: readingTime,
-            author_first_name: authorProfile.first_name || null,
-            author_last_name: authorProfile.last_name || null,
-            author_avatar_url: authorProfile.avatar_url || null,
+            author_first_name: typedProfile.first_name || null,
+            author_last_name: typedProfile.last_name || null,
+            author_avatar_url: typedProfile.avatar_url || null,
             // Remove the profiles object as we've extracted what we need
             profiles: undefined
           };
@@ -220,3 +241,4 @@ export function useCategoryPosts(categorySlug: string) {
 
   return { posts, isLoading, error };
 }
+
