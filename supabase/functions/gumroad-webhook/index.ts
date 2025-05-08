@@ -54,6 +54,8 @@ function getSubscriptionTier(productCode: string): { tier: string; cycle: string
 // Helper function to find a user by email
 async function findUserByEmail(email: string): Promise<string | null> {
   try {
+    console.log("Looking up user by email:", email);
+    
     // Query auth.users directly to find user by email
     const { data, error } = await supabase.auth.admin.listUsers({
       page: 1,
