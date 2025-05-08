@@ -2,55 +2,33 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1"
 
-// Environment variables
-const supabaseUrl = Deno.env.get("SUPABASE_URL")
-const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
-const supabase = createClient(supabaseUrl || "", supabaseKey || "")
+const supabaseUrl = Deno.env.get("SUPABASE_URL") || ""
+const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
+const appUrl = Deno.env.get("APP_URL") || "https://resulient.com"
+const supabase = createClient(supabaseUrl, supabaseKey)
 
-// CORS headers for the API
+// CORS headers
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 }
 
-// Helper function to parse webhook payload from different formats
-async function parsePayload(req: Request): Promise<Record<string, any>> {
-  const contentType = req.headers.get("content-type") || ""
-  const rawBody = await req.text()
-  console.log(`[gumroad-webhook] Raw payload received:`, rawBody)
-  
+// Helper function to safely parse a date string
+function safeParseDate(dateString: string): Date | null {
   try {
-    // Try parsing based on content type
-    if (contentType.includes("application/json")) {
-      return JSON.parse(rawBody)
-    } 
-    else if (contentType.includes("application/x-www-form-urlencoded")) {
-      const formData = new URLSearchParams(rawBody)
-      return Object.fromEntries(formData.entries())
-    } 
-    else {
-      // Try JSON first, fall back to form data
-      try {
-        return JSON.parse(rawBody)
-      } catch {
-        const formData = new URLSearchParams(rawBody)
-        return Object.fromEntries(formData.entries())
-      }
+    const date = new Date(dateString);
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return null;
     }
+    return date;
   } catch (error) {
-    console.error(`[gumroad-webhook] Failed to parse payload:`, error)
-    
-    // Check if this is a test ping
-    if (rawBody.includes("ping") || rawBody.toLowerCase().includes("test")) {
-      console.log(`[gumroad-webhook] Detected test ping`)
-      return { ping: true }
-    }
-    
-    throw new Error("Could not parse webhook payload")
+    console.error("Error parsing date:", error);
+    return null;
   }
 }
 
-// Helper function to determine subscription tier from product code
+// Helper function to map Gumroad product codes to subscription tiers
 function getSubscriptionTier(productCode: string): { tier: string; cycle: string } {
   const productMap: Record<string, { tier: string; cycle: string }> = {
     // Premium Monthly
@@ -68,369 +46,378 @@ function getSubscriptionTier(productCode: string): { tier: string; cycle: string
     // Platinum Yearly
     "dcfjt": { tier: "platinum", cycle: "yearly" },
     "platinum-yearly": { tier: "platinum", cycle: "yearly" },
-  }
+  };
   
-  return productMap[productCode] || { tier: "premium", cycle: "monthly" }
+  return productMap[productCode] || { tier: "premium", cycle: "monthly" };
 }
 
 // Helper function to find a user by email
 async function findUserByEmail(email: string): Promise<string | null> {
-  if (!email) {
-    console.log(`[gumroad-webhook] No email provided to search for user`)
-    return null
-  }
-  
   try {
-    console.log(`[gumroad-webhook] Searching for user with email: ${email}`)
+    console.log("Looking up user by email:", email);
     
+    // Query auth.users directly to find user by email
     const { data, error } = await supabase.auth.admin.listUsers({
       page: 1,
-      perPage: 1000
-    })
+      perPage: 1000 // Adjust based on expected number of users
+    });
     
     if (error) {
-      console.error(`[gumroad-webhook] Error querying users:`, error)
-      return null
+      console.error("Error querying users:", error);
+      return null;
     }
     
-    const user = data.users.find(u => u.email?.toLowerCase() === email.toLowerCase())
+    // Find the user with the matching email
+    const user = data.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
     
     if (user) {
-      console.log(`[gumroad-webhook] Found user ID ${user.id} for email ${email}`)
-      return user.id
+      console.log("Found user ID for email:", user.id);
+      return user.id;
     }
     
-    console.log(`[gumroad-webhook] No user found with email: ${email}`)
-    return null
+    console.log("No user found with email:", email);
+    return null;
   } catch (error) {
-    console.error(`[gumroad-webhook] Error finding user by email:`, error)
-    return null
+    console.error("Error finding user by email:", error);
+    return null;
   }
 }
 
-// Date handling helper
-function addDuration(date: Date, cycle: string): Date {
-  const result = new Date(date)
-  if (cycle === "yearly") {
-    result.setFullYear(result.getFullYear() + 1)
-  } else {
-    result.setMonth(result.getMonth() + 1)
-  }
-  return result
+// Helper function to add 1 year to a date
+function addOneYear(date: Date): Date {
+  const result = new Date(date);
+  result.setFullYear(result.getFullYear() + 1);
+  return result;
 }
 
-// Create a request ID for traceability in logs
-function generateRequestId(): string {
-  return crypto.randomUUID()
+// Helper function to add 1 month to a date
+function addOneMonth(date: Date): Date {
+  const result = new Date(date);
+  result.setMonth(result.getMonth() + 1);
+  return result;
 }
 
-serve(async (req: Request) => {
-  // Generate a unique request ID for tracing
-  const requestId = generateRequestId()
+// Enhanced HTML template for immediate redirect
+function getRedirectHtml(redirectUrl: string): string {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting to Resulient...</title>
+  <meta http-equiv="refresh" content="0;url=${redirectUrl}">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(to bottom right, #eef2ff, #e0e7ff);
+      color: #4338ca;
+      text-align: center;
+      padding: 0 20px;
+    }
+    .logo {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #4338ca, #6366f1, #ec4899);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .container {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      max-width: 500px;
+      width: 100%;
+    }
+    .message {
+      font-size: 1.125rem;
+      margin-bottom: 1.5rem;
+    }
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border-left-color: #4338ca;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .button {
+      display: inline-block;
+      background: linear-gradient(to right, #4f46e5, #7c3aed);
+      color: white;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      text-decoration: none;
+      margin-top: 1rem;
+      transition: transform 0.2s;
+    }
+    .button:hover {
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">Resulient</div>
+    <div class="spinner"></div>
+    <div class="message">Payment successful! Redirecting you now...</div>
+    <p>If you're not redirected automatically, <a href="${redirectUrl}" class="button">Click here to continue</a>.</p>
+  </div>
   
-  console.log(`[gumroad-webhook] [${requestId}] Received ${req.method} request`)
-  console.log(`[gumroad-webhook] [${requestId}] Headers:`, 
-    Object.fromEntries(req.headers.entries()))
-  
+  <script>
+    // Try multiple redirect approaches
+    setTimeout(function() {
+      window.location.href = "${redirectUrl}";
+    }, 500);
+    
+    // Fallback approach with form submission
+    setTimeout(function() {
+      var form = document.createElement('form');
+      form.method = 'GET';
+      form.action = "${redirectUrl}";
+      document.body.appendChild(form);
+      form.submit();
+    }, 1500);
+  </script>
+</body>
+</html>
+  `;
+}
+
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    console.log(`[gumroad-webhook] [${requestId}] Handling CORS preflight request`)
-    return new Response(null, { 
-      status: 204, 
-      headers: corsHeaders 
-    })
+    return new Response("ok", { headers: corsHeaders })
   }
-  
+
   try {
-    // Parse the webhook payload
-    const payload = await parsePayload(req)
-    console.log(`[gumroad-webhook] [${requestId}] Parsed payload:`, payload)
+    // Log that we received a webhook
+    console.log("Received webhook request:", req.method, req.url);
     
-    // Check for test ping
-    if (payload.ping === "true" || payload.ping === true || 
-        payload.test === "true" || payload.test === true) {
-      console.log(`[gumroad-webhook] [${requestId}] Received test ping from Gumroad`)
+    // Get request content type
+    const contentType = req.headers.get("content-type") || "";
+    console.log("Content-Type:", contentType);
+    
+    let payload: Record<string, string> = {};
+    
+    // Process webhook payload based on content type
+    if (contentType.includes("application/json")) {
+      // Handle JSON payload
+      const jsonData = await req.json();
+      console.log("Received JSON data:", JSON.stringify(jsonData));
       
-      // Create a record of the test ping
-      try {
-        await supabase
-          .from("subscription_notifications")
-          .insert({
-            email: "test@ping.com",
-            purchase_id: `test_ping_${requestId}`,
-            product_code: "test_ping",
-            processed: true,
-            user_id: null,
-          })
-        
-        console.log(`[gumroad-webhook] [${requestId}] Created test ping notification record`)
-      } catch (error) {
-        console.error(`[gumroad-webhook] [${requestId}] Error recording test ping:`, error)
+      // Convert JSON to expected format
+      if (typeof jsonData === "object" && jsonData !== null) {
+        for (const [key, value] of Object.entries(jsonData)) {
+          payload[key] = String(value);
+        }
       }
+    } else if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
+      // Handle form data
+      try {
+        const formData = await req.formData();
+        console.log("Received form data");
+        
+        // Convert FormData to a regular object
+        for (const [key, value] of formData.entries()) {
+          payload[key] = value.toString();
+        }
+      } catch (error) {
+        console.error("Error parsing form data:", error);
+        // Try fallback to text parsing if formData fails
+        const text = await req.text();
+        console.log("Received text data:", text);
+        
+        // Parse URL-encoded form data
+        if (text) {
+          const params = new URLSearchParams(text);
+          for (const [key, value] of params.entries()) {
+            payload[key] = value;
+          }
+        }
+      }
+    } else {
+      // Fallback to text parsing
+      const text = await req.text();
+      console.log("Received text data:", text);
       
-      return new Response(
-        JSON.stringify({ 
-          status: "success", 
-          message: "Test ping received successfully",
-          requestId
-        }),
-        { 
-          status: 200, 
-          headers: { 
-            ...corsHeaders, 
-            "Content-Type": "application/json" 
-          } 
+      try {
+        // Try to parse as JSON first
+        const jsonData = JSON.parse(text);
+        for (const [key, value] of Object.entries(jsonData)) {
+          payload[key] = String(value);
         }
-      )
+      } catch (jsonError) {
+        // If not JSON, try as URL-encoded
+        try {
+          const params = new URLSearchParams(text);
+          for (const [key, value] of params.entries()) {
+            payload[key] = value;
+          }
+        } catch (urlError) {
+          console.error("Failed to parse payload:", urlError);
+          throw new Error("Could not parse webhook payload in any supported format");
+        }
+      }
     }
     
-    // Check for required fields
-    const userEmail = payload.email
-    if (!userEmail) {
-      console.log(`[gumroad-webhook] [${requestId}] Invalid webhook payload - missing email field`)
-      return new Response(
-        JSON.stringify({ 
-          status: "error", 
-          message: "Missing required field: email",
-          requestId 
-        }),
-        { 
-          status: 200, // Return 200 so Gumroad doesn't retry
-          headers: { 
-            ...corsHeaders, 
-            "Content-Type": "application/json" 
-          } 
-        }
-      )
+    console.log("Processed webhook payload:", JSON.stringify(payload));
+    
+    // Verify this is a Gumroad webhook
+    if (!payload.email && !payload.sale_id && !payload.product_id) {
+      console.error("Invalid webhook payload - missing required fields");
+      throw new Error("Invalid webhook payload - not a valid Gumroad webhook");
     }
     
-    // Extract sale/purchase ID from various possible fields
-    const saleId = payload.sale_id || payload.purchase_id || 
-                  payload.subscription_id || payload.id || 
-                  payload.resource_id
-                  
-    if (!saleId) {
-      console.log(`[gumroad-webhook] [${requestId}] Invalid webhook payload - missing sale/purchase ID`)
-      return new Response(
-        JSON.stringify({ 
-          status: "error", 
-          message: "Missing required ID field",
-          requestId 
-        }),
-        { 
-          status: 200, // Return 200 so Gumroad doesn't retry
-          headers: { 
-            ...corsHeaders, 
-            "Content-Type": "application/json" 
-          } 
-        }
-      )
-    }
+    // Extract the product code from the permalink or product_id
+    const productCode = payload.permalink || payload.short_product_id || "";
+    console.log("Extracted product code:", productCode);
     
-    // Extract the product code from various possible fields
-    const productCode = payload.permalink || payload.product_permalink || 
-                       payload.product_id || payload.short_product_id || ""
-    console.log(`[gumroad-webhook] [${requestId}] Product code: ${productCode}`)
-    
-    // Get subscription tier details
-    const { tier, cycle } = getSubscriptionTier(productCode)
-    console.log(`[gumroad-webhook] [${requestId}] Subscription tier: ${tier}, cycle: ${cycle}`)
+    // Get subscription details based on product code
+    const { tier, cycle } = getSubscriptionTier(productCode);
+    console.log("Subscription details:", { tier, cycle });
     
     // Find the user associated with this email
-    const userId = await findUserByEmail(userEmail)
-    
-    // Always create notification record regardless of user match
-    const { data: notificationData, error: notificationError } = await supabase
-      .from("subscription_notifications")
-      .insert({
-        email: userEmail,
-        purchase_id: saleId,
-        product_code: productCode,
-        processed: userId !== null,
-        user_id: userId,
-      })
-      .select()
-      .single()
-    
-    if (notificationError) {
-      console.error(`[gumroad-webhook] [${requestId}] Error creating notification record:`, notificationError)
-    } else {
-      console.log(`[gumroad-webhook] [${requestId}] Created notification record:`, notificationData)
+    const userEmail = payload.email;
+    if (!userEmail) {
+      throw new Error("No email address provided in webhook payload");
     }
     
-    // If user not found, we can't proceed with subscription updates
+    console.log("Looking up user by email in auth.users:", userEmail);
+    const userId = await findUserByEmail(userEmail);
+    
     if (!userId) {
-      console.log(`[gumroad-webhook] [${requestId}] Could not find user with email: ${userEmail}`)
-      return new Response(
-        JSON.stringify({ 
-          status: "warning", 
-          message: "Webhook received but user not found",
+      console.error("Could not find user with email:", userEmail);
+      // Create notification record even if user is not found
+      await supabase
+        .from("subscription_notifications")
+        .insert({
           email: userEmail,
-          product: productCode,
-          requestId
-        }),
-        { 
-          status: 200, // Return 200 so Gumroad doesn't retry
-          headers: { 
-            ...corsHeaders, 
-            "Content-Type": "application/json" 
-          } 
-        }
-      )
+          purchase_id: payload.sale_id,
+          product_code: productCode,
+          processed: false,
+          user_id: null,
+        });
+      
+      throw new Error("Could not find user with email: " + userEmail);
     }
     
-    // Parse the timestamp from various possible fields
-    const timestamp = payload.sale_timestamp || payload.created_at || 
-                     payload.purchase_time || new Date().toISOString()
-    const saleTimestamp = new Date(timestamp)
-    if (isNaN(saleTimestamp.getTime())) {
-      console.log(`[gumroad-webhook] [${requestId}] Invalid sale timestamp: ${timestamp}, using current time`)
-      saleTimestamp.setTime(Date.now())
+    // Parse the sale timestamp
+    const saleTimestamp = safeParseDate(payload.sale_timestamp || new Date().toISOString());
+    if (!saleTimestamp) {
+      throw new Error("Invalid sale timestamp: " + payload.sale_timestamp);
     }
     
     // Calculate subscription end date
-    const endDate = addDuration(saleTimestamp, cycle)
-    
-    // Get the event type from various possible fields
-    const event = payload.event || payload.resource_name || payload.action || "sale"
-    console.log(`[gumroad-webhook] [${requestId}] Event type: ${event}`)
-    
-    // Handle different webhook events
-    if (event === "subscription_cancelled" || event === "refund" || 
-        event === "dispute" || event === "charge_refunded" ||
-        event.includes("cancel")) {
-      console.log(`[gumroad-webhook] [${requestId}] Handling cancellation/refund event: ${event}`)
-      
-      const { data, error } = await supabase
-        .from("user_subscriptions")
-        .update({ 
-          status: "cancelled",
-          updated_at: new Date().toISOString(),
-          last_webhook_event: event
-        })
-        .eq("gumroad_purchase_id", saleId)
-        .select()
-        .single()
-        
-      if (error) {
-        console.error(`[gumroad-webhook] [${requestId}] Error cancelling subscription:`, error)
-        return new Response(
-          JSON.stringify({ 
-            status: "error", 
-            message: "Failed to cancel subscription", 
-            error: error.message,
-            requestId
-          }),
-          { 
-            status: 200, // Return 200 so Gumroad doesn't retry
-            headers: { 
-              ...corsHeaders, 
-              "Content-Type": "application/json" 
-            } 
-          }
-        )
-      }
-      
-      console.log(`[gumroad-webhook] [${requestId}] Successfully cancelled subscription:`, data)
-      return new Response(
-        JSON.stringify({ 
-          status: "success", 
-          message: "Subscription cancelled successfully",
-          requestId
-        }),
-        { 
-          status: 200,
-          headers: { 
-            ...corsHeaders, 
-            "Content-Type": "application/json" 
-          } 
-        }
-      )
+    let endDate: Date;
+    if (cycle === "yearly") {
+      endDate = addOneYear(saleTimestamp);
+    } else {
+      endDate = addOneMonth(saleTimestamp);
     }
     
-    // For new sales or renewals, update/create subscription
-    console.log(`[gumroad-webhook] [${requestId}] Creating/updating subscription:`, {
+    console.log("Creating subscription record with data:", {
       user_id: userId,
       subscription_tier: tier,
       billing_cycle: cycle,
+      status: "active",
       start_date: saleTimestamp.toISOString(),
       end_date: endDate.toISOString(),
-      sale_id: saleId
-    })
+      gumroad_product_id: payload.product_id,
+      gumroad_purchase_id: payload.sale_id,
+      gumroad_subscription_id: payload.subscription_id,
+      last_webhook_event: payload.resource_name
+    });
     
+    // Create a subscription record in the database
     const { data: subscription, error } = await supabase
       .from("user_subscriptions")
-      .upsert({
+      .insert({
         user_id: userId,
         subscription_tier: tier,
         billing_cycle: cycle,
         status: "active",
         start_date: saleTimestamp.toISOString(),
         end_date: endDate.toISOString(),
-        gumroad_product_id: productCode,
-        gumroad_purchase_id: saleId,
-        gumroad_subscription_id: payload.subscription_id || null,
-        last_webhook_event: event
+        gumroad_product_id: payload.product_id,
+        gumroad_purchase_id: payload.sale_id,
+        gumroad_subscription_id: payload.subscription_id,
+        last_webhook_event: payload.resource_name
       })
-      .select()
-      .single()
+      .select("*")
+      .single();
       
     if (error) {
-      console.error(`[gumroad-webhook] [${requestId}] Error creating/updating subscription:`, error)
-      return new Response(
-        JSON.stringify({ 
-          status: "error", 
-          message: "Failed to create/update subscription", 
-          error: error.message,
-          requestId
-        }),
-        { 
-          status: 200, // Return 200 so Gumroad doesn't retry
-          headers: { 
-            ...corsHeaders, 
-            "Content-Type": "application/json" 
-          } 
-        }
-      )
+      console.error("Error creating subscription:", error);
+      throw new Error("Failed to create subscription: " + error.message);
     }
     
-    console.log(`[gumroad-webhook] [${requestId}] Successfully processed webhook:`, subscription)
+    console.log("Created subscription:", subscription);
     
-    // Return success response
+    // Also create a notification record for tracking
+    await supabase
+      .from("subscription_notifications")
+      .insert({
+        email: userEmail,
+        purchase_id: payload.sale_id,
+        product_code: productCode,
+        processed: true,
+        user_id: userId,
+      });
+    
+    // Get the success URL from the payload or use default with product code
+    const redirectUrl = payload["url_params[success_url]"] || 
+                      `${appUrl}/subscription-success?product=${productCode}`;
+    console.log("Redirecting to:", redirectUrl);
+    
+    // For Gumroad, we need to return a simple 200 success response
+    // But we'll add a Location header to attempt a redirect
     return new Response(
-      JSON.stringify({ 
-        status: "success", 
-        message: "Webhook processed successfully",
-        subscription_id: subscription?.id,
-        requestId
-      }),
+      getRedirectHtml(redirectUrl),
       { 
         status: 200, 
         headers: { 
           ...corsHeaders, 
-          "Content-Type": "application/json",
-          "Cache-Control": "no-store, no-cache, must-revalidate"
+          "Content-Type": "text/html",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "Location": redirectUrl // Add redirect header as a fallback
         } 
       }
-    )
+    );
   } catch (error) {
-    console.error(`[gumroad-webhook] [${requestId}] Unhandled error:`, error)
+    console.error("Error processing webhook:", error);
     
-    // Always return a 200 response to Gumroad, even on error
+    // Even on error, return a success response to Gumroad with redirect
     return new Response(
-      JSON.stringify({ 
-        status: "error", 
-        message: "Internal server error", 
-        error: error.message,
-        requestId
-      }),
+      getRedirectHtml(`${appUrl}/subscription-success`),
       { 
-        status: 200, 
+        status: 200,  // Still return 200 to Gumroad
         headers: { 
           ...corsHeaders, 
-          "Content-Type": "application/json" 
+          "Content-Type": "text/html",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "Location": `${appUrl}/subscription-success` // Add redirect header as a fallback
         } 
       }
-    )
+    );
   }
 })
