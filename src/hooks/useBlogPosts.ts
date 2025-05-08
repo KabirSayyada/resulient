@@ -27,7 +27,7 @@ export function useBlogPosts() {
               avatar_url
             )
           `)
-          .eq('published_at', 'is not', null)
+          .is('published_at', 'not.null') // Fixed: Using is instead of eq with 'is not'
           .order('published_at', { ascending: false });
         
         if (error) {
@@ -189,7 +189,7 @@ export function useCategoryPosts(categorySlug: string) {
             )
           `)
           .eq('category', categorySlug)
-          .eq('published_at', 'is not', null)
+          .is('published_at', 'not.null') // Fixed: Using is instead of eq with 'is not'
           .order('published_at', { ascending: false });
         
         if (error) {
@@ -241,4 +241,3 @@ export function useCategoryPosts(categorySlug: string) {
 
   return { posts, isLoading, error };
 }
-
