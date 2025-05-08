@@ -4,10 +4,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1"
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || ""
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
-const appUrl = Deno.env.get("APP_URL") || "https://resulient.com"
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-// CORS headers
+// CORS headers for API responses
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -90,24 +89,6 @@ function addOneMonth(date: Date): Date {
   return result;
 }
 
-// Simple redirect HTML
-function getRedirectHtml(redirectUrl: string): string {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0;url=${redirectUrl}">
-  <title>Redirecting...</title>
-</head>
-<body>
-  <p>Redirecting to <a href="${redirectUrl}">${redirectUrl}</a>...</p>
-  <script>window.location.href = "${redirectUrl}";</script>
-</body>
-</html>
-  `;
-}
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -116,62 +97,153 @@ serve(async (req) => {
 
   try {
     console.log("Received webhook request:", req.method, req.url);
+    const requestId = crypto.randomUUID();
+    console.log(`Request ID: ${requestId} - Starting processing`);
     
-    // Parse the webhook payload as JSON - Gumroad always sends JSON
     let payload;
+    let rawText = "";
+    
     try {
-      payload = await req.json();
-      console.log("Received webhook payload:", JSON.stringify(payload));
-    } catch (error) {
-      console.error("Error parsing JSON payload:", error);
-      // If JSON parsing fails, try to get the raw text
-      const text = await req.text();
-      console.log("Raw payload text:", text);
-      throw new Error("Failed to parse webhook payload as JSON");
+      // Try to parse the webhook payload as JSON
+      rawText = await req.text();
+      console.log(`Request ID: ${requestId} - Raw payload:`, rawText);
+      
+      try {
+        payload = JSON.parse(rawText);
+        console.log(`Request ID: ${requestId} - Parsed JSON payload:`, JSON.stringify(payload));
+      } catch (jsonError) {
+        console.error(`Request ID: ${requestId} - Error parsing JSON:`, jsonError);
+        // If JSON parsing fails, check if it's form data
+        const formData = new URLSearchParams(rawText);
+        if (formData.has("email") || formData.has("sale_id")) {
+          // Convert form data to JSON object
+          payload = Object.fromEntries(formData.entries());
+          console.log(`Request ID: ${requestId} - Parsed form data payload:`, JSON.stringify(payload));
+        } else {
+          throw new Error("Could not parse payload as JSON or form data");
+        }
+      }
+    } catch (parseError) {
+      console.error(`Request ID: ${requestId} - Failed to parse payload:`, parseError);
+      console.log(`Request ID: ${requestId} - Request headers:`, JSON.stringify(Object.fromEntries(req.headers.entries())));
+      return new Response(
+        JSON.stringify({ status: "error", message: "Failed to parse webhook payload" }),
+        { 
+          status: 400, 
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json"
+          } 
+        }
+      );
     }
     
+    // Log the event type if it exists
+    const eventName = payload.event || payload.resource_name;
+    console.log(`Request ID: ${requestId} - Event type: ${eventName || "unknown"}`);
+    
     // Verify this is a Gumroad webhook with required fields
-    if (!payload.email || !payload.sale_id) {
-      console.error("Invalid webhook payload - missing required fields");
-      throw new Error("Invalid webhook payload - missing required fields");
+    if (!payload.email) {
+      console.error(`Request ID: ${requestId} - Invalid webhook payload - missing email field`);
+      return new Response(
+        JSON.stringify({ status: "error", message: "Missing required field: email" }),
+        { 
+          status: 400, 
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json"
+          } 
+        }
+      );
+    }
+    
+    const saleId = payload.sale_id || payload.purchase_id || payload.subscription_id;
+    if (!saleId) {
+      console.error(`Request ID: ${requestId} - Invalid webhook payload - missing sale/purchase/subscription ID`);
+      return new Response(
+        JSON.stringify({ status: "error", message: "Missing required ID field" }),
+        { 
+          status: 400, 
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json"
+          } 
+        }
+      );
     }
     
     // Extract the product code (permalink is the product code in Gumroad)
-    const productCode = payload.permalink || payload.short_product_id || "";
-    console.log("Product code:", productCode);
+    const productCode = payload.permalink || payload.product_permalink || payload.short_product_id || "";
+    console.log(`Request ID: ${requestId} - Product code:`, productCode);
     
     // Get subscription details based on product code
     const { tier, cycle } = getSubscriptionTier(productCode);
-    console.log("Subscription tier:", tier, "cycle:", cycle);
+    console.log(`Request ID: ${requestId} - Subscription tier: ${tier}, cycle: ${cycle}`);
     
     // Find the user associated with this email
     const userEmail = payload.email;
     if (!userEmail) {
-      throw new Error("No email address provided in webhook payload");
+      console.error(`Request ID: ${requestId} - No email address provided in webhook payload`);
+      return new Response(
+        JSON.stringify({ status: "error", message: "No email address provided" }),
+        { 
+          status: 400, 
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json"
+          } 
+        }
+      );
     }
     
     const userId = await findUserByEmail(userEmail);
     
+    // Create notification record even if user is not found
+    await supabase
+      .from("subscription_notifications")
+      .insert({
+        email: userEmail,
+        purchase_id: saleId,
+        product_code: productCode,
+        processed: userId !== null,
+        user_id: userId,
+      });
+    
+    console.log(`Request ID: ${requestId} - Created notification record for email: ${userEmail}`);
+    
     if (!userId) {
-      console.error("Could not find user with email:", userEmail);
-      // Create notification record even if user is not found
-      await supabase
-        .from("subscription_notifications")
-        .insert({
+      console.error(`Request ID: ${requestId} - Could not find user with email: ${userEmail}`);
+      return new Response(
+        JSON.stringify({ 
+          status: "warning", 
+          message: "Webhook received but user not found",
           email: userEmail,
-          purchase_id: payload.sale_id,
-          product_code: productCode,
-          processed: false,
-          user_id: null,
-        });
-      
-      throw new Error("Could not find user with email: " + userEmail);
+          product: productCode
+        }),
+        { 
+          status: 200,  // Still return 200 to Gumroad  
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json"
+          } 
+        }
+      );
     }
     
     // Parse the sale timestamp
-    const saleTimestamp = safeParseDate(payload.sale_timestamp || new Date().toISOString());
+    const saleTimestamp = safeParseDate(payload.sale_timestamp || payload.created_at || new Date().toISOString());
     if (!saleTimestamp) {
-      throw new Error("Invalid sale timestamp: " + payload.sale_timestamp);
+      console.error(`Request ID: ${requestId} - Invalid sale timestamp:`, payload.sale_timestamp);
+      return new Response(
+        JSON.stringify({ status: "error", message: "Invalid sale timestamp" }),
+        { 
+          status: 200,  // Still return 200 to Gumroad
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json"
+          } 
+        }
+      );
     }
     
     // Calculate subscription end date
@@ -182,19 +254,62 @@ serve(async (req) => {
       endDate = addOneMonth(saleTimestamp);
     }
     
-    console.log("Creating subscription record:", {
+    console.log(`Request ID: ${requestId} - Creating subscription record:`, {
       user_id: userId,
       subscription_tier: tier,
       billing_cycle: cycle,
       start_date: saleTimestamp.toISOString(),
       end_date: endDate.toISOString(),
-      sale_id: payload.sale_id
+      sale_id: saleId
     });
     
-    // Create a subscription record in the database
+    // Handle different webhook events
+    const event = payload.event || payload.resource_name;
+    
+    // Handle subscription cancellation
+    if (event === "subscription_cancelled" || event === "refund") {
+      console.log(`Request ID: ${requestId} - Handling cancellation/refund event:`, event);
+      
+      const { error } = await supabase
+        .from("user_subscriptions")
+        .update({ 
+          status: "cancelled",
+          updated_at: new Date().toISOString(),
+          last_webhook_event: event
+        })
+        .eq("gumroad_purchase_id", saleId);
+        
+      if (error) {
+        console.error(`Request ID: ${requestId} - Error cancelling subscription:`, error);
+        return new Response(
+          JSON.stringify({ status: "error", message: "Failed to cancel subscription" }),
+          { 
+            status: 200,  // Still return 200 to Gumroad
+            headers: { 
+              ...corsHeaders, 
+              "Content-Type": "application/json"
+            } 
+          }
+        );
+      }
+      
+      console.log(`Request ID: ${requestId} - Successfully cancelled subscription for user:`, userId);
+      return new Response(
+        JSON.stringify({ status: "success", message: "Subscription cancelled" }),
+        { 
+          status: 200,
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json"
+          } 
+        }
+      );
+    }
+    
+    // For subscription renewals or new sales, create/update subscription
     const { data: subscription, error } = await supabase
       .from("user_subscriptions")
-      .insert({
+      .upsert({
         user_id: userId,
         subscription_tier: tier,
         billing_cycle: cycle,
@@ -202,46 +317,42 @@ serve(async (req) => {
         start_date: saleTimestamp.toISOString(),
         end_date: endDate.toISOString(),
         gumroad_product_id: payload.product_id,
-        gumroad_purchase_id: payload.sale_id,
+        gumroad_purchase_id: saleId,
         gumroad_subscription_id: payload.subscription_id,
-        last_webhook_event: payload.resource_name
+        last_webhook_event: event
       })
       .select("*")
-      .single();
+      .maybeSingle();
       
     if (error) {
-      console.error("Error creating subscription:", error);
-      throw new Error("Failed to create subscription: " + error.message);
+      console.error(`Request ID: ${requestId} - Error creating/updating subscription:`, error);
+      return new Response(
+        JSON.stringify({ status: "error", message: "Failed to create subscription" }),
+        { 
+          status: 200,  // Still return 200 to Gumroad
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json"
+          } 
+        }
+      );
     }
     
-    console.log("Created subscription:", subscription);
+    console.log(`Request ID: ${requestId} - Successfully processed webhook. Subscription:`, subscription);
     
-    // Create a notification record for tracking
-    await supabase
-      .from("subscription_notifications")
-      .insert({
-        email: userEmail,
-        purchase_id: payload.sale_id,
-        product_code: productCode,
-        processed: true,
-        user_id: userId,
-      });
-    
-    // Return a success response with redirect
-    const redirectUrl = payload.success_url || 
-                       `${appUrl}/subscription-success?product=${productCode}`;
-    
-    console.log("Redirecting to:", redirectUrl);
-    
+    // Return a simple success response without redirect
     return new Response(
-      getRedirectHtml(redirectUrl),
+      JSON.stringify({ 
+        status: "success", 
+        message: "Webhook processed successfully",
+        subscription_id: subscription?.id || null
+      }),
       { 
         status: 200, 
         headers: { 
           ...corsHeaders, 
-          "Content-Type": "text/html",
-          "Cache-Control": "no-store, no-cache, must-revalidate",
-          "Location": redirectUrl
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate"
         } 
       }
     );
