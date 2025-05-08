@@ -27,7 +27,7 @@ export function useBlogPosts() {
               avatar_url
             )
           `)
-          .is('published_at', 'not.null') // Fixed: Using is instead of eq with 'is not'
+          .not('published_at', 'is', null) // Fixed: Using not() instead of is()
           .order('published_at', { ascending: false });
         
         if (error) {
@@ -189,7 +189,7 @@ export function useCategoryPosts(categorySlug: string) {
             )
           `)
           .eq('category', categorySlug)
-          .is('published_at', 'not.null') // Fixed: Using is instead of eq with 'is not'
+          .not('published_at', 'is', null) // Fixed: Using not() instead of is()
           .order('published_at', { ascending: false });
         
         if (error) {
