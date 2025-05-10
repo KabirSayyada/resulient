@@ -12,13 +12,19 @@ import {
 } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { createMultipleBlogPosts, createCareerDevelopmentPosts, createInterviewPreparationPosts } from '@/utils/blogPostCreator';
+import { 
+  createMultipleBlogPosts, 
+  createCareerDevelopmentPosts, 
+  createInterviewPreparationPosts 
+} from '@/utils/blogPostCreator';
+import { createAdvancedCareerPosts } from '@/utils/createAdvancedCareerPosts';
 
 export function CreateNewBlogPosts() {
   const { user } = useAuth();
   const [isLoadingAll, setIsLoadingAll] = useState(false);
   const [isLoadingCareer, setIsLoadingCareer] = useState(false);
   const [isLoadingInterview, setIsLoadingInterview] = useState(false);
+  const [isLoadingAdvanced, setIsLoadingAdvanced] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
 
   const handleCreateAllPosts = async () => {
@@ -136,6 +142,44 @@ export function CreateNewBlogPosts() {
     }
   };
 
+  const handleCreateAdvancedCareerPosts = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to create blog posts.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsLoadingAdvanced(true);
+      
+      const createdCount = await createAdvancedCareerPosts(user.id);
+      
+      if (createdCount > 0) {
+        toast({
+          title: "Success!",
+          description: `Created ${createdCount} advanced career development blog posts.`,
+        });
+      } else {
+        toast({
+          title: "Note",
+          description: "No new advanced career posts were created. They may already exist.",
+        });
+      }
+    } catch (error) {
+      console.error("Error creating advanced career posts:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create advanced career posts. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingAdvanced(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -149,6 +193,7 @@ export function CreateNewBlogPosts() {
           <TabsList className="mb-4">
             <TabsTrigger value="all">All Posts</TabsTrigger>
             <TabsTrigger value="categories">By Category</TabsTrigger>
+            <TabsTrigger value="advanced">Advanced Posts</TabsTrigger>
           </TabsList>
           
           <TabsContent value="all">
@@ -199,6 +244,38 @@ export function CreateNewBlogPosts() {
                 >
                   {isLoadingInterview ? "Creating..." : "Create Interview Preparation Posts"}
                 </Button>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="advanced">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium mb-2">Advanced Career Development</h3>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Five high-quality, SEO-optimized posts on career growth strategies, work-life balance, 
+                  professional relationships, overcoming plateaus, and future-proofing your career.
+                </p>
+                <Button 
+                  onClick={handleCreateAdvancedCareerPosts} 
+                  disabled={isLoadingAdvanced}
+                  size="sm"
+                  className="w-full"
+                  variant="secondary"
+                >
+                  {isLoadingAdvanced ? "Creating..." : "Create Advanced Career Posts"}
+                </Button>
+              </div>
+              
+              <div className="p-3 bg-muted rounded-md mt-3">
+                <h4 className="text-xs font-semibold mb-2">Posts included:</h4>
+                <ul className="list-disc pl-4 text-xs space-y-1 text-muted-foreground">
+                  <li>Career Growth Strategies for 2024 and Beyond</li>
+                  <li>Mastering Work-Life Balance in High-Pressure Careers</li>
+                  <li>Building Professional Relationships That Advance Your Career</li>
+                  <li>Overcoming Career Plateaus: Strategies for Getting Unstuck</li>
+                  <li>Future-Proof Your Career Path in a Rapidly Changing Job Market</li>
+                </ul>
               </div>
             </div>
           </TabsContent>
