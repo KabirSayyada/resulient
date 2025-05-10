@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BlogLayout } from '@/components/blog/BlogLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,6 +10,7 @@ import { BlogAdminForm } from '@/components/blog/BlogAdminForm';
 import { BlogInitialization } from '@/components/blog/BlogAdmin/BlogInitialization';
 import { CreateEnhancedBlogPosts } from '@/components/blog/CreateEnhancedBlogPosts';
 import { CreateResumeTipsPosts } from '@/components/blog/CreateResumeTipsPosts';
+import { CreateJobSearchStrategyPosts } from '@/components/blog/CreateJobSearchStrategyPosts';
 import { 
   Table,
   TableBody,
@@ -314,6 +314,7 @@ export default function BlogAdmin() {
                       <CardContent className="space-y-4">
                         <CreateEnhancedBlogPosts />
                         <CreateResumeTipsPosts />
+                        <CreateJobSearchStrategyPosts />
                       </CardContent>
                     </Card>
                     
@@ -354,6 +355,14 @@ export default function BlogAdmin() {
                           Create professional resume tips and advice posts
                         </p>
                         <CreateResumeTipsPosts />
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-lg font-medium mb-2">Job Search Strategy Content</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Create professional job search strategy and advice posts
+                        </p>
+                        <CreateJobSearchStrategyPosts />
                       </div>
                     </CardContent>
                   </Card>
