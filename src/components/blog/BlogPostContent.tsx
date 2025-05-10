@@ -1,4 +1,3 @@
-
 import { BlogPost } from '@/types/blog';
 import { formatDistanceToNow } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -58,13 +57,15 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
     ? formatDistanceToNow(new Date(post.published_at), { addSuffix: true })
     : 'Not published';
 
+  // Get author initials for avatar fallback
   const authorInitials = post.author_first_name && post.author_last_name
     ? `${post.author_first_name.charAt(0)}${post.author_last_name.charAt(0)}`
-    : 'AU';
+    : 'RT';
 
+  // Get full author name with better fallback
   const authorName = post.author_first_name && post.author_last_name
     ? `${post.author_first_name} ${post.author_last_name}`
-    : 'Unknown Author';
+    : 'Resulient Team';
 
   const handleShare = () => {
     if (navigator.share) {

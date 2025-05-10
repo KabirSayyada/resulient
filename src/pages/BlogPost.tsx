@@ -27,7 +27,7 @@ export default function BlogPost() {
   // Get author name with fallback
   const authorName = post?.author_first_name && post?.author_last_name 
     ? `${post.author_first_name} ${post.author_last_name}` 
-    : 'Resulient';
+    : 'Resulient Team';
   
   // Prepare structured data for BlogPosting schema
   const structuredData = post ? {
