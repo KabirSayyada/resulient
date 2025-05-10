@@ -36,8 +36,8 @@ export function useBlogPosts() {
         
         // Process the joined data to flatten the author information
         const processedPosts = data.map(post => {
-          // Calculate reading time for each post
-          const readingTime = calculateReadingTime(post.content);
+          // Calculate reading time for each post if not already present
+          const readingTime = post.reading_time || calculateReadingTime(post.content);
           
           // Extract profile info if it exists
           const authorProfile = post.profiles || {};
@@ -125,8 +125,8 @@ export function useBlogPost(slug: string) {
             avatar_url?: string | null 
           };
           
-          // Calculate reading time
-          const readingTime = calculateReadingTime(data.content);
+          // Calculate reading time if not already present
+          const readingTime = data.reading_time || calculateReadingTime(data.content);
           
           const processedPost = {
             ...data,
@@ -198,8 +198,8 @@ export function useCategoryPosts(categorySlug: string) {
         
         // Process the joined data to flatten the author information
         const processedPosts = data.map(post => {
-          // Calculate reading time for each post
-          const readingTime = calculateReadingTime(post.content);
+          // Calculate reading time for each post if not already present
+          const readingTime = post.reading_time || calculateReadingTime(post.content);
           
           // Extract profile info if it exists
           const authorProfile = post.profiles || {};

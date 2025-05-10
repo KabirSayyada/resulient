@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { BlogAdminForm } from '@/components/blog/BlogAdminForm';
 import { BlogInitialization } from '@/components/blog/BlogAdmin/BlogInitialization';
 import { CreateEnhancedBlogPosts } from '@/components/blog/CreateEnhancedBlogPosts';
+import { CreateResumeTipsPosts } from '@/components/blog/CreateResumeTipsPosts';
 import { 
   Table,
   TableBody,
@@ -312,6 +313,7 @@ export default function BlogAdmin() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <CreateEnhancedBlogPosts />
+                        <CreateResumeTipsPosts />
                       </CardContent>
                     </Card>
                     
@@ -344,6 +346,14 @@ export default function BlogAdmin() {
                           Create high-quality, SEO-optimized blog posts
                         </p>
                         <CreateEnhancedBlogPosts />
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-lg font-medium mb-2">Resume Tips Content</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Create professional resume tips and advice posts
+                        </p>
+                        <CreateResumeTipsPosts />
                       </div>
                     </CardContent>
                   </Card>
