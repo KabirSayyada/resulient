@@ -212,7 +212,8 @@ export async function createCareerDevelopmentPosts(authorId: string) {
         updated_at: now,
         seo_title: "Effective Networking Strategies for Career Advancement in 2025 | Expert Guide",
         seo_description: "Learn proven networking techniques to accelerate your career growth in today's digital-first professional landscape. Discover strategies for both online and in-person connections.",
-        seo_keywords: "professional networking, career advancement, linkedin optimization, virtual networking, informational interviews, career development, networking strategies"
+        seo_keywords: "professional networking, career advancement, linkedin optimization, virtual networking, informational interviews, career development, networking strategies",
+        reading_time: 0 // Initialize with 0, will be calculated below
       };
       
       // Calculate reading time
@@ -447,7 +448,8 @@ export async function createCareerDevelopmentPosts(authorId: string) {
         updated_at: now,
         seo_title: "Remote Work Productivity Tips for Success in 2025 | Expert Guide",
         seo_description: "Discover expert strategies to maximize your remote work productivity and advance your career while maintaining work-life balance in today's flexible work environment.",
-        seo_keywords: "remote work productivity, work from home tips, remote work tools, time management, digital productivity, work-life balance, hybrid work, virtual communication"
+        seo_keywords: "remote work productivity, work from home tips, remote work tools, time management, digital productivity, work-life balance, hybrid work, virtual communication",
+        reading_time: 0 // Initialize with 0, will be calculated below
       };
       
       // Calculate reading time
@@ -722,7 +724,8 @@ export async function createCareerDevelopmentPosts(authorId: string) {
         updated_at: now,
         seo_title: "Salary Negotiation Techniques That Actually Work in 2025 | Expert Guide",
         seo_description: "Master proven salary negotiation strategies to secure the compensation you deserve. Learn how to research, prepare and confidently negotiate your complete compensation package.",
-        seo_keywords: "salary negotiation, compensation negotiation, job offer negotiation, negotiation techniques, salary increase, job offer, compensation package, negotiation strategy"
+        seo_keywords: "salary negotiation, compensation negotiation, job offer negotiation, negotiation techniques, salary increase, job offer, compensation package, negotiation strategy",
+        reading_time: 0 // Initialize with 0, will be calculated below
       };
       
       // Calculate reading time
@@ -990,7 +993,8 @@ export async function createCareerDevelopmentPosts(authorId: string) {
         updated_at: now,
         seo_title: "Building a Personal Brand for Career Success in 2025 | Expert Guide",
         seo_description: "Learn how to develop an authentic personal brand that attracts opportunities and accelerates your career growth in today's competitive professional landscape.",
-        seo_keywords: "personal branding, professional identity, linkedin optimization, thought leadership, online presence, career advancement, personal brand strategy, professional development"
+        seo_keywords: "personal branding, professional identity, linkedin optimization, thought leadership, online presence, career advancement, personal brand strategy, professional development",
+        reading_time: 0 // Initialize with 0, will be calculated below
       };
       
       // Calculate reading time
@@ -1319,14 +1323,15 @@ export async function createCareerDevelopmentPosts(authorId: string) {
 </div>`,
         featured_image: "https://images.unsplash.com/photo-1529387488305-4c3d38a1e2e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
         category: "career-development",
-        tags: ["career transition", "career change", "industry change", "professional development", "transferable skills", "job search", "networking"],
+        tags: ["career transition", "career change", "industry switch", "professional development", "job search", "career strategy"],
         author_id: authorId,
         published_at: now,
         created_at: now,
         updated_at: now,
-        seo_title: "Career Transition Guide: Changing Industries Successfully in 2025",
-        seo_description: "Master the process of changing careers with this comprehensive guide to successfully transitioning between industries while leveraging your existing skills and experience.",
-        seo_keywords: "career transition, career change, industry change, changing careers, professional reinvention, transferable skills, career pivot, new industry, career development"
+        seo_title: "Career Transition Guide: Changing Industries Successfully | Expert Guide",
+        seo_description: "Learn how to successfully transition to a new industry with our comprehensive guide. Discover strategies to leverage your existing skills and experience for a smooth career change.",
+        seo_keywords: "career transition, career change, changing industries, industry switch, professional pivot, job search, career development, transferable skills",
+        reading_time: 0 // Initialize with 0, will be calculated below
       };
       
       // Calculate reading time
@@ -1346,11 +1351,7 @@ export async function createCareerDevelopmentPosts(authorId: string) {
       }
     }
     
-    return { 
-      created: createdPosts.length, 
-      existing: existingPosts ? existingPosts.length : 0
-    };
-    
+    return { created: createdPosts.length, existing: existingPosts ? existingPosts.length : 0 };
   } catch (error) {
     console.error('Error creating career development posts:', error);
     throw error;
