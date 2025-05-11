@@ -11,6 +11,7 @@ import { BlogInitialization } from '@/components/blog/BlogAdmin/BlogInitializati
 import { CreateEnhancedBlogPosts } from '@/components/blog/CreateEnhancedBlogPosts';
 import { CreateResumeTipsPosts } from '@/components/blog/CreateResumeTipsPosts';
 import { CreateJobSearchStrategyPosts } from '@/components/blog/CreateJobSearchStrategyPosts';
+import { CreateInterviewPrepPosts } from '@/components/blog/CreateInterviewPrepPosts';
 import { 
   Table,
   TableBody,
@@ -315,6 +316,7 @@ export default function BlogAdmin() {
                         <CreateEnhancedBlogPosts />
                         <CreateResumeTipsPosts />
                         <CreateJobSearchStrategyPosts />
+                        <CreateInterviewPrepPosts />
                       </CardContent>
                     </Card>
                     
@@ -363,6 +365,14 @@ export default function BlogAdmin() {
                           Create professional job search strategy and advice posts
                         </p>
                         <CreateJobSearchStrategyPosts />
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-lg font-medium mb-2">Interview Preparation Content</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Create comprehensive interview preparation guides and resources
+                        </p>
+                        <CreateInterviewPrepPosts />
                       </div>
                     </CardContent>
                   </Card>
