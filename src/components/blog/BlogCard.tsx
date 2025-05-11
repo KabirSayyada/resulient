@@ -19,7 +19,7 @@ export function BlogCard({ post }: BlogCardProps) {
   // Get author initials for avatar fallback
   const authorInitials = post.author_first_name && post.author_last_name
     ? `${post.author_first_name.charAt(0)}${post.author_last_name.charAt(0)}`
-    : 'AU';
+    : 'RT';
   
   // Get full author name with better fallback
   const authorName = post.author_first_name && post.author_last_name

@@ -516,7 +516,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
           <div>
             <h3 className="text-lg font-bold">{authorName}</h3>
             <p className="text-sm text-muted-foreground mb-2">Resume Optimization Expert</p>
-            <p>Career advisor and resume specialist with over 8 years of experience helping job seekers land their dream positions through optimized application materials.</p>
+            <p>Career advisor and resume specialist with over 40 years of experience helping job seekers land their dream positions through optimized application materials.</p>
           </div>
         </div>
       </div>
