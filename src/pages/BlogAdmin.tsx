@@ -7,7 +7,6 @@ import { BlogPost } from '@/types/blog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BlogAdminForm } from '@/components/blog/BlogAdminForm';
-import { BlogInitialization } from '@/components/blog/BlogAdmin/BlogInitialization';
 import { CreateInterviewPrepPosts } from '@/components/blog/CreateInterviewPrepPosts';
 import { 
   Table,
@@ -307,11 +306,10 @@ export default function BlogAdmin() {
                     <Card>
                       <CardHeader>
                         <CardTitle>Quick Actions</CardTitle>
-                        <CardDescription>Manage your blog content</CardDescription>
+                        <CardDescription>Create new blog content</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <CreateInterviewPrepPosts />
-                        <BlogInitialization />
                       </CardContent>
                     </Card>
                   </div>
@@ -328,14 +326,6 @@ export default function BlogAdmin() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div>
-                        <h3 className="text-lg font-medium mb-2">Blog Initialization</h3>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          Initialize your blog with categories and professional content
-                        </p>
-                        <BlogInitialization />
-                      </div>
-                      
                       <div>
                         <h3 className="text-lg font-medium mb-2">Interview Preparation Content</h3>
                         <p className="text-sm text-muted-foreground mb-4">
