@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -27,7 +28,7 @@ import { SubscriptionTierIndicator } from "@/components/subscription/Subscriptio
 import { Helmet } from "react-helmet-async";
 import { Card, CardContent } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowRight, BookOpen, CheckCircle, FileText, Users } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle, ChevronDown, FileText, Star, Clock, BarChart, Users, Shield, Award, PieChart } from "lucide-react";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -41,6 +42,7 @@ const Index = () => {
   const [optimizedResume, setOptimizedResume] = useState("");
   const [qualificationGaps, setQualificationGaps] = useState<QualificationGap[]>([]);
   const [optimizing, setOptimizing] = useState(false);
+  const [showStats, setShowStats] = useState(false);
 
   const { callFunction, loading: functionLoading, error: functionError } = useSupabaseFunction();
   const { saveOptimization } = useResumeOptimizationHistory(user?.id);
@@ -102,6 +104,14 @@ const Index = () => {
       }
     ]
   };
+
+  // Stats for the landing page
+  const atsStats = [
+    { stat: "75%", description: "of resumes are rejected by ATS before a human ever sees them" },
+    { stat: "98%", description: "of Fortune 500 companies use ATS software to filter candidates" },
+    { stat: "95%", description: "of large companies use ATS to screen resumes" },
+    { stat: "70%", description: "of resumes are rejected by ATS due to formatting or keyword issues" }
+  ];
 
   useEffect(() => {
     if (!loading && !user) {
@@ -481,6 +491,74 @@ const Index = () => {
           </div>
         </section>
 
+        {/* ATS Statistics Section - NEW */}
+        <section className="py-16 bg-indigo-50 dark:bg-gray-800/50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">The ATS Challenge</h2>
+              <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+                Understanding the automated gatekeepers standing between you and your dream job
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {atsStats.map((item, index) => (
+                <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transform transition-all duration-300 hover:scale-105 border border-indigo-100 dark:border-indigo-900">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="text-4xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-2">{item.stat}</div>
+                    <p className="text-gray-600 dark:text-gray-300">{item.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-12 text-center">
+              <button 
+                onClick={() => setShowStats(!showStats)}
+                className="inline-flex items-center px-4 py-2 text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
+              >
+                {showStats ? "Hide Details" : "Show More ATS Facts"} 
+                <ChevronDown className={`ml-2 h-5 w-5 transition-transform duration-300 ${showStats ? 'rotate-180' : 'rotate-0'}`} />
+              </button>
+              
+              {showStats && (
+                <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-indigo-100 dark:border-indigo-900 animate-fade-in">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex items-start">
+                      <Clock className="h-6 w-6 text-indigo-500 mr-3 flex-shrink-0 mt-1" />
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Average Resume Review Time</h3>
+                        <p className="text-gray-600 dark:text-gray-300">Recruiters spend an average of just 6-7 seconds reviewing a resume that makes it past the ATS.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <BarChart className="h-6 w-6 text-indigo-500 mr-3 flex-shrink-0 mt-1" />
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Keyword Match Rate</h3>
+                        <p className="text-gray-600 dark:text-gray-300">Resumes with at least 60% keyword match rate are more likely to pass ATS screening.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <Shield className="h-6 w-6 text-indigo-500 mr-3 flex-shrink-0 mt-1" />
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Formatting Matters</h3>
+                        <p className="text-gray-600 dark:text-gray-300">Complex formatting, tables, and graphics can confuse ATS systems and cause immediate rejection.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <Award className="h-6 w-6 text-indigo-500 mr-3 flex-shrink-0 mt-1" />
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Success Rate Increase</h3>
+                        <p className="text-gray-600 dark:text-gray-300">Job seekers who optimize their resumes for ATS see up to 3x more interview invitations.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
         {/* Features Section */}
         <section className="py-16 bg-white dark:bg-gray-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -502,7 +580,7 @@ const Index = () => {
                   description: "We restructure your resume to ensure it's parsed correctly by every ATS, eliminating the risk of data misinterpretation."
                 },
                 {
-                  icon: <CheckCircle className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />,
+                  icon: <PieChart className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />,
                   title: "Advanced Keyword Analysis",
                   description: "Our AI identifies missing skills and experience from job descriptions and intelligently integrates them into your resume."
                 },
@@ -512,9 +590,9 @@ const Index = () => {
                   description: "We pinpoint areas where your experience differs from requirements and suggest how to bridge those gaps effectively."
                 }
               ].map((feature, i) => (
-                <Card key={i} className="border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg">
+                <Card key={i} className="border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg group hover:-translate-y-2">
                   <CardContent className="p-6 flex flex-col items-center text-center">
-                    <div className="rounded-full bg-indigo-100 dark:bg-indigo-900 p-3 mb-4">
+                    <div className="rounded-full bg-indigo-100 dark:bg-indigo-900 p-3 mb-4 group-hover:bg-indigo-200 dark:group-hover:bg-indigo-800 transition-colors">
                       {feature.icon}
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{feature.title}</h3>
@@ -522,6 +600,69 @@ const Index = () => {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+
+            {/* NEW: How It Works Section */}
+            <div className="mt-24">
+              <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
+                How Resulient Works
+              </h2>
+              
+              <div className="relative">
+                {/* Timeline Connector */}
+                <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-indigo-200 dark:bg-indigo-800 transform -translate-x-1/2"></div>
+                
+                {/* Step 1 */}
+                <div className="relative md:grid md:grid-cols-2 md:gap-8 mb-12 md:mb-24">
+                  <div className="md:text-right md:pr-12">
+                    <div className="hidden md:block absolute right-0 top-6 w-12 h-0.5 bg-indigo-200 dark:bg-indigo-800"></div>
+                    <div className="hidden md:flex absolute right-0 top-0 transform translate-x-1/2 -translate-y-1/3 items-center justify-center w-12 h-12 rounded-full border-4 border-indigo-100 dark:border-indigo-900 bg-indigo-500 text-white">
+                      <span className="text-xl font-bold">1</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Upload Your Resume</h3>
+                    <p className="text-gray-600 dark:text-gray-300">Simply upload your existing resume in any format. Our system will parse and analyze your document.</p>
+                  </div>
+                  <div className="md:pl-12 mt-6 md:mt-0">
+                    <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-4 shadow-sm border border-indigo-100 dark:border-indigo-800">
+                      <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" alt="Uploading resume" className="rounded-lg shadow-md w-full object-cover h-48" />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Step 2 */}
+                <div className="relative md:grid md:grid-cols-2 md:gap-8 mb-12 md:mb-24">
+                  <div className="md:pl-12 order-2 md:order-1">
+                    <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-4 shadow-sm border border-indigo-100 dark:border-indigo-800">
+                      <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f" alt="AI Analysis" className="rounded-lg shadow-md w-full object-cover h-48" />
+                    </div>
+                  </div>
+                  <div className="md:text-left md:pl-12 order-1 md:order-2">
+                    <div className="hidden md:block absolute left-0 top-6 w-12 h-0.5 bg-indigo-200 dark:bg-indigo-800"></div>
+                    <div className="hidden md:flex absolute left-0 top-0 transform -translate-x-1/2 -translate-y-1/3 items-center justify-center w-12 h-12 rounded-full border-4 border-indigo-100 dark:border-indigo-900 bg-indigo-500 text-white">
+                      <span className="text-xl font-bold">2</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">AI Deep Analysis</h3>
+                    <p className="text-gray-600 dark:text-gray-300">Our AI compares your resume against the job description, analyzing keywords, formatting, and qualification matches.</p>
+                  </div>
+                </div>
+                
+                {/* Step 3 */}
+                <div className="relative md:grid md:grid-cols-2 md:gap-8">
+                  <div className="md:text-right md:pr-12">
+                    <div className="hidden md:block absolute right-0 top-6 w-12 h-0.5 bg-indigo-200 dark:bg-indigo-800"></div>
+                    <div className="hidden md:flex absolute right-0 top-0 transform translate-x-1/2 -translate-y-1/3 items-center justify-center w-12 h-12 rounded-full border-4 border-indigo-100 dark:border-indigo-900 bg-indigo-500 text-white">
+                      <span className="text-xl font-bold">3</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Get Optimized Results</h3>
+                    <p className="text-gray-600 dark:text-gray-300">Receive your ATS-optimized resume, complete with scores, improvement suggestions, and qualification gap analysis.</p>
+                  </div>
+                  <div className="md:pl-12 mt-6 md:mt-0">
+                    <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-4 shadow-sm border border-indigo-100 dark:border-indigo-800">
+                      <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085" alt="Optimized results" className="rounded-lg shadow-md w-full object-cover h-48" />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -544,15 +685,57 @@ const Index = () => {
                   <CardContent className="p-6">
                     <div className="flex mb-4">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <svg key={star} className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
+                        <Star key={star} className="h-5 w-5 text-yellow-400 fill-current" />
                       ))}
                     </div>
                     <p className="text-gray-600 dark:text-gray-300 italic mb-4">"{testimonial.quote}"</p>
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{testimonial.author}</p>
                   </CardContent>
                 </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section - NEW */}
+        <section className="py-16 bg-white dark:bg-gray-800">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+                Frequently Asked Questions
+              </h2>
+              <p className="mt-4 text-gray-600 dark:text-gray-300">
+                Everything you need to know about Resulient and ATS optimization
+              </p>
+            </div>
+
+            <div className="space-y-8">
+              {[
+                {
+                  question: "What is an ATS and why should I care?",
+                  answer: "An Applicant Tracking System (ATS) is software used by companies to manage job applications. These systems automatically filter and rank resumes before human recruiters see them. You should care because 75% of resumes are rejected by ATS systems before a human ever sees them, often due to formatting issues or missing keywords—not because the candidate isn't qualified."
+                },
+                {
+                  question: "How does Resulient improve my chances of getting hired?",
+                  answer: "Resulient analyzes your resume against specific job descriptions, identifying missing keywords, highlighting qualification gaps, and recommending format improvements. Our AI engine understands the nuances of different ATS systems and provides tailored optimization that helps your resume rank higher, get past automated filters, and land on a recruiter's desk."
+                },
+                {
+                  question: "Is my data secure with Resulient?",
+                  answer: "Absolutely. We take data security seriously. Your resumes and job descriptions are encrypted, and we never share your personal information with third parties. You can delete your data at any time from your account settings."
+                },
+                {
+                  question: "Can I use Resulient for multiple job applications?",
+                  answer: "Yes! In fact, we recommend optimizing your resume for each specific job you apply to. Our free tier allows limited optimizations, while our Premium and Platinum plans offer unlimited resume optimizations to help you tailor your applications for each opportunity."
+                },
+                {
+                  question: "How long does it take to optimize my resume?",
+                  answer: "The optimization process takes just 60-90 seconds. Simply upload your resume, paste the job description, and our AI handles the rest. You'll receive an optimized version with a detailed analysis and improvement suggestions almost immediately."
+                }
+              ].map((faq, i) => (
+                <div key={i} className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-6 border border-indigo-100 dark:border-indigo-800">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{faq.question}</h3>
+                  <p className="text-gray-600 dark:text-gray-300">{faq.answer}</p>
+                </div>
               ))}
             </div>
           </div>
