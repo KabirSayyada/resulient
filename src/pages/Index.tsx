@@ -286,14 +286,14 @@ const Index = () => {
             {/* NEW: About section, styled and responsive */}
             <div className="bg-gradient-to-br from-fuchsia-50 via-indigo-50 to-yellow-50 dark:from-fuchsia-950 dark:via-indigo-950 dark:to-yellow-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-md px-4 py-5 mb-5 sm:mb-8 sm:px-6 mx-auto max-w-2xl text-center">
               <p className="text-lg sm:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-2">
-                <span className="text-fuchsia-700 dark:text-fuchsia-400 font-bold">Resulient</span> is on a mission to make your resume shine&nbsp;
+                <span className="text-fuchsia-700 dark:text-fuchsia-400 font-bold">Resulient</span> is on a mission to help your resume stand out&nbsp;
                 <span className="hidden sm:inline">—</span>
                 <span className="block sm:inline text-base sm:text-lg font-normal text-indigo-700 dark:text-indigo-300">
-                  We give everyone a fighting chance against unfair machines and "black box" ATS gatekeepers.
+                  We empower job seekers to navigate modern hiring systems with confidence.
                 </span>
               </p>
               <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
-                Upload your resume and the job description — we help you stand out, get noticed, and get hired, no matter what automated system tries to stop you.
+                Upload your resume and job description — we'll help you optimize your application to increase visibility, highlight your strengths, and improve your chances of landing interviews.
               </p>
             </div>
             {/* End About section */}
