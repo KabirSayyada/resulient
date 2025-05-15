@@ -31,12 +31,12 @@ const AuthPage = () => {
       </div>
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-4 sm:p-8 w-full max-w-md border border-gray-100 dark:border-gray-700">
         <div className="mb-6 text-center">
-          <span className="font-brand text-3xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-yellow-400 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none inline-block mb-2">
+          <span className="font-brand text-3xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none inline-block mb-2">
             Resulient
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-primary dark:text-primary-foreground mb-2 mt-2">Welcome Back!</h2>
           <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
-            Join <span className="text-fuchsia-700 dark:text-fuchsia-400 font-bold">Resulient</span> and enhance your resume quality!<br className="hidden sm:block" />
+            Join <span className="text-indigo-600 dark:text-indigo-400 font-bold">Resulient</span> and enhance your resume quality!<br className="hidden sm:block" />
             With Resulient, you'll:
           </p>
           <ul className="mt-3 mb-0 space-y-1 text-left text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 font-medium ml-4 sm:ml-6">
