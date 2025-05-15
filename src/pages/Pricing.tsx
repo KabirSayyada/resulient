@@ -103,7 +103,7 @@ const PricingPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { subscription, checkout } = useSubscription();
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly'); // Changed default to 'monthly'
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
 
   const handlePurchase = async (tier: PricingTier) => {
@@ -185,10 +185,10 @@ const PricingPage = () => {
             </div>
           )}
           
-          {/* New improved billing cycle selector using Tabs */}
+          {/* Tabs for billing cycle selection, with monthly as default */}
           <div className="mt-8">
             <Tabs 
-              defaultValue="yearly" 
+              defaultValue="monthly" 
               value={billingCycle}
               onValueChange={(value) => setBillingCycle(value as 'monthly' | 'yearly')}
               className="max-w-xs mx-auto"
