@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -256,10 +255,10 @@ const Index = () => {
               : "bg-gray-50 dark:bg-gray-900"
         }`}>
           <div className="max-w-4xl mx-auto">
-            {/* Brand Header */}
+            {/* Brand Header with simplified color scheme */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
               <div className="flex items-center gap-4">
-                <span className="font-brand text-4xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-yellow-400 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
+                <span className="font-brand text-4xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
                   Resulient
                 </span>
                 <span className="rounded-full px-3 py-1 text-xs sm:text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 shadow border border-indigo-200 dark:border-indigo-700 animate-fade-in">
@@ -283,10 +282,10 @@ const Index = () => {
               </div>
             )}
 
-            {/* NEW: About section, styled and responsive */}
-            <div className="bg-gradient-to-br from-fuchsia-50 via-indigo-50 to-yellow-50 dark:from-fuchsia-950 dark:via-indigo-950 dark:to-yellow-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-md px-4 py-5 mb-5 sm:mb-8 sm:px-6 mx-auto max-w-2xl text-center">
+            {/* About section, styled and responsive */}
+            <div className="bg-gradient-to-br from-indigo-50 via-gray-50 to-blue-50 dark:from-indigo-950 dark:via-gray-900 dark:to-blue-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-md px-4 py-5 mb-5 sm:mb-8 sm:px-6 mx-auto max-w-2xl text-center">
               <p className="text-lg sm:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-2">
-                <span className="text-fuchsia-700 dark:text-fuchsia-400 font-bold">Resulient</span> is on a mission to help your resume stand out&nbsp;
+                <span className="text-blue-600 dark:text-blue-400 font-bold">Resulient</span> is on a mission to help your resume stand out&nbsp;
                 <span className="hidden sm:inline">—</span>
                 <span className="block sm:inline text-base sm:text-lg font-normal text-indigo-700 dark:text-indigo-300">
                   We empower job seekers to navigate modern hiring systems with confidence.
@@ -404,7 +403,7 @@ const Index = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
               <div className="flex items-center">
-                <span className="font-brand text-3xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-yellow-400 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
+                <span className="font-brand text-3xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
                   Resulient
                 </span>
                 <span className="ml-2 rounded-full px-3 py-1 text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 shadow border border-indigo-200 dark:border-indigo-700">
@@ -437,7 +436,7 @@ const Index = () => {
               <div>
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight">
                   Beat the ATS.
-                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 to-indigo-600">
+                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
                     Land More Interviews.
                   </span>
                 </h1>

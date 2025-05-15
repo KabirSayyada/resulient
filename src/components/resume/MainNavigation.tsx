@@ -31,7 +31,7 @@ export function MainNavigation() {
       {isMobile ? (
         <div className="px-4">
           <div className="flex justify-between items-center">
-            <Link to="/" className="font-bold text-xl">Resulient</Link>
+            <Link to="/" className="font-bold text-xl text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text">Resulient</Link>
             <Button 
               variant="ghost" 
               size="icon" 
