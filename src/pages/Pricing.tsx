@@ -39,13 +39,13 @@ const pricingTiers: PricingTier[] = [
     monthlyPrice: null,
     yearlyPrice: null,
     features: [
-      { text: "2 Resume Scorings Daily", included: true }, // Updated from 3 to 2
-      { text: "1 Resume Optimization Daily", included: true }, // Updated from 2 to 1
+      { text: "2 Resume Scorings Daily", included: true },
+      { text: "1 Resume Optimization Daily", included: true },
       { text: "Detailed Reports (View Only)", included: true },
       { text: "Daily Reset of Credits", included: true },
       { text: "Basic Support", included: true },
       { text: "Report Downloads", included: false },
-      { text: "Resume Comparison", included: false }, // Added this feature
+      { text: "Resume Comparison", included: false },
       { text: "Unlimited Optimizations", included: false },
     ],
     badge: "Free Forever",
@@ -66,7 +66,7 @@ const pricingTiers: PricingTier[] = [
       { text: "Priority Support", included: true },
       { text: "All Free Features", included: true },
       { text: "Advanced Analytics", included: true },
-      { text: "Resume Comparison", included: false }, // Added and marked as not included
+      { text: "Resume Comparison", included: false },
       { text: "Unlimited Downloads", included: false },
     ],
     badge: "Most Popular",
@@ -85,7 +85,7 @@ const pricingTiers: PricingTier[] = [
       { text: "Unlimited Resume Scorings", included: true },
       { text: "Unlimited Resume Optimizations", included: true },
       { text: "Unlimited Report Downloads", included: true },
-      { text: "Resume Comparison Tool", included: true }, // Added and marked as included
+      { text: "Resume Comparison Tool", included: true },
       { text: "Priority Support", included: true },
       { text: "All Premium Features", included: true },
       { text: "Advanced Analytics", included: true },

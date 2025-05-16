@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1"
 
@@ -11,10 +10,10 @@ const APP_URL = Deno.env.get("APP_URL") || "https://resulient.com"
 
 // Gumroad product IDs with permalinks
 const GUMROAD_PRODUCTS = {
-  "premium-monthly": "https://garbaverse.gumroad.com/l/ylaia",
-  "premium-yearly": "https://garbaverse.gumroad.com/l/dencp",
-  "platinum-monthly": "https://garbaverse.gumroad.com/l/tbfapo",
-  "platinum-yearly": "https://garbaverse.gumroad.com/l/dcfjt",
+  "premium-monthly": "https://ringimkabir.gumroad.com/l/edtye",
+  "premium-yearly": "https://ringimkabir.gumroad.com/l/rdozx",
+  "platinum-monthly": "https://ringimkabir.gumroad.com/l/ocssyw",
+  "platinum-yearly": "https://ringimkabir.gumroad.com/l/cncwtj",
 }
 
 // CORS headers

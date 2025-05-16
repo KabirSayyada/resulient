@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1"
 
@@ -32,19 +31,19 @@ function safeParseDate(dateString: string): Date | null {
 function getSubscriptionTier(productCode: string): { tier: string; cycle: string } {
   const productMap: Record<string, { tier: string; cycle: string }> = {
     // Premium Monthly
-    "ylaia": { tier: "premium", cycle: "monthly" },
+    "edtye": { tier: "premium", cycle: "monthly" },
     "premium-monthly": { tier: "premium", cycle: "monthly" },
     
     // Premium Yearly
-    "dencp": { tier: "premium", cycle: "yearly" },
+    "rdozx": { tier: "premium", cycle: "yearly" },
     "premium-yearly": { tier: "premium", cycle: "yearly" },
     
     // Platinum Monthly
-    "tbfapo": { tier: "platinum", cycle: "monthly" },
+    "ocssyw": { tier: "platinum", cycle: "monthly" },
     "platinum-monthly": { tier: "platinum", cycle: "monthly" },
     
     // Platinum Yearly
-    "dcfjt": { tier: "platinum", cycle: "yearly" },
+    "cncwtj": { tier: "platinum", cycle: "yearly" },
     "platinum-yearly": { tier: "platinum", cycle: "yearly" },
   };
   
