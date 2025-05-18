@@ -58,7 +58,7 @@ const Index = () => {
       "price": "0",
       "priceCurrency": "USD"
     },
-    "description": "AI-powered resume optimization tool that helps job seekers get past ATS systems and land more interviews.",
+    "description": "Intelligent resume optimization tool that helps job seekers get past ATS systems and land more interviews.",
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": "4.8",
@@ -90,7 +90,7 @@ const Index = () => {
         "name": "How does Resulient optimize my resume?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Resulient uses AI to analyze your resume against job descriptions, identifying missing keywords, improving formatting, and providing actionable suggestions to increase your chances of getting past ATS systems."
+          "text": "Resulient uses advanced algorithms to analyze your resume against job descriptions, identifying missing keywords, improving formatting, and providing actionable suggestions to increase your chances of getting past ATS systems."
         }
       },
       {
@@ -215,15 +215,15 @@ const Index = () => {
     return (
       <>
         <Helmet>
-          <title>Resulient | AI-Powered Resume Optimization & ATS Scoring</title>
-          <meta name="description" content="Transform your job search with Resulient's AI-powered resume optimization tool. Get past ATS systems and land more interviews with data-driven improvements." />
+          <title>Resulient | Smart Resume Optimization & ATS Scoring</title>
+          <meta name="description" content="Transform your job search with Resulient's advanced resume optimization tool. Get past ATS systems and land more interviews with data-driven improvements." />
           <link rel="canonical" href="https://resulient.com/" />
           
           {/* Open Graph / Facebook */}
           <meta property="og:type" content="website" />
           <meta property="og:url" content="https://resulient.com/" />
-          <meta property="og:title" content="Resulient | AI-Powered Resume Optimization & ATS Scoring" />
-          <meta property="og:description" content="Transform your job search with Resulient's AI-powered resume optimization tool. Get past ATS systems and land more interviews with data-driven improvements." />
+          <meta property="og:title" content="Resulient | Smart Resume Optimization & ATS Scoring" />
+          <meta property="og:description" content="Transform your job search with Resulient's advanced resume optimization tool. Get past ATS systems and land more interviews with data-driven improvements." />
           <meta property="og:image" content="/lovable-uploads/2f15a536-6c8b-4812-b04f-13e247804a93.png" />
           <meta property="og:image:width" content="1200" />
           <meta property="og:image:height" content="1200" />
@@ -232,8 +232,8 @@ const Index = () => {
           {/* Twitter */}
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:site" content="@lovable_dev" />
-          <meta name="twitter:title" content="Resulient | AI-Powered Resume Optimization" />
-          <meta name="twitter:description" content="Beat ATS systems and land more interviews with our AI-powered tool" />
+          <meta name="twitter:title" content="Resulient | Smart Resume Optimization" />
+          <meta name="twitter:description" content="Beat ATS systems and land more interviews with our intelligent optimization tool" />
           <meta name="twitter:image" content="/lovable-uploads/2f15a536-6c8b-4812-b04f-13e247804a93.png" />
           
           {/* Structured data for the main application */}
@@ -365,15 +365,15 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Resulient | AI-Powered Resume Optimization That Beats Every ATS System</title>
-        <meta name="description" content="Discover how Resulient's AI-powered resume optimization tool can help you beat ATS systems and land more interviews. Get personalized resume recommendations based on job descriptions." />
+        <title>Resulient | Smart Resume Optimization That Beats Every ATS System</title>
+        <meta name="description" content="Discover how Resulient's advanced resume optimization tool can help you beat ATS systems and land more interviews. Get personalized resume recommendations based on job descriptions." />
         <link rel="canonical" href="https://resulient.com/" />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://resulient.com/" />
-        <meta property="og:title" content="Resulient | AI-Powered Resume Optimization That Beats Every ATS System" />
-        <meta property="og:description" content="Discover how Resulient's AI-powered resume optimization tool can help you beat ATS systems and land more interviews. Get personalized resume recommendations based on job descriptions." />
+        <meta property="og:title" content="Resulient | Smart Resume Optimization That Beats Every ATS System" />
+        <meta property="og:description" content="Discover how Resulient's advanced resume optimization tool can help you beat ATS systems and land more interviews. Get personalized resume recommendations based on job descriptions." />
         <meta property="og:image" content="/lovable-uploads/2f15a536-6c8b-4812-b04f-13e247804a93.png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="1200" />
@@ -382,8 +382,8 @@ const Index = () => {
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@lovable_dev" />
-        <meta name="twitter:title" content="Resulient | AI-Powered Resume Optimization" />
-        <meta name="twitter:description" content="Beat ATS systems and land more interviews with our AI-powered tool" />
+        <meta name="twitter:title" content="Resulient | Smart Resume Optimization" />
+        <meta name="twitter:description" content="Beat ATS systems and land more interviews with our intelligent tool" />
         <meta name="twitter:image" content="/lovable-uploads/2f15a536-6c8b-4812-b04f-13e247804a93.png" />
         
         {/* Structured data for the main application */}
@@ -441,7 +441,7 @@ const Index = () => {
                   </span>
                 </h1>
                 <p className="mt-6 text-xl text-gray-600 dark:text-gray-300 max-w-2xl">
-                  Resulient's AI-powered resume optimization ensures your application makes it past 
+                  Resulient's intelligent resume optimization ensures your application makes it past 
                   Applicant Tracking Systems (ATS) and into human hands. Don't let algorithms reject 
                   your dream job application.
                 </p>
@@ -490,7 +490,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* ATS Statistics Section - NEW */}
+        {/* ATS Statistics Section */}
         <section className="py-16 bg-indigo-50 dark:bg-gray-800/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
@@ -566,7 +566,7 @@ const Index = () => {
                 <span className="block">Why Resulient Outperforms Other Tools</span>
               </h2>
               <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Our AI doesn't just check for keywords—it understands context, formatting, 
+                Our technology doesn't just check for keywords—it understands context, formatting, 
                 and what makes resumes stand out to both machines and humans.
               </p>
             </div>
@@ -581,7 +581,7 @@ const Index = () => {
                 {
                   icon: <PieChart className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />,
                   title: "Advanced Keyword Analysis",
-                  description: "Our AI identifies missing skills and experience from job descriptions and intelligently integrates them into your resume."
+                  description: "Our intelligent system identifies missing skills and experience from job descriptions and seamlessly integrates them into your resume."
                 },
                 {
                   icon: <Users className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />,
@@ -601,7 +601,7 @@ const Index = () => {
               ))}
             </div>
 
-            {/* NEW: How It Works Section */}
+            {/* How It Works Section */}
             <div className="mt-24">
               <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
                 How Resulient Works
@@ -632,7 +632,7 @@ const Index = () => {
                 <div className="relative md:grid md:grid-cols-2 md:gap-8 mb-12 md:mb-24">
                   <div className="md:pl-12 order-2 md:order-1">
                     <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-4 shadow-sm border border-indigo-100 dark:border-indigo-800">
-                      <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f" alt="AI Analysis" className="rounded-lg shadow-md w-full object-cover h-48" />
+                      <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f" alt="Deep Analysis" className="rounded-lg shadow-md w-full object-cover h-48" />
                     </div>
                   </div>
                   <div className="md:text-left md:pl-12 order-1 md:order-2">
@@ -640,8 +640,8 @@ const Index = () => {
                     <div className="hidden md:flex absolute left-0 top-0 transform -translate-x-1/2 -translate-y-1/3 items-center justify-center w-12 h-12 rounded-full border-4 border-indigo-100 dark:border-indigo-900 bg-indigo-500 text-white">
                       <span className="text-xl font-bold">2</span>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">AI Deep Analysis</h3>
-                    <p className="text-gray-600 dark:text-gray-300">Our AI compares your resume against the job description, analyzing keywords, formatting, and qualification matches.</p>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Deep Analysis</h3>
+                    <p className="text-gray-600 dark:text-gray-300">Our advanced system compares your resume against the job description, analyzing keywords, formatting, and qualification matches.</p>
                   </div>
                 </div>
                 
@@ -696,7 +696,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* FAQ Section - NEW */}
+        {/* FAQ Section */}
         <section className="py-16 bg-white dark:bg-gray-800">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
@@ -716,7 +716,7 @@ const Index = () => {
                 },
                 {
                   question: "How does Resulient improve my chances of getting hired?",
-                  answer: "Resulient analyzes your resume against specific job descriptions, identifying missing keywords, highlighting qualification gaps, and recommending format improvements. Our AI engine understands the nuances of different ATS systems and provides tailored optimization that helps your resume rank higher, get past automated filters, and land on a recruiter's desk."
+                  answer: "Resulient analyzes your resume against specific job descriptions, identifying missing keywords, highlighting qualification gaps, and recommending format improvements. Our advanced technology understands the nuances of different ATS systems and provides tailored optimization that helps your resume rank higher, get past automated filters, and land on a recruiter's desk."
                 },
                 {
                   question: "Is my data secure with Resulient?",
@@ -728,7 +728,7 @@ const Index = () => {
                 },
                 {
                   question: "How long does it take to optimize my resume?",
-                  answer: "The optimization process takes just 60-90 seconds. Simply upload your resume, paste the job description, and our AI handles the rest. You'll receive an optimized version with a detailed analysis and improvement suggestions almost immediately."
+                  answer: "The optimization process takes just 60-90 seconds. Simply upload your resume, paste the job description, and our intelligent system handles the rest. You'll receive an optimized version with a detailed analysis and improvement suggestions almost immediately."
                 }
               ].map((faq, i) => (
                 <div key={i} className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-6 border border-indigo-100 dark:border-indigo-800">
