@@ -7,12 +7,13 @@ interface ATSFriendlyResumePdfTemplateProps {
 }
 
 export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyResumePdfTemplateProps) => {
-  // Process the content to remove confusing characters
+  // Process the content but be careful not to overly sanitize
+  // We just want to remove the most problematic special characters
   const cleanedContent = content
-    .replace(/\*/g, '') // Remove asterisks 
-    .replace(/\*\*/g, '') // Remove double asterisks
-    .replace(/[^\w\s.,():;'"-]/g, ' ') // Replace other special characters with spaces
-    .replace(/\s+/g, ' '); // Normalize spaces
+    .replace(/\*\*/g, '') // Remove double asterisks first
+    .replace(/\*/g, '') // Remove single asterisks
+    .replace(/[•⋅◦◘○◙♦]/g, '-') // Replace bullets with hyphens
+    .trim(); // Trim extra whitespace
   
   const lines = cleanedContent.split('\n');
   
@@ -80,9 +81,10 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
     return /\d{4}[\s-]+.*?(\d{4}|present|current|now)/i.test(line);
   };
   
-  // Skip the name line if it appears in both places (top and within content)
-  const displayLines = hasNameAtTop ? lines.filter((line, index) => 
-    index === 0 || line.trim() !== potentialName) : lines;
+  // Get display lines, but only filter out the duplicate name if we show it at the top
+  const displayLines = hasNameAtTop 
+    ? lines.filter((line, index) => index === 0 || line.trim() !== potentialName) 
+    : lines;
 
   return (
     <div className="ats-resume-template p-8 bg-white text-black font-sans" style={{ 
@@ -107,9 +109,12 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
 
       <div className="pdf-content" style={{ fontSize: '10pt' }}>
         {displayLines.map((line, index) => {
-          if (isSectionHeader(line, index)) {
+          // Adjust the index for comparison if we're filtering out the name
+          const adjustedIndex = hasNameAtTop && index > 0 ? index - 1 : index;
+          
+          if (isSectionHeader(line, adjustedIndex)) {
             // Add more space before section headers (except the first one)
-            const topMargin = index > 0 ? 'mt-6' : '';
+            const topMargin = adjustedIndex > 0 ? 'mt-6' : '';
             return (
               <h2 key={index} className={`text-lg font-bold text-slate-800 ${topMargin} mb-3 border-b border-slate-300 pb-2 uppercase`}>
                 {line.trim()}
@@ -117,7 +122,7 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
             );
           } else if (line.trim().length === 0) {
             // Add appropriate spacing for blank lines
-            return <div key={index} style={{ height: '0.75em' }}></div>;
+            return <div key={index} className="py-1"></div>;
           } else {
             // Check if this might be a bullet point
             if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
@@ -133,7 +138,7 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
                   {line.trim()}
                 </p>
               );
-            } else if (isJobTitleOrCompany(line, index)) {
+            } else if (isJobTitleOrCompany(line, adjustedIndex)) {
               // This could be a job title or company name
               return (
                 <p key={index} className="mt-3 mb-1 font-semibold text-slate-800" style={{ lineHeight: '1.4' }}>

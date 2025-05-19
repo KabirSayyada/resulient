@@ -101,25 +101,25 @@ export const ResumeActions = ({
     if (!atsResumeRef?.current) return;
     toast({
       title: "Preparing Resume PDF",
-      description: "Exporting your properly formatted resume with clean layout and selectable text...",
+      description: "Exporting your professionally formatted resume with selectable text...",
     });
 
     const success = await generatePDFFromElement(
       atsResumeRef.current,
-      `optimized-resume-${new Date().toISOString().split("T")[0]}.pdf`,
+      `professional-resume-${new Date().toISOString().split("T")[0]}.pdf`,
       true, // Single-page PDF for ATS resume
       true  // Use text mode for selectable text
     );
 
     if (success) {
       toast({
-        title: "Resume PDF Downloaded",
-        description: "Your clean, formatted resume has been downloaded as a PDF with selectable text.",
+        title: "Resume Downloaded",
+        description: "Your professionally formatted resume has been downloaded as a PDF with selectable text.",
       });
     } else {
       toast({
         title: "PDF Export Failed",
-        description: "There was an error downloading your resume as PDF.",
+        description: "There was an error downloading your resume as PDF. Please try again.",
         variant: "destructive",
       });
     }
@@ -160,7 +160,7 @@ export const ResumeActions = ({
         onClick={handleFullReportDownload} 
       />
       
-      {/* New button for ATS-friendly resume */}
+      {/* Button for professionally formatted resume */}
       {optimizedResume && atsResumeRef && (
         <DownloadATSResumeButton
           onClick={handleATSResumeDownload}
