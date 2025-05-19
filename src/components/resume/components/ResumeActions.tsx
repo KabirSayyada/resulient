@@ -102,7 +102,7 @@ export const ResumeActions = ({
     if (!atsResumeRef?.current) return;
     toast({
       title: "Preparing ATS Resume",
-      description: "Exporting your ATS-optimized resume as a PDF with selectable text. Hang tight!",
+      description: "Exporting your properly formatted ATS resume with selectable text. Hang tight!",
     });
 
     const success = await generatePDFFromElement(
@@ -115,7 +115,7 @@ export const ResumeActions = ({
     if (success) {
       toast({
         title: "ATS Resume Downloaded",
-        description: "Your ATS-optimized resume has been downloaded as PDF with selectable text.",
+        description: "Your ATS-optimized resume has been downloaded as a well-formatted PDF with selectable text.",
       });
     } else {
       toast({
