@@ -18,7 +18,7 @@ export const DownloadATSResumeButton = ({ onClick, disabled = false }: DownloadA
       disabled={disabled}
     >
       <FileText className="mr-2 h-5 w-5" />
-      Download Complete ATS-Friendly Resume (PDF)
+      Download ATS-Friendly Resume with Selectable Text
     </Button>
   );
 };

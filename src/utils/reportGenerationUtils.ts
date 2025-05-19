@@ -1,3 +1,4 @@
+
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { ScoreData } from "@/types/resume";
@@ -99,7 +100,8 @@ const CANVAS_SETTINGS = {
 export async function generatePDFFromElement(
   element: HTMLElement, 
   filename: string, 
-  singlePage: boolean = false
+  singlePage: boolean = false,
+  textMode: boolean = false
 ) {
   if (!element) return false;
   
@@ -127,7 +129,126 @@ export async function generatePDFFromElement(
     // Add a small delay to ensure styles are applied
     await new Promise(resolve => setTimeout(resolve, 100));
     
-    // Capture the element as an image
+    // For text mode, extract the text content and generate PDF with text layers
+    if (textMode && singlePage) {
+      // Create new PDF document
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4",
+      });
+      
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 40; // margins
+      
+      // Get all text elements
+      const contentElements = element.querySelectorAll('p, h1, h2, h3, h4, h5, h6');
+      const lineHeight = 14; // approximate line height in points
+      let yPosition = margin;
+      
+      // Set default font
+      pdf.setFont('helvetica', 'normal');
+      
+      // Add title
+      const titleElement = element.querySelector('h1');
+      if (titleElement) {
+        pdf.setFontSize(18);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(titleElement.textContent || 'ATS-Optimized Resume', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += lineHeight * 2;
+      }
+      
+      // Add subtitle if exists
+      const subtitleElement = element.querySelector('h2');
+      if (subtitleElement) {
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(subtitleElement.textContent || '', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += lineHeight * 2;
+      }
+      
+      // Add date
+      const dateElement = element.querySelector('.text-xs.text-center');
+      if (dateElement) {
+        pdf.setFontSize(10);
+        pdf.text(dateElement.textContent || '', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += lineHeight * 2;
+      }
+      
+      // Process all content elements
+      contentElements.forEach((el) => {
+        // Skip title elements already processed
+        if (el === titleElement || el === subtitleElement || el === dateElement) {
+          return;
+        }
+        
+        const text = el.textContent || '';
+        
+        // Handle section headers
+        if (el.tagName.toLowerCase().startsWith('h')) {
+          // Add some space before section headers
+          yPosition += lineHeight;
+          
+          pdf.setFontSize(12);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(text, margin, yPosition);
+          yPosition += lineHeight;
+          
+          // Add underline for section headers
+          pdf.setDrawColor(200, 200, 200);
+          pdf.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+          yPosition += lineHeight / 2;
+        } 
+        // Handle paragraphs
+        else if (el.tagName.toLowerCase() === 'p') {
+          pdf.setFontSize(10);
+          pdf.setFont('helvetica', 'normal');
+          
+          // Split long text into multiple lines to fit page width
+          const textLines = pdf.splitTextToSize(text, pageWidth - (margin * 2));
+          
+          // Check if we need to add a new page
+          if (yPosition + (textLines.length * lineHeight) > pageHeight - margin) {
+            pdf.addPage();
+            yPosition = margin;
+          }
+          
+          // Add each line to the PDF
+          textLines.forEach((line: string) => {
+            pdf.text(line, margin, yPosition);
+            yPosition += lineHeight;
+          });
+          
+          // Add a small space after paragraphs
+          yPosition += lineHeight / 2;
+        }
+      });
+      
+      // Add footer
+      pdf.setFontSize(8);
+      pdf.setTextColor(150, 150, 150);
+      pdf.text('This resume has been optimized for Applicant Tracking Systems (ATS)', 
+        pageWidth / 2, pageHeight - margin / 2, { align: 'center' });
+      
+      // Restore original element properties
+      element.classList.remove('pdf-export-in-progress');
+      
+      if (element.classList.contains('fixed')) {
+        element.style.position = originalPosition;
+        element.style.left = originalLeft;
+        element.style.zIndex = originalZIndex;
+      }
+      
+      if (originalDisplay === 'none') {
+        element.style.display = originalDisplay;
+      }
+      
+      pdf.save(filename);
+      return true;
+    }
+    
+    // For image-based PDFs (non-text mode)
     const canvas = await html2canvas(element, CANVAS_SETTINGS);
     
     // Create PDF
