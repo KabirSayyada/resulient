@@ -25,10 +25,22 @@ export const formatResumeContent = (resumeContent: string | any): string => {
 export const formatResumeForATS = (resumeContent: string | any): string => {
   let content = formatResumeContent(resumeContent);
   
+  // Handle JSON objects by trying to extract the raw resume content
+  if (content.startsWith('{') && content.endsWith('}')) {
+    try {
+      const parsedContent = JSON.parse(content);
+      if (parsedContent.resumeContent || parsedContent.content || parsedContent.text) {
+        content = parsedContent.resumeContent || parsedContent.content || parsedContent.text;
+      }
+    } catch (e) {
+      // Not valid JSON or couldn't extract content, continue with original
+    }
+  }
+  
   // Remove special characters that might confuse ATS
   content = content.replace(/[•⋅◦◘○◙♦]/g, '-');
   
-  // Standardize section headers to be uppercase
+  // Standardize section headers to be uppercase and ensure they stand out
   const standardSections = [
     'SUMMARY', 'PROFESSIONAL SUMMARY', 'OBJECTIVE', 
     'EXPERIENCE', 'WORK EXPERIENCE', 'EMPLOYMENT HISTORY',
@@ -46,6 +58,10 @@ export const formatResumeForATS = (resumeContent: string | any): string => {
   
   // Ensure proper spacing between sections
   content = content.replace(/\n{3,}/g, '\n\n');
+  
+  // Clean up excessive whitespace between sections to save space
+  content = content.replace(/^\s+/gm, '');
+  content = content.replace(/\s+$/gm, '');
   
   return content;
 };

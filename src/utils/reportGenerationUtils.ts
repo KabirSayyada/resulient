@@ -142,17 +142,25 @@ export async function generatePDFFromElement(
     const pageHeight = pdf.internal.pageSize.getHeight();
     
     if (singlePage) {
-      // For scorecards - fit the entire content on one page with proper scaling
+      // For ATS resumes - fit the entire content on one page with proper scaling
       const imgWidth = pageWidth - 40; // margins
-      const scaleFactor = imgWidth / canvas.width;
-      const imgHeight = canvas.height * scaleFactor;
+      let scaleFactor = imgWidth / canvas.width;
+      let imgHeight = canvas.height * scaleFactor;
       
-      // Center vertically if there's room
-      const yPosition = imgHeight < pageHeight - 40 
-        ? (pageHeight - imgHeight) / 2 
-        : 20;
+      // If too tall for one page, scale it down to fit
+      if (imgHeight > pageHeight - 40) {
+        scaleFactor = (pageHeight - 40) / canvas.height;
+        imgHeight = canvas.height * scaleFactor;
+        const newImgWidth = canvas.width * scaleFactor;
         
-      pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
+        // Center horizontally
+        const leftMargin = (pageWidth - newImgWidth) / 2;
+        pdf.addImage(imgData, 'PNG', leftMargin, 20, newImgWidth, imgHeight);
+      } else {
+        // Center vertically if there's room
+        const yPosition = (pageHeight - imgHeight) / 2;
+        pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
+      }
     } else {
       // For full reports - handle multi-page properly
       const imgWidth = pageWidth - 40; // margins
