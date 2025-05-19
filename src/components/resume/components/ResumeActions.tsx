@@ -102,19 +102,20 @@ export const ResumeActions = ({
     if (!atsResumeRef?.current) return;
     toast({
       title: "Preparing ATS Resume",
-      description: "Exporting your ATS-optimized resume as a PDF. Hang tight!",
+      description: "Exporting your ATS-optimized resume as a PDF with selectable text. Hang tight!",
     });
 
     const success = await generatePDFFromElement(
       atsResumeRef.current,
       `ats-optimized-resume-${new Date().toISOString().split("T")[0]}.pdf`,
-      true // Single-page PDF for ATS resume
+      true, // Single-page PDF for ATS resume
+      true  // Use text mode for selectable text
     );
 
     if (success) {
       toast({
         title: "ATS Resume Downloaded",
-        description: "Your ATS-optimized resume has been downloaded as PDF.",
+        description: "Your ATS-optimized resume has been downloaded as PDF with selectable text.",
       });
     } else {
       toast({

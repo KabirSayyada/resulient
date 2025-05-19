@@ -1,4 +1,3 @@
-
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { ScoreData } from "@/types/resume";
@@ -130,7 +129,7 @@ export async function generatePDFFromElement(
     await new Promise(resolve => setTimeout(resolve, 100));
     
     // For text mode, extract the text content and generate PDF with text layers
-    if (textMode && singlePage) {
+    if (textMode) {
       // Create new PDF document
       const pdf = new jsPDF({
         orientation: "portrait",
@@ -143,7 +142,7 @@ export async function generatePDFFromElement(
       const margin = 40; // margins
       
       // Get all text elements
-      const contentElements = element.querySelectorAll('p, h1, h2, h3, h4, h5, h6');
+      const contentElements = element.querySelectorAll('p, h1, h2, h3, h4, h5, h6, div');
       const lineHeight = 14; // approximate line height in points
       let yPosition = margin;
       
@@ -176,60 +175,51 @@ export async function generatePDFFromElement(
         yPosition += lineHeight * 2;
       }
       
-      // Process all content elements
-      contentElements.forEach((el) => {
-        // Skip title elements already processed
-        if (el === titleElement || el === subtitleElement || el === dateElement) {
-          return;
-        }
-        
-        const text = el.textContent || '';
-        
-        // Handle section headers
-        if (el.tagName.toLowerCase().startsWith('h')) {
-          // Add some space before section headers
-          yPosition += lineHeight;
-          
-          pdf.setFontSize(12);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(text, margin, yPosition);
-          yPosition += lineHeight;
-          
-          // Add underline for section headers
-          pdf.setDrawColor(200, 200, 200);
-          pdf.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
-          yPosition += lineHeight / 2;
-        } 
-        // Handle paragraphs
-        else if (el.tagName.toLowerCase() === 'p') {
-          pdf.setFontSize(10);
-          pdf.setFont('helvetica', 'normal');
-          
-          // Split long text into multiple lines to fit page width
-          const textLines = pdf.splitTextToSize(text, pageWidth - (margin * 2));
-          
-          // Check if we need to add a new page
-          if (yPosition + (textLines.length * lineHeight) > pageHeight - margin) {
-            pdf.addPage();
-            yPosition = margin;
+      // Extract all text content for ATS-friendly format
+      let allContentText = '';
+      element.querySelectorAll('p, h1, h2, h3, h4, h5, h6, div:not(.pdf-header):not(.pdf-footer)').forEach(el => {
+        if (el.textContent && el.textContent.trim() !== '') {
+          // Skip if element is a child of an already processed element
+          if (el.parentElement && (
+            el.parentElement.tagName.toLowerCase() === 'div' || 
+            el.parentElement.classList.contains('ats-resume-template')
+          )) {
+            allContentText += el.textContent.trim() + '\n';
+            
+            // Add extra newline if it's a heading or section divider
+            if (el.tagName.toLowerCase().startsWith('h') || el.classList.contains('section-header')) {
+              allContentText += '\n';
+            }
           }
-          
-          // Add each line to the PDF
-          textLines.forEach((line: string) => {
-            pdf.text(line, margin, yPosition);
-            yPosition += lineHeight;
-          });
-          
-          // Add a small space after paragraphs
-          yPosition += lineHeight / 2;
         }
       });
       
+      // Process all text content as paragraphs with proper formatting
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      
+      // Split text into lines
+      const textLines = pdf.splitTextToSize(allContentText, pageWidth - (margin * 2));
+      
+      // Add content to PDF with wrapping
+      for (let i = 0; i < textLines.length; i++) {
+        // Check if we need to add a new page
+        if (yPosition + lineHeight > pageHeight - margin) {
+          pdf.addPage();
+          yPosition = margin;
+        }
+        
+        // Add the line
+        pdf.text(textLines[i], margin, yPosition);
+        yPosition += lineHeight;
+      }
+      
       // Add footer
+      yPosition = pageHeight - margin / 2;
       pdf.setFontSize(8);
       pdf.setTextColor(150, 150, 150);
       pdf.text('This resume has been optimized for Applicant Tracking Systems (ATS)', 
-        pageWidth / 2, pageHeight - margin / 2, { align: 'center' });
+        pageWidth / 2, yPosition, { align: 'center' });
       
       // Restore original element properties
       element.classList.remove('pdf-export-in-progress');
