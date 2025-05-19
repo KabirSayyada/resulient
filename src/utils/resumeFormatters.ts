@@ -38,8 +38,7 @@ export const formatResumeForATS = (resumeContent: string | any): string => {
   }
   
   // Remove special characters that might confuse ATS
-  content = content.replace(/[•⋅◦◘○◙♦*]/g, '-'); // Replace bullets and asterisks with hyphens
-  content = content.replace(/\*\*/g, ''); // Remove double asterisks
+  content = content.replace(/[•⋅◦◘○◙♦]/g, '-');
   
   // Standardize section headers to be uppercase and ensure they stand out
   const standardSections = [
