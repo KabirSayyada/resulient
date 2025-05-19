@@ -233,7 +233,7 @@ const Index = () => {
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:site" content="@lovable_dev" />
           <meta name="twitter:title" content="Resulient | Smart Resume Optimization" />
-          <meta name="twitter:description" content="Beat ATS systems and land more interviews with our intelligent optimization tool" />
+          <meta name="twitter:description" content="Beat ATS systems and land more interviews with our intelligent AI-powered optimization tool" />
           <meta name="twitter:image" content="/lovable-uploads/2f15a536-6c8b-4812-b04f-13e247804a93.png" />
           
           {/* Structured data for the main application */}
@@ -383,7 +383,7 @@ const Index = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@lovable_dev" />
         <meta name="twitter:title" content="Resulient | Smart Resume Optimization" />
-        <meta name="twitter:description" content="Beat ATS systems and land more interviews with our intelligent tool" />
+        <meta name="twitter:description" content="Beat ATS systems and land more interviews with our intelligent AI-powered tool" />
         <meta name="twitter:image" content="/lovable-uploads/2f15a536-6c8b-4812-b04f-13e247804a93.png" />
         
         {/* Structured data for the main application */}
@@ -441,7 +441,7 @@ const Index = () => {
                   </span>
                 </h1>
                 <p className="mt-6 text-xl text-gray-600 dark:text-gray-300 max-w-2xl">
-                  Resulient's intelligent resume optimization ensures your application makes it past 
+                  Resulient's intelligent AI-powered resume optimization ensures your application makes it past 
                   Applicant Tracking Systems (ATS) and into human hands. Don't let algorithms reject 
                   your dream job application.
                 </p>
@@ -581,7 +581,7 @@ const Index = () => {
                 {
                   icon: <PieChart className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />,
                   title: "Advanced Keyword Analysis",
-                  description: "Our intelligent system identifies missing skills and experience from job descriptions and seamlessly integrates them into your resume."
+                  description: "Our cutting-edge AI system identifies missing skills and experience from job descriptions and seamlessly integrates them into your resume."
                 },
                 {
                   icon: <Users className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />,
@@ -747,7 +747,7 @@ const Index = () => {
               Ready to Transform Your Job Search?
             </h2>
             <p className="text-xl text-indigo-100 max-w-2xl mx-auto mb-8">
-              Join over 100,000 professionals who have used Resulient to land interviews at top companies.
+              Join over 100,000 professionals who have used Resulient to land interviews at top companies with our powerful AI-driven optimization.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/auth" className="px-8 py-3 border-2 border-white text-white font-bold rounded-full hover:bg-white hover:text-indigo-600 transition-all duration-300 transform hover:scale-105">
