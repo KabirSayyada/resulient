@@ -144,37 +144,15 @@ export async function generatePDFFromElement(
       // Set default font
       pdf.setFont('helvetica', 'normal');
       
-      // Add title
+      // Add title ONLY if it exists and isn't "ATS-Optimized Resume"
       let yPosition = margin;
-      const titleElement = element.querySelector('h1');
-      if (titleElement) {
-        pdf.setFontSize(18);
+      const titleElement = element.querySelector('h2');
+      if (titleElement && !titleElement.textContent?.includes("ATS-Optimized Resume")) {
+        pdf.setFontSize(16);
         pdf.setFont('helvetica', 'bold');
-        pdf.text(titleElement.textContent || 'ATS-Optimized Resume', pageWidth / 2, yPosition, { align: 'center' });
+        pdf.text(titleElement.textContent || '', pageWidth / 2, yPosition, { align: 'center' });
         yPosition += 30; // More space after title
       }
-      
-      // Add subtitle if exists
-      const subtitleElement = element.querySelector('h2');
-      if (subtitleElement) {
-        pdf.setFontSize(14);
-        pdf.setFont('helvetica', 'normal');
-        pdf.text(subtitleElement.textContent || '', pageWidth / 2, yPosition, { align: 'center' });
-        yPosition += 25; // More space after subtitle
-      }
-      
-      // Add date
-      const dateElement = element.querySelector('.text-xs.text-center, .text-sm.text-center');
-      if (dateElement) {
-        pdf.setFontSize(10);
-        pdf.text(dateElement.textContent || '', pageWidth / 2, yPosition, { align: 'center' });
-        yPosition += 25; // More space after date
-      }
-      
-      // Add a separator line
-      pdf.setDrawColor(200, 200, 200);
-      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-      yPosition += 25; // Space after line
       
       // We'll analyze the content from the DOM to detect sections and structure
       const contentElements = element.querySelectorAll('.pdf-content > *');
@@ -209,13 +187,14 @@ export async function generatePDFFromElement(
           pdf.text(currentSection, margin, yPosition);
           yPosition += lineHeight;
           
-          // Add a light separator line under section headers
-          pdf.setDrawColor(220, 220, 220);
+          // Add a stronger separator line under section headers
+          pdf.setDrawColor(180, 180, 180);
           pdf.line(margin, yPosition - 6, pageWidth - margin, yPosition - 6);
           yPosition += lineHeight * 0.5; // Space after section header
         } 
         else if (el.classList.contains('font-semibold') || el.classList.contains('mt-3')) {
           // Likely a job title, company name, or similar
+          yPosition += lineHeight * 0.3; // Extra space before job titles
           pdf.setFontSize(12);
           pdf.setFont('helvetica', 'bold');
           pdf.text(el.textContent || '', margin, yPosition);
@@ -276,13 +255,6 @@ export async function generatePDFFromElement(
           }
         }
       }
-      
-      // Add footer
-      yPosition = pageHeight - margin / 2;
-      pdf.setFontSize(8);
-      pdf.setTextColor(150, 150, 150);
-      pdf.text('This resume has been optimized for Applicant Tracking Systems (ATS)', 
-        pageWidth / 2, yPosition, { align: 'center' });
       
       // Restore original element properties
       element.classList.remove('pdf-export-in-progress');
