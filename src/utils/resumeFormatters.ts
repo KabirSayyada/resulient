@@ -21,6 +21,35 @@ export const formatResumeContent = (resumeContent: string | any): string => {
   }
 };
 
+// Format resume content for ATS compatibility
+export const formatResumeForATS = (resumeContent: string | any): string => {
+  let content = formatResumeContent(resumeContent);
+  
+  // Remove special characters that might confuse ATS
+  content = content.replace(/[•⋅◦◘○◙♦]/g, '-');
+  
+  // Standardize section headers to be uppercase
+  const standardSections = [
+    'SUMMARY', 'PROFESSIONAL SUMMARY', 'OBJECTIVE', 
+    'EXPERIENCE', 'WORK EXPERIENCE', 'EMPLOYMENT HISTORY',
+    'EDUCATION', 'ACADEMIC BACKGROUND',
+    'SKILLS', 'TECHNICAL SKILLS', 'COMPETENCIES',
+    'CERTIFICATIONS', 'LICENSES', 
+    'PROJECTS', 'ACHIEVEMENTS', 'REFERENCES'
+  ];
+  
+  // Simple regex to try to identify and standardize section headers
+  standardSections.forEach(section => {
+    const regex = new RegExp(`(?<![a-zA-Z])${section}(?![a-zA-Z])`, 'i');
+    content = content.replace(regex, section);
+  });
+  
+  // Ensure proper spacing between sections
+  content = content.replace(/\n{3,}/g, '\n\n');
+  
+  return content;
+};
+
 // Calculate keyword score by matching resume content against job description
 export const calculateKeywordScore = (resume: string, jobDescription: string): number => {
   // For now, using a placeholder scoring mechanism 

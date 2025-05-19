@@ -8,15 +8,24 @@ import { generatePDFFromElement, handleDownloadTextReport } from "@/utils/report
 import { ScoreData } from "@/types/resume";
 import { exportElementAsImage } from "@/utils/imageExportUtils";
 import React, { useState } from "react";
-import { DownloadReportButton } from "./DownloadReportButton"; // ADD this for "Full Report (PDF)"
+import { DownloadReportButton } from "./DownloadReportButton"; 
+import { DownloadATSResumeButton } from "./DownloadATSResumeButton";
 
 interface ResumeActionsProps {
   scoreCardRef: React.RefObject<HTMLDivElement>;
   completeReportRef: React.RefObject<HTMLDivElement>;
+  atsResumeRef?: React.RefObject<HTMLDivElement>;
   scoreData?: ScoreData;
+  optimizedResume?: string;
 }
 
-export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: ResumeActionsProps) => {
+export const ResumeActions = ({ 
+  scoreCardRef, 
+  completeReportRef, 
+  atsResumeRef,
+  scoreData,
+  optimizedResume
+}: ResumeActionsProps) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [showShareMessage, setShowShareMessage] = useState(true);
@@ -88,6 +97,34 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
     }
   };
 
+  // Download ATS-friendly resume as PDF
+  const handleATSResumeDownload = async () => {
+    if (!atsResumeRef?.current) return;
+    toast({
+      title: "Preparing ATS Resume",
+      description: "Exporting your ATS-optimized resume as a PDF. Hang tight!",
+    });
+
+    const success = await generatePDFFromElement(
+      atsResumeRef.current,
+      `ats-optimized-resume-${new Date().toISOString().split("T")[0]}.pdf`,
+      true // Single-page PDF for ATS resume
+    );
+
+    if (success) {
+      toast({
+        title: "ATS Resume Downloaded",
+        description: "Your ATS-optimized resume has been downloaded as PDF.",
+      });
+    } else {
+      toast({
+        title: "PDF Export Failed",
+        description: "There was an error downloading your ATS resume as PDF.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border border-indigo-100 shadow-sm">
       {/* Encouragement message for sharing, always visible above export/share buttons */}
@@ -117,11 +154,18 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
           </Button>
         )}
       </div>
-      {/* Button for exporting full report PDF (add below all other export options) */}
+      {/* Button for exporting full report PDF */}
       <DownloadReportButton 
         title="Download Full Report (PDF)"
         onClick={handleFullReportDownload} 
       />
+      
+      {/* New button for ATS-friendly resume */}
+      {optimizedResume && atsResumeRef && (
+        <DownloadATSResumeButton
+          onClick={handleATSResumeDownload}
+        />
+      )}
     </div>
   );
 };
