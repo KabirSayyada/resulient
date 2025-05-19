@@ -7,11 +7,21 @@ interface ATSFriendlyResumePdfTemplateProps {
 }
 
 export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyResumePdfTemplateProps) => {
-  const currentDate = new Date();
-  const formattedDate = currentDate.toLocaleDateString();
+  // Process the content to remove confusing characters
+  const cleanedContent = content
+    .replace(/\*/g, '') // Remove asterisks 
+    .replace(/\*\*/g, '') // Remove double asterisks
+    .replace(/[^\w\s.,():;'"-]/g, ' ') // Replace other special characters with spaces
+    .replace(/\s+/g, ' '); // Normalize spaces
   
-  // Try to extract sections from the resume content
-  const lines = content.split('\n');
+  const lines = cleanedContent.split('\n');
+  
+  // Try to identify the name at the top of the resume
+  const potentialName = lines.length > 0 ? lines[0].trim() : '';
+  const hasNameAtTop = potentialName.length > 0 && 
+                      potentialName.length < 50 && 
+                      !potentialName.includes('@') &&
+                      !/^\d+/.test(potentialName);
   
   // More comprehensive function to identify section headers
   const isSectionHeader = (line: string, index: number): boolean => {
@@ -69,6 +79,10 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
   const isDateRange = (line: string): boolean => {
     return /\d{4}[\s-]+.*?(\d{4}|present|current|now)/i.test(line);
   };
+  
+  // Skip the name line if it appears in both places (top and within content)
+  const displayLines = hasNameAtTop ? lines.filter((line, index) => 
+    index === 0 || line.trim() !== potentialName) : lines;
 
   return (
     <div className="ats-resume-template p-8 bg-white text-black font-sans" style={{ 
@@ -79,13 +93,20 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
       overflowX: 'hidden',
       pageBreakInside: 'avoid'
     }}>
-      {/* Only show job title if provided, without the "ATS-Optimized Resume" header */}
+      {/* Only show job title if provided */}
       {jobTitle && (
         <h2 className="text-lg text-center text-slate-700 mb-4">For: {jobTitle}</h2>
       )}
+      
+      {/* If we identified a name at the top, show it prominently */}
+      {hasNameAtTop && (
+        <h1 className="text-xl font-bold text-center text-slate-900 mb-6">
+          {potentialName}
+        </h1>
+      )}
 
       <div className="pdf-content" style={{ fontSize: '10pt' }}>
-        {lines.map((line, index) => {
+        {displayLines.map((line, index) => {
           if (isSectionHeader(line, index)) {
             // Add more space before section headers (except the first one)
             const topMargin = index > 0 ? 'mt-6' : '';
@@ -130,8 +151,6 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
           }
         })}
       </div>
-      
-      {/* Remove the footer with "This resume has been optimized..." text */}
     </div>
   );
 };

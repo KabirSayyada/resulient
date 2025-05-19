@@ -18,7 +18,7 @@ export const DownloadATSResumeButton = ({ onClick, disabled = false }: DownloadA
       disabled={disabled}
     >
       <FileText className="mr-2 h-5 w-5" />
-      Download Clean, Formatted Resume PDF
+      Download Formatted Resume PDF
     </Button>
   );
 };
