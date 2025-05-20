@@ -37,18 +37,10 @@ export const formatResumeForATS = (resumeContent: string | any): string => {
     }
   }
   
-  // Clean up the content for ATS systems
-  content = cleanResumeForATS(content);
+  // Remove special characters that might confuse ATS
+  content = content.replace(/[•⋅◦◘○◙♦]/g, '-');
   
-  return content;
-};
-
-// Clean up resume content for ATS compatibility
-const cleanResumeForATS = (content: string): string => {
-  // Replace non-standard bullets with standard ones
-  content = content.replace(/[•⋅◦◘○◙♦]/g, '•');
-  
-  // Standardize section headers to be uppercase 
+  // Standardize section headers to be uppercase and ensure they stand out
   const standardSections = [
     'SUMMARY', 'PROFESSIONAL SUMMARY', 'OBJECTIVE', 
     'EXPERIENCE', 'WORK EXPERIENCE', 'EMPLOYMENT HISTORY',
@@ -67,27 +59,9 @@ const cleanResumeForATS = (content: string): string => {
   // Ensure proper spacing between sections
   content = content.replace(/\n{3,}/g, '\n\n');
   
-  // Remove excessive whitespace
+  // Clean up excessive whitespace between sections to save space
   content = content.replace(/^\s+/gm, '');
   content = content.replace(/\s+$/gm, '');
-  
-  // Standardize dashes and hyphens
-  content = content.replace(/–/g, '-');
-  content = content.replace(/—/g, '-');
-  
-  // Fix common formatting issues
-  // Ensure bullet points have spaces after them
-  content = content.replace(/•(?=\S)/g, '• ');
-  
-  // Ensure consistent date formatting
-  content = content.replace(/(\d{4})\s*[-–]\s*([Pp]resent|[Cc]urrent)/g, '$1 - Present');
-  content = content.replace(/(\d{4})\s*[-–]\s*(\d{4})/g, '$1 - $2');
-  
-  // Add line break before section headers if missing
-  standardSections.forEach(section => {
-    const regex = new RegExp(`(?<!\n)${section}`, 'g');
-    content = content.replace(regex, `\n${section}`);
-  });
   
   return content;
 };
