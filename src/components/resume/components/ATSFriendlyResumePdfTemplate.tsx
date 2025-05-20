@@ -109,7 +109,7 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
         {contactInfo.length > 0 && (
           <div className="contact-info text-sm text-slate-600 mb-2">
             {contactInfo.map((contact, idx) => (
-              <span key={idx} className="mx-1">{contact} {idx < contactInfo.length - 1 && '|'}</span>
+              <span key={idx} className="mx-1">{contact} {idx < contactInfo.length - 1 ? '|' : ''}</span>
             ))}
           </div>
         )}

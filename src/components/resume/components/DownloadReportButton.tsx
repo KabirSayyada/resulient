@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { DownloadIcon } from "lucide-react";
+import { DownloadIcon, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
@@ -13,6 +13,7 @@ interface DownloadReportButtonProps {
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
+  disabled?: boolean;  // Added the disabled prop
 }
 
 export function DownloadReportButton({
@@ -20,7 +21,8 @@ export function DownloadReportButton({
   onClick,
   className,
   variant = "default",
-  size = "default"
+  size = "default",
+  disabled = false // Added default value
 }: DownloadReportButtonProps) {
   const [isDisabled, setIsDisabled] = useState(false);
   const { subscription } = useSubscription();
@@ -154,9 +156,13 @@ export function DownloadReportButton({
       size={size}
       className={className}
       onClick={handleDownloadClick}
-      disabled={isDisabled || subscription.isLoading}
+      disabled={isDisabled || subscription.isLoading || disabled} // Added external disabled state to the list
     >
-      <DownloadIcon className="h-4 w-4 mr-2" />
+      {isDisabled ? (
+        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+      ) : (
+        <DownloadIcon className="h-4 w-4 mr-2" />
+      )}
       {title}
     </Button>
   );
