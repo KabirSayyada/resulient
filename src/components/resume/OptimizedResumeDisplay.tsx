@@ -8,8 +8,6 @@ import { useLocation } from "react-router-dom";
 import { AnalysisCards } from "./components/AnalysisCards";
 import { ReportHeader } from "./components/ReportHeader";
 import { OptimizedResumeContent } from "./components/OptimizedResumeContent";
-import { DownloadReportButton } from "./components/DownloadReportButton";
-import { generatePDFFromElement } from "@/utils/reportGenerationUtils";
 import { ResumeActions } from "./components/ResumeActions";
 import { ATSFriendlyResumePdfTemplate } from "./components/ATSFriendlyResumePdfTemplate";
 import { 
@@ -39,21 +37,6 @@ export const OptimizedResumeDisplay = ({
   const optimizationReportRef = useRef<HTMLDivElement>(null);
   const pdfExportRef = useRef<HTMLDivElement>(null);
   const atsResumeRef = useRef<HTMLDivElement>(null);
-
-  const handleOptimizationReportDownload = async () => {
-    // First prepare a clean version for PDF export
-    if (!optimizationReportRef.current || !pdfExportRef.current) return;
-    
-    // Copy content to the hidden PDF element for clean export
-    pdfExportRef.current.innerHTML = optimizationReportRef.current.innerHTML;
-    
-    // Generate the PDF from the hidden element
-    await generatePDFFromElement(
-      pdfExportRef.current,
-      `resume-optimization-report-${new Date().toISOString().split("T")[0]}.pdf`, 
-      false
-    );
-  };
 
   if (!optimizedResume) return null;
 
@@ -156,7 +139,7 @@ export const OptimizedResumeDisplay = ({
         <div 
           ref={atsResumeRef} 
           className="fixed left-[-9999px] top-0 z-[-1] bg-white print-export"
-          style={{ width: "800px" }}
+          style={{ width: "800px", minHeight: "1100px" }}
         >
           <ATSFriendlyResumePdfTemplate 
             content={atsFormattedResume}
