@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface ATSFriendlyResumePdfTemplateProps {
@@ -7,7 +6,7 @@ interface ATSFriendlyResumePdfTemplateProps {
 }
 
 export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTemplateProps) => {
-  // Try to extract sections from the resume content
+  // Split the content into lines
   const lines = content.split('\n');
   
   // More comprehensive function to identify section headers
@@ -67,14 +66,14 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
     return /\d{4}[\s-]+.*?(\d{4}|present|current|now)/i.test(line);
   };
 
-  // Extract name and contact info from the beginning of the resume
+  // Improved function to extract name and contact info from the beginning of the resume
   const extractContactInfo = (): { name: string; contactInfo: string[] } => {
     let name = "";
     const contactInfo: string[] = [];
     let nameFound = false;
     
-    // Look at the first few lines to find name and contact info
-    for (let i = 0; i < Math.min(10, lines.length); i++) {
+    // Look at the first several lines to find name and contact info
+    for (let i = 0; i < Math.min(15, lines.length); i++) {
       const line = lines[i].trim();
       
       // Skip empty lines
@@ -86,6 +85,7 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
           !line.match(/^\d{3}[-.\s]?\d{3}[-.\s]?\d{4}$/) && // Phone number pattern
           !line.match(/^https?:\/\//) && // URL pattern
           !line.match(/^www\./) && // URL pattern
+          !line.match(/^\d+\s+[\w\s]+,/) && // Address pattern
           !isSectionHeader(line, i)) {
         name = line;
         nameFound = true;
@@ -95,15 +95,17 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
       // If it looks like contact info, add it
       if ((line.includes('@') || // Email
            line.match(/^\d{3}[-.\s]?\d{3}[-.\s]?\d{4}$/) || // Phone number
+           line.match(/^[\d\-+().\s]{10,}$/) || // Another phone pattern
            line.match(/^https?:\/\//) || // URL
            line.match(/^www\./) || // URL
-           line.includes('linkedin.com')) && // LinkedIn
-          contactInfo.length < 4) { // Limit to 4 contact items
+           line.includes('linkedin.com') || // LinkedIn
+           line.match(/^\d+\s+[\w\s]+,/)) && // Address pattern
+          !isSectionHeader(line, i)) { 
         contactInfo.push(line);
       }
       
-      // If we've found a section header, stop looking for contact info
-      if (isSectionHeader(line, i) && i > 1) {
+      // If we've found a section header and we have some contact info, stop looking
+      if (isSectionHeader(line, i) && nameFound && contactInfo.length > 0) {
         break;
       }
     }
@@ -112,6 +114,10 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
   };
 
   const { name, contactInfo } = extractContactInfo();
+
+  // Log extracted data for debugging
+  console.log("Extracted name:", name);
+  console.log("Extracted contact info:", contactInfo);
 
   return (
     <div className="ats-resume-template p-8 bg-white text-black font-sans" style={{ 
@@ -141,8 +147,8 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
 
       <div className="pdf-content" style={{ fontSize: '10pt' }}>
         {lines.map((line, index) => {
-          // Skip the first few lines that we used for contact info
-          if (index < 10 && (line.trim() === name || contactInfo.includes(line.trim()) || line.trim() === "")) {
+          // Skip the first several lines that we used for contact info
+          if (index < 15 && (line.trim() === name || contactInfo.includes(line.trim()) || line.trim() === "")) {
             return null;
           }
           
