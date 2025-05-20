@@ -133,7 +133,7 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
             return <div key={index} style={{ height: '0.5em' }}></div>;
           } else {
             // Skip contact info lines that we already displayed in the header
-            if (contactInfo.includes(line.trim())) {
+            if (contactInfo.some(contactItem => contactItem === line.trim())) {
               return null;
             }
             
