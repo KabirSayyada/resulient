@@ -14,19 +14,24 @@ export const DownloadATSResumeSection = ({ atsResumeRef }: DownloadATSResumeSect
     
     toast.loading("Preparing your ATS-friendly resume...");
     
-    // Always force to a single page for ATS optimization
-    const forceSinglePage = true;
+    // Get approximate content length to determine if we need multi-page support
+    const contentElement = atsResumeRef.current.querySelector('.pdf-content');
+    const contentLength = contentElement?.textContent?.length || 0;
+    
+    // Force single page for most resumes, only use multi-page for very long content
+    // (Increased threshold to 4000 characters to fit more on a single page)
+    const forceSinglePage = contentLength <= 4000;
     
     const success = await generatePDFFromElement(
       atsResumeRef.current,
       `ats-optimized-resume-${new Date().toISOString().split("T")[0]}.pdf`,
-      forceSinglePage, // Always force single page
+      forceSinglePage, // Force single page in most cases
       true  // Use text mode for selectable text
     );
     
     if (success) {
       toast.success("ATS Resume Downloaded", {
-        description: "Your ATS-optimized resume has been downloaded as a single-page PDF with selectable text. Single-page resumes are typically preferred by ATS systems."
+        description: `Your ATS-optimized resume has been downloaded as a PDF with selectable text${forceSinglePage ? '' : ' (multi-page format due to content length)'}.`
       });
     } else {
       toast.error("PDF Export Failed", {
