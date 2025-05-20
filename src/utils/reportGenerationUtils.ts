@@ -1,8 +1,6 @@
-
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { ScoreData } from "@/types/resume";
-import { identifyResumeSections, extractCandidateName } from "./resumeFormatters";
 
 /**
  * Consistent settings for all canvas capture operations
@@ -146,18 +144,9 @@ export async function generatePDFFromElement(
       // Set default font
       pdf.setFont('helvetica', 'normal');
       
-      // Check if this is an ATS-Resume by looking for the class
-      const isATSResume = element.classList.contains('ats-resume-template') || 
-                          element.querySelector('.ats-resume-template') !== null;
-      
-      // Special handling for ATS resumes with better formatting
-      if (isATSResume) {
-        return generateATSResumePDF(element, filename, pdf, pageWidth, pageHeight, margin);
-      }
-      
       // Add title ONLY if it exists and isn't "ATS-Optimized Resume"
       let yPosition = margin;
-      const titleElement = element.querySelector('h2, h1');
+      const titleElement = element.querySelector('h2');
       if (titleElement && !titleElement.textContent?.includes("ATS-Optimized Resume")) {
         pdf.setFontSize(16);
         pdf.setFont('helvetica', 'bold');
@@ -357,191 +346,6 @@ export async function generatePDFFromElement(
     return true;
   } catch (error) {
     console.error("PDF generation error:", error);
-    return false;
-  }
-}
-
-/**
- * Generate an ATS-friendly resume PDF with carefully formatted content
- */
-async function generateATSResumePDF(
-  element: HTMLElement, 
-  filename: string,
-  pdf: jsPDF,
-  pageWidth: number,
-  pageHeight: number,
-  margin: number
-): Promise<boolean> {
-  try {
-    // Get the raw content of the resume
-    const contentElement = element.querySelector('.pdf-content');
-    if (!contentElement) return false;
-    
-    const rawContent = contentElement.textContent || '';
-    const sections = identifyResumeSections(rawContent);
-    
-    // Extract candidate name for header
-    const candidateName = extractCandidateName(rawContent);
-    const nameElement = element.querySelector('h1');
-    const titleElement = element.querySelector('h2');
-    
-    // Contact information (identify from the DOM)
-    const contactNodes = element.querySelectorAll('.contact-info span');
-    const contactInfo: string[] = [];
-    contactNodes.forEach(node => {
-      const text = node.textContent?.replace('|', '').trim();
-      if (text) contactInfo.push(text);
-    });
-    
-    // Constants for layout
-    const lineHeight = 16;
-    let yPosition = margin;
-    
-    // Start with header
-    if (candidateName || nameElement?.textContent) {
-      const name = candidateName || nameElement?.textContent || '';
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(name, pageWidth / 2, yPosition, { align: 'center' });
-      yPosition += lineHeight * 1.5;
-    }
-    
-    // Contact info
-    if (contactInfo.length > 0) {
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(contactInfo.join(' | '), pageWidth / 2, yPosition, { align: 'center' });
-      yPosition += lineHeight * 1.5;
-    }
-    
-    // Job title if present
-    if (titleElement?.textContent?.includes('For:')) {
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'italic');
-      pdf.text(titleElement.textContent, pageWidth / 2, yPosition, { align: 'center' });
-      yPosition += lineHeight * 2;
-    } else {
-      yPosition += lineHeight;
-    }
-    
-    // Process resume sections
-    const sectionKeys = Object.keys(sections);
-    
-    for (const section of sectionKeys) {
-      // Skip the header section since we've already processed it
-      if (section === 'HEADER') continue;
-      
-      // Check if we need to add a new page
-      if (yPosition + lineHeight * 3 > pageHeight - margin) {
-        pdf.addPage();
-        yPosition = margin;
-      }
-      
-      // Add section heading
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(section, margin, yPosition);
-      yPosition += lineHeight;
-      
-      // Add section separator line
-      pdf.setDrawColor(100, 100, 100);
-      pdf.line(margin, yPosition - 6, pageWidth - margin, yPosition - 6);
-      yPosition += lineHeight * 0.5;
-      
-      // Process section content
-      const contentLines = sections[section].split('\n').filter(line => line.trim() !== '');
-      
-      let inJobRole = false;
-      let inBulletList = false;
-      
-      for (const line of contentLines) {
-        // Check if we need to add a new page
-        if (yPosition + lineHeight > pageHeight - margin) {
-          pdf.addPage();
-          yPosition = margin;
-        }
-        
-        // Format based on line content type
-        if (line.match(/\d{4}\s*-\s*(\d{4}|present|current|now)/i)) {
-          // Date range
-          pdf.setFontSize(10);
-          pdf.setFont('helvetica', 'italic');
-          pdf.text(line, margin, yPosition);
-          yPosition += lineHeight;
-          inJobRole = true;
-          inBulletList = false;
-        } 
-        else if (inJobRole && !line.startsWith('-') && !line.startsWith('•') && line.length < 60) {
-          // Job title or company - first line after date is usually job title
-          pdf.setFontSize(12);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(line, margin, yPosition);
-          yPosition += lineHeight;
-          inJobRole = false;
-        }
-        else if (line.startsWith('-') || line.startsWith('•')) {
-          // Bullet point
-          inBulletList = true;
-          
-          pdf.setFontSize(10);
-          pdf.setFont('helvetica', 'normal');
-          
-          // Format bullet points with proper wrapping and indentation
-          const bulletText = line;
-          const wrappedText = pdf.splitTextToSize(bulletText, pageWidth - margin * 2 - 20);
-          
-          for (let i = 0; i < wrappedText.length; i++) {
-            // Check for page break
-            if (yPosition + lineHeight > pageHeight - margin) {
-              pdf.addPage();
-              yPosition = margin;
-            }
-            
-            // First line has the bullet, subsequent lines are indented
-            const xPosition = i === 0 ? margin : margin + 15;
-            pdf.text(wrappedText[i], xPosition, yPosition);
-            yPosition += lineHeight;
-          }
-          
-          // Small space after each bullet
-          yPosition += lineHeight * 0.2;
-        }
-        else {
-          // Regular paragraph
-          if (inBulletList) {
-            // Add some space after bullet list
-            yPosition += lineHeight * 0.3;
-            inBulletList = false;
-          }
-          
-          pdf.setFontSize(10);
-          pdf.setFont('helvetica', 'normal');
-          
-          // Wrap text properly
-          const wrappedText = pdf.splitTextToSize(line, pageWidth - margin * 2);
-          
-          for (let i = 0; i < wrappedText.length; i++) {
-            // Check for page break
-            if (yPosition + lineHeight > pageHeight - margin) {
-              pdf.addPage();
-              yPosition = margin;
-            }
-            
-            pdf.text(wrappedText[i], margin, yPosition);
-            yPosition += lineHeight;
-          }
-        }
-      }
-      
-      // Add space after each section
-      yPosition += lineHeight;
-    }
-    
-    // Save and return
-    pdf.save(filename);
-    return true;
-  } catch (error) {
-    console.error("ATS PDF generation error:", error);
     return false;
   }
 }

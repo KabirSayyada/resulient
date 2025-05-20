@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { FileText, Loader2 } from "lucide-react";
+import { FileText } from "lucide-react";
 
 interface DownloadATSResumeButtonProps {
   onClick: () => void;
@@ -17,12 +17,8 @@ export const DownloadATSResumeButton = ({ onClick, disabled = false }: DownloadA
       onClick={onClick}
       disabled={disabled}
     >
-      {disabled ? (
-        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-      ) : (
-        <FileText className="mr-2 h-5 w-5" />
-      )}
-      Download ATS-Optimized Resume PDF
+      <FileText className="mr-2 h-5 w-5" />
+      Download Clean, Formatted Resume PDF
     </Button>
   );
 };
