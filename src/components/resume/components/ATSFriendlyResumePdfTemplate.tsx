@@ -68,19 +68,19 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
   const { name, contactInfo } = extractContactInfo(lines);
 
   return (
-    <div className="ats-resume-template p-8 bg-white text-black font-sans" style={{ 
+    <div className="ats-resume-template p-6 bg-white text-black font-sans" style={{ 
       fontFamily: 'Arial, sans-serif', 
-      lineHeight: '1.4',
-      fontSize: '10.5pt', // Slightly smaller font for better fit
+      lineHeight: '1.2',  // Reduced line height
+      fontSize: '9pt',    // Smaller font size overall
       maxWidth: '100%',
       overflowX: 'hidden',
       pageBreakInside: 'avoid'
     }}>
-      <div className="pdf-header mb-4 pb-2 border-b border-gray-300 text-center">
-        {name && <h1 className="text-xl font-bold text-slate-800 mb-1">{name}</h1>}
+      <div className="pdf-header mb-3 pb-1 border-b border-gray-300 text-center">
+        {name && <h1 className="text-lg font-bold text-slate-800 mb-0.5">{name}</h1>}
         
         {contactInfo.length > 0 && (
-          <div className="text-sm text-slate-700 mb-2">
+          <div className="text-xs text-slate-700 mb-1">
             {contactInfo.map((info, idx) => (
               <div key={idx}>{info}</div>
             ))}
@@ -88,12 +88,12 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
         )}
         
         {jobTitle && (
-          <h2 className="text-md text-slate-700 mt-2 mb-1">For: {jobTitle}</h2>
+          <h2 className="text-sm text-slate-700 mt-1 mb-0.5">For: {jobTitle}</h2>
         )}
-        <div className="text-xs text-slate-500 mt-1">Generated on {formattedDate} by Resulient</div>
+        <div className="text-xs text-slate-500 mt-0.5">Generated on {formattedDate} by Resulient</div>
       </div>
 
-      <div className="pdf-content" style={{ fontSize: '9.5pt', lineHeight: '1.3' }}>
+      <div className="pdf-content" style={{ fontSize: '8.5pt', lineHeight: '1.2' }}>
         {lines.map((line, index) => {
           // Skip first few lines if they're part of the header we've already displayed
           if (index < contactInfo.length + 1 && (line.trim() === name || contactInfo.includes(line.trim()) || !line.trim())) {
@@ -101,42 +101,42 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
           }
           
           if (isSectionHeader(line)) {
-            // Add more space before section headers (except the first one)
-            const topMargin = index > 0 ? 'mt-4' : '';
+            // Add minimal space before section headers
+            const topMargin = index > 0 ? 'mt-2' : '';
             return (
-              <h2 key={index} className={`text-md font-bold text-slate-800 ${topMargin} mb-2 border-b border-slate-300 pb-1`}>
+              <h2 key={index} className={`text-sm font-bold text-slate-800 ${topMargin} mb-1 border-b border-slate-200 pb-0.5`}>
                 {line.trim()}
               </h2>
             );
           } else if (line.trim().length === 0) {
-            // Add appropriate spacing for blank lines - reduced for better space usage
-            return <div key={index} style={{ height: '0.4em' }}></div>;
+            // Minimal spacing for blank lines
+            return <div key={index} style={{ height: '0.2em' }}></div>;
           } else {
             // Check if this might be a bullet point or job title/date
             if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
               return (
-                <p key={index} className="my-0.5 ml-4 text-slate-700" style={{ lineHeight: '1.3', textIndent: '-1em', paddingLeft: '1em' }}>
+                <p key={index} className="my-0.5 ml-3 text-slate-700" style={{ lineHeight: '1.2', textIndent: '-0.7em', paddingLeft: '0.7em', marginBottom: '0.2em' }}>
                   {line.trim()}
                 </p>
               );
             } else if (/\d{4}\s*(-|–|to)\s*(\d{4}|present)/i.test(line)) {
               // This looks like a date range, make it stand out
               return (
-                <p key={index} className="my-0.5 font-semibold text-slate-700" style={{ lineHeight: '1.3' }}>
+                <p key={index} className="my-0.5 font-semibold text-slate-700" style={{ lineHeight: '1.2', marginBottom: '0.2em' }}>
                   {line.trim()}
                 </p>
               );
             } else if (line.trim().length > 0 && line.trim().length < 60 && index > 0 && lines[index-1].trim() === '') {
               // This could be a job title or company name
               return (
-                <p key={index} className="mt-2 mb-0.5 font-semibold text-slate-800" style={{ lineHeight: '1.3' }}>
+                <p key={index} className="mt-1 mb-0.5 font-semibold text-slate-800" style={{ lineHeight: '1.2' }}>
                   {line.trim()}
                 </p>
               );
             } else {
               // Regular paragraph
               return (
-                <p key={index} className="my-0.5 text-slate-700" style={{ lineHeight: '1.3' }}>
+                <p key={index} className="my-0.5 text-slate-700" style={{ lineHeight: '1.2', marginBottom: '0.2em' }}>
                   {line.trim()}
                 </p>
               );
@@ -145,7 +145,7 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
         })}
       </div>
       
-      <div className="pdf-footer mt-2 pt-1 border-t border-slate-300 text-center text-xs text-slate-500">
+      <div className="pdf-footer mt-1 pt-0.5 border-t border-slate-200 text-center text-xs text-slate-500">
         <p>This resume has been optimized for Applicant Tracking Systems (ATS)</p>
       </div>
     </div>

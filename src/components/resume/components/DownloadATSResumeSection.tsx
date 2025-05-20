@@ -18,13 +18,14 @@ export const DownloadATSResumeSection = ({ atsResumeRef }: DownloadATSResumeSect
     const contentElement = atsResumeRef.current.querySelector('.pdf-content');
     const contentLength = contentElement?.textContent?.length || 0;
     
-    // Use multi-page mode for longer content (approximately > 3000 characters)
-    const forceSinglePage = contentLength <= 3000;
+    // Force single page for most resumes, only use multi-page for very long content
+    // (Increased threshold to 4000 characters to fit more on a single page)
+    const forceSinglePage = contentLength <= 4000;
     
     const success = await generatePDFFromElement(
       atsResumeRef.current,
       `ats-optimized-resume-${new Date().toISOString().split("T")[0]}.pdf`,
-      forceSinglePage, // Dynamic single-page decision based on content length
+      forceSinglePage, // Force single page in most cases
       true  // Use text mode for selectable text
     );
     
