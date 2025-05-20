@@ -42,12 +42,14 @@ export const formatResumeForATS = (resumeContent: string | any): string => {
   
   // Standardize section headers to be uppercase and ensure they stand out
   const standardSections = [
-    'SUMMARY', 'PROFESSIONAL SUMMARY', 'OBJECTIVE', 
-    'EXPERIENCE', 'WORK EXPERIENCE', 'EMPLOYMENT HISTORY',
-    'EDUCATION', 'ACADEMIC BACKGROUND',
-    'SKILLS', 'TECHNICAL SKILLS', 'COMPETENCIES',
-    'CERTIFICATIONS', 'LICENSES', 
-    'PROJECTS', 'ACHIEVEMENTS', 'REFERENCES'
+    'SUMMARY', 'PROFESSIONAL SUMMARY', 'OBJECTIVE', 'PROFILE',
+    'EXPERIENCE', 'WORK EXPERIENCE', 'EMPLOYMENT HISTORY', 'PROFESSIONAL EXPERIENCE',
+    'EDUCATION', 'ACADEMIC BACKGROUND', 'EDUCATIONAL QUALIFICATIONS',
+    'SKILLS', 'TECHNICAL SKILLS', 'COMPETENCIES', 'KEY SKILLS',
+    'CERTIFICATIONS', 'LICENSES', 'CERTIFICATES',
+    'PROJECTS', 'KEY PROJECTS', 'PROFESSIONAL PROJECTS',
+    'ACHIEVEMENTS', 'ACCOMPLISHMENTS', 'KEY ACHIEVEMENTS',
+    'REFERENCES', 'PROFESSIONAL REFERENCES'
   ];
   
   // Simple regex to try to identify and standardize section headers
@@ -62,6 +64,18 @@ export const formatResumeForATS = (resumeContent: string | any): string => {
   // Clean up excessive whitespace between sections to save space
   content = content.replace(/^\s+/gm, '');
   content = content.replace(/\s+$/gm, '');
+  
+  // Standardize bullet points for better ATS parsing
+  content = content.replace(/^[∙•●⦿⭗⭘⬤◉○◌◎●◐◑◕◉⦿⨀⯁▶➤➢➣➔→⇒⊕⋄♦]/gm, '- ');
+  
+  // Ensure dates are properly formatted
+  content = content.replace(/(\d{4})\s*[-–—]\s*(\d{4}|Present|Current|Now)/gi, '$1 - $2');
+  
+  // Add extra spacing after section headers to ensure they stand out
+  standardSections.forEach(section => {
+    const regex = new RegExp(`^${section}$`, 'gmi');
+    content = content.replace(regex, `${section}\n`);
+  });
   
   return content;
 };
