@@ -12,6 +12,7 @@ import { DownloadReportButton } from "./components/DownloadReportButton";
 import { generatePDFFromElement } from "@/utils/reportGenerationUtils";
 import { ResumeActions } from "./components/ResumeActions";
 import { ATSFriendlyResumePdfTemplate } from "./components/ATSFriendlyResumePdfTemplate";
+import { DownloadATSResumeSection } from "./components/DownloadATSResumeSection";
 import { 
   formatResumeContent, 
   formatResumeForATS,
@@ -156,13 +157,16 @@ export const OptimizedResumeDisplay = ({
         <div 
           ref={atsResumeRef} 
           className="fixed left-[-9999px] top-0 z-[-1] bg-white print-export"
-          style={{ width: "800px" }}
+          style={{ width: "800px", visibility: "hidden" }}
         >
           <ATSFriendlyResumePdfTemplate 
             content={atsFormattedResume}
             jobTitle={jobTitle}
           />
         </div>
+        
+        {/* Add separate download section for ATS resume */}
+        <DownloadATSResumeSection atsResumeRef={atsResumeRef} />
       </>
     );
   }

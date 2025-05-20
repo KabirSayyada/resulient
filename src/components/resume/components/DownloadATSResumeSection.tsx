@@ -10,9 +10,26 @@ interface DownloadATSResumeSectionProps {
 
 export const DownloadATSResumeSection = ({ atsResumeRef }: DownloadATSResumeSectionProps) => {
   const handleATSResumeDownload = async () => {
-    if (!atsResumeRef.current) return;
+    if (!atsResumeRef.current) {
+      toast.error("Could not generate resume", {
+        description: "The resume template could not be found."
+      });
+      return;
+    }
     
     toast.loading("Preparing your ATS-friendly resume...");
+    
+    // Ensure the element is visible before generating the PDF
+    const originalVisibility = atsResumeRef.current.style.visibility;
+    const originalPosition = atsResumeRef.current.style.position;
+    const originalLeft = atsResumeRef.current.style.left;
+    
+    atsResumeRef.current.style.visibility = 'visible';
+    atsResumeRef.current.style.position = 'fixed';
+    atsResumeRef.current.style.left = '0';
+    
+    // Add a short delay to ensure the element is properly rendered
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     const success = await generatePDFFromElement(
       atsResumeRef.current,
@@ -20,6 +37,11 @@ export const DownloadATSResumeSection = ({ atsResumeRef }: DownloadATSResumeSect
       true, // Single-page PDF for ATS resume
       true  // Use text mode for selectable text
     );
+    
+    // Restore original element properties
+    atsResumeRef.current.style.visibility = originalVisibility;
+    atsResumeRef.current.style.position = originalPosition;
+    atsResumeRef.current.style.left = originalLeft;
     
     if (success) {
       toast.success("ATS Resume Downloaded", {
