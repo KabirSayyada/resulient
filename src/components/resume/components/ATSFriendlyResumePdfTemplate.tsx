@@ -120,59 +120,100 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
 
       <div className="pdf-content" style={{ fontSize: '10pt' }}>
         {lines.map((line, index) => {
+          const trimmedLine = line.trim();
+          
+          // Skip completely empty lines
+          if (trimmedLine.length === 0) {
+            return <div key={index} className="empty-line" style={{ height: '0.5em' }}></div>;
+          }
+          
+          // Skip contact info lines that we already displayed in the header
+          if (contactInfo.some(contactItem => contactItem === trimmedLine)) {
+            return null;
+          }
+          
+          // Check if this is a section header
           if (isSectionHeader(line, index)) {
-            // Add more space before section headers (except the first one)
             const topMargin = index > 0 ? 'mt-6' : '';
             return (
-              <h2 key={index} className={`text-lg font-bold text-slate-800 ${topMargin} mb-2 border-b border-slate-300 pb-1 uppercase`} data-section-header>
-                {line.trim()}
+              <h2 
+                key={index} 
+                className={`text-lg font-bold text-slate-800 ${topMargin} mb-2 border-b border-slate-300 pb-1 uppercase`} 
+                data-section-header="true"
+              >
+                {trimmedLine}
               </h2>
             );
-          } else if (line.trim().length === 0) {
-            // Add appropriate spacing for blank lines
-            return <div key={index} style={{ height: '0.5em' }}></div>;
-          } else {
-            // Skip contact info lines that we already displayed in the header
-            if (contactInfo.some(contactItem => contactItem === line.trim())) {
-              return null;
-            }
-            
-            // Check if this might be a bullet point
-            if (line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().startsWith('*')) {
-              return (
-                <p key={index} className="my-1 ml-4 text-slate-700" style={{ lineHeight: '1.4', textIndent: '-1em', paddingLeft: '1em' }} data-bullet-point>
-                  {line.trim()}
-                </p>
-              );
-            } else if (isDateRange(line)) {
-              // This looks like a date range, make it stand out
-              return (
-                <p key={index} className="my-1 italic text-slate-600" style={{ lineHeight: '1.4' }} data-date-range>
-                  {line.trim()}
-                </p>
-              );
-            } else if (isJobTitleOrCompany(line, index)) {
-              // This could be a job title or company name
-              return (
-                <p key={index} className="mt-3 mb-1 font-bold text-slate-800" style={{ lineHeight: '1.4' }} data-job-title>
-                  {line.trim()}
-                </p>
-              );
-            } else if (isSkillItem(line)) {
-              // This looks like a skill item
-              return (
-                <p key={index} className="my-1 text-slate-700" style={{ lineHeight: '1.3' }} data-skill-item>
-                  {line.trim()}
-                </p>
-              );
-            } else {
-              // Regular paragraph
-              return (
-                <p key={index} className="my-1 text-slate-700" style={{ lineHeight: '1.4' }} data-regular-text>
-                  {line.trim()}
-                </p>
-              );
-            }
+          }
+          
+          // Check if this might be a bullet point
+          else if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-') || trimmedLine.startsWith('*')) {
+            return (
+              <p 
+                key={index} 
+                className="my-1 ml-4 text-slate-700" 
+                style={{ lineHeight: '1.4', textIndent: '-1em', paddingLeft: '1em' }} 
+                data-bullet-point="true"
+              >
+                {trimmedLine}
+              </p>
+            );
+          }
+          
+          // Check if this is a date range
+          else if (isDateRange(line)) {
+            return (
+              <p 
+                key={index} 
+                className="my-1 italic text-slate-600" 
+                style={{ lineHeight: '1.4' }} 
+                data-date-range="true"
+              >
+                {trimmedLine}
+              </p>
+            );
+          }
+          
+          // Check if this could be a job title or company name
+          else if (isJobTitleOrCompany(line, index)) {
+            return (
+              <p 
+                key={index} 
+                className="mt-3 mb-1 font-bold text-slate-800" 
+                style={{ lineHeight: '1.4' }} 
+                data-job-title="true"
+              >
+                {trimmedLine}
+              </p>
+            );
+          }
+          
+          // Check if this looks like a skill item
+          else if (isSkillItem(line)) {
+            return (
+              <p 
+                key={index} 
+                className="my-1 text-slate-700" 
+                style={{ lineHeight: '1.3' }} 
+                data-skill-item="true"
+              >
+                {trimmedLine}
+              </p>
+            );
+          }
+          
+          // Regular paragraph
+          else {
+            return (
+              <p 
+                key={index} 
+                className="my-1 text-slate-700" 
+                style={{ lineHeight: '1.4' }} 
+                data-regular-text="true"
+              >
+                {trimmedLine}
+              </p>
+            );
           }
         })}
       </div>
