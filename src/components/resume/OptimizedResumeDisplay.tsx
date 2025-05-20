@@ -10,11 +10,8 @@ import { ReportHeader } from "./components/ReportHeader";
 import { OptimizedResumeContent } from "./components/OptimizedResumeContent";
 import { DownloadReportButton } from "./components/DownloadReportButton";
 import { generatePDFFromElement } from "@/utils/reportGenerationUtils";
-import { ResumeActions } from "./components/ResumeActions";
-import { ATSFriendlyResumePdfTemplate } from "./components/ATSFriendlyResumePdfTemplate";
 import { 
   formatResumeContent, 
-  formatResumeForATS,
   calculateKeywordScore, 
   calculateStructureScore, 
   calculateATSScore,
@@ -38,7 +35,6 @@ export const OptimizedResumeDisplay = ({
   const isAtsOptimizerPage = location.pathname === "/";
   const optimizationReportRef = useRef<HTMLDivElement>(null);
   const pdfExportRef = useRef<HTMLDivElement>(null);
-  const atsResumeRef = useRef<HTMLDivElement>(null);
 
   const handleOptimizationReportDownload = async () => {
     // First prepare a clean version for PDF export
@@ -58,7 +54,6 @@ export const OptimizedResumeDisplay = ({
   if (!optimizedResume) return null;
 
   const formattedResumeContent = formatResumeContent(optimizedResume);
-  const atsFormattedResume = formatResumeForATS(optimizedResume);
   const keywordScore = calculateKeywordScore(formattedResumeContent, jobDescription || "");
   const structureScore = calculateStructureScore(formattedResumeContent);
   const atsScore = calculateATSScore(formattedResumeContent);
@@ -68,15 +63,6 @@ export const OptimizedResumeDisplay = ({
   const currentDate = new Date();
   const formattedDate = currentDate.toLocaleDateString();
   const formattedTime = currentDate.toLocaleTimeString();
-
-  // Extract job title from job description, if available
-  let jobTitle = "";
-  if (jobDescription) {
-    const titleMatch = jobDescription.match(/^(.*?job title|.*?position|.*?role):?\s*(.*?)$/im);
-    if (titleMatch && titleMatch[2]) {
-      jobTitle = titleMatch[2].trim().replace(/[^\w\s]/gi, '');
-    }
-  }
 
   if (isAtsOptimizerPage) {
     return (
@@ -116,31 +102,9 @@ export const OptimizedResumeDisplay = ({
               <OptimizedResumeContent content={formattedResumeContent} />
             </div>
             
-            <ResumeActions 
-              scoreCardRef={optimizationReportRef} 
-              completeReportRef={optimizationReportRef}
-              atsResumeRef={atsResumeRef}
-              scoreData={{
-                overallScore,
-                keywordRelevance: keywordScore,
-                skillsAlignment: keywordScore,  // Using keywordScore as a fallback
-                WorkExperience: keywordScore,   // Using keywordScore as a fallback
-                Achievements: keywordScore,     // Using keywordScore as a fallback
-                EducationQuality: keywordScore, // Using keywordScore as a fallback
-                Certifications: keywordScore,   // Using keywordScore as a fallback
-                ContentStructure: structureScore,
-                Industry: "General",
-                percentile: "Top 10%",
-                numSimilarResumes: 1000,
-                suggestedSkills: suggestions.length > 0 ? suggestions.map(s => s.split(":")[0].trim()) : [],
-                eliteIndicatorsFound: [],
-                improvementTips: suggestions,
-                missingQualifications: [],
-                timestamp: `${formattedDate} ${formattedTime}`,
-                id: "local-" + Date.now().toString(),
-                scoringMode: "resumeOnly"
-              }}
-              optimizedResume={formattedResumeContent}
+            <DownloadReportButton
+              title="Download Full Report (PDF)"
+              onClick={handleOptimizationReportDownload}
             />
           </CardContent>
         </Card>
@@ -151,18 +115,6 @@ export const OptimizedResumeDisplay = ({
           className="fixed left-[-9999px] top-0 z-[-1] bg-white p-8 print-export"
           style={{ width: "800px" }}
         ></div>
-
-        {/* Hidden element for ATS-friendly resume PDF export */}
-        <div 
-          ref={atsResumeRef} 
-          className="fixed left-[-9999px] top-0 z-[-1] bg-white print-export"
-          style={{ width: "800px" }}
-        >
-          <ATSFriendlyResumePdfTemplate 
-            content={atsFormattedResume}
-            jobTitle={jobTitle}
-          />
-        </div>
       </>
     );
   }

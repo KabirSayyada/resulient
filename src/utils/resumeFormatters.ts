@@ -21,65 +21,6 @@ export const formatResumeContent = (resumeContent: string | any): string => {
   }
 };
 
-// Format resume content for ATS compatibility
-export const formatResumeForATS = (resumeContent: string | any): string => {
-  let content = formatResumeContent(resumeContent);
-  
-  // Handle JSON objects by trying to extract the raw resume content
-  if (content.startsWith('{') && content.endsWith('}')) {
-    try {
-      const parsedContent = JSON.parse(content);
-      if (parsedContent.resumeContent || parsedContent.content || parsedContent.text) {
-        content = parsedContent.resumeContent || parsedContent.content || parsedContent.text;
-      }
-    } catch (e) {
-      // Not valid JSON or couldn't extract content, continue with original
-    }
-  }
-  
-  // Remove special characters that might confuse ATS
-  content = content.replace(/[•⋅◦◘○◙♦]/g, '-');
-  
-  // Standardize section headers to be uppercase and ensure they stand out
-  const standardSections = [
-    'SUMMARY', 'PROFESSIONAL SUMMARY', 'OBJECTIVE', 'PROFILE',
-    'EXPERIENCE', 'WORK EXPERIENCE', 'EMPLOYMENT HISTORY', 'PROFESSIONAL EXPERIENCE',
-    'EDUCATION', 'ACADEMIC BACKGROUND', 'EDUCATIONAL QUALIFICATIONS',
-    'SKILLS', 'TECHNICAL SKILLS', 'COMPETENCIES', 'KEY SKILLS',
-    'CERTIFICATIONS', 'LICENSES', 'CERTIFICATES',
-    'PROJECTS', 'KEY PROJECTS', 'PROFESSIONAL PROJECTS',
-    'ACHIEVEMENTS', 'ACCOMPLISHMENTS', 'KEY ACHIEVEMENTS',
-    'REFERENCES', 'PROFESSIONAL REFERENCES'
-  ];
-  
-  // Simple regex to try to identify and standardize section headers
-  standardSections.forEach(section => {
-    const regex = new RegExp(`(?<![a-zA-Z])${section}(?![a-zA-Z])`, 'i');
-    content = content.replace(regex, section);
-  });
-  
-  // Ensure proper spacing between sections
-  content = content.replace(/\n{3,}/g, '\n\n');
-  
-  // Clean up excessive whitespace between sections to save space
-  content = content.replace(/^\s+/gm, '');
-  content = content.replace(/\s+$/gm, '');
-  
-  // Standardize bullet points for better ATS parsing
-  content = content.replace(/^[∙•●⦿⭗⭘⬤◉○◌◎●◐◑◕◉⦿⨀⯁▶➤➢➣➔→⇒⊕⋄♦]/gm, '- ');
-  
-  // Ensure dates are properly formatted
-  content = content.replace(/(\d{4})\s*[-–—]\s*(\d{4}|Present|Current|Now)/gi, '$1 - $2');
-  
-  // Add extra spacing after section headers to ensure they stand out
-  standardSections.forEach(section => {
-    const regex = new RegExp(`^${section}$`, 'gmi');
-    content = content.replace(regex, `${section}\n`);
-  });
-  
-  return content;
-};
-
 // Calculate keyword score by matching resume content against job description
 export const calculateKeywordScore = (resume: string, jobDescription: string): number => {
   // For now, using a placeholder scoring mechanism 

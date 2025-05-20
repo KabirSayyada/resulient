@@ -99,8 +99,7 @@ const CANVAS_SETTINGS = {
 export async function generatePDFFromElement(
   element: HTMLElement, 
   filename: string, 
-  singlePage: boolean = false,
-  textMode: boolean = false
+  singlePage: boolean = false
 ) {
   if (!element) return false;
   
@@ -128,180 +127,7 @@ export async function generatePDFFromElement(
     // Add a small delay to ensure styles are applied
     await new Promise(resolve => setTimeout(resolve, 100));
     
-    // For text mode, create a PDF with selectable text and proper formatting
-    if (textMode) {
-      // Create new PDF document
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "pt",
-        format: "a4",
-      });
-      
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 40; // margins
-      
-      // Set default font
-      pdf.setFont('helvetica', 'normal');
-      
-      // Add title
-      let yPosition = margin;
-      const titleElement = element.querySelector('h1');
-      if (titleElement) {
-        pdf.setFontSize(18);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text(titleElement.textContent || 'ATS-Optimized Resume', pageWidth / 2, yPosition, { align: 'center' });
-        yPosition += 30; // More space after title
-      }
-      
-      // Add subtitle if exists
-      const subtitleElement = element.querySelector('h2');
-      if (subtitleElement) {
-        pdf.setFontSize(14);
-        pdf.setFont('helvetica', 'normal');
-        pdf.text(subtitleElement.textContent || '', pageWidth / 2, yPosition, { align: 'center' });
-        yPosition += 25; // More space after subtitle
-      }
-      
-      // Add date
-      const dateElement = element.querySelector('.text-xs.text-center, .text-sm.text-center');
-      if (dateElement) {
-        pdf.setFontSize(10);
-        pdf.text(dateElement.textContent || '', pageWidth / 2, yPosition, { align: 'center' });
-        yPosition += 25; // More space after date
-      }
-      
-      // Add a separator line
-      pdf.setDrawColor(200, 200, 200);
-      pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-      yPosition += 25; // Space after line
-      
-      // We'll analyze the content from the DOM to detect sections and structure
-      const contentElements = element.querySelectorAll('.pdf-content > *');
-      const lineHeight = 18; // slightly increased line height for better readability
-      let currentSection = '';
-      
-      // Process each content element
-      for (let i = 0; i < contentElements.length; i++) {
-        const el = contentElements[i];
-        
-        // Check if we need to add a new page
-        if (yPosition + lineHeight > pageHeight - margin) {
-          pdf.addPage();
-          yPosition = margin;
-          
-          // If in a section, repeat section name on new page
-          if (currentSection) {
-            pdf.setFontSize(12);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text(currentSection, margin, yPosition);
-            yPosition += lineHeight * 1.5;
-          }
-        }
-        
-        // Process element based on its type/class
-        if (el.tagName.toLowerCase() === 'h2') {
-          // This is a section header
-          currentSection = el.textContent || '';
-          yPosition += lineHeight * 0.5; // Extra space before section
-          pdf.setFontSize(14);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(currentSection, margin, yPosition);
-          yPosition += lineHeight;
-          
-          // Add a light separator line under section headers
-          pdf.setDrawColor(220, 220, 220);
-          pdf.line(margin, yPosition - 6, pageWidth - margin, yPosition - 6);
-          yPosition += lineHeight * 0.5; // Space after section header
-        } 
-        else if (el.classList.contains('font-semibold') || el.classList.contains('mt-3')) {
-          // Likely a job title, company name, or similar
-          pdf.setFontSize(12);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(el.textContent || '', margin, yPosition);
-          yPosition += lineHeight;
-        }
-        else if (el.tagName.toLowerCase() === 'div' && el.getAttribute('style')?.includes('height')) {
-          // This is a spacer div, add some space
-          yPosition += lineHeight * 0.5;
-        }
-        else if (el.tagName.toLowerCase() === 'p') {
-          // Regular paragraph or bullet point
-          let text = el.textContent || '';
-          
-          if (text.trim().startsWith('•') || text.trim().startsWith('-')) {
-            // Bullet point
-            pdf.setFontSize(11);
-            pdf.setFont('helvetica', 'normal');
-            
-            // Handle long bullet points with text wrapping
-            const bulletText = text.trim();
-            const wrappedText = pdf.splitTextToSize(bulletText, pageWidth - margin * 2 - 15);
-            
-            // Add each line with proper indentation
-            for (let j = 0; j < wrappedText.length; j++) {
-              // Indent after the first line
-              const indentation = j === 0 ? margin + 10 : margin + 20;
-              
-              // Check for page break
-              if (yPosition + lineHeight > pageHeight - margin) {
-                pdf.addPage();
-                yPosition = margin;
-              }
-              
-              pdf.text(wrappedText[j], indentation, yPosition);
-              yPosition += lineHeight;
-            }
-          } else {
-            // Regular paragraph
-            pdf.setFontSize(11);
-            pdf.setFont('helvetica', 'normal');
-            
-            // Handle text wrapping for paragraphs
-            const wrappedText = pdf.splitTextToSize(text.trim(), pageWidth - margin * 2);
-            
-            for (let j = 0; j < wrappedText.length; j++) {
-              // Check for page break
-              if (yPosition + lineHeight > pageHeight - margin) {
-                pdf.addPage();
-                yPosition = margin;
-              }
-              
-              pdf.text(wrappedText[j], margin, yPosition);
-              yPosition += lineHeight;
-            }
-            
-            // Small extra space after paragraphs
-            yPosition += lineHeight * 0.2;
-          }
-        }
-      }
-      
-      // Add footer
-      yPosition = pageHeight - margin / 2;
-      pdf.setFontSize(8);
-      pdf.setTextColor(150, 150, 150);
-      pdf.text('This resume has been optimized for Applicant Tracking Systems (ATS)', 
-        pageWidth / 2, yPosition, { align: 'center' });
-      
-      // Restore original element properties
-      element.classList.remove('pdf-export-in-progress');
-      
-      if (element.classList.contains('fixed')) {
-        element.style.position = originalPosition;
-        element.style.left = originalLeft;
-        element.style.zIndex = originalZIndex;
-      }
-      
-      if (originalDisplay === 'none') {
-        element.style.display = originalDisplay;
-      }
-      
-      pdf.save(filename);
-      return true;
-    }
-    
-    // For image-based PDFs (non-text mode)
+    // Capture the element as an image
     const canvas = await html2canvas(element, CANVAS_SETTINGS);
     
     // Create PDF
@@ -316,25 +142,17 @@ export async function generatePDFFromElement(
     const pageHeight = pdf.internal.pageSize.getHeight();
     
     if (singlePage) {
-      // For ATS resumes - fit the entire content on one page with proper scaling
+      // For scorecards - fit the entire content on one page with proper scaling
       const imgWidth = pageWidth - 40; // margins
-      let scaleFactor = imgWidth / canvas.width;
-      let imgHeight = canvas.height * scaleFactor;
+      const scaleFactor = imgWidth / canvas.width;
+      const imgHeight = canvas.height * scaleFactor;
       
-      // If too tall for one page, scale it down to fit
-      if (imgHeight > pageHeight - 40) {
-        scaleFactor = (pageHeight - 40) / canvas.height;
-        imgHeight = canvas.height * scaleFactor;
-        const newImgWidth = canvas.width * scaleFactor;
+      // Center vertically if there's room
+      const yPosition = imgHeight < pageHeight - 40 
+        ? (pageHeight - imgHeight) / 2 
+        : 20;
         
-        // Center horizontally
-        const leftMargin = (pageWidth - newImgWidth) / 2;
-        pdf.addImage(imgData, 'PNG', leftMargin, 20, newImgWidth, imgHeight);
-      } else {
-        // Center vertically if there's room
-        const yPosition = (pageHeight - imgHeight) / 2;
-        pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
-      }
+      pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
     } else {
       // For full reports - handle multi-page properly
       const imgWidth = pageWidth - 40; // margins
