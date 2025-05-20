@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { FileDown, FileText, FileType } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -100,26 +101,26 @@ export const ResumeActions = ({
   const handleATSResumeDownload = async () => {
     if (!atsResumeRef?.current) return;
     toast({
-      title: "Preparing Resume PDF",
-      description: "Exporting your properly formatted resume with clean layout and selectable text...",
+      title: "Preparing ATS Resume",
+      description: "Exporting your properly formatted ATS resume with selectable text. Hang tight!",
     });
 
     const success = await generatePDFFromElement(
       atsResumeRef.current,
-      `optimized-resume-${new Date().toISOString().split("T")[0]}.pdf`,
+      `ats-optimized-resume-${new Date().toISOString().split("T")[0]}.pdf`,
       true, // Single-page PDF for ATS resume
       true  // Use text mode for selectable text
     );
 
     if (success) {
       toast({
-        title: "Resume PDF Downloaded",
-        description: "Your clean, formatted resume has been downloaded as a PDF with selectable text.",
+        title: "ATS Resume Downloaded",
+        description: "Your ATS-optimized resume has been downloaded as a well-formatted PDF with selectable text.",
       });
     } else {
       toast({
         title: "PDF Export Failed",
-        description: "There was an error downloading your resume as PDF.",
+        description: "There was an error downloading your ATS resume as PDF.",
         variant: "destructive",
       });
     }
