@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { extractCandidateName, identifyResumeSections } from '@/utils/resumeFormatters';
 
 interface ATSFriendlyResumePdfTemplateProps {
   content: string;
@@ -9,6 +10,9 @@ interface ATSFriendlyResumePdfTemplateProps {
 export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyResumePdfTemplateProps) => {
   const currentDate = new Date();
   const formattedDate = currentDate.toLocaleDateString();
+  
+  // Extract candidate name if possible
+  const candidateName = extractCandidateName(content);
   
   // Try to extract sections from the resume content
   const lines = content.split('\n');
@@ -70,6 +74,14 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
     return /\d{4}[\s-]+.*?(\d{4}|present|current|now)/i.test(line);
   };
 
+  // Function to determine if line is contact info
+  const isContactInfo = (line: string): boolean => {
+    return /([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|(\+?[\d\s\(\)-]{10,})|((https?:\/\/)?(www\.)?linkedin\.com\/in\/[\w-]+)/i.test(line);
+  };
+
+  // Extract potential contact info for header
+  const contactInfo = lines.filter(isContactInfo).slice(0, 3);
+
   return (
     <div className="ats-resume-template p-8 bg-white text-black font-sans" style={{ 
       fontFamily: 'Arial, sans-serif', 
@@ -79,10 +91,22 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
       overflowX: 'hidden',
       pageBreakInside: 'avoid'
     }}>
-      {/* Only show job title if provided, without the "ATS-Optimized Resume" header */}
-      {jobTitle && (
-        <h2 className="text-lg text-center text-slate-700 mb-4">For: {jobTitle}</h2>
-      )}
+      {/* Header section with name and contact info */}
+      <div className="header-section text-center mb-4">
+        {candidateName && (
+          <h1 className="text-xl font-bold text-slate-800 mb-1">{candidateName}</h1>
+        )}
+        {contactInfo.length > 0 && (
+          <div className="contact-info text-sm text-slate-600 mb-2">
+            {contactInfo.map((contact, idx) => (
+              <span key={idx} className="mx-1">{contact} {idx < contactInfo.length - 1 && '|'}</span>
+            ))}
+          </div>
+        )}
+        {jobTitle && (
+          <div className="text-md text-slate-700 mt-2">For: {jobTitle}</div>
+        )}
+      </div>
 
       <div className="pdf-content" style={{ fontSize: '10pt' }}>
         {lines.map((line, index) => {
@@ -98,6 +122,11 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
             // Add appropriate spacing for blank lines
             return <div key={index} style={{ height: '0.75em' }}></div>;
           } else {
+            // Skip contact info lines that we already displayed in the header
+            if (isContactInfo(line) && contactInfo.includes(line.trim())) {
+              return null;
+            }
+            
             // Check if this might be a bullet point
             if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
               return (
@@ -108,14 +137,14 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
             } else if (isDateRange(line)) {
               // This looks like a date range, make it stand out
               return (
-                <p key={index} className="my-1 font-semibold text-slate-700" style={{ lineHeight: '1.4' }}>
+                <p key={index} className="my-1 font-semibold italic text-slate-600" style={{ lineHeight: '1.4' }}>
                   {line.trim()}
                 </p>
               );
             } else if (isJobTitleOrCompany(line, index)) {
               // This could be a job title or company name
               return (
-                <p key={index} className="mt-3 mb-1 font-semibold text-slate-800" style={{ lineHeight: '1.4' }}>
+                <p key={index} className="mt-3 mb-1 font-bold text-slate-800" style={{ lineHeight: '1.4' }}>
                   {line.trim()}
                 </p>
               );
@@ -130,8 +159,6 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
           }
         })}
       </div>
-      
-      {/* Remove the footer with "This resume has been optimized..." text */}
     </div>
   );
 };

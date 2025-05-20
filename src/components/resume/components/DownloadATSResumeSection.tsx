@@ -23,7 +23,7 @@ export const DownloadATSResumeSection = ({ atsResumeRef }: DownloadATSResumeSect
     
     if (success) {
       toast.success("ATS Resume Downloaded", {
-        description: "Your ATS-optimized resume has been downloaded as a PDF with selectable text."
+        description: "Your ATS-optimized resume has been downloaded as a PDF with perfectly formatted, selectable text."
       });
     } else {
       toast.error("PDF Export Failed", {
@@ -37,7 +37,7 @@ export const DownloadATSResumeSection = ({ atsResumeRef }: DownloadATSResumeSect
       <div className="flex justify-center mt-4 w-full">
         <div className="bg-gradient-to-r from-green-50 to-teal-50 p-4 rounded-lg border border-green-100 w-full sm:w-auto">
           <div className="text-center mb-2">
-            <p className="text-sm text-gray-600">Download your ATS-friendly resume with selectable text</p>
+            <p className="text-sm text-gray-600">Download your perfectly formatted, ATS-friendly resume with selectable text</p>
           </div>
           <DownloadATSResumeButton
             onClick={handleATSResumeDownload}
