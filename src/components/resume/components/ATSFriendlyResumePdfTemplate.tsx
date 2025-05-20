@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface ATSFriendlyResumePdfTemplateProps {
@@ -13,15 +12,45 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
   // Try to extract sections from the resume content
   const lines = content.split('\n');
   
-  // Simple function to determine if a line is likely a section header
-  const isSectionHeader = (line: string): boolean => {
+  // Enhanced function to determine if a line is likely a section header
+  const isSectionHeader = (line: string, index: number, lines: string[]): boolean => {
     const trimmed = line.trim();
-    return (
-      trimmed.length > 0 && 
-      trimmed.length < 50 && // Allow longer section headers
-      (trimmed === trimmed.toUpperCase() ||
-      /^(SUMMARY|PROFESSIONAL SUMMARY|OBJECTIVE|EXPERIENCE|WORK EXPERIENCE|EMPLOYMENT HISTORY|EDUCATION|ACADEMIC BACKGROUND|SKILLS|TECHNICAL SKILLS|COMPETENCIES|CERTIFICATIONS|LICENSES|PROJECTS|ACHIEVEMENTS|REFERENCES)/i.test(trimmed))
-    );
+    if (!trimmed) return false;
+    
+    // Check for common section header patterns
+    const isCommonHeader = /^(SUMMARY|PROFESSIONAL SUMMARY|OBJECTIVE|EXPERIENCE|WORK EXPERIENCE|EMPLOYMENT HISTORY|EDUCATION|ACADEMIC BACKGROUND|SKILLS|TECHNICAL SKILLS|COMPETENCIES|CERTIFICATIONS|LICENSES|PROJECTS|ACHIEVEMENTS|REFERENCES|ADDITIONAL INFORMATION|PUBLICATIONS|LANGUAGES|INTERESTS|VOLUNTEER|AWARDS|HONORS|AFFILIATIONS|PROFESSIONAL AFFILIATIONS|ACTIVITIES|EXTRACURRICULAR ACTIVITIES)/i.test(trimmed);
+    
+    if (isCommonHeader) return true;
+    
+    // Enhanced pattern detection for unconventional headers
+    // Section headers are typically:
+    // 1. Short (less than 60 chars)
+    // 2. Often all caps or title case
+    // 3. Often followed by a blank line or different formatting
+    // 4. Often preceded by a blank line
+    // 5. Don't start with bullet points, dates, or common non-header patterns
+    
+    const isShort = trimmed.length > 0 && trimmed.length < 60;
+    const isAllCapsOrTitleCase = trimmed === trimmed.toUpperCase() || 
+                                 /^[A-Z][a-z]*([ ][A-Z][a-z]*)*$/.test(trimmed);
+    const hasLeadingSpace = index > 0 && !lines[index-1].trim();
+    const hasTrailingSpace = index < lines.length - 1 && !lines[index+1].trim();
+    const notBulletOrDate = !trimmed.startsWith('•') && 
+                           !trimmed.startsWith('-') && 
+                           !trimmed.startsWith('*') &&
+                           !/^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(trimmed) &&
+                           !/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/.test(trimmed);
+    
+    // Likely a standalone line that's meant to be a header
+    const isStandaloneFormatting = (hasLeadingSpace || hasTrailingSpace) && 
+                                  isShort && 
+                                  notBulletOrDate;
+    
+    // Check if it has any formatting that suggests it's a header (like ending with a colon)
+    const hasHeaderFormatting = trimmed.endsWith(':') || 
+                               (isAllCapsOrTitleCase && isShort);
+    
+    return isStandaloneFormatting || hasHeaderFormatting;
   };
 
   // Function to determine if a line likely contains contact information
@@ -65,18 +94,18 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
     return { name, contactInfo };
   };
 
-  // Function to identify job experience entries
+  // Function to identify job experience entries - improved for better detection
   const isJobTitle = (line: string, index: number, lines: string[]): boolean => {
     const trimmed = line.trim();
     
     // Skip empty lines or section headers
-    if (!trimmed || isSectionHeader(trimmed)) return false;
+    if (!trimmed || isSectionHeader(line, index, lines)) return false;
     
-    // Check previous lines to see if we're in the experience section
+    // Check previous lines to see if we're in the experience section - now more flexible
     let inExperienceSection = false;
-    for (let i = index - 1; i >= 0 && i >= index - 10; i--) {
-      if (isSectionHeader(lines[i]) && 
-          /^(EXPERIENCE|WORK EXPERIENCE|EMPLOYMENT HISTORY|PROFESSIONAL EXPERIENCE)/i.test(lines[i].trim())) {
+    for (let i = index - 1; i >= 0 && i >= index - 15; i--) { // Look back more lines
+      if (isSectionHeader(lines[i], i, lines) && 
+          (/experience|employment|work|career|position|job|role|history/i.test(lines[i].trim()))) {
         inExperienceSection = true;
         break;
       }
@@ -90,13 +119,13 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
             !trimmed.startsWith('•') && 
             !trimmed.startsWith('-') &&
             (
-              /\b(senior|junior|lead|director|manager|engineer|developer|analyst|specialist|coordinator|assistant|associate)\b/i.test(trimmed) ||
+              /\b(senior|junior|lead|director|manager|engineer|developer|analyst|specialist|coordinator|assistant|associate|consultant|advisor|officer|representative|administrator|supervisor|head|chief|president|ceo|cto|cfo|vp|vice president)\b/i.test(trimmed) ||
               index > 0 && lines[index-1].trim() === '' // A line after an empty line in the experience section is likely a job title
             )
            );
   };
   
-  // Function to identify company names
+  // Function to identify company names - made more robust
   const isCompanyName = (line: string, index: number, lines: string[]): boolean => {
     const trimmed = line.trim();
     
@@ -106,19 +135,23 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
       return (trimmed.length > 0 && 
               trimmed.length < 70 && 
               !trimmed.startsWith('•') && 
-              !trimmed.startsWith('-'));
+              !trimmed.startsWith('-') &&
+              !isDateRange(trimmed)); // Make sure it's not a date
     }
     
     return false;
   };
   
-  // Function to identify date ranges/durations
+  // Function to identify date ranges/durations - enhanced to catch more formats
   const isDateRange = (line: string): boolean => {
     const trimmed = line.trim();
     // Date ranges typically contain years or "present"
-    return /\b(19|20)\d{2}\b.*(\b(19|20)\d{2}\b|present|current|now)/i.test(trimmed) ||
+    return /\b(19|20)\d{2}\b.*(\b(19|20)\d{2}\b|present|current|now|ongoing)/i.test(trimmed) ||
            /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b.*\b(19|20)\d{2}\b/i.test(trimmed) ||
-           /\b\d{1,2}\/\d{4}\b.*(\b\d{1,2}\/\d{4}\b|present|current|now)/i.test(trimmed);
+           /\b\d{1,2}\/\d{4}\b.*(\b\d{1,2}\/\d{4}\b|present|current|now|ongoing)/i.test(trimmed) ||
+           /\b(January|February|March|April|May|June|July|August|September|October|November|December)\b.*\b(19|20)\d{2}\b/i.test(trimmed) ||
+           /\b(19|20)\d{2}\b.*to.*\b(19|20)\d{2}\b/i.test(trimmed) ||
+           /\b(19|20)\d{2}\b.*-.*\b(19|20)\d{2}\b/i.test(trimmed);
   };
   
   const { name, contactInfo } = extractContactInfo(lines);
@@ -156,7 +189,7 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
             return null;
           }
           
-          if (isSectionHeader(line)) {
+          if (isSectionHeader(line, index, lines)) {
             // Add minimal space before section headers
             const topMargin = index > 0 ? 'mt-2' : '';
             return (
@@ -188,8 +221,8 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
                 {line.trim()}
               </p>
             );
-          } else if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
-            // Bullet point formatting
+          } else if (line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().startsWith('*')) {
+            // Bullet point formatting - expanded to handle different bullet styles
             return (
               <p key={index} className="my-0.5 ml-3 text-slate-700" style={{ lineHeight: '1.2', textIndent: '-0.7em', paddingLeft: '0.7em', marginBottom: '0.2em' }}>
                 {line.trim()}
