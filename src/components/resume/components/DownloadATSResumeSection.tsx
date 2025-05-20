@@ -14,39 +14,21 @@ export const DownloadATSResumeSection = ({ atsResumeRef }: DownloadATSResumeSect
     
     toast.loading("Preparing your ATS-friendly resume...");
     
-    try {
-      // First, ensure all styling is fully applied
-      atsResumeRef.current.classList.add('pdf-export-ready');
-      
-      // Allow time for styles to apply
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      const success = await generatePDFFromElement(
-        atsResumeRef.current,
-        `ats-optimized-resume-${new Date().toISOString().split("T")[0]}.pdf`,
-        true, // Single-page PDF for ATS resume
-        true  // Use text mode for selectable text
-      );
-      
-      if (success) {
-        toast.success("ATS Resume Downloaded", {
-          description: "Your ATS-optimized resume has been downloaded as a PDF with selectable text."
-        });
-      } else {
-        toast.error("PDF Export Failed", {
-          description: "There was an error downloading your ATS resume as PDF."
-        });
-      }
-    } catch (error) {
-      console.error("Error during PDF generation:", error);
-      toast.error("PDF Generation Failed", {
-        description: "An unexpected error occurred. Please try again."
+    const success = await generatePDFFromElement(
+      atsResumeRef.current,
+      `ats-optimized-resume-${new Date().toISOString().split("T")[0]}.pdf`,
+      true, // Single-page PDF for ATS resume
+      true  // Use text mode for selectable text
+    );
+    
+    if (success) {
+      toast.success("ATS Resume Downloaded", {
+        description: "Your ATS-optimized resume has been downloaded as a PDF with selectable text."
       });
-    } finally {
-      // Remove the temporary class
-      if (atsResumeRef.current) {
-        atsResumeRef.current.classList.remove('pdf-export-ready');
-      }
+    } else {
+      toast.error("PDF Export Failed", {
+        description: "There was an error downloading your ATS resume as PDF."
+      });
     }
   };
 

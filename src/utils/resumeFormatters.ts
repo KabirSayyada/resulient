@@ -50,32 +50,18 @@ export const formatResumeForATS = (resumeContent: string | any): string => {
     'PROJECTS', 'ACHIEVEMENTS', 'REFERENCES'
   ];
   
-  // Improve section header formatting
+  // Simple regex to try to identify and standardize section headers
   standardSections.forEach(section => {
     const regex = new RegExp(`(?<![a-zA-Z])${section}(?![a-zA-Z])`, 'i');
     content = content.replace(regex, section);
   });
   
-  // Standardize bullet points
-  content = content.replace(/[•⋅◦◘○◙♦★☆➤➢➣➸]/g, '-');
-  content = content.replace(/^\s*[*]\s/gm, '- '); // Convert asterisks to dashes
+  // Ensure proper spacing between sections
+  content = content.replace(/\n{3,}/g, '\n\n');
   
-  // Standardize date formats
-  content = content.replace(/(\d{1,2})\/(\d{1,2})\/(\d{4})/g, '$1-$2-$3');
-  
-  // Fix spacing issues
-  content = content.replace(/\n{3,}/g, '\n\n'); // Reduce excessive line breaks
-  content = content.replace(/^\s+/gm, ''); // Remove leading whitespace
-  content = content.replace(/\s+$/gm, ''); // Remove trailing whitespace
-  
-  // Add space before section headers if missing
-  standardSections.forEach(section => {
-    const headerPattern = new RegExp(`([^\n])\n${section}`, 'gi');
-    content = content.replace(headerPattern, '$1\n\n' + section);
-  });
-  
-  // Ensure proper spacing between bullet points
-  content = content.replace(/(\n\s*-[^\n]+)(\n\s*-)/g, '$1\n$2');
+  // Clean up excessive whitespace between sections to save space
+  content = content.replace(/^\s+/gm, '');
+  content = content.replace(/\s+$/gm, '');
   
   return content;
 };
