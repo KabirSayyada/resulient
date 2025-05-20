@@ -122,8 +122,8 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
       overflowX: 'hidden',
       pageBreakInside: 'avoid'
     }}>
-      {/* Display name and contact info at the top */}
-      <div className="contact-header mb-6">
+      {/* Display name and contact info at the top instead of ATS header */}
+      <div className="contact-header mb-6 text-center">
         {name && (
           <h1 className="text-2xl font-bold text-gray-800 mb-2">{name}</h1>
         )}
