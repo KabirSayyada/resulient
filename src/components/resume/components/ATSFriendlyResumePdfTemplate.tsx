@@ -18,77 +18,6 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
   const contactInfoRegex = /([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|(\+?[\d\s\(\)-]{10,})|((https?:\/\/)?(www\.)?linkedin\.com\/in\/[\w-]+)/g;
   const contactInfo = content.match(contactInfoRegex) || [];
   
-  // Function to identify section headers
-  const isSectionHeader = (line: string, index: number): boolean => {
-    const trimmed = line.trim();
-    
-    // Common section header patterns
-    const sectionHeaderPatterns = [
-      /^(SUMMARY|PROFESSIONAL\s+SUMMARY|CAREER\s+SUMMARY|PROFILE|OBJECTIVE|CAREER\s+OBJECTIVE)/i,
-      /^(EXPERIENCE|WORK\s+EXPERIENCE|PROFESSIONAL\s+EXPERIENCE|EMPLOYMENT|EMPLOYMENT\s+HISTORY|WORK\s+HISTORY)/i,
-      /^(EDUCATION|ACADEMIC\s+BACKGROUND|ACADEMIC\s+HISTORY|EDUCATIONAL\s+BACKGROUND|TRAINING)/i,
-      /^(SKILLS|TECHNICAL\s+SKILLS|CORE\s+SKILLS|KEY\s+SKILLS|COMPETENCIES|QUALIFICATIONS|EXPERTISE)/i,
-      /^(CERTIFICATIONS|LICENSES|CREDENTIALS|PROFESSIONAL\s+CERTIFICATIONS)/i,
-      /^(PROJECTS|PROJECT\s+EXPERIENCE|RELEVANT\s+PROJECTS|KEY\s+PROJECTS)/i,
-      /^(ACHIEVEMENTS|ACCOMPLISHMENTS|HONORS|AWARDS|RECOGNITION)/i,
-      /^(VOLUNTEER|VOLUNTEER\s+EXPERIENCE|COMMUNITY\s+SERVICE|VOLUNTEER\s+WORK)/i,
-      /^(LANGUAGES|LANGUAGE\s+PROFICIENCY|LANGUAGE\s+SKILLS)/i,
-      /^(INTERESTS|HOBBIES|ACTIVITIES|PERSONAL\s+INTERESTS)/i,
-      /^(PUBLICATIONS|RESEARCH|PAPERS|PRESENTATIONS)/i,
-      /^(REFERENCES|PROFESSIONAL\s+REFERENCES)/i,
-      /^(AFFILIATIONS|PROFESSIONAL\s+AFFILIATIONS|MEMBERSHIPS)/i
-    ];
-    
-    // Check if line matches common section header patterns
-    const isCommonHeader = sectionHeaderPatterns.some(pattern => pattern.test(trimmed));
-    
-    // Check if line has the characteristics of a section header
-    const hasHeaderCharacteristics = (
-      trimmed.length > 0 && 
-      trimmed.length < 60 && 
-      (trimmed === trimmed.toUpperCase() || 
-       /^[A-Z][a-z]*([\s&]+[A-Z][a-z]*)*$/.test(trimmed)) && // Proper Case like "Professional Experience"
-      !trimmed.includes('@') && // Not an email
-      !trimmed.match(/^\d/) &&  // Doesn't start with a number
-      (index === 0 || lines[index-1].trim() === '') && // Usually preceded by blank line except at start
-      (index < lines.length - 1 && lines[index+1].trim() !== '') // Usually followed by content
-    );
-    
-    return isCommonHeader || hasHeaderCharacteristics;
-  };
-
-  // Function to determine if line is likely a job title or company
-  const isJobTitleOrCompany = (line: string, index: number): boolean => {
-    const trimmed = line.trim();
-    return (
-      trimmed.length > 0 &&
-      trimmed.length < 80 &&
-      index > 0 && 
-      (lines[index-1].trim() === '' || isSectionHeader(lines[index-1], index-1) || isDateRange(lines[index-1])) &&
-      !trimmed.startsWith('•') &&
-      !trimmed.startsWith('-') &&
-      !/^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(trimmed) && // Not a date like 5/19/2025
-      !/^\d{1,2}-\d{1,2}-\d{2,4}/.test(trimmed) // Not a date like 5-19-2025
-    );
-  };
-
-  // Function to determine if line contains a date range
-  const isDateRange = (line: string): boolean => {
-    return /\d{4}[\s-]+.*?(\d{4}|present|current|now)/i.test(line) || 
-           /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{4}\s*-\s*(?:present|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{4})\b/i.test(line);
-  };
-
-  // Identify skill items (typically short phrases with technical terms)
-  const isSkillItem = (line: string): boolean => {
-    const trimmed = line.trim();
-    // Skills are typically short phrases, often comma-separated or bullet points
-    return (trimmed.length > 0 && 
-            trimmed.length < 80 && 
-            (trimmed.includes(',') || 
-             /^[•\-\*]/.test(trimmed) || 
-             /\b(html|css|javascript|react|node|python|java|typescript|sql|aws|azure|git|agile|scrum)\b/i.test(trimmed)));
-  };
-
   // Process sections for better organization in PDF
   const sections = identifyResumeSections(content);
   
@@ -118,103 +47,83 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
         )}
       </div>
 
-      <div className="pdf-content" style={{ fontSize: '10pt' }}>
-        {lines.map((line, index) => {
-          const trimmedLine = line.trim();
+      {/* Main content section */}
+      <div className="pdf-content">
+        {/* Render each section */}
+        {Object.entries(sections).map(([sectionName, sectionContent], sectionIndex) => {
+          // Skip the header section as we've already rendered it above
+          if (sectionName === 'HEADER') return null;
           
-          // Skip completely empty lines
-          if (trimmedLine.length === 0) {
-            return <div key={index} className="empty-line" style={{ height: '0.5em' }}></div>;
-          }
-          
-          // Skip contact info lines that we already displayed in the header
-          if (contactInfo.some(contactItem => contactItem === trimmedLine)) {
-            return null;
-          }
-          
-          // Check if this is a section header
-          if (isSectionHeader(line, index)) {
-            const topMargin = index > 0 ? 'mt-6' : '';
-            return (
-              <h2 
-                key={index} 
-                className={`text-lg font-bold text-slate-800 ${topMargin} mb-2 border-b border-slate-300 pb-1 uppercase`} 
-                data-section-header="true"
-              >
-                {trimmedLine}
+          return (
+            <div key={sectionIndex} className="resume-section mb-4">
+              <h2 className="text-lg font-bold text-slate-800 mb-2 border-b border-slate-300 pb-1 uppercase">
+                {sectionName}
               </h2>
-            );
-          }
-          
-          // Check if this might be a bullet point
-          else if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-') || trimmedLine.startsWith('*')) {
-            return (
-              <p 
-                key={index} 
-                className="my-1 ml-4 text-slate-700" 
-                style={{ lineHeight: '1.4', textIndent: '-1em', paddingLeft: '1em' }} 
-                data-bullet-point="true"
-              >
-                {trimmedLine}
-              </p>
-            );
-          }
-          
-          // Check if this is a date range
-          else if (isDateRange(line)) {
-            return (
-              <p 
-                key={index} 
-                className="my-1 italic text-slate-600" 
-                style={{ lineHeight: '1.4' }} 
-                data-date-range="true"
-              >
-                {trimmedLine}
-              </p>
-            );
-          }
-          
-          // Check if this could be a job title or company name
-          else if (isJobTitleOrCompany(line, index)) {
-            return (
-              <p 
-                key={index} 
-                className="mt-3 mb-1 font-bold text-slate-800" 
-                style={{ lineHeight: '1.4' }} 
-                data-job-title="true"
-              >
-                {trimmedLine}
-              </p>
-            );
-          }
-          
-          // Check if this looks like a skill item
-          else if (isSkillItem(line)) {
-            return (
-              <p 
-                key={index} 
-                className="my-1 text-slate-700" 
-                style={{ lineHeight: '1.3' }} 
-                data-skill-item="true"
-              >
-                {trimmedLine}
-              </p>
-            );
-          }
-          
-          // Regular paragraph
-          else {
-            return (
-              <p 
-                key={index} 
-                className="my-1 text-slate-700" 
-                style={{ lineHeight: '1.4' }} 
-                data-regular-text="true"
-              >
-                {trimmedLine}
-              </p>
-            );
-          }
+              <div className="section-content">
+                {sectionContent.split('\n').map((line, lineIndex) => {
+                  const trimmedLine = line.trim();
+                  if (!trimmedLine) return null;
+                  
+                  // Detect if this is a bullet point
+                  if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-') || trimmedLine.startsWith('*')) {
+                    return (
+                      <p 
+                        key={lineIndex} 
+                        className="my-1 ml-4 text-slate-700" 
+                        style={{ lineHeight: '1.4', textIndent: '-1em', paddingLeft: '1em' }} 
+                        data-bullet-point="true"
+                      >
+                        {trimmedLine}
+                      </p>
+                    );
+                  }
+                  
+                  // Detect if this is a date range
+                  if (/\d{4}[\s-]+.*?(\d{4}|present|current|now)/i.test(trimmedLine)) {
+                    return (
+                      <p 
+                        key={lineIndex} 
+                        className="my-1 italic text-slate-600" 
+                        style={{ lineHeight: '1.4' }} 
+                        data-date-range="true"
+                      >
+                        {trimmedLine}
+                      </p>
+                    );
+                  }
+                  
+                  // Detect if this looks like a job title or company
+                  if (trimmedLine.length > 0 && 
+                      trimmedLine.length < 80 && 
+                      !trimmedLine.startsWith('•') && 
+                      !trimmedLine.startsWith('-')) {
+                    return (
+                      <p 
+                        key={lineIndex} 
+                        className="mt-3 mb-1 font-bold text-slate-800" 
+                        style={{ lineHeight: '1.4' }} 
+                        data-job-title="true"
+                      >
+                        {trimmedLine}
+                      </p>
+                    );
+                  }
+                  
+                  // Regular paragraph
+                  return (
+                    <p 
+                      key={lineIndex} 
+                      className="my-1 text-slate-700" 
+                      style={{ lineHeight: '1.4' }} 
+                      data-regular-text="true"
+                    >
+                      {trimmedLine}
+                    </p>
+                  );
+                })}
+              </div>
+            </div>
+          );
         })}
       </div>
     </div>

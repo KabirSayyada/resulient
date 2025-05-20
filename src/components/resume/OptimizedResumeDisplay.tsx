@@ -152,16 +152,18 @@ export const OptimizedResumeDisplay = ({
           style={{ width: "800px" }}
         ></div>
 
-        {/* Hidden element for ATS-friendly resume PDF export */}
-        <div 
-          ref={atsResumeRef} 
-          className="fixed left-[-9999px] top-0 z-[-1] bg-white print-export"
-          style={{ width: "800px" }}
-        >
-          <ATSFriendlyResumePdfTemplate 
-            content={atsFormattedResume}
-            jobTitle={jobTitle}
-          />
+        {/* ATS-friendly resume PDF template - now explicitly visible during development */}
+        <div className="hidden">
+          <div 
+            ref={atsResumeRef} 
+            className="bg-white p-5"
+            style={{ width: "800px" }}
+          >
+            <ATSFriendlyResumePdfTemplate 
+              content={atsFormattedResume}
+              jobTitle={jobTitle}
+            />
+          </div>
         </div>
       </>
     );

@@ -23,13 +23,28 @@ export const DownloadATSResumeSection = ({ atsResumeRef }: DownloadATSResumeSect
     toast.loading("Preparing your ATS-friendly resume...");
     
     try {
-      // Use text mode with proper page formatting and selectable text
+      // Ensure the element is visible and properly rendered before generating PDF
+      const originalDisplay = atsResumeRef.current.style.display;
+      const originalVisibility = atsResumeRef.current.style.visibility;
+      
+      // Make sure the element is visible for capturing
+      atsResumeRef.current.style.display = "block";
+      atsResumeRef.current.style.visibility = "visible";
+      
+      // Small delay to ensure DOM rendering is complete
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Generate PDF with text mode for selectable text
       const success = await generatePDFFromElement(
         atsResumeRef.current,
         `ats-optimized-resume-${new Date().toISOString().split("T")[0]}.pdf`,
         true, // Single-page PDF for ATS resume
         true  // Use text mode for selectable text
       );
+      
+      // Restore original visibility
+      atsResumeRef.current.style.display = originalDisplay;
+      atsResumeRef.current.style.visibility = originalVisibility;
       
       if (success) {
         toast.success("ATS Resume Downloaded", {
