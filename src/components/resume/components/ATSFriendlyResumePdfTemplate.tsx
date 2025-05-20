@@ -64,6 +64,62 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
     
     return { name, contactInfo };
   };
+
+  // Function to identify job experience entries
+  const isJobTitle = (line: string, index: number, lines: string[]): boolean => {
+    const trimmed = line.trim();
+    
+    // Skip empty lines or section headers
+    if (!trimmed || isSectionHeader(trimmed)) return false;
+    
+    // Check previous lines to see if we're in the experience section
+    let inExperienceSection = false;
+    for (let i = index - 1; i >= 0 && i >= index - 10; i--) {
+      if (isSectionHeader(lines[i]) && 
+          /^(EXPERIENCE|WORK EXPERIENCE|EMPLOYMENT HISTORY|PROFESSIONAL EXPERIENCE)/i.test(lines[i].trim())) {
+        inExperienceSection = true;
+        break;
+      }
+    }
+    
+    if (!inExperienceSection) return false;
+    
+    // Job titles are typically short, not bullet points, and might contain common job title words
+    return (trimmed.length > 0 && 
+            trimmed.length < 70 && 
+            !trimmed.startsWith('•') && 
+            !trimmed.startsWith('-') &&
+            (
+              /\b(senior|junior|lead|director|manager|engineer|developer|analyst|specialist|coordinator|assistant|associate)\b/i.test(trimmed) ||
+              index > 0 && lines[index-1].trim() === '' // A line after an empty line in the experience section is likely a job title
+            )
+           );
+  };
+  
+  // Function to identify company names
+  const isCompanyName = (line: string, index: number, lines: string[]): boolean => {
+    const trimmed = line.trim();
+    
+    // Check if this line follows what appears to be a job title
+    if (index > 0 && isJobTitle(lines[index-1], index-1, lines)) {
+      // Company names are typically short and might contain "Inc", "LLC", etc.
+      return (trimmed.length > 0 && 
+              trimmed.length < 70 && 
+              !trimmed.startsWith('•') && 
+              !trimmed.startsWith('-'));
+    }
+    
+    return false;
+  };
+  
+  // Function to identify date ranges/durations
+  const isDateRange = (line: string): boolean => {
+    const trimmed = line.trim();
+    // Date ranges typically contain years or "present"
+    return /\b(19|20)\d{2}\b.*(\b(19|20)\d{2}\b|present|current|now)/i.test(trimmed) ||
+           /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b.*\b(19|20)\d{2}\b/i.test(trimmed) ||
+           /\b\d{1,2}\/\d{4}\b.*(\b\d{1,2}\/\d{4}\b|present|current|now)/i.test(trimmed);
+  };
   
   const { name, contactInfo } = extractContactInfo(lines);
 
@@ -111,36 +167,41 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
           } else if (line.trim().length === 0) {
             // Minimal spacing for blank lines
             return <div key={index} style={{ height: '0.2em' }}></div>;
+          } else if (isJobTitle(line, index, lines)) {
+            // Job title formatting
+            return (
+              <h3 key={index} className="mt-1.5 font-bold text-slate-800" style={{ fontSize: '9pt', marginBottom: '0.1em' }}>
+                {line.trim()}
+              </h3>
+            );
+          } else if (isCompanyName(line, index, lines)) {
+            // Company name formatting
+            return (
+              <p key={index} className="font-semibold text-slate-700" style={{ fontSize: '8.5pt', marginTop: '0.1em', marginBottom: '0.1em' }}>
+                {line.trim()}
+              </p>
+            );
+          } else if (isDateRange(line)) {
+            // Date range formatting
+            return (
+              <p key={index} className="text-slate-600 italic" style={{ fontSize: '8.5pt', marginTop: '0.1em', marginBottom: '0.3em' }}>
+                {line.trim()}
+              </p>
+            );
+          } else if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
+            // Bullet point formatting
+            return (
+              <p key={index} className="my-0.5 ml-3 text-slate-700" style={{ lineHeight: '1.2', textIndent: '-0.7em', paddingLeft: '0.7em', marginBottom: '0.2em' }}>
+                {line.trim()}
+              </p>
+            );
           } else {
-            // Check if this might be a bullet point or job title/date
-            if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
-              return (
-                <p key={index} className="my-0.5 ml-3 text-slate-700" style={{ lineHeight: '1.2', textIndent: '-0.7em', paddingLeft: '0.7em', marginBottom: '0.2em' }}>
-                  {line.trim()}
-                </p>
-              );
-            } else if (/\d{4}\s*(-|–|to)\s*(\d{4}|present)/i.test(line)) {
-              // This looks like a date range, make it stand out
-              return (
-                <p key={index} className="my-0.5 font-semibold text-slate-700" style={{ lineHeight: '1.2', marginBottom: '0.2em' }}>
-                  {line.trim()}
-                </p>
-              );
-            } else if (line.trim().length > 0 && line.trim().length < 60 && index > 0 && lines[index-1].trim() === '') {
-              // This could be a job title or company name
-              return (
-                <p key={index} className="mt-1 mb-0.5 font-semibold text-slate-800" style={{ lineHeight: '1.2' }}>
-                  {line.trim()}
-                </p>
-              );
-            } else {
-              // Regular paragraph
-              return (
-                <p key={index} className="my-0.5 text-slate-700" style={{ lineHeight: '1.2', marginBottom: '0.2em' }}>
-                  {line.trim()}
-                </p>
-              );
-            }
+            // Regular paragraph
+            return (
+              <p key={index} className="my-0.5 text-slate-700" style={{ lineHeight: '1.2', marginBottom: '0.2em' }}>
+                {line.trim()}
+              </p>
+            );
           }
         })}
       </div>
