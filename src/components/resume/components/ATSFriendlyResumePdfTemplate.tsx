@@ -8,16 +8,17 @@ interface ATSFriendlyResumePdfTemplateProps {
 }
 
 export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyResumePdfTemplateProps) => {
-  const currentDate = new Date();
-  const formattedDate = currentDate.toLocaleDateString();
-  
   // Extract candidate name if possible
   const candidateName = extractCandidateName(content);
   
-  // Try to extract sections from the resume content
+  // Split content into lines
   const lines = content.split('\n');
   
-  // More comprehensive function to identify section headers
+  // Extract contact information (email, phone, LinkedIn)
+  const contactInfoRegex = /([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|(\+?[\d\s\(\)-]{10,})|((https?:\/\/)?(www\.)?linkedin\.com\/in\/[\w-]+)/g;
+  const contactInfo = content.match(contactInfoRegex) || [];
+  
+  // Function to identify section headers
   const isSectionHeader = (line: string, index: number): boolean => {
     const trimmed = line.trim();
     
@@ -47,6 +48,8 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
       trimmed.length < 60 && 
       (trimmed === trimmed.toUpperCase() || 
        /^[A-Z][a-z]*([\s&]+[A-Z][a-z]*)*$/.test(trimmed)) && // Proper Case like "Professional Experience"
+      !trimmed.includes('@') && // Not an email
+      !trimmed.match(/^\d/) &&  // Doesn't start with a number
       (index === 0 || lines[index-1].trim() === '') && // Usually preceded by blank line except at start
       (index < lines.length - 1 && lines[index+1].trim() !== '') // Usually followed by content
     );
@@ -61,7 +64,7 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
       trimmed.length > 0 &&
       trimmed.length < 80 &&
       index > 0 && 
-      (lines[index-1].trim() === '' || isSectionHeader(lines[index-1], index-1)) &&
+      (lines[index-1].trim() === '' || isSectionHeader(lines[index-1], index-1) || isDateRange(lines[index-1])) &&
       !trimmed.startsWith('•') &&
       !trimmed.startsWith('-') &&
       !/^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(trimmed) && // Not a date like 5/19/2025
@@ -71,17 +74,24 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
 
   // Function to determine if line contains a date range
   const isDateRange = (line: string): boolean => {
-    return /\d{4}[\s-]+.*?(\d{4}|present|current|now)/i.test(line);
+    return /\d{4}[\s-]+.*?(\d{4}|present|current|now)/i.test(line) || 
+           /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{4}\s*-\s*(?:present|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{4})\b/i.test(line);
   };
 
-  // Function to determine if line is contact info
-  const isContactInfo = (line: string): boolean => {
-    return /([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|(\+?[\d\s\(\)-]{10,})|((https?:\/\/)?(www\.)?linkedin\.com\/in\/[\w-]+)/i.test(line);
+  // Identify skill items (typically short phrases with technical terms)
+  const isSkillItem = (line: string): boolean => {
+    const trimmed = line.trim();
+    // Skills are typically short phrases, often comma-separated or bullet points
+    return (trimmed.length > 0 && 
+            trimmed.length < 80 && 
+            (trimmed.includes(',') || 
+             /^[•\-\*]/.test(trimmed) || 
+             /\b(html|css|javascript|react|node|python|java|typescript|sql|aws|azure|git|agile|scrum)\b/i.test(trimmed)));
   };
 
-  // Extract potential contact info for header
-  const contactInfo = lines.filter(isContactInfo).slice(0, 3);
-
+  // Process sections for better organization in PDF
+  const sections = identifyResumeSections(content);
+  
   return (
     <div className="ats-resume-template p-8 bg-white text-black font-sans" style={{ 
       fontFamily: 'Arial, sans-serif', 
@@ -92,9 +102,9 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
       pageBreakInside: 'avoid'
     }}>
       {/* Header section with name and contact info */}
-      <div className="header-section text-center mb-4">
+      <div className="header-section text-center mb-6">
         {candidateName && (
-          <h1 className="text-xl font-bold text-slate-800 mb-1">{candidateName}</h1>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">{candidateName}</h1>
         )}
         {contactInfo.length > 0 && (
           <div className="contact-info text-sm text-slate-600 mb-2">
@@ -114,44 +124,51 @@ export const ATSFriendlyResumePdfTemplate = ({ content, jobTitle }: ATSFriendlyR
             // Add more space before section headers (except the first one)
             const topMargin = index > 0 ? 'mt-6' : '';
             return (
-              <h2 key={index} className={`text-lg font-bold text-slate-800 ${topMargin} mb-3 border-b border-slate-300 pb-2 uppercase`}>
+              <h2 key={index} className={`text-lg font-bold text-slate-800 ${topMargin} mb-2 border-b border-slate-300 pb-1 uppercase`} data-section-header>
                 {line.trim()}
               </h2>
             );
           } else if (line.trim().length === 0) {
             // Add appropriate spacing for blank lines
-            return <div key={index} style={{ height: '0.75em' }}></div>;
+            return <div key={index} style={{ height: '0.5em' }}></div>;
           } else {
             // Skip contact info lines that we already displayed in the header
-            if (isContactInfo(line) && contactInfo.includes(line.trim())) {
+            if (contactInfo.includes(line.trim())) {
               return null;
             }
             
             // Check if this might be a bullet point
-            if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
+            if (line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().startsWith('*')) {
               return (
-                <p key={index} className="my-1 ml-4 text-slate-700" style={{ lineHeight: '1.4', textIndent: '-1em', paddingLeft: '1em' }}>
+                <p key={index} className="my-1 ml-4 text-slate-700" style={{ lineHeight: '1.4', textIndent: '-1em', paddingLeft: '1em' }} data-bullet-point>
                   {line.trim()}
                 </p>
               );
             } else if (isDateRange(line)) {
               // This looks like a date range, make it stand out
               return (
-                <p key={index} className="my-1 font-semibold italic text-slate-600" style={{ lineHeight: '1.4' }}>
+                <p key={index} className="my-1 italic text-slate-600" style={{ lineHeight: '1.4' }} data-date-range>
                   {line.trim()}
                 </p>
               );
             } else if (isJobTitleOrCompany(line, index)) {
               // This could be a job title or company name
               return (
-                <p key={index} className="mt-3 mb-1 font-bold text-slate-800" style={{ lineHeight: '1.4' }}>
+                <p key={index} className="mt-3 mb-1 font-bold text-slate-800" style={{ lineHeight: '1.4' }} data-job-title>
+                  {line.trim()}
+                </p>
+              );
+            } else if (isSkillItem(line)) {
+              // This looks like a skill item
+              return (
+                <p key={index} className="my-1 text-slate-700" style={{ lineHeight: '1.3' }} data-skill-item>
                   {line.trim()}
                 </p>
               );
             } else {
               // Regular paragraph
               return (
-                <p key={index} className="my-1 text-slate-700" style={{ lineHeight: '1.4' }}>
+                <p key={index} className="my-1 text-slate-700" style={{ lineHeight: '1.4' }} data-regular-text>
                   {line.trim()}
                 </p>
               );

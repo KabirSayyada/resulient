@@ -1,8 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { FileDown, FileText, FileType } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import html2canvas from "html2canvas";
 import { generatePDFFromElement, handleDownloadTextReport } from "@/utils/reportGenerationUtils";
 import { ScoreData } from "@/types/resume";
 import { exportElementAsImage } from "@/utils/imageExportUtils";
@@ -28,6 +28,7 @@ export const ResumeActions = ({
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [showShareMessage, setShowShareMessage] = useState(true);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   // Download Scorecard as Image (PNG)
   const handleImageDownload = async () => {
@@ -71,57 +72,111 @@ export const ResumeActions = ({
   // Download FULL REPORT as PDF
   const handleFullReportDownload = async () => {
     if (!completeReportRef.current) return;
+    
+    setIsGeneratingPDF(true);
     toast({
       title: "Preparing PDF",
       description: "Exporting your complete resume analysis as a PDF. Hang tight!",
     });
 
-    const success = await generatePDFFromElement(
-      completeReportRef.current,
-      `resume-full-report-${new Date().toISOString().split("T")[0]}.pdf`,
-      false // Multi-page PDF for full report
-    );
+    try {
+      const success = await generatePDFFromElement(
+        completeReportRef.current,
+        `resume-full-report-${new Date().toISOString().split("T")[0]}.pdf`,
+        false // Multi-page PDF for full report
+      );
 
-    if (success) {
-      toast({
-        title: "Full Report PDF Downloaded",
-        description: "Your full analysis has been downloaded as PDF.",
-      });
-    } else {
+      if (success) {
+        toast({
+          title: "Full Report PDF Downloaded",
+          description: "Your full analysis has been downloaded as PDF.",
+        });
+      } else {
+        toast({
+          title: "PDF Export Failed",
+          description: "There was an error downloading your full analysis as PDF.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("PDF generation error:", error);
       toast({
         title: "PDF Export Failed",
-        description: "There was an error downloading your full analysis as PDF.",
+        description: "There was an unexpected error generating your PDF.",
         variant: "destructive",
       });
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
   // Download ATS-friendly resume as PDF
   const handleATSResumeDownload = async () => {
-    if (!atsResumeRef?.current) return;
-    toast({
-      title: "Preparing Resume PDF",
-      description: "Exporting your properly formatted resume with clean layout and selectable text...",
-    });
-
-    const success = await generatePDFFromElement(
-      atsResumeRef.current,
-      `optimized-resume-${new Date().toISOString().split("T")[0]}.pdf`,
-      true, // Single-page PDF for ATS resume
-      true  // Use text mode for selectable text
-    );
-
-    if (success) {
-      toast({
-        title: "Resume PDF Downloaded",
-        description: "Your clean, formatted resume has been downloaded as a PDF with selectable text.",
-      });
-    } else {
+    if (!atsResumeRef?.current) {
       toast({
         title: "PDF Export Failed",
-        description: "There was an error downloading your resume as PDF.",
+        description: "Could not find resume content to export.",
         variant: "destructive",
       });
+      return;
+    }
+    
+    setIsGeneratingPDF(true);
+    toast({
+      title: "Preparing Resume PDF",
+      description: "Generating your ATS-optimized resume with proper formatting...",
+    });
+
+    try {
+      // Force display of hidden element during export
+      const originalDisplay = atsResumeRef.current.style.display;
+      const originalVisibility = atsResumeRef.current.style.visibility;
+      const originalPosition = atsResumeRef.current.style.position;
+      const originalLeft = atsResumeRef.current.style.left;
+      
+      // Make element visible for capture
+      atsResumeRef.current.style.display = "block";
+      atsResumeRef.current.style.visibility = "visible";
+      atsResumeRef.current.style.position = "fixed";
+      atsResumeRef.current.style.left = "-9999px";
+      
+      // Small delay to ensure rendering
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const success = await generatePDFFromElement(
+        atsResumeRef.current,
+        `ats-optimized-resume-${new Date().toISOString().split("T")[0]}.pdf`,
+        true, // Single-page PDF for ATS resume
+        true  // Use text mode for selectable text
+      );
+      
+      // Restore original styles
+      atsResumeRef.current.style.display = originalDisplay;
+      atsResumeRef.current.style.visibility = originalVisibility;
+      atsResumeRef.current.style.position = originalPosition;
+      atsResumeRef.current.style.left = originalLeft;
+
+      if (success) {
+        toast({
+          title: "ATS Resume Downloaded",
+          description: "Your ATS-optimized resume has been downloaded with perfect formatting.",
+        });
+      } else {
+        toast({
+          title: "PDF Export Failed",
+          description: "There was an error creating your resume PDF. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("ATS PDF generation error:", error);
+      toast({
+        title: "PDF Export Failed",
+        description: "An unexpected error occurred during PDF generation.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -158,12 +213,14 @@ export const ResumeActions = ({
       <DownloadReportButton 
         title="Download Full Report (PDF)"
         onClick={handleFullReportDownload} 
+        disabled={isGeneratingPDF}
       />
       
       {/* New button for ATS-friendly resume */}
       {optimizedResume && atsResumeRef && (
         <DownloadATSResumeButton
           onClick={handleATSResumeDownload}
+          disabled={isGeneratingPDF}
         />
       )}
     </div>
