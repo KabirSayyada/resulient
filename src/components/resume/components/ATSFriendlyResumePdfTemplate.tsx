@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 interface ATSFriendlyResumePdfTemplateProps {
@@ -46,10 +47,12 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
     return isCommonHeader || hasHeaderCharacteristics;
   };
 
-  // Function to determine if line is likely a job title or company
+  // Enhanced function to determine if line is likely a job title or company
   const isJobTitleOrCompany = (line: string, index: number): boolean => {
     const trimmed = line.trim();
-    return (
+    
+    // Check for job title/company characteristics
+    const hasJobTitleCharacteristics = (
       trimmed.length > 0 &&
       trimmed.length < 80 &&
       index > 0 && 
@@ -59,14 +62,28 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
       !/^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(trimmed) && // Not a date like 5/19/2025
       !/^\d{1,2}-\d{1,2}-\d{2,4}/.test(trimmed) // Not a date like 5-19-2025
     );
+    
+    // Additional check for common job title patterns
+    const jobTitlePatterns = [
+      /engineer|developer|architect|manager|director|specialist|analyst|consultant|designer/i,
+      /lead|senior|junior|principal|chief|head of|vp|president|coordinator/i
+    ];
+    
+    const containsJobTitleKeyword = jobTitlePatterns.some(pattern => pattern.test(trimmed));
+    
+    return hasJobTitleCharacteristics || (containsJobTitleKeyword && !isDateRange(trimmed));
   };
 
   // Function to determine if line contains a date range
   const isDateRange = (line: string): boolean => {
-    return /\d{4}[\s-]+.*?(\d{4}|present|current|now)/i.test(line);
+    // Common date range patterns
+    return (
+      /\d{4}[\s-]+.*?(\d{4}|present|current|now)/i.test(line) || 
+      /(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s\.,]+\d{4}\s+[-–—]\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Present|Current|Now)/i.test(line)
+    );
   };
 
-  // Improved function to extract name and contact info from the beginning of the resume
+  // Enhanced function to extract name and contact info
   const extractContactInfo = (): { name: string; contactInfo: string[] } => {
     let name = "";
     const contactInfo: string[] = [];
@@ -86,6 +103,8 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
           !line.match(/^https?:\/\//) && // URL pattern
           !line.match(/^www\./) && // URL pattern
           !line.match(/^\d+\s+[\w\s]+,/) && // Address pattern
+          !line.match(/^\(.+\)$/) && // Text in parentheses (likely not name)
+          !line.match(/\d{1,2}\/\d{1,2}\/\d{2,4}/) && // Not a date
           !isSectionHeader(line, i)) {
         name = line;
         nameFound = true;
@@ -99,6 +118,7 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
            line.match(/^https?:\/\//) || // URL
            line.match(/^www\./) || // URL
            line.includes('linkedin.com') || // LinkedIn
+           line.includes('github.com') || // GitHub
            line.match(/^\d+\s+[\w\s]+,/)) && // Address pattern
           !isSectionHeader(line, i)) { 
         contactInfo.push(line);
@@ -115,9 +135,20 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
 
   const { name, contactInfo } = extractContactInfo();
 
-  // Log extracted data for debugging
+  // Check for summary content parsing
   console.log("Extracted name:", name);
   console.log("Extracted contact info:", contactInfo);
+
+  // Function to determine if a line is a bullet point
+  const isBulletPoint = (line: string): boolean => {
+    const trimmed = line.trim();
+    return trimmed.startsWith('•') || 
+           trimmed.startsWith('-') || 
+           trimmed.startsWith('*') || 
+           trimmed.startsWith('○') ||
+           trimmed.startsWith('◦') ||
+           /^\d+\.\s/.test(trimmed);  // Numbered bullets like "1. "
+  };
 
   return (
     <div className="ats-resume-template p-8 bg-white text-black font-sans" style={{ 
@@ -131,12 +162,12 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
       {/* Display name and contact info at the top */}
       <div className="contact-header mb-6 text-center">
         {name && (
-          <h1 className="text-2xl font-bold text-gray-800 mb-1">{name}</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">{name}</h1>
         )}
         {contactInfo.length > 0 && (
           <div className="contact-details text-sm text-gray-600">
             {contactInfo.map((info, index) => (
-              <span key={index} className="mx-2">
+              <span key={index} className="mx-1">
                 {info}
                 {index < contactInfo.length - 1 && " • "}
               </span>
@@ -147,7 +178,7 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
 
       <div className="pdf-content" style={{ fontSize: '10pt' }}>
         {lines.map((line, index) => {
-          // Skip the first several lines that we used for contact info
+          // Skip lines already used for name and contact info
           if (index < 15 && (line.trim() === name || contactInfo.includes(line.trim()) || line.trim() === "")) {
             return null;
           }
@@ -156,25 +187,30 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
             // Add more space before section headers (except the first one)
             const topMargin = index > 0 ? 'mt-6' : '';
             return (
-              <h2 key={index} className={`text-lg font-bold text-slate-800 ${topMargin} mb-3 border-b border-slate-300 pb-2 uppercase`}>
+              <h2 key={index} className={`text-lg font-bold text-slate-800 ${topMargin} mb-3 border-b border-slate-300 pb-1 uppercase`}>
                 {line.trim()}
               </h2>
             );
           } else if (line.trim().length === 0) {
             // Add appropriate spacing for blank lines
-            return <div key={index} style={{ height: '0.75em' }}></div>;
+            return <div key={index} style={{ height: '0.5em' }}></div>;
           } else {
             // Check if this might be a bullet point
-            if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
+            if (isBulletPoint(line)) {
               return (
-                <p key={index} className="my-1 ml-4 text-slate-700" style={{ lineHeight: '1.4', textIndent: '-1em', paddingLeft: '1em' }}>
+                <p key={index} className="my-1 ml-4 text-slate-700" style={{ 
+                  lineHeight: '1.4', 
+                  textIndent: '-1em', 
+                  paddingLeft: '1em',
+                  marginBottom: '0.25em'
+                }}>
                   {line.trim()}
                 </p>
               );
             } else if (isDateRange(line)) {
               // This looks like a date range, make it stand out
               return (
-                <p key={index} className="my-1 font-semibold text-slate-700" style={{ lineHeight: '1.4' }}>
+                <p key={index} className="my-1 font-semibold text-slate-600 italic" style={{ lineHeight: '1.4' }}>
                   {line.trim()}
                 </p>
               );
@@ -188,7 +224,10 @@ export const ATSFriendlyResumePdfTemplate = ({ content }: ATSFriendlyResumePdfTe
             } else {
               // Regular paragraph
               return (
-                <p key={index} className="my-1 text-slate-700" style={{ lineHeight: '1.4' }}>
+                <p key={index} className="my-1 text-slate-700" style={{ 
+                  lineHeight: '1.4',
+                  marginBottom: '0.25em' 
+                }}>
                   {line.trim()}
                 </p>
               );
