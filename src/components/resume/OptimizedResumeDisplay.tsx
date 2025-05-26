@@ -1,5 +1,8 @@
+
 import { useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { FileDown } from "lucide-react";
 import { QualificationGap } from "@/types/resume";
 import { QualificationWarnings } from "./components/QualificationWarnings";
 import { ImprovementSuggestions } from "./components/ImprovementSuggestions";
