@@ -1,4 +1,3 @@
-
 import { useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { ReportHeader } from "./components/ReportHeader";
 import { OptimizedResumeContent } from "./components/OptimizedResumeContent";
 import { DownloadReportButton } from "./components/DownloadReportButton";
 import { generatePDFFromElement } from "@/utils/reportGenerationUtils";
+import { generateTextFormattedPDF } from "@/utils/textFormattedPdfGenerator";
 import { 
   formatResumeContent, 
   calculateKeywordScore, 
@@ -40,6 +40,7 @@ export const OptimizedResumeDisplay = ({
   const pdfExportRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isPdfDownloading, setIsPdfDownloading] = useState(false);
 
   const handleOptimizationReportDownload = async () => {
     // First prepare a clean version for PDF export
@@ -93,6 +94,42 @@ export const OptimizedResumeDisplay = ({
       });
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  const handleOptimizedResumePdfDownload = async () => {
+    try {
+      setIsPdfDownloading(true);
+      
+      toast({
+        title: "Preparing PDF Resume",
+        description: "Generating your ATS-optimized resume in PDF format...",
+      });
+
+      const formattedContent = formatResumeForTextDownload(formattedResumeContent);
+      const success = await generateTextFormattedPDF(
+        formattedContent,
+        `optimized-resume-${new Date().toISOString().split('T')[0]}.pdf`
+      );
+
+      if (success) {
+        toast({
+          title: "PDF Resume Downloaded Successfully!",
+          description: "Your ATS-optimized resume has been downloaded as a PDF with the same formatting as the text version.",
+        });
+      } else {
+        throw new Error("PDF generation failed");
+      }
+      
+    } catch (error) {
+      console.error('Error downloading PDF resume:', error);
+      toast({
+        title: "PDF Download Failed",
+        description: "There was an error generating your PDF resume. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPdfDownloading(false);
     }
   };
 
@@ -170,7 +207,7 @@ export const OptimizedResumeDisplay = ({
 
               <OptimizedResumeContent content={formattedResumeContent} />
               
-              {/* Enhanced Optimized Resume Download Section */}
+              {/* Enhanced Optimized Resume Download Section with both TXT and PDF options */}
               <div className="mt-4 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border border-indigo-200 dark:border-indigo-700">
                 <div className="flex flex-col space-y-4">
                   <div>
@@ -178,37 +215,58 @@ export const OptimizedResumeDisplay = ({
                       Download Professional Resume
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Get your AI-optimized resume as a clean, properly formatted text file that's perfect for ATS systems and easy to customize
+                      Get your AI-optimized resume in your preferred format. Both formats contain identical content and formatting.
                     </p>
                   </div>
                   
-                  <Button 
-                    onClick={handleOptimizedResumeDownload}
-                    disabled={isDownloading}
-                    className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                    size="lg"
-                  >
-                    {isDownloading ? (
-                      <>
-                        <FileText className="h-4 w-4 mr-2 animate-pulse" />
-                        Preparing Download...
-                      </>
-                    ) : (
-                      <>
-                        <FileDown className="h-4 w-4 mr-2" />
-                        Download Resume (.txt)
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button 
+                      onClick={handleOptimizedResumeDownload}
+                      disabled={isDownloading}
+                      className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50 disabled:cursor-not-allowed flex-1"
+                      size="lg"
+                    >
+                      {isDownloading ? (
+                        <>
+                          <FileText className="h-4 w-4 mr-2 animate-pulse" />
+                          Preparing...
+                        </>
+                      ) : (
+                        <>
+                          <FileDown className="h-4 w-4 mr-2" />
+                          Download as TXT
+                        </>
+                      )}
+                    </Button>
+
+                    <Button 
+                      onClick={handleOptimizedResumePdfDownload}
+                      disabled={isPdfDownloading}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 disabled:cursor-not-allowed flex-1"
+                      size="lg"
+                    >
+                      {isPdfDownloading ? (
+                        <>
+                          <FileText className="h-4 w-4 mr-2 animate-pulse" />
+                          Preparing...
+                        </>
+                      ) : (
+                        <>
+                          <FileDown className="h-4 w-4 mr-2" />
+                          Download as PDF
+                        </>
+                      )}
+                    </Button>
+                  </div>
                   
                   <div className="text-xs text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
-                    <p className="font-medium mb-1">✨ Text Format Benefits:</p>
+                    <p className="font-medium mb-1">✨ Format Benefits:</p>
                     <ul className="space-y-1">
-                      <li>• Perfect for ATS systems - 100% readable and parseable</li>
-                      <li>• Easy to edit and customize in any text editor</li>
+                      <li>• <strong>TXT:</strong> Perfect for ATS systems, easy to edit and customize</li>
+                      <li>• <strong>PDF:</strong> Professional presentation, maintains exact formatting</li>
+                      <li>• Both formats contain identical content and structure</li>
                       <li>• Clean section headers with proper formatting</li>
-                      <li>• Copy-paste friendly for job applications</li>
-                      <li>• Small file size and universal compatibility</li>
+                      <li>• Universal compatibility across all platforms</li>
                     </ul>
                   </div>
                 </div>
