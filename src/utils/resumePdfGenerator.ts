@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import { ParsedResume } from '@/types/resumeStructure';
 
@@ -28,15 +29,15 @@ const PDF_SETTINGS: PDFSettings = {
   pageHeight: 841.89, // A4 height in points
   margin: 40,
   fontSize: {
-    name: 18,
-    header: 12,
-    subheader: 10,
-    body: 9,
-    small: 8
+    name: 16,
+    header: 11,
+    subheader: 9,
+    body: 8,
+    small: 7
   },
   lineHeight: {
-    normal: 1.4,
-    tight: 1.2
+    normal: 1.3,
+    tight: 1.1
   },
   colors: {
     primary: '#1f2937',
@@ -78,39 +79,24 @@ class ResumePDFGenerator {
 
     const effectiveWidth = maxWidth || (this.contentWidth - indent);
     const lines = this.pdf.splitTextToSize(text, effectiveWidth);
-    const lineHeight = fontSize * this.settings.lineHeight.normal;
+    const lineHeight = fontSize * this.settings.lineHeight.tight;
 
-    // Check if we need a new page
-    if (this.currentY + (lines.length * lineHeight) > this.settings.pageHeight - this.settings.margin) {
-      // Try to fit on current page with tighter spacing
-      const tightLineHeight = fontSize * this.settings.lineHeight.tight;
-      if (this.currentY + (lines.length * tightLineHeight) <= this.settings.pageHeight - this.settings.margin) {
-        // Use tight spacing
-        for (const line of lines) {
-          this.pdf.text(line, this.settings.margin + indent, this.currentY);
-          this.currentY += tightLineHeight;
-        }
-      } else {
-        // Truncate content to fit on one page
-        const availableSpace = this.settings.pageHeight - this.settings.margin - this.currentY;
-        const maxLines = Math.floor(availableSpace / tightLineHeight);
-        const truncatedLines = lines.slice(0, Math.max(1, maxLines));
-        
-        for (const line of truncatedLines) {
-          this.pdf.text(line, this.settings.margin + indent, this.currentY);
-          this.currentY += tightLineHeight;
-        }
+    // Always fit content on the page, use minimal spacing
+    for (const line of lines) {
+      // Check if we need a new page
+      if (this.currentY + lineHeight > this.settings.pageHeight - this.settings.margin) {
+        this.pdf.addPage();
+        this.currentY = this.settings.margin;
       }
-    } else {
-      for (const line of lines) {
-        this.pdf.text(line, this.settings.margin + indent, this.currentY);
-        this.currentY += lineHeight;
-      }
+      
+      this.pdf.text(line, this.settings.margin + indent, this.currentY);
+      this.currentY += lineHeight;
     }
   }
 
   private addSpace(points: number): void {
-    this.currentY += points;
+    // Reduce spacing to fit more content
+    this.currentY += Math.min(points, 4);
   }
 
   private addLine(): void {
@@ -122,11 +108,11 @@ class ResumePDFGenerator {
       this.settings.pageWidth - this.settings.margin, 
       this.currentY
     );
-    this.addSpace(8);
+    this.addSpace(4);
   }
 
   private addSectionHeader(title: string): void {
-    this.addSpace(6);
+    this.addSpace(3);
     this.addText(title.toUpperCase(), this.settings.fontSize.header, 'bold', this.settings.colors.primary);
     this.addLine();
   }
@@ -135,7 +121,7 @@ class ResumePDFGenerator {
     // Name
     if (contact.name) {
       this.addText(contact.name, this.settings.fontSize.name, 'bold', this.settings.colors.primary);
-      this.addSpace(4);
+      this.addSpace(3);
     }
 
     // Contact details in a compact format
@@ -147,7 +133,7 @@ class ResumePDFGenerator {
 
     if (contactDetails.length > 0) {
       this.addText(contactDetails.join(' | '), this.settings.fontSize.small, 'normal', this.settings.colors.secondary);
-      this.addSpace(8);
+      this.addSpace(6);
     }
   }
 
@@ -155,14 +141,18 @@ class ResumePDFGenerator {
     if (!summary) return;
     this.addSectionHeader('Professional Summary');
     this.addText(summary, this.settings.fontSize.body);
-    this.addSpace(4);
+    this.addSpace(3);
   }
 
   private addWorkExperience(experiences: any[]): void {
     if (!experiences || experiences.length === 0) return;
+    
+    console.log('Adding work experience section with', experiences.length, 'experiences');
     this.addSectionHeader('Professional Experience');
 
     experiences.forEach((exp, index) => {
+      console.log('Processing experience:', exp);
+      
       // Job title and company
       const titleLine = exp.position && exp.company ? 
         `${exp.position} - ${exp.company}` : 
@@ -182,27 +172,29 @@ class ResumePDFGenerator {
 
       // Responsibilities
       if (exp.responsibilities && exp.responsibilities.length > 0) {
-        this.addSpace(2);
-        exp.responsibilities.slice(0, 6).forEach((resp: string) => {
+        this.addSpace(1);
+        // Limit to 4 responsibilities per job to save space
+        exp.responsibilities.slice(0, 4).forEach((resp: string) => {
           const bulletText = `• ${resp}`;
-          this.addText(bulletText, this.settings.fontSize.body, 'normal', this.settings.colors.text, 10);
+          this.addText(bulletText, this.settings.fontSize.body, 'normal', this.settings.colors.text, 8);
         });
       }
 
       if (index < experiences.length - 1) {
-        this.addSpace(6);
+        this.addSpace(3);
       }
     });
-    this.addSpace(4);
+    this.addSpace(3);
   }
 
   private addSkills(skills: string[]): void {
     if (!skills || skills.length === 0) return;
     this.addSectionHeader('Technical Skills');
     
-    const skillsText = skills.slice(0, 30).join(' • ');
+    // Group skills into chunks to fit better
+    const skillsText = skills.slice(0, 25).join(' • ');
     this.addText(skillsText, this.settings.fontSize.body);
-    this.addSpace(4);
+    this.addSpace(3);
   }
 
   private addEducation(education: any[]): void {
@@ -225,57 +217,58 @@ class ResumePDFGenerator {
         this.addText(schoolLine.join(' | '), this.settings.fontSize.body, 'normal', this.settings.colors.secondary);
       }
       
-      this.addSpace(3);
+      this.addSpace(2);
     });
-    this.addSpace(4);
+    this.addSpace(3);
   }
 
   private addProjects(projects: any[]): void {
     if (!projects || projects.length === 0) return;
     this.addSectionHeader('Projects');
 
-    projects.slice(0, 4).forEach((project) => {
+    projects.slice(0, 3).forEach((project) => {
       this.addText(project.name || 'Project', this.settings.fontSize.subheader, 'bold');
       
       if (project.description) {
-        const truncatedDesc = project.description.length > 150 ? 
-          project.description.substring(0, 150) + '...' : 
+        const truncatedDesc = project.description.length > 120 ? 
+          project.description.substring(0, 120) + '...' : 
           project.description;
         this.addText(truncatedDesc, this.settings.fontSize.body);
       }
       
       if (project.technologies && project.technologies.length > 0) {
-        this.addText(`Technologies: ${project.technologies.join(', ')}`, this.settings.fontSize.small, 'normal', this.settings.colors.secondary);
+        this.addText(`Tech: ${project.technologies.slice(0, 5).join(', ')}`, this.settings.fontSize.small, 'normal', this.settings.colors.secondary);
       }
       
-      this.addSpace(4);
+      this.addSpace(2);
     });
+    this.addSpace(3);
   }
 
   private addCertifications(certifications: any[]): void {
     if (!certifications || certifications.length === 0) return;
     this.addSectionHeader('Certifications');
 
-    certifications.slice(0, 5).forEach((cert) => {
+    certifications.slice(0, 4).forEach((cert) => {
       const certLine = [];
       if (cert.name) certLine.push(cert.name);
       if (cert.issuer && cert.issuer !== 'Unknown') certLine.push(`- ${cert.issuer}`);
       if (cert.date) certLine.push(`(${cert.date})`);
       
       this.addText(certLine.join(' '), this.settings.fontSize.body);
-      this.addSpace(2);
+      this.addSpace(1);
     });
-    this.addSpace(4);
+    this.addSpace(3);
   }
 
   private addAchievements(achievements: string[]): void {
     if (!achievements || achievements.length === 0) return;
     this.addSectionHeader('Achievements');
 
-    achievements.slice(0, 5).forEach((achievement) => {
-      this.addText(`• ${achievement}`, this.settings.fontSize.body, 'normal', this.settings.colors.text, 10);
+    achievements.slice(0, 4).forEach((achievement) => {
+      this.addText(`• ${achievement}`, this.settings.fontSize.body, 'normal', this.settings.colors.text, 8);
     });
-    this.addSpace(4);
+    this.addSpace(3);
   }
 
   private addLanguages(languages: string[]): void {
@@ -284,17 +277,23 @@ class ResumePDFGenerator {
     
     const languagesText = languages.join(' • ');
     this.addText(languagesText, this.settings.fontSize.body);
-    this.addSpace(4);
+    this.addSpace(3);
   }
 
   public generateResumePDF(resume: ParsedResume, filename: string = 'optimized-resume.pdf'): void {
+    console.log('Starting PDF generation with resume:', resume);
+    
     // Reset position
     this.currentY = this.settings.margin;
 
-    // Add content in priority order to ensure all sections appear
+    // Add content in priority order - ALWAYS include work experience
     this.addContactInfo(resume.contact);
     this.addProfessionalSummary(resume.professionalSummary);
+    
+    // ENSURE work experience is always added
+    console.log('Work experience data:', resume.workExperience);
     this.addWorkExperience(resume.workExperience);
+    
     this.addSkills(resume.skills);
     this.addEducation(resume.education);
     this.addProjects(resume.projects);
@@ -302,19 +301,20 @@ class ResumePDFGenerator {
     this.addAchievements(resume.achievements);
     this.addLanguages(resume.languages);
 
-    // Add any additional sections that might contain important AI-generated content
+    // Add any additional sections
     if (resume.additionalSections) {
       Object.entries(resume.additionalSections).forEach(([sectionName, content]) => {
         if (Array.isArray(content) && content.length > 0) {
           this.addSectionHeader(sectionName);
-          content.slice(0, 5).forEach((item) => {
-            this.addText(`• ${item}`, this.settings.fontSize.body, 'normal', this.settings.colors.text, 10);
+          content.slice(0, 3).forEach((item) => {
+            this.addText(`• ${item}`, this.settings.fontSize.body, 'normal', this.settings.colors.text, 8);
           });
-          this.addSpace(4);
+          this.addSpace(3);
         }
       });
     }
 
+    console.log('PDF generation completed, saving file:', filename);
     // Save the PDF
     this.pdf.save(filename);
   }
@@ -324,7 +324,6 @@ export async function generateATSResumePDF(
   element: HTMLElement,
   filename: string = 'optimized-resume.pdf'
 ): Promise<boolean> {
-  // This function is kept for backward compatibility but not used for the new text-based PDF
   console.warn('generateATSResumePDF with element is deprecated. Use generateResumePDFFromContent instead.');
   return false;
 }
@@ -334,13 +333,8 @@ export function generateResumePDFFromContent(
   filename: string = 'optimized-resume.pdf'
 ): boolean {
   try {
-    // Import the parser
     const { parseResumeContent } = require('./resumeParser');
-    
-    // Parse the resume content
     const parsedResume = parseResumeContent(resumeContent);
-    
-    // Generate PDF
     const generator = new ResumePDFGenerator();
     generator.generateResumePDF(parsedResume, filename);
     
@@ -354,6 +348,7 @@ export function generateResumePDFFromContent(
 }
 
 export function generateDirectResumePDF(resume: ParsedResume, filename: string = 'optimized-resume.pdf'): void {
+  console.log('generateDirectResumePDF called with:', resume);
   const generator = new ResumePDFGenerator();
   generator.generateResumePDF(resume, filename);
 }
