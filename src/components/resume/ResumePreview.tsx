@@ -4,7 +4,7 @@ import { ParsedResume } from '@/types/resumeStructure';
 import { ATSFriendlyResumePdfTemplate } from './ATSFriendlyResumePdfTemplate';
 import { Button } from '@/components/ui/button';
 import { FileDown } from 'lucide-react';
-import { generateATSResumePDF } from '@/utils/resumePdfGenerator';
+import { generateDirectResumePDF } from '@/utils/resumePdfGenerator';
 import { useToast } from '@/hooks/use-toast';
 
 interface ResumePreviewProps {
@@ -17,31 +17,23 @@ export const ResumePreview = ({ resume, className = '' }: ResumePreviewProps) =>
   const { toast } = useToast();
 
   const handleDownloadPDF = async () => {
-    if (!resumeRef.current) {
-      toast({
-        title: "Error",
-        description: "Resume preview not available for download.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     toast({
       title: "Generating PDF",
-      description: "Creating your ATS-optimized resume PDF...",
+      description: "Creating your ATS-optimized resume PDF with selectable text...",
     });
 
-    const success = await generateATSResumePDF(
-      resumeRef.current,
-      `optimized-resume-${new Date().toISOString().split('T')[0]}.pdf`
-    );
+    try {
+      generateDirectResumePDF(
+        resume,
+        `optimized-resume-${new Date().toISOString().split('T')[0]}.pdf`
+      );
 
-    if (success) {
       toast({
         title: "Resume Downloaded",
-        description: "Your ATS-optimized resume has been downloaded successfully!",
+        description: "Your ATS-optimized resume has been downloaded successfully! The PDF contains selectable text.",
       });
-    } else {
+    } catch (error) {
+      console.error('Error generating PDF:', error);
       toast({
         title: "Download Failed",
         description: "There was an error generating your resume PDF. Please try again.",
@@ -76,6 +68,7 @@ export const ResumePreview = ({ resume, className = '' }: ResumePreviewProps) =>
         <ul className="list-disc list-inside space-y-1 text-xs">
           <li>Clean, single-page layout optimized for Applicant Tracking Systems</li>
           <li>Professional formatting with clear section headers</li>
+          <li>Selectable text content for easy copying and ATS parsing</li>
           <li>Keyword-optimized content based on job requirements</li>
           <li>Consistent typography and spacing for better readability</li>
         </ul>

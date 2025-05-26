@@ -1,4 +1,3 @@
-
 import { useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { QualificationGap } from "@/types/resume";
@@ -51,6 +50,25 @@ export const OptimizedResumeDisplay = ({
       `resume-optimization-report-${new Date().toISOString().split("T")[0]}.pdf`, 
       false
     );
+  };
+
+  const handleOptimizedResumeDownload = async () => {
+    try {
+      const { generateResumePDFFromContent } = await import('@/utils/resumePdfGenerator');
+      
+      const success = generateResumePDFFromContent(
+        formattedResumeContent,
+        `optimized-resume-${new Date().toISOString().split('T')[0]}.pdf`
+      );
+      
+      if (success) {
+        console.log('Optimized resume PDF generated successfully');
+      } else {
+        console.error('Failed to generate optimized resume PDF');
+      }
+    } catch (error) {
+      console.error('Error importing PDF generator:', error);
+    }
   };
 
   if (!optimizedResume) return null;
@@ -109,6 +127,27 @@ export const OptimizedResumeDisplay = ({
               {/* ATS-Optimized Resume Preview and Download */}
               <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-700">
                 <ResumePreview resume={parsedResume} />
+              </div>
+
+              {/* Direct Optimized Resume Download */}
+              <div className="mt-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border border-indigo-200 dark:border-indigo-700">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                      Download Optimized Resume
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Get your AI-optimized resume as a clean, ATS-friendly PDF with selectable text
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={handleOptimizedResumeDownload}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Download Resume PDF
+                  </Button>
+                </div>
               </div>
             </div>
             
