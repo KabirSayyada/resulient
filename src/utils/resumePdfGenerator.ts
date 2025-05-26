@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { ParsedResume } from '@/types/resumeStructure';
 
@@ -184,7 +183,7 @@ class ResumePDFGenerator {
       // Responsibilities
       if (exp.responsibilities && exp.responsibilities.length > 0) {
         this.addSpace(2);
-        exp.responsibilities.slice(0, 4).forEach((resp: string) => {
+        exp.responsibilities.slice(0, 6).forEach((resp: string) => {
           const bulletText = `• ${resp}`;
           this.addText(bulletText, this.settings.fontSize.body, 'normal', this.settings.colors.text, 10);
         });
@@ -201,7 +200,7 @@ class ResumePDFGenerator {
     if (!skills || skills.length === 0) return;
     this.addSectionHeader('Technical Skills');
     
-    const skillsText = skills.slice(0, 25).join(' • ');
+    const skillsText = skills.slice(0, 30).join(' • ');
     this.addText(skillsText, this.settings.fontSize.body);
     this.addSpace(4);
   }
@@ -235,12 +234,12 @@ class ResumePDFGenerator {
     if (!projects || projects.length === 0) return;
     this.addSectionHeader('Projects');
 
-    projects.slice(0, 3).forEach((project) => {
+    projects.slice(0, 4).forEach((project) => {
       this.addText(project.name || 'Project', this.settings.fontSize.subheader, 'bold');
       
       if (project.description) {
-        const truncatedDesc = project.description.length > 120 ? 
-          project.description.substring(0, 120) + '...' : 
+        const truncatedDesc = project.description.length > 150 ? 
+          project.description.substring(0, 150) + '...' : 
           project.description;
         this.addText(truncatedDesc, this.settings.fontSize.body);
       }
@@ -257,7 +256,7 @@ class ResumePDFGenerator {
     if (!certifications || certifications.length === 0) return;
     this.addSectionHeader('Certifications');
 
-    certifications.slice(0, 4).forEach((cert) => {
+    certifications.slice(0, 5).forEach((cert) => {
       const certLine = [];
       if (cert.name) certLine.push(cert.name);
       if (cert.issuer && cert.issuer !== 'Unknown') certLine.push(`- ${cert.issuer}`);
@@ -273,9 +272,18 @@ class ResumePDFGenerator {
     if (!achievements || achievements.length === 0) return;
     this.addSectionHeader('Achievements');
 
-    achievements.slice(0, 4).forEach((achievement) => {
+    achievements.slice(0, 5).forEach((achievement) => {
       this.addText(`• ${achievement}`, this.settings.fontSize.body, 'normal', this.settings.colors.text, 10);
     });
+    this.addSpace(4);
+  }
+
+  private addLanguages(languages: string[]): void {
+    if (!languages || languages.length === 0) return;
+    this.addSectionHeader('Languages');
+    
+    const languagesText = languages.join(' • ');
+    this.addText(languagesText, this.settings.fontSize.body);
     this.addSpace(4);
   }
 
@@ -283,7 +291,7 @@ class ResumePDFGenerator {
     // Reset position
     this.currentY = this.settings.margin;
 
-    // Add content in priority order
+    // Add content in priority order to ensure all sections appear
     this.addContactInfo(resume.contact);
     this.addProfessionalSummary(resume.professionalSummary);
     this.addWorkExperience(resume.workExperience);
@@ -292,13 +300,14 @@ class ResumePDFGenerator {
     this.addProjects(resume.projects);
     this.addCertifications(resume.certifications);
     this.addAchievements(resume.achievements);
+    this.addLanguages(resume.languages);
 
-    // Add any additional sections
+    // Add any additional sections that might contain important AI-generated content
     if (resume.additionalSections) {
       Object.entries(resume.additionalSections).forEach(([sectionName, content]) => {
         if (Array.isArray(content) && content.length > 0) {
           this.addSectionHeader(sectionName);
-          content.slice(0, 3).forEach((item) => {
+          content.slice(0, 5).forEach((item) => {
             this.addText(`• ${item}`, this.settings.fontSize.body, 'normal', this.settings.colors.text, 10);
           });
           this.addSpace(4);
