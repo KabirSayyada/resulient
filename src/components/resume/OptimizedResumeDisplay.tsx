@@ -20,6 +20,8 @@ import {
   calculateATSScore,
   generateSuggestions 
 } from "@/utils/resumeFormatters";
+import { generateDirectResumePDF } from "@/utils/resumePdfGenerator";
+import { useToast } from "@/hooks/use-toast";
 
 interface OptimizedResumeDisplayProps {
   optimizedResume: string | any;
@@ -38,6 +40,7 @@ export const OptimizedResumeDisplay = ({
   const isAtsOptimizerPage = location.pathname === "/";
   const optimizationReportRef = useRef<HTMLDivElement>(null);
   const pdfExportRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const handleOptimizationReportDownload = async () => {
     // First prepare a clean version for PDF export
@@ -56,20 +59,32 @@ export const OptimizedResumeDisplay = ({
 
   const handleOptimizedResumeDownload = async () => {
     try {
-      const { generateResumePDFFromContent } = await import('@/utils/resumePdfGenerator');
+      toast({
+        title: "Generating PDF",
+        description: "Creating your ATS-optimized resume PDF with selectable text...",
+      });
+
+      // Parse the resume content
+      const parsedResume = parseResumeContent(formattedResumeContent);
       
-      const success = generateResumePDFFromContent(
-        formattedResumeContent,
+      // Generate PDF directly
+      generateDirectResumePDF(
+        parsedResume,
         `optimized-resume-${new Date().toISOString().split('T')[0]}.pdf`
       );
       
-      if (success) {
-        console.log('Optimized resume PDF generated successfully');
-      } else {
-        console.error('Failed to generate optimized resume PDF');
-      }
+      toast({
+        title: "Resume Downloaded",
+        description: "Your ATS-optimized resume has been downloaded successfully! The PDF contains selectable text.",
+      });
+      
     } catch (error) {
-      console.error('Error importing PDF generator:', error);
+      console.error('Error generating optimized resume PDF:', error);
+      toast({
+        title: "Download Failed",
+        description: "There was an error generating your resume PDF. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
