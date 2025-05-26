@@ -420,79 +420,53 @@ class EnhancedResumePDFGenerator {
     });
   }
 
-  private parseExperienceItems(content: string): ExperienceItem[] {
-    const lines = content.split('\n').filter(line => line.trim());
-    const experiences: ExperienceItem[] = [];
-    let currentExp: ExperienceItem | null = null;
-
-    for (const line of lines) {
-      if (line.includes(' - ') && !line.startsWith('•') && !line.match(/^\d{4}/)) {
-        // This is likely a job title - company line
-        if (currentExp) {
-          experiences.push(currentExp);
-        }
-        
-        const parts = line.split(' - ');
-        currentExp = {
-          position: parts[0]?.trim() || '',
-          company: parts[1]?.trim() || '',
-          dates: '',
-          responsibilities: []
-        };
-      } else if (currentExp && line.match(/\d{4}/)) {
-        // This is a date line
-        const parts = line.split('|');
-        currentExp.dates = parts[0]?.trim() || '';
-        currentExp.location = parts[1]?.trim() || '';
-      } else if (currentExp && (line.startsWith('•') || line.startsWith('-'))) {
-        // This is a responsibility
-        currentExp.responsibilities.push(line.replace(/^[•\-]\s*/, ''));
-      }
-    }
-
-    if (currentExp) {
-      experiences.push(currentExp);
-    }
-
-    return experiences;
-  }
-
   private renderSkills(section: ResumeSection): void {
     this.addSection('Technical Skills');
     
-    let skillsText = section.content;
     if (section.items && section.items.length > 0) {
-      skillsText = section.items.join(', ');
+      const skillsText = section.items.join(', ');
+      this.addText(skillsText, 10, 'normal', '#374151');
+    } else if (section.content) {
+      this.addText(section.content, 10, 'normal', '#374151');
     }
-    
-    this.addText(skillsText, 10, 'normal', '#374151');
   }
 
   private renderEducation(section: ResumeSection): void {
     this.addSection('Education');
     
-    const lines = section.content.split('\n').filter(line => line.trim());
-    let currentEdu: EducationItem | null = null;
-    
-    for (const line of lines) {
-      if (line.includes(' - ') || line.toLowerCase().includes('university') || line.toLowerCase().includes('college')) {
-        if (currentEdu) {
-          this.renderEducationItem(currentEdu);
+    if (section.items && section.items.length > 0) {
+      section.items.forEach(item => {
+        this.addText(item, 10, 'normal', '#374151');
+        this.currentY += 4;
+      });
+    } else if (section.content) {
+      // Try to parse education content more intelligently
+      const lines = section.content.split('\n').filter(line => line.trim());
+      let currentEdu: EducationItem | null = null;
+      
+      for (const line of lines) {
+        if (line.includes(' - ') || line.toLowerCase().includes('university') || line.toLowerCase().includes('college')) {
+          if (currentEdu) {
+            this.renderEducationItem(currentEdu);
+          }
+          
+          const parts = line.split(' - ');
+          currentEdu = {
+            degree: parts[0]?.trim() || line,
+            institution: parts[1]?.trim() || '',
+            date: ''
+          };
+        } else if (currentEdu && line.match(/\d{4}/)) {
+          currentEdu.date = line;
         }
-        
-        const parts = line.split(' - ');
-        currentEdu = {
-          degree: parts[0]?.trim() || line,
-          institution: parts[1]?.trim() || '',
-          date: ''
-        };
-      } else if (currentEdu && line.match(/\d{4}/)) {
-        currentEdu.date = line;
       }
-    }
-    
-    if (currentEdu) {
-      this.renderEducationItem(currentEdu);
+      
+      if (currentEdu) {
+        this.renderEducationItem(currentEdu);
+      } else {
+        // Fallback to simple text rendering
+        this.addText(section.content, 10, 'normal', '#374151');
+      }
     }
   }
 
@@ -573,48 +547,6 @@ class EnhancedResumePDFGenerator {
     } catch (error) {
       console.error('Error in enhanced PDF generation:', error);
       return false;
-    }
-  }
-
-  private renderSkills(section: ResumeSection): void {
-    this.addSection('Technical Skills');
-    
-    let skillsText = section.content;
-    if (section.items && section.items.length > 0) {
-      skillsText = section.items.join(', ');
-    }
-    
-    this.addText(skillsText, 10, 'normal', '#374151');
-  }
-
-  private renderEducation(section: ResumeSection): void {
-    this.addSection('Education');
-    
-    if (section.items && section.items.length > 0) {
-      section.items.forEach(item => {
-        this.addText(item, 10, 'normal', '#374151');
-        this.currentY += 4;
-      });
-    } else {
-      this.addText(section.content, 10, 'normal', '#374151');
-    }
-  }
-
-  private renderGenericSection(section: ResumeSection): void {
-    if (!section.title) return;
-    
-    this.addSection(section.title.replace(/^[A-Z\s]+$/, (match) => 
-      match.split(' ').map(word => 
-        word.charAt(0) + word.slice(1).toLowerCase()
-      ).join(' ')
-    ));
-    
-    if (section.items && section.items.length > 0) {
-      section.items.forEach(item => {
-        this.addText(`• ${item}`, 10, 'normal', '#374151', 0);
-      });
-    } else if (section.content) {
-      this.addText(section.content, 10, 'normal', '#374151');
     }
   }
 }
