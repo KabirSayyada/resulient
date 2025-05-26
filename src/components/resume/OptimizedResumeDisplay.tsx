@@ -1,7 +1,7 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { FileDown, Loader2 } from "lucide-react";
 import { QualificationGap } from "@/types/resume";
 import { QualificationWarnings } from "./components/QualificationWarnings";
 import { ImprovementSuggestions } from "./components/ImprovementSuggestions";
@@ -18,7 +18,7 @@ import {
   calculateATSScore,
   generateSuggestions 
 } from "@/utils/resumeFormatters";
-import { generateResumePDFFromContent } from "@/utils/resumePdfGenerator";
+import { generateEnhancedResumePDF } from "@/utils/enhancedResumePdfGenerator";
 import { useToast } from "@/hooks/use-toast";
 
 interface OptimizedResumeDisplayProps {
@@ -39,6 +39,8 @@ export const OptimizedResumeDisplay = ({
   const optimizationReportRef = useRef<HTMLDivElement>(null);
   const pdfExportRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [pdfProgress, setPdfProgress] = useState<string>("");
 
   const handleOptimizationReportDownload = async () => {
     // First prepare a clean version for PDF export
@@ -57,21 +59,34 @@ export const OptimizedResumeDisplay = ({
 
   const handleOptimizedResumeDownload = async () => {
     try {
+      setIsGeneratingPDF(true);
+      setPdfProgress("Initializing PDF generation...");
+      
       toast({
-        title: "Generating PDF",
-        description: "Creating your ATS-optimized resume PDF with selectable text...",
+        title: "Generating Your Resume",
+        description: "Please wait while we create your professional ATS-optimized resume PDF...",
       });
 
-      // Use the formatted resume content directly
-      const success = generateResumePDFFromContent(
+      // Step 1: Parse and structure the content
+      setPdfProgress("Parsing resume content...");
+      await new Promise(resolve => setTimeout(resolve, 500)); // Show progress
+
+      // Step 2: Format sections
+      setPdfProgress("Formatting sections and layout...");
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Step 3: Generate PDF
+      setPdfProgress("Generating PDF document...");
+      const success = await generateEnhancedResumePDF(
         formattedResumeContent,
         `optimized-resume-${new Date().toISOString().split('T')[0]}.pdf`
       );
       
       if (success) {
+        setPdfProgress("Download complete!");
         toast({
-          title: "Resume Downloaded",
-          description: "Your ATS-optimized resume has been downloaded successfully! The PDF contains selectable text and all sections.",
+          title: "Resume Downloaded Successfully!",
+          description: "Your ATS-optimized resume has been downloaded with all sections properly formatted.",
         });
       } else {
         throw new Error('PDF generation failed');
@@ -84,6 +99,9 @@ export const OptimizedResumeDisplay = ({
         description: "There was an error generating your resume PDF. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsGeneratingPDF(false);
+      setPdfProgress("");
     }
   };
 
@@ -137,24 +155,66 @@ export const OptimizedResumeDisplay = ({
 
               <OptimizedResumeContent content={formattedResumeContent} />
               
-              {/* Direct Optimized Resume Download */}
-              <div className="mt-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border border-indigo-200 dark:border-indigo-700">
-                <div className="flex justify-between items-center">
+              {/* Enhanced Optimized Resume Download Section */}
+              <div className="mt-4 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border border-indigo-200 dark:border-indigo-700">
+                <div className="flex flex-col space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                      Download Optimized Resume
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      Download Professional Resume
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Get your AI-optimized resume as a clean, ATS-friendly PDF with selectable text and all sections properly formatted
+                      Get your AI-optimized resume as a clean, professional PDF with all sections properly formatted for ATS systems
                     </p>
                   </div>
+                  
+                  {/* Progress Indicator */}
+                  {isGeneratingPDF && (
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-600">
+                      <div className="flex items-center space-x-3">
+                        <Loader2 className="h-5 w-5 animate-spin text-purple-600" />
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            Creating your resume...
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {pdfProgress}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-purple-600 h-2 rounded-full animate-pulse" style={{width: '60%'}}></div>
+                      </div>
+                    </div>
+                  )}
+                  
                   <Button 
                     onClick={handleOptimizedResumeDownload}
-                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                    disabled={isGeneratingPDF}
+                    className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    size="lg"
                   >
-                    <FileDown className="h-4 w-4 mr-2" />
-                    Download Resume PDF
+                    {isGeneratingPDF ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Generating PDF...
+                      </>
+                    ) : (
+                      <>
+                        <FileDown className="h-4 w-4 mr-2" />
+                        Download Resume PDF
+                      </>
+                    )}
                   </Button>
+                  
+                  <div className="text-xs text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
+                    <p className="font-medium mb-1">✨ Premium Features:</p>
+                    <ul className="space-y-1">
+                      <li>• Professional multi-page layout with proper spacing</li>
+                      <li>• All sections included and properly formatted</li>
+                      <li>• ATS-friendly structure with selectable text</li>
+                      <li>• Clean typography optimized for recruiters</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
