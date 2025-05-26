@@ -99,20 +99,33 @@ class EnhancedResumePDFGenerator {
   }
 
   private parseResumeContent(content: string): ResumeSection[] {
+    console.log('Starting comprehensive content parsing...');
     const sections: ResumeSection[] = [];
     const lines = content.split('\n').map(line => line.trim()).filter(line => line);
     
     let currentSection: ResumeSection | null = null;
     let headerProcessed = false;
+    let insideExperienceItem = false;
+    let currentExperienceItem: any = null;
+
+    console.log('Processing', lines.length, 'lines of content');
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const upperLine = line.toUpperCase();
+      console.log(`Line ${i}: "${line}" (uppercase: "${upperLine}")`);
 
-      // Check for section headers
+      // Enhanced section header detection
       if (this.isSectionHeader(upperLine)) {
+        console.log('Found section header:', line);
+        
         // Save previous section
         if (currentSection) {
+          // For experience section, add the last item if exists
+          if (currentSection.type === 'experience' && currentExperienceItem) {
+            if (!currentSection.items) currentSection.items = [];
+            currentSection.items.push(JSON.stringify(currentExperienceItem));
+          }
           sections.push(currentSection);
         }
 
@@ -123,11 +136,16 @@ class EnhancedResumePDFGenerator {
           content: '',
           items: []
         };
+        
+        insideExperienceItem = false;
+        currentExperienceItem = null;
         continue;
       }
 
-      // Handle header information (first few lines before any section)
+      // Handle header information (contact details)
       if (!headerProcessed && !currentSection) {
+        console.log('Processing header line:', line);
+        
         if (!sections.find(s => s.type === 'header')) {
           sections.push({
             type: 'header',
@@ -140,60 +158,181 @@ class EnhancedResumePDFGenerator {
             headerSection.content += '\n' + line;
           }
         }
-
-        // Mark header as processed after a few lines or when we hit a section
-        if (sections.length > 0 && sections[0].content.split('\n').length >= 4) {
-          headerProcessed = true;
-        }
         continue;
       }
 
-      // Add content to current section
+      // Mark header as processed when we hit first section or after reasonable lines
+      if (!headerProcessed && (currentSection || i > 6)) {
+        headerProcessed = true;
+      }
+
+      // Process content based on current section
       if (currentSection) {
-        if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
-          currentSection.items?.push(line.replace(/^[•\-*]\s*/, ''));
+        console.log(`Processing content for section ${currentSection.type}: "${line}"`);
+        
+        if (currentSection.type === 'experience') {
+          this.processExperienceContent(line, currentSection, currentExperienceItem, insideExperienceItem);
         } else {
-          currentSection.content += (currentSection.content ? '\n' : '') + line;
+          // For other sections, handle bullet points and regular content
+          if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
+            if (!currentSection.items) currentSection.items = [];
+            currentSection.items.push(line.replace(/^[•\-*]\s*/, ''));
+          } else if (line.trim().length > 0) {
+            currentSection.content += (currentSection.content ? '\n' : '') + line;
+          }
         }
       }
     }
 
     // Add the last section
     if (currentSection) {
+      if (currentSection.type === 'experience' && currentExperienceItem) {
+        if (!currentSection.items) currentSection.items = [];
+        currentSection.items.push(JSON.stringify(currentExperienceItem));
+      }
       sections.push(currentSection);
     }
 
+    console.log('Parsed sections:', sections.map(s => ({ type: s.type, title: s.title, itemsCount: s.items?.length || 0, contentLength: s.content.length })));
     return sections;
+  }
+
+  private processExperienceContent(line: string, section: ResumeSection, currentItem: any, insideItem: boolean): void {
+    // Check if this is a job title/company line (contains " - " or similar patterns)
+    if (this.isJobTitleLine(line)) {
+      console.log('Found job title line:', line);
+      
+      // Save previous item if exists
+      if (currentItem) {
+        if (!section.items) section.items = [];
+        section.items.push(JSON.stringify(currentItem));
+      }
+      
+      // Parse new job info
+      currentItem = this.parseJobTitleLine(line);
+      insideItem = true;
+      
+    } else if (line.match(/\d{4}/) && currentItem) {
+      // This looks like a date/location line
+      console.log('Found date/location line:', line);
+      const parts = line.split('|').map(p => p.trim());
+      currentItem.dates = parts[0] || line;
+      if (parts.length > 1) {
+        currentItem.location = parts[1];
+      }
+      
+    } else if ((line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) && currentItem) {
+      // This is a responsibility bullet point
+      console.log('Found responsibility:', line);
+      if (!currentItem.responsibilities) currentItem.responsibilities = [];
+      currentItem.responsibilities.push(line.replace(/^[•\-*]\s*/, ''));
+      
+    } else if (currentItem && line.trim().length > 10 && !line.match(/^[A-Z\s]{3,}$/)) {
+      // This might be a responsibility without bullet or additional job info
+      console.log('Found additional content:', line);
+      if (!currentItem.responsibilities) currentItem.responsibilities = [];
+      currentItem.responsibilities.push(line);
+    }
+  }
+
+  private isJobTitleLine(line: string): boolean {
+    // Enhanced job title detection
+    const hasJobSeparators = line.includes(' - ') || line.includes(' at ') || line.includes(' | ');
+    const hasReasonableLength = line.length > 10 && line.length < 150;
+    const notBulletPoint = !line.startsWith('•') && !line.startsWith('-') && !line.startsWith('*');
+    const notAllCaps = !(line === line.toUpperCase() && line.length > 20);
+    
+    return hasJobSeparators && hasReasonableLength && notBulletPoint && notAllCaps;
+  }
+
+  private parseJobTitleLine(line: string): any {
+    console.log('Parsing job title line:', line);
+    
+    const item = {
+      position: '',
+      company: '',
+      dates: '',
+      location: '',
+      responsibilities: []
+    };
+    
+    // Remove any date patterns first for cleaner parsing
+    let cleanLine = line;
+    const datePatterns = [
+      /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}\b/gi,
+      /\b\d{1,2}\/\d{4}\b/g,
+      /\b\d{4}\s*[-–—]\s*\d{4}\b/g,
+      /\b\d{4}\s*[-–—]\s*(?:Present|Current|Now)\b/gi
+    ];
+    
+    datePatterns.forEach(pattern => {
+      const match = cleanLine.match(pattern);
+      if (match && !item.dates) {
+        item.dates = match[0];
+        cleanLine = cleanLine.replace(pattern, '').trim();
+      }
+    });
+    
+    // Try different separation patterns
+    const separators = [' - ', ' – ', ' — ', ' at ', ' | ', ' / '];
+    
+    for (const separator of separators) {
+      if (cleanLine.includes(separator)) {
+        const parts = cleanLine.split(separator).map(p => p.trim());
+        if (parts.length >= 2) {
+          item.position = parts[0];
+          item.company = parts.slice(1).join(separator);
+          break;
+        }
+      }
+    }
+    
+    // If no clear separator, try to guess based on capitalization or length
+    if (!item.position || !item.company) {
+      const words = cleanLine.split(' ');
+      if (words.length >= 4) {
+        const midPoint = Math.floor(words.length / 2);
+        item.position = words.slice(0, midPoint).join(' ');
+        item.company = words.slice(midPoint).join(' ');
+      } else {
+        item.position = cleanLine;
+        item.company = 'Company';
+      }
+    }
+    
+    console.log('Parsed job item:', item);
+    return item;
   }
 
   private isSectionHeader(line: string): boolean {
     const sectionKeywords = [
-      'PROFESSIONAL SUMMARY', 'SUMMARY', 'OBJECTIVE',
-      'PROFESSIONAL EXPERIENCE', 'WORK EXPERIENCE', 'EXPERIENCE',
-      'TECHNICAL SKILLS', 'SKILLS', 'CORE COMPETENCIES',
-      'EDUCATION', 'ACADEMIC BACKGROUND',
-      'PROJECTS', 'KEY PROJECTS',
-      'CERTIFICATIONS', 'CERTIFICATES',
-      'ACHIEVEMENTS', 'ACCOMPLISHMENTS',
-      'LANGUAGES'
+      'PROFESSIONAL SUMMARY', 'SUMMARY', 'OBJECTIVE', 'PROFILE',
+      'PROFESSIONAL EXPERIENCE', 'WORK EXPERIENCE', 'EXPERIENCE', 'EMPLOYMENT',
+      'TECHNICAL SKILLS', 'SKILLS', 'CORE COMPETENCIES', 'COMPETENCIES',
+      'EDUCATION', 'ACADEMIC BACKGROUND', 'QUALIFICATIONS',
+      'PROJECTS', 'KEY PROJECTS', 'NOTABLE PROJECTS',
+      'CERTIFICATIONS', 'CERTIFICATES', 'CREDENTIALS',
+      'ACHIEVEMENTS', 'ACCOMPLISHMENTS', 'AWARDS',
+      'LANGUAGES', 'LANGUAGE SKILLS'
     ];
 
-    return sectionKeywords.some(keyword => line.includes(keyword)) && line.length < 50;
+    return sectionKeywords.some(keyword => line.includes(keyword)) && line.length < 60;
   }
 
   private getSectionType(line: string): ResumeSection['type'] {
-    if (line.includes('SUMMARY') || line.includes('OBJECTIVE')) return 'summary';
-    if (line.includes('EXPERIENCE')) return 'experience';
+    if (line.includes('SUMMARY') || line.includes('OBJECTIVE') || line.includes('PROFILE')) return 'summary';
+    if (line.includes('EXPERIENCE') || line.includes('EMPLOYMENT')) return 'experience';
     if (line.includes('SKILLS') || line.includes('COMPETENCIES')) return 'skills';
-    if (line.includes('EDUCATION')) return 'education';
+    if (line.includes('EDUCATION') || line.includes('ACADEMIC')) return 'education';
     if (line.includes('PROJECTS')) return 'projects';
-    if (line.includes('CERTIFICATIONS') || line.includes('CERTIFICATES')) return 'certifications';
-    if (line.includes('ACHIEVEMENTS') || line.includes('ACCOMPLISHMENTS')) return 'achievements';
-    if (line.includes('LANGUAGES')) return 'languages';
+    if (line.includes('CERTIFICATIONS') || line.includes('CERTIFICATES') || line.includes('CREDENTIALS')) return 'certifications';
+    if (line.includes('ACHIEVEMENTS') || line.includes('ACCOMPLISHMENTS') || line.includes('AWARDS')) return 'achievements';
+    if (line.includes('LANGUAGES') || line.includes('LANGUAGE')) return 'languages';
     return 'summary';
   }
 
   private renderHeader(section: ResumeSection): void {
+    console.log('Rendering header with content:', section.content);
     const lines = section.content.split('\n').filter(line => line.trim());
     
     // Name (first line, larger font)
@@ -205,13 +344,27 @@ class EnhancedResumePDFGenerator {
       this.currentY += 24;
     }
 
-    // Contact information (remaining lines, smaller font)
-    const contactInfo = lines.slice(1).join(' | ');
-    if (contactInfo) {
+    // Process all remaining lines as contact information
+    const contactLines = lines.slice(1);
+    console.log('Contact lines to process:', contactLines);
+    
+    // Group contact info logically
+    const contactInfo = [];
+    contactLines.forEach(line => {
+      // Split line by common separators
+      const parts = line.split(/\s*\|\s*|\s*•\s*|\s{3,}/).filter(p => p.trim());
+      contactInfo.push(...parts);
+    });
+
+    // Display contact info in a clean format
+    if (contactInfo.length > 0) {
       this.pdf.setFontSize(10);
       this.pdf.setFont('helvetica', 'normal');
       this.pdf.setTextColor('#4b5563');
-      this.pdf.text(contactInfo, this.margin, this.currentY);
+      
+      // Join with separators for better readability
+      const formattedContact = contactInfo.join(' | ');
+      this.pdf.text(formattedContact, this.margin, this.currentY);
       this.currentY += 16;
     }
 
@@ -219,31 +372,50 @@ class EnhancedResumePDFGenerator {
   }
 
   private renderExperience(section: ResumeSection): void {
+    console.log('Rendering experience section with items:', section.items);
     this.addSection('Professional Experience');
     
-    const experiences = this.parseExperienceItems(section.content);
-    
-    experiences.forEach((exp, index) => {
-      this.checkPageBreak(60); // Ensure space for experience block
-      
-      // Job title and company
-      this.addText(`${exp.position} - ${exp.company}`, 11, 'bold', '#1f2937');
-      
-      // Dates and location
-      if (exp.dates || exp.location) {
-        const dateLocation = [exp.dates, exp.location].filter(Boolean).join(' | ');
-        this.addText(dateLocation, 9, 'normal', '#6b7280');
+    if (!section.items || section.items.length === 0) {
+      console.log('No experience items found, using content directly');
+      if (section.content) {
+        this.addText(section.content, 10, 'normal', '#374151');
       }
-      
-      this.currentY += 4;
-      
-      // Responsibilities
-      exp.responsibilities.forEach(resp => {
-        this.addText(`• ${resp}`, 10, 'normal', '#374151', 15);
-      });
-      
-      if (index < experiences.length - 1) {
-        this.currentY += 12; // Space between experiences
+      return;
+    }
+    
+    section.items.forEach((itemStr, index) => {
+      try {
+        const exp = JSON.parse(itemStr);
+        console.log('Rendering experience item:', exp);
+        
+        this.checkPageBreak(80); // Ensure space for experience block
+        
+        // Job title and company
+        const titleLine = `${exp.position || 'Position'} - ${exp.company || 'Company'}`;
+        this.addText(titleLine, 11, 'bold', '#1f2937');
+        
+        // Dates and location
+        if (exp.dates || exp.location) {
+          const dateLocation = [exp.dates, exp.location].filter(Boolean).join(' | ');
+          this.addText(dateLocation, 9, 'normal', '#6b7280');
+        }
+        
+        this.currentY += 4;
+        
+        // Responsibilities
+        if (exp.responsibilities && exp.responsibilities.length > 0) {
+          exp.responsibilities.forEach((resp: string) => {
+            this.addText(`• ${resp}`, 10, 'normal', '#374151', 15);
+          });
+        }
+        
+        if (index < section.items.length - 1) {
+          this.currentY += 12; // Space between experiences
+        }
+      } catch (error) {
+        console.error('Error parsing experience item:', error);
+        // Fallback: treat as plain text
+        this.addText(`• ${itemStr}`, 10, 'normal', '#374151', 15);
       }
     });
   }
@@ -356,12 +528,19 @@ class EnhancedResumePDFGenerator {
 
   public generatePDF(content: string, filename: string): boolean {
     try {
-      console.log('Starting enhanced PDF generation...');
+      console.log('Starting enhanced PDF generation with improved parsing...');
       
       const sections = this.parseResumeContent(content);
-      console.log('Parsed sections:', sections.map(s => ({ type: s.type, title: s.title })));
+      console.log('Final parsed sections:', sections.map(s => ({ 
+        type: s.type, 
+        title: s.title, 
+        hasContent: !!s.content, 
+        itemsCount: s.items?.length || 0 
+      })));
 
       sections.forEach((section) => {
+        console.log(`Rendering section: ${section.type}`);
+        
         switch (section.type) {
           case 'header':
             this.renderHeader(section);
@@ -394,6 +573,48 @@ class EnhancedResumePDFGenerator {
     } catch (error) {
       console.error('Error in enhanced PDF generation:', error);
       return false;
+    }
+  }
+
+  private renderSkills(section: ResumeSection): void {
+    this.addSection('Technical Skills');
+    
+    let skillsText = section.content;
+    if (section.items && section.items.length > 0) {
+      skillsText = section.items.join(', ');
+    }
+    
+    this.addText(skillsText, 10, 'normal', '#374151');
+  }
+
+  private renderEducation(section: ResumeSection): void {
+    this.addSection('Education');
+    
+    if (section.items && section.items.length > 0) {
+      section.items.forEach(item => {
+        this.addText(item, 10, 'normal', '#374151');
+        this.currentY += 4;
+      });
+    } else {
+      this.addText(section.content, 10, 'normal', '#374151');
+    }
+  }
+
+  private renderGenericSection(section: ResumeSection): void {
+    if (!section.title) return;
+    
+    this.addSection(section.title.replace(/^[A-Z\s]+$/, (match) => 
+      match.split(' ').map(word => 
+        word.charAt(0) + word.slice(1).toLowerCase()
+      ).join(' ')
+    ));
+    
+    if (section.items && section.items.length > 0) {
+      section.items.forEach(item => {
+        this.addText(`• ${item}`, 10, 'normal', '#374151', 0);
+      });
+    } else if (section.content) {
+      this.addText(section.content, 10, 'normal', '#374151');
     }
   }
 }
