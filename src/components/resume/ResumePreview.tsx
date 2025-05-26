@@ -19,7 +19,7 @@ export const ResumePreview = ({ resume, className = '' }: ResumePreviewProps) =>
   const handleDownloadPDF = async () => {
     toast({
       title: "Generating PDF",
-      description: "Creating your ATS-optimized resume PDF with selectable text...",
+      description: "Creating your ATS-optimized resume PDF with all sections properly formatted...",
     });
 
     try {
@@ -30,7 +30,7 @@ export const ResumePreview = ({ resume, className = '' }: ResumePreviewProps) =>
 
       toast({
         title: "Resume Downloaded",
-        description: "Your ATS-optimized resume has been downloaded successfully! The PDF contains selectable text.",
+        description: "Your ATS-optimized resume has been downloaded successfully! The PDF contains selectable text and all sections.",
       });
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -66,11 +66,12 @@ export const ResumePreview = ({ resume, className = '' }: ResumePreviewProps) =>
       <div className="text-sm text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
         <p className="font-medium mb-1">ATS-Optimized Features:</p>
         <ul className="list-disc list-inside space-y-1 text-xs">
-          <li>Clean, single-page layout optimized for Applicant Tracking Systems</li>
-          <li>Professional formatting with clear section headers</li>
+          <li>Clean, multi-page layout optimized for Applicant Tracking Systems</li>
+          <li>Professional formatting with clear section headers and proper spacing</li>
           <li>Selectable text content for easy copying and ATS parsing</li>
           <li>Keyword-optimized content based on job requirements</li>
           <li>Consistent typography and spacing for better readability</li>
+          <li>All sections properly formatted and included in the PDF</li>
         </ul>
       </div>
     </div>

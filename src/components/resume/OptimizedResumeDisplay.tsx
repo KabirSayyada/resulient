@@ -1,4 +1,3 @@
-
 import { useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,6 @@ import { ReportHeader } from "./components/ReportHeader";
 import { OptimizedResumeContent } from "./components/OptimizedResumeContent";
 import { DownloadReportButton } from "./components/DownloadReportButton";
 import { generatePDFFromElement } from "@/utils/reportGenerationUtils";
-import { parseResumeContent } from "@/utils/resumeParser";
 import { 
   formatResumeContent, 
   calculateKeywordScore, 
@@ -20,7 +18,7 @@ import {
   calculateATSScore,
   generateSuggestions 
 } from "@/utils/resumeFormatters";
-import { generateDirectResumePDF } from "@/utils/resumePdfGenerator";
+import { generateResumePDFFromContent } from "@/utils/resumePdfGenerator";
 import { useToast } from "@/hooks/use-toast";
 
 interface OptimizedResumeDisplayProps {
@@ -64,19 +62,20 @@ export const OptimizedResumeDisplay = ({
         description: "Creating your ATS-optimized resume PDF with selectable text...",
       });
 
-      // Parse the resume content
-      const parsedResume = parseResumeContent(formattedResumeContent);
-      
-      // Generate PDF directly
-      generateDirectResumePDF(
-        parsedResume,
+      // Use the formatted resume content directly
+      const success = generateResumePDFFromContent(
+        formattedResumeContent,
         `optimized-resume-${new Date().toISOString().split('T')[0]}.pdf`
       );
       
-      toast({
-        title: "Resume Downloaded",
-        description: "Your ATS-optimized resume has been downloaded successfully! The PDF contains selectable text.",
-      });
+      if (success) {
+        toast({
+          title: "Resume Downloaded",
+          description: "Your ATS-optimized resume has been downloaded successfully! The PDF contains selectable text and all sections.",
+        });
+      } else {
+        throw new Error('PDF generation failed');
+      }
       
     } catch (error) {
       console.error('Error generating optimized resume PDF:', error);
@@ -146,7 +145,7 @@ export const OptimizedResumeDisplay = ({
                       Download Optimized Resume
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Get your AI-optimized resume as a clean, ATS-friendly PDF with selectable text
+                      Get your AI-optimized resume as a clean, ATS-friendly PDF with selectable text and all sections properly formatted
                     </p>
                   </div>
                   <Button 
