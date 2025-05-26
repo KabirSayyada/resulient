@@ -10,6 +10,8 @@ import { ReportHeader } from "./components/ReportHeader";
 import { OptimizedResumeContent } from "./components/OptimizedResumeContent";
 import { DownloadReportButton } from "./components/DownloadReportButton";
 import { generatePDFFromElement } from "@/utils/reportGenerationUtils";
+import { ResumePreview } from "./ResumePreview";
+import { parseResumeContent } from "@/utils/resumeParser";
 import { 
   formatResumeContent, 
   calculateKeywordScore, 
@@ -60,6 +62,9 @@ export const OptimizedResumeDisplay = ({
   const overallScore = Math.round((keywordScore + structureScore + atsScore) / 3);
   const suggestions = generateSuggestions(keywordScore, structureScore, atsScore, formattedResumeContent, jobDescription || "");
   
+  // Parse the optimized resume for PDF template
+  const parsedResume = parseResumeContent(formattedResumeContent);
+  
   const currentDate = new Date();
   const formattedDate = currentDate.toLocaleDateString();
   const formattedTime = currentDate.toLocaleTimeString();
@@ -100,6 +105,11 @@ export const OptimizedResumeDisplay = ({
               )}
 
               <OptimizedResumeContent content={formattedResumeContent} />
+              
+              {/* ATS-Optimized Resume Preview and Download */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-green-200 dark:border-green-700">
+                <ResumePreview resume={parsedResume} />
+              </div>
             </div>
             
             <DownloadReportButton
