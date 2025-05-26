@@ -1,7 +1,8 @@
+
 import { useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileDown, Loader2 } from "lucide-react";
+import { FileDown, FileText } from "lucide-react";
 import { QualificationGap } from "@/types/resume";
 import { QualificationWarnings } from "./components/QualificationWarnings";
 import { ImprovementSuggestions } from "./components/ImprovementSuggestions";
@@ -18,7 +19,6 @@ import {
   calculateATSScore,
   generateSuggestions 
 } from "@/utils/resumeFormatters";
-import { generateEnhancedResumePDF } from "@/utils/enhancedResumePdfGenerator";
 import { useToast } from "@/hooks/use-toast";
 
 interface OptimizedResumeDisplayProps {
@@ -39,8 +39,7 @@ export const OptimizedResumeDisplay = ({
   const optimizationReportRef = useRef<HTMLDivElement>(null);
   const pdfExportRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [pdfProgress, setPdfProgress] = useState<string>("");
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleOptimizationReportDownload = async () => {
     // First prepare a clean version for PDF export
@@ -57,52 +56,68 @@ export const OptimizedResumeDisplay = ({
     );
   };
 
-  const handleOptimizedResumeDownload = async () => {
+  const handleOptimizedResumeDownload = () => {
     try {
-      setIsGeneratingPDF(true);
-      setPdfProgress("Initializing PDF generation...");
+      setIsDownloading(true);
       
       toast({
-        title: "Generating Your Resume",
-        description: "Please wait while we create your professional ATS-optimized resume PDF...",
+        title: "Preparing Your Resume",
+        description: "Generating your ATS-optimized resume in text format...",
       });
 
-      // Step 1: Parse and structure the content
-      setPdfProgress("Parsing resume content...");
-      await new Promise(resolve => setTimeout(resolve, 500)); // Show progress
-
-      // Step 2: Format sections
-      setPdfProgress("Formatting sections and layout...");
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Step 3: Generate PDF
-      setPdfProgress("Generating PDF document...");
-      const success = await generateEnhancedResumePDF(
-        formattedResumeContent,
-        `optimized-resume-${new Date().toISOString().split('T')[0]}.pdf`
-      );
+      // Format the resume content for text download
+      const formattedContent = formatResumeForTextDownload(formattedResumeContent);
       
-      if (success) {
-        setPdfProgress("Download complete!");
-        toast({
-          title: "Resume Downloaded Successfully!",
-          description: "Your ATS-optimized resume has been downloaded with all sections properly formatted.",
-        });
-      } else {
-        throw new Error('PDF generation failed');
-      }
+      // Create and download the text file
+      const blob = new Blob([formattedContent], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `optimized-resume-${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Resume Downloaded Successfully!",
+        description: "Your ATS-optimized resume has been downloaded as a text file with proper formatting.",
+      });
       
     } catch (error) {
-      console.error('Error generating optimized resume PDF:', error);
+      console.error('Error downloading optimized resume:', error);
       toast({
         title: "Download Failed",
-        description: "There was an error generating your resume PDF. Please try again.",
+        description: "There was an error generating your resume file. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsGeneratingPDF(false);
-      setPdfProgress("");
+      setIsDownloading(false);
     }
+  };
+
+  const formatResumeForTextDownload = (content: string): string => {
+    // Clean up and format the content for better text presentation
+    let formatted = content
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+      .replace(/\n{3,}/g, '\n\n');
+
+    // Add proper spacing and formatting for text file
+    const sections = formatted.split(/\n\n+/);
+    const formattedSections = sections.map(section => {
+      const lines = section.split('\n');
+      if (lines.length === 0) return '';
+      
+      // Check if this looks like a section header (all caps, short)
+      if (lines[0] && lines[0] === lines[0].toUpperCase() && lines[0].length < 50 && !lines[0].startsWith('•')) {
+        return lines[0] + '\n' + '='.repeat(lines[0].length) + '\n' + lines.slice(1).join('\n');
+      }
+      
+      return section;
+    });
+
+    return formattedSections.join('\n\n').trim();
   };
 
   if (!optimizedResume) return null;
@@ -163,56 +178,37 @@ export const OptimizedResumeDisplay = ({
                       Download Professional Resume
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Get your AI-optimized resume as a clean, professional PDF with all sections properly formatted for ATS systems
+                      Get your AI-optimized resume as a clean, properly formatted text file that's perfect for ATS systems and easy to customize
                     </p>
                   </div>
                   
-                  {/* Progress Indicator */}
-                  {isGeneratingPDF && (
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-600">
-                      <div className="flex items-center space-x-3">
-                        <Loader2 className="h-5 w-5 animate-spin text-purple-600" />
-                        <div className="flex-1">
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            Creating your resume...
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            {pdfProgress}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-purple-600 h-2 rounded-full animate-pulse" style={{width: '60%'}}></div>
-                      </div>
-                    </div>
-                  )}
-                  
                   <Button 
                     onClick={handleOptimizedResumeDownload}
-                    disabled={isGeneratingPDF}
+                    disabled={isDownloading}
                     className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                     size="lg"
                   >
-                    {isGeneratingPDF ? (
+                    {isDownloading ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Generating PDF...
+                        <FileText className="h-4 w-4 mr-2 animate-pulse" />
+                        Preparing Download...
                       </>
                     ) : (
                       <>
                         <FileDown className="h-4 w-4 mr-2" />
-                        Download Resume PDF
+                        Download Resume (.txt)
                       </>
                     )}
                   </Button>
                   
                   <div className="text-xs text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
-                    <p className="font-medium mb-1">✨ Premium Features:</p>
+                    <p className="font-medium mb-1">✨ Text Format Benefits:</p>
                     <ul className="space-y-1">
-                      <li>• Professional multi-page layout with proper spacing</li>
-                      <li>• All sections included and properly formatted</li>
-                      <li>• ATS-friendly structure with selectable text</li>
-                      <li>• Clean typography optimized for recruiters</li>
+                      <li>• Perfect for ATS systems - 100% readable and parseable</li>
+                      <li>• Easy to edit and customize in any text editor</li>
+                      <li>• Clean section headers with proper formatting</li>
+                      <li>• Copy-paste friendly for job applications</li>
+                      <li>• Small file size and universal compatibility</li>
                     </ul>
                   </div>
                 </div>
