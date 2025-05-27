@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { ParsedResume } from '@/types/resumeStructure';
 
@@ -120,21 +119,33 @@ class ResumePDFGenerator {
   }
 
   private addContactInfo(contact: any): void {
-    // Name
+    // Name - centered and larger
     if (contact.name) {
-      this.addText(contact.name, this.settings.fontSize.name, 'bold', this.settings.colors.primary);
+      const nameX = this.settings.pageWidth / 2;
+      this.pdf.setFontSize(this.settings.fontSize.name);
+      this.pdf.setFont('helvetica', 'bold');
+      this.pdf.setTextColor(this.settings.colors.primary);
+      this.pdf.text(contact.name, nameX, this.currentY, { align: 'center' });
+      this.currentY += this.settings.fontSize.name * this.settings.lineHeight.normal;
       this.addSpace(4);
     }
 
-    // Contact details in a compact format
+    // Contact details - all in gray and on one line
     const contactDetails = [];
     if (contact.email) contactDetails.push(contact.email);
     if (contact.phone) contactDetails.push(contact.phone);
     if (contact.linkedin) contactDetails.push(contact.linkedin);
+    if (contact.website) contactDetails.push(contact.website);
     if (contact.address) contactDetails.push(contact.address);
 
     if (contactDetails.length > 0) {
-      this.addText(contactDetails.join(' | '), this.settings.fontSize.small, 'normal', this.settings.colors.secondary);
+      this.pdf.setFontSize(this.settings.fontSize.small);
+      this.pdf.setFont('helvetica', 'normal');
+      this.pdf.setTextColor(this.settings.colors.secondary); // Gray color for all contact info
+      
+      const contactLine = contactDetails.join(' | ');
+      this.pdf.text(contactLine, this.settings.margin, this.currentY);
+      this.currentY += this.settings.fontSize.small * this.settings.lineHeight.normal;
       this.addSpace(8);
     }
   }
@@ -322,7 +333,8 @@ export function parseOptimizedResumeContent(content: string): ParsedResume {
       email: '',
       phone: '',
       linkedin: '',
-      address: ''
+      address: '',
+      website: ''
     },
     professionalSummary: '',
     workExperience: [],
