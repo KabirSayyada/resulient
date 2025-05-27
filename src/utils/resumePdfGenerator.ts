@@ -124,7 +124,7 @@ class ResumePDFGenerator {
   }
 
   private addContactInfo(contact: any): void {
-    // Name - centered
+    // Name - centered with larger font
     if (contact.name) {
       this.addText(contact.name, this.settings.fontSize.name, 'bold', this.settings.colors.primary, 0, undefined, true);
       this.addSpace(4);
