@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { ParsedResume } from '@/types/resumeStructure';
 
@@ -76,7 +75,8 @@ class ResumePDFGenerator {
     fontStyle: 'normal' | 'bold' = 'normal',
     color: string = this.settings.colors.text,
     indent: number = 0,
-    maxWidth?: number
+    maxWidth?: number,
+    centerAlign: boolean = false
   ): void {
     if (!text || text.trim() === '') return;
 
@@ -92,7 +92,14 @@ class ResumePDFGenerator {
     this.checkPageBreak(lines.length * lineHeight);
 
     for (const line of lines) {
-      this.pdf.text(line, this.settings.margin + indent, this.currentY);
+      let xPosition = this.settings.margin + indent;
+      
+      if (centerAlign) {
+        const textWidth = this.pdf.getTextWidth(line);
+        xPosition = (this.settings.pageWidth - textWidth) / 2;
+      }
+      
+      this.pdf.text(line, xPosition, this.currentY);
       this.currentY += lineHeight;
     }
   }
@@ -120,13 +127,13 @@ class ResumePDFGenerator {
   }
 
   private addContactInfo(contact: any): void {
-    // Name
+    // Name - center aligned
     if (contact.name) {
-      this.addText(contact.name, this.settings.fontSize.name, 'bold', this.settings.colors.primary);
+      this.addText(contact.name, this.settings.fontSize.name, 'bold', this.settings.colors.primary, 0, undefined, true);
       this.addSpace(4);
     }
 
-    // Contact details in a compact format
+    // Contact details in a compact format - left aligned
     const contactDetails = [];
     if (contact.email) contactDetails.push(contact.email);
     if (contact.phone) contactDetails.push(contact.phone);
