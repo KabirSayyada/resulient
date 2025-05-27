@@ -85,6 +85,10 @@ export async function generateTextFormattedPDF(
         const indent = 15;
         const bulletText = line.startsWith('•') ? line : `• ${line.substring(1).trim()}`;
         
+        // Set bullet points to black color instead of gray
+        pdf.setFontSize(fontSize);
+        pdf.setTextColor('#000000');
+        
         const wrappedLines = pdf.splitTextToSize(bulletText, contentWidth - indent);
         for (const wrappedLine of wrappedLines) {
           pdf.text(wrappedLine, margin + indent, currentY);
