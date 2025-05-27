@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import { ParsedResume } from '@/types/resumeStructure';
 
@@ -119,14 +120,14 @@ class ResumePDFGenerator {
   }
 
   private addContactInfo(contact: any): void {
-    // Name - centered and larger
+    // Name - centered and larger (same size as section headers)
     if (contact.name) {
       const nameX = this.settings.pageWidth / 2;
-      this.pdf.setFontSize(this.settings.fontSize.name);
+      this.pdf.setFontSize(this.settings.fontSize.header); // Changed from fontSize.name to fontSize.header
       this.pdf.setFont('helvetica', 'bold');
       this.pdf.setTextColor(this.settings.colors.primary);
       this.pdf.text(contact.name, nameX, this.currentY, { align: 'center' });
-      this.currentY += this.settings.fontSize.name * this.settings.lineHeight.normal;
+      this.currentY += this.settings.fontSize.header * this.settings.lineHeight.normal; // Updated line height calculation
       this.addSpace(4);
     }
 
