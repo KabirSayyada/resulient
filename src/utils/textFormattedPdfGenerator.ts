@@ -104,12 +104,26 @@ export async function generateTextFormattedPDF(
         if (line.includes('@') || line.includes('|') || line.match(/\d{4}/)) {
           pdf.setFontSize(9);
           pdf.setTextColor('#666666');
+          // Center align contact information
+          const textWidth = pdf.getTextWidth(wrappedLine);
+          const xPosition = (pageWidth - textWidth) / 2;
+          pdf.text(wrappedLine, xPosition, currentY);
+        } else if (i === 0) {
+          // This is likely the name (first line) - make it bigger and center it
+          pdf.setFontSize(14);
+          pdf.setTextColor('#000000');
+          pdf.setFont('helvetica', 'bold');
+          const textWidth = pdf.getTextWidth(wrappedLine);
+          const xPosition = (pageWidth - textWidth) / 2;
+          pdf.text(wrappedLine, xPosition, currentY);
+          // Reset font after name
+          pdf.setFont('helvetica', 'normal');
         } else {
           pdf.setFontSize(fontSize);
           pdf.setTextColor('#000000');
+          pdf.text(wrappedLine, margin, currentY);
         }
         
-        pdf.text(wrappedLine, margin, currentY);
         currentY += lineHeight;
       }
 
