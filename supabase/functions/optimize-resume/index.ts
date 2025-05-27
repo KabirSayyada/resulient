@@ -62,13 +62,13 @@ serve(async (req) => {
        - Ensure all content is ATS-friendly (no special characters, tables, or complex formatting)
     
     4. Structure example:
-    ```
-    [Name]
-    [Contact Information: Email | Phone | LinkedIn | Location]
+    \`\`\`
+    \\[Name\\]
+    \\[Contact Information: Email | Phone | LinkedIn | Location\\]
     
     PROFESSIONAL SUMMARY
     =====================================
-    [2-3 lines summarizing key qualifications and value proposition]
+    \\[2-3 lines summarizing key qualifications and value proposition\\]
     
     PROFESSIONAL EXPERIENCE
     =========================================
@@ -80,16 +80,16 @@ serve(async (req) => {
     
     TECHNICAL SKILLS
     ==============================
-    • Programming Languages: [list]
-    • Frameworks & Tools: [list]
-    • Databases: [list]
+    • Programming Languages: \\[list\\]
+    • Frameworks & Tools: \\[list\\]
+    • Databases: \\[list\\]
     
     EDUCATION
     ===================
     Degree - Institution Name
     Graduation Date | Location
     • Relevant coursework or achievements if applicable
-    ```
+    \`\`\`
     
     After optimizing the resume content, identify any missing but important qualifications from the job description
     that might be sensitive or require verification (certifications, specific experiences, etc.).
