@@ -100,17 +100,9 @@ export async function generateTextFormattedPDF(
       // Handle regular text
       const wrappedLines = pdf.splitTextToSize(line, contentWidth);
       for (const wrappedLine of wrappedLines) {
-        // Check for contact info or dates (smaller, gray text)
-        if (line.includes('@') || line.includes('|') || line.match(/\d{4}/)) {
-          pdf.setFontSize(9);
-          pdf.setTextColor('#666666');
-          // Center align contact information
-          const textWidth = pdf.getTextWidth(wrappedLine);
-          const xPosition = (pageWidth - textWidth) / 2;
-          pdf.text(wrappedLine, xPosition, currentY);
-        } else if (i === 0) {
-          // This is likely the name (first line) - make it bigger and center it
-          pdf.setFontSize(14);
+        if (i === 0) {
+          // This is the name (first line) - make it bigger, bold and center it
+          pdf.setFontSize(16);
           pdf.setTextColor('#000000');
           pdf.setFont('helvetica', 'bold');
           const textWidth = pdf.getTextWidth(wrappedLine);
@@ -118,7 +110,15 @@ export async function generateTextFormattedPDF(
           pdf.text(wrappedLine, xPosition, currentY);
           // Reset font after name
           pdf.setFont('helvetica', 'normal');
+        } else if (line.includes('@') || line.includes('|') || line.match(/\d{4}/)) {
+          // Contact information - center align and make gray
+          pdf.setFontSize(9);
+          pdf.setTextColor('#666666');
+          const textWidth = pdf.getTextWidth(wrappedLine);
+          const xPosition = (pageWidth - textWidth) / 2;
+          pdf.text(wrappedLine, xPosition, currentY);
         } else {
+          // All other content - left align
           pdf.setFontSize(fontSize);
           pdf.setTextColor('#000000');
           pdf.text(wrappedLine, margin, currentY);
