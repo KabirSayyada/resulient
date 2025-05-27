@@ -110,8 +110,8 @@ export async function generateTextFormattedPDF(
           pdf.text(wrappedLine, xPosition, currentY);
           // Reset font after name
           pdf.setFont('helvetica', 'normal');
-        } else if (line.includes('@') || line.includes('|') || line.match(/\d{4}/)) {
-          // Contact information - center align and make gray
+        } else if (i < 5 && (line.includes('@') || line.includes('|'))) {
+          // Contact information (only in header area) - center align and make gray
           pdf.setFontSize(9);
           pdf.setTextColor('#666666');
           const textWidth = pdf.getTextWidth(wrappedLine);
