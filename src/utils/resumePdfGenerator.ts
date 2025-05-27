@@ -76,8 +76,7 @@ class ResumePDFGenerator {
     fontStyle: 'normal' | 'bold' = 'normal',
     color: string = this.settings.colors.text,
     indent: number = 0,
-    maxWidth?: number,
-    centerAlign: boolean = false
+    maxWidth?: number
   ): void {
     if (!text || text.trim() === '') return;
 
@@ -93,14 +92,7 @@ class ResumePDFGenerator {
     this.checkPageBreak(lines.length * lineHeight);
 
     for (const line of lines) {
-      let xPosition = this.settings.margin + indent;
-      
-      if (centerAlign) {
-        const textWidth = this.pdf.getTextWidth(line);
-        xPosition = (this.settings.pageWidth - textWidth) / 2;
-      }
-      
-      this.pdf.text(line, xPosition, this.currentY);
+      this.pdf.text(line, this.settings.margin + indent, this.currentY);
       this.currentY += lineHeight;
     }
   }
@@ -128,13 +120,13 @@ class ResumePDFGenerator {
   }
 
   private addContactInfo(contact: any): void {
-    // Name - centered
+    // Name
     if (contact.name) {
-      this.addText(contact.name, this.settings.fontSize.name, 'bold', this.settings.colors.primary, 0, undefined, true);
+      this.addText(contact.name, this.settings.fontSize.name, 'bold', this.settings.colors.primary);
       this.addSpace(4);
     }
 
-    // Contact details in a compact format - centered
+    // Contact details in a compact format
     const contactDetails = [];
     if (contact.email) contactDetails.push(contact.email);
     if (contact.phone) contactDetails.push(contact.phone);
@@ -142,7 +134,7 @@ class ResumePDFGenerator {
     if (contact.address) contactDetails.push(contact.address);
 
     if (contactDetails.length > 0) {
-      this.addText(contactDetails.join(' | '), this.settings.fontSize.small, 'normal', this.settings.colors.secondary, 0, undefined, true);
+      this.addText(contactDetails.join(' | '), this.settings.fontSize.small, 'normal', this.settings.colors.secondary);
       this.addSpace(8);
     }
   }
@@ -170,14 +162,14 @@ class ResumePDFGenerator {
       
       this.addText(titleLine, this.settings.fontSize.subheader, 'bold');
 
-      // Dates and location - LEFT ALIGNED (not centered like contact info)
+      // Dates and location
       if (exp.startDate || exp.endDate || exp.location) {
         const dateLocation = [];
         if (exp.startDate) dateLocation.push(exp.startDate);
         if (exp.endDate) dateLocation.push(`- ${exp.endDate}`);
         if (exp.location) dateLocation.push(`| ${exp.location}`);
         
-        this.addText(dateLocation.join(' '), this.settings.fontSize.small, 'normal', this.settings.colors.secondary, 0, undefined, false);
+        this.addText(dateLocation.join(' '), this.settings.fontSize.small, 'normal', this.settings.colors.secondary);
       }
 
       // Responsibilities
@@ -222,8 +214,7 @@ class ResumePDFGenerator {
       if (edu.gpa) schoolLine.push(`GPA: ${edu.gpa}`);
       
       if (schoolLine.length > 0) {
-        // LEFT ALIGNED (not centered like contact info)
-        this.addText(schoolLine.join(' | '), this.settings.fontSize.body, 'normal', this.settings.colors.secondary, 0, undefined, false);
+        this.addText(schoolLine.join(' | '), this.settings.fontSize.body, 'normal', this.settings.colors.secondary);
       }
       
       this.addSpace(4);
@@ -243,8 +234,7 @@ class ResumePDFGenerator {
       }
       
       if (project.technologies && project.technologies.length > 0) {
-        // LEFT ALIGNED (not centered like contact info)
-        this.addText(`Technologies: ${project.technologies.join(', ')}`, this.settings.fontSize.small, 'normal', this.settings.colors.secondary, 0, undefined, false);
+        this.addText(`Technologies: ${project.technologies.join(', ')}`, this.settings.fontSize.small, 'normal', this.settings.colors.secondary);
       }
       
       this.addSpace(4);
