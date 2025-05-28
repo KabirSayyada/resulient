@@ -385,15 +385,23 @@ export function parseOptimizedResumeContent(content: string): ParsedResume {
       continue;
     }
 
-    // Extract contact info from header
+    // Extract contact info from header - ensure single line formatting
     if (i < 5 && !currentSection) {
-      if (line.includes('@')) {
+      if (line.includes('@') || line.includes('|')) {
+        // This line contains contact information
         const parts = line.split('|').map(p => p.trim());
         parts.forEach(part => {
-          if (part.includes('@')) resume.contact.email = part;
-          else if (part.match(/\d{3}-\d{3}-\d{4}|\(\d{3}\)\s*\d{3}-\d{4}/)) resume.contact.phone = part;
-          else if (part.includes('linkedin')) resume.contact.linkedin = part;
-          else if (!resume.contact.name) resume.contact.name = part;
+          if (part.includes('@')) {
+            resume.contact.email = part;
+          } else if (part.match(/\d{3}-\d{3}-\d{4}|\(\d{3}\)\s*\d{3}-\d{4}|^\+?\d[\d\s\-\(\)]+$/)) {
+            resume.contact.phone = part;
+          } else if (part.toLowerCase().includes('linkedin') || part.includes('linkedin.com')) {
+            resume.contact.linkedin = part;
+          } else if (part.includes('http') || part.includes('www.') || part.includes('.com')) {
+            resume.contact.website = part;
+          } else if (part.includes(',') && (part.toLowerCase().includes('street') || part.toLowerCase().includes('ave') || part.toLowerCase().includes('rd') || part.toLowerCase().includes('blvd'))) {
+            resume.contact.address = part;
+          }
         });
       } else if (!resume.contact.name && !line.includes('PROFESSIONAL') && !line.includes('SUMMARY')) {
         resume.contact.name = line;
