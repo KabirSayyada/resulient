@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for resume formatting and scoring
  */
@@ -39,10 +38,11 @@ export const formatResumeContent = (resumeContent: string | any): string => {
 const ensureContactInfoOnOneLine = (resumeText: string): string => {
   const lines = resumeText.split('\n');
   let nameLineIndex = -1;
+  let contactLines: string[] = [];
   let contactStartIndex = -1;
   let contactEndIndex = -1;
   
-  // Find the name and contact information lines (usually in the first 5 lines)
+  // Find the name and contact information lines (usually in the first 8 lines)
   for (let i = 0; i < Math.min(lines.length, 8); i++) {
     const line = lines[i].trim();
     
@@ -52,37 +52,58 @@ const ensureContactInfoOnOneLine = (resumeText: string): string => {
     }
     
     // Find name line (first non-empty line that doesn't contain contact info)
-    if (nameLineIndex === -1 && !line.includes('@') && !line.includes('|') && !line.match(/\d{3}-\d{3}-\d{4}/)) {
+    if (nameLineIndex === -1 && !line.includes('@') && !line.includes('|') && !line.match(/\d{3}[-\s]?\d{3}[-\s]?\d{4}/)) {
       nameLineIndex = i;
       continue;
     }
     
-    // Find contact information lines (contain email, phone, or already have pipe separators)
-    if (line.includes('@') || line.includes('|') || line.match(/\d{3}-\d{3}-\d{4}/) || 
-        line.toLowerCase().includes('linkedin') || line.includes('http')) {
+    // Check if this line contains contact information
+    const hasEmail = line.includes('@');
+    const hasPhone = line.match(/\d{3}[-\s]?\d{3}[-\s]?\d{4}|\(\d{3}\)\s*\d{3}[-\s]?\d{4}/);
+    const hasLinkedIn = line.toLowerCase().includes('linkedin') || line.includes('linkedin.com');
+    const hasWebsite = line.includes('http') || line.includes('www.') || (line.includes('.com') && !line.includes('@'));
+    const hasPipeAlready = line.includes('|');
+    const hasAddress = line.includes(',') && (line.toLowerCase().includes('street') || line.toLowerCase().includes('ave') || line.toLowerCase().includes('rd') || line.toLowerCase().includes('blvd') || line.match(/\b[A-Z]{2}\s+\d{5}/));
+    
+    if (hasEmail || hasPhone || hasLinkedIn || hasWebsite || hasPipeAlready || hasAddress) {
       if (contactStartIndex === -1) {
         contactStartIndex = i;
       }
       contactEndIndex = i;
-    } else if (contactStartIndex !== -1) {
+      contactLines.push(line);
+    } else if (contactStartIndex !== -1 && contactLines.length > 0) {
       // Stop when we hit a line that's not contact info
       break;
     }
   }
   
-  // If we found contact information spread across multiple lines, combine them
-  if (contactStartIndex !== -1 && contactEndIndex > contactStartIndex) {
-    const contactLines = lines.slice(contactStartIndex, contactEndIndex + 1)
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
-    
-    // Check if contact info is already on one line with proper separators
+  // If we found contact information, process it
+  if (contactLines.length > 0) {
+    // Check if all contact info is already on one line with proper separators
     if (contactLines.length === 1 && contactLines[0].includes('|')) {
       return resumeText; // Already formatted correctly
     }
     
-    // Combine contact information into one line
-    const combinedContact = contactLines.join(' | ');
+    // Extract individual contact pieces from all contact lines
+    const contactPieces: string[] = [];
+    
+    contactLines.forEach(line => {
+      // If line already has pipes, split by pipes
+      if (line.includes('|')) {
+        const parts = line.split('|').map(p => p.trim()).filter(p => p.length > 0);
+        contactPieces.push(...parts);
+      } else {
+        // Otherwise, this whole line is one contact piece
+        contactPieces.push(line.trim());
+      }
+    });
+    
+    // Remove duplicates and filter out empty pieces
+    const uniqueContactPieces = contactPieces
+      .filter((piece, index, arr) => piece.length > 0 && arr.indexOf(piece) === index);
+    
+    // Combine all contact information into one line with pipe separators
+    const combinedContact = uniqueContactPieces.join(' | ');
     
     // Replace the original contact lines with the combined line
     const newLines = [
@@ -106,7 +127,7 @@ const convertStructuredResumeToText = (resume: any): string => {
     text += `${resume.contact.name}\n`;
   }
   
-  // Contact info - ensure it's on one line with pipe separators
+  // Contact info - ALWAYS ensure it's on one line with pipe separators
   const contactInfo = [
     resume.contact?.email,
     resume.contact?.phone,

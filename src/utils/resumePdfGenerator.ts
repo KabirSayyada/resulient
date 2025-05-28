@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { ParsedResume } from '@/types/resumeStructure';
 
@@ -120,18 +119,18 @@ class ResumePDFGenerator {
   }
 
   private addContactInfo(contact: any): void {
-    // Name - centered and larger (same size as section headers)
+    // Name - centered and using header font size
     if (contact.name) {
       const nameX = this.settings.pageWidth / 2;
-      this.pdf.setFontSize(this.settings.fontSize.header); // Changed from fontSize.name to fontSize.header
+      this.pdf.setFontSize(this.settings.fontSize.header);
       this.pdf.setFont('helvetica', 'bold');
       this.pdf.setTextColor(this.settings.colors.primary);
       this.pdf.text(contact.name, nameX, this.currentY, { align: 'center' });
-      this.currentY += this.settings.fontSize.header * this.settings.lineHeight.normal; // Updated line height calculation
+      this.currentY += this.settings.fontSize.header * this.settings.lineHeight.normal;
       this.addSpace(4);
     }
 
-    // Contact details - all in gray and on one line
+    // Contact details - ALWAYS ensure they're on one line with pipe separators
     const contactDetails = [];
     if (contact.email) contactDetails.push(contact.email);
     if (contact.phone) contactDetails.push(contact.phone);
@@ -142,8 +141,9 @@ class ResumePDFGenerator {
     if (contactDetails.length > 0) {
       this.pdf.setFontSize(this.settings.fontSize.small);
       this.pdf.setFont('helvetica', 'normal');
-      this.pdf.setTextColor(this.settings.colors.secondary); // Gray color for all contact info
+      this.pdf.setTextColor(this.settings.colors.secondary);
       
+      // Always combine all contact details into one line with pipe separators
       const contactLine = contactDetails.join(' | ');
       this.pdf.text(contactLine, this.settings.margin, this.currentY);
       this.currentY += this.settings.fontSize.small * this.settings.lineHeight.normal;
@@ -324,7 +324,7 @@ class ResumePDFGenerator {
   }
 }
 
-// Parse optimized resume content from string format
+// Parse optimized resume content from string format with improved contact parsing
 export function parseOptimizedResumeContent(content: string): ParsedResume {
   console.log('Parsing optimized resume content:', content);
   
@@ -385,21 +385,21 @@ export function parseOptimizedResumeContent(content: string): ParsedResume {
       continue;
     }
 
-    // Extract contact info from header - ensure single line formatting
+    // Extract contact info from header - improved to handle single-line format
     if (i < 5 && !currentSection) {
       if (line.includes('@') || line.includes('|')) {
-        // This line contains contact information
+        // This line contains contact information - parse it properly
         const parts = line.split('|').map(p => p.trim());
         parts.forEach(part => {
           if (part.includes('@')) {
             resume.contact.email = part;
-          } else if (part.match(/\d{3}-\d{3}-\d{4}|\(\d{3}\)\s*\d{3}-\d{4}|^\+?\d[\d\s\-\(\)]+$/)) {
+          } else if (part.match(/\d{3}[-\s]?\d{3}[-\s]?\d{4}|\(\d{3}\)\s*\d{3}[-\s]?\d{4}/)) {
             resume.contact.phone = part;
           } else if (part.toLowerCase().includes('linkedin') || part.includes('linkedin.com')) {
             resume.contact.linkedin = part;
-          } else if (part.includes('http') || part.includes('www.') || part.includes('.com')) {
+          } else if (part.includes('http') || part.includes('www.') || (part.includes('.com') && !part.includes('@'))) {
             resume.contact.website = part;
-          } else if (part.includes(',') && (part.toLowerCase().includes('street') || part.toLowerCase().includes('ave') || part.toLowerCase().includes('rd') || part.toLowerCase().includes('blvd'))) {
+          } else if (part.includes(',') || part.match(/\b[A-Z]{2}\s+\d{5}/)) {
             resume.contact.address = part;
           }
         });
