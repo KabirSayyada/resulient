@@ -18,6 +18,12 @@ export const AnalysisCards = ({
 }: AnalysisCardsProps) => {
   return (
     <div className="grid grid-cols-1 gap-4">
+      <div className="mb-3">
+        <p className="text-sm text-indigo-700 dark:text-indigo-300 font-medium">
+          Analysis for your optimized resume:
+        </p>
+      </div>
+      
       <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-2">
