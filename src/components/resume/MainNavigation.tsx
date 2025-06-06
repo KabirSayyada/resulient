@@ -15,6 +15,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ReferralStatusIndicator } from "@/components/referrals/ReferralStatusIndicator";
 
 export function MainNavigation() {
   const { user } = useAuth();
@@ -32,14 +33,17 @@ export function MainNavigation() {
         <div className="px-4">
           <div className="flex justify-between items-center">
             <Link to="/" className="font-bold text-xl text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text">Resulient</Link>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={toggleMenu}
-              className="p-1"
-            >
-              {menuOpen ? <X size={24} /> : <Menu size={24} />}
-            </Button>
+            <div className="flex items-center space-x-2">
+              {user && <ReferralStatusIndicator />}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleMenu}
+                className="p-1"
+              >
+                {menuOpen ? <X size={24} /> : <Menu size={24} />}
+              </Button>
+            </div>
           </div>
           
           {menuOpen && (
@@ -73,6 +77,15 @@ export function MainNavigation() {
                 >
                   Subscription
                 </Link>
+                {user && (
+                  <Link
+                    to="/referrals"
+                    className="py-2 hover:text-primary"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Referrals
+                  </Link>
+                )}
                 <Link
                   to="/blog"
                   className="py-2 font-medium text-primary hover:text-primary/90"
@@ -99,78 +112,96 @@ export function MainNavigation() {
           )}
         </div>
       ) : (
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  to="/"
-                  className={navigationMenuTriggerStyle()}
-                >
-                  Home
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  to="/resume-scoring"
-                  className={navigationMenuTriggerStyle()}
-                >
-                  Resume Score
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  to="/industry-leaderboard"
-                  className={navigationMenuTriggerStyle()}
-                >
-                  Leaderboard
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  to="/subscription"
-                  className={navigationMenuTriggerStyle()}
-                >
-                  Subscription
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  to="/blog"
-                  className={`${navigationMenuTriggerStyle()} font-medium text-primary hover:text-primary/90`}
-                >
-                  Blog
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            {user && (
+        <div className="flex items-center justify-between w-full">
+          <NavigationMenu>
+            <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuContent>
-                </NavigationMenuContent>
+                <NavigationMenuLink asChild>
+                  <Link
+                    to="/"
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    Home
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
+                    to="/resume-scoring"
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    Resume Score
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
+                    to="/industry-leaderboard"
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    Leaderboard
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
+                    to="/subscription"
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    Subscription
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              {user && (
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to="/referrals"
+                      className={navigationMenuTriggerStyle()}
+                    >
+                      Referrals
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              )}
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
+                    to="/blog"
+                    className={`${navigationMenuTriggerStyle()} font-medium text-primary hover:text-primary/90`}
+                  >
+                    Blog
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              {user && (
+                <NavigationMenuItem>
+                  <NavigationMenuContent>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              )}
+            </NavigationMenuList>
+          </NavigationMenu>
+          
+          <div className="flex items-center space-x-4">
+            {user && <ReferralStatusIndicator />}
+            {user ? (
+              <UserMenu />
+            ) : (
+              <NavigationMenuLink asChild>
+                <Link
+                  to="/auth"
+                  className={navigationMenuTriggerStyle()}
+                >
+                  Sign In
+                </Link>
+              </NavigationMenuLink>
             )}
-          </NavigationMenuList>
-          {user ? (
-            <UserMenu />
-          ) : (
-            <NavigationMenuLink asChild>
-              <Link
-                to="/auth"
-                className={navigationMenuTriggerStyle()}
-              >
-                Sign In
-              </Link>
-            </NavigationMenuLink>
-          )}
-        </NavigationMenu>
+          </div>
+        </div>
       )}
     </div>
   )

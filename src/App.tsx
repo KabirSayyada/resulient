@@ -17,6 +17,7 @@ import Legal from "@/pages/Legal";
 import Pricing from "@/pages/Pricing";
 import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
 import SubscriptionDetails from "@/pages/SubscriptionDetails";
+import ReferralProgram from "@/pages/ReferralProgram";
 // Blog imports
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
@@ -41,6 +42,7 @@ function App() {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/subscription-success" element={<SubscriptionSuccess />} />
         <Route path="/subscription" element={<SubscriptionDetails />} />
+        <Route path="/referrals" element={<ReferralProgram />} />
         {/* Blog routes */}
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
