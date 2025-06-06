@@ -85,8 +85,8 @@ export function useReferrals() {
         totalReferrals,
         successfulReferrals,
         pendingReferrals,
-        referrals: referrals || [],
-        rewards: rewards || [],
+        referrals: (referrals || []) as Referral[],
+        rewards: (rewards || []) as ReferralReward[],
         progressToNextReward,
       });
     } catch (error) {
