@@ -254,7 +254,6 @@ export type Database = {
           id: string
           job_title: string | null
           last_name: string | null
-          referral_code: string | null
           show_avatar_on_scorecard: boolean
           updated_at: string
           username: string | null
@@ -266,7 +265,6 @@ export type Database = {
           id: string
           job_title?: string | null
           last_name?: string | null
-          referral_code?: string | null
           show_avatar_on_scorecard?: boolean
           updated_at?: string
           username?: string | null
@@ -278,90 +276,9 @@ export type Database = {
           id?: string
           job_title?: string | null
           last_name?: string | null
-          referral_code?: string | null
           show_avatar_on_scorecard?: boolean
           updated_at?: string
           username?: string | null
-        }
-        Relationships: []
-      }
-      referral_rewards: {
-        Row: {
-          created_at: string
-          earned_at: string
-          expires_at: string | null
-          granted_at: string | null
-          id: string
-          referral_count: number
-          reward_type: string
-          status: string
-          subscription_id: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          earned_at?: string
-          expires_at?: string | null
-          granted_at?: string | null
-          id?: string
-          referral_count?: number
-          reward_type?: string
-          status?: string
-          subscription_id?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          earned_at?: string
-          expires_at?: string | null
-          granted_at?: string | null
-          id?: string
-          referral_count?: number
-          reward_type?: string
-          status?: string
-          subscription_id?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "referral_rewards_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: false
-            referencedRelation: "user_subscriptions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      referrals: {
-        Row: {
-          converted_at: string | null
-          created_at: string
-          id: string
-          referral_code: string
-          referred_user_id: string
-          referrer_user_id: string
-          status: string
-          subscription_purchase_id: string | null
-        }
-        Insert: {
-          converted_at?: string | null
-          created_at?: string
-          id?: string
-          referral_code: string
-          referred_user_id: string
-          referrer_user_id: string
-          status?: string
-          subscription_purchase_id?: string | null
-        }
-        Update: {
-          converted_at?: string | null
-          created_at?: string
-          id?: string
-          referral_code?: string
-          referred_user_id?: string
-          referrer_user_id?: string
-          status?: string
-          subscription_purchase_id?: string | null
         }
         Relationships: []
       }
@@ -604,10 +521,6 @@ export type Database = {
       }
     }
     Functions: {
-      check_referral_rewards: {
-        Args: { referrer_id: string }
-        Returns: undefined
-      }
       user_has_active_subscription: {
         Args: { user_uuid: string; tier?: string }
         Returns: boolean

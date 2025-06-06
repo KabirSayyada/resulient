@@ -26,14 +26,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
-      // Process referral when user signs up
-      if (event === 'SIGNED_IN' && session?.user) {
-        await processReferralOnSignup(session.user.id);
-      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -46,56 +41,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
-
-  const processReferralOnSignup = async (newUserId: string) => {
-    const pendingReferralCode = localStorage.getItem('pendingReferralCode');
-    
-    if (!pendingReferralCode) return;
-
-    try {
-      // Find the referrer by their referral code
-      const { data: referrerProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('referral_code', pendingReferralCode)
-        .single();
-
-      if (!referrerProfile) {
-        console.error('Referrer not found for code:', pendingReferralCode);
-        localStorage.removeItem('pendingReferralCode');
-        return;
-      }
-
-      // Prevent self-referral
-      if (referrerProfile.id === newUserId) {
-        console.error('Self-referral attempted');
-        localStorage.removeItem('pendingReferralCode');
-        return;
-      }
-
-      // Create referral record
-      const { error } = await supabase
-        .from('referrals')
-        .insert({
-          referrer_user_id: referrerProfile.id,
-          referred_user_id: newUserId,
-          referral_code: pendingReferralCode,
-          status: 'pending'
-        });
-
-      if (error) {
-        console.error('Error creating referral record:', error);
-      } else {
-        console.log('Referral recorded successfully');
-      }
-
-      // Clean up
-      localStorage.removeItem('pendingReferralCode');
-    } catch (error) {
-      console.error('Error processing referral:', error);
-      localStorage.removeItem('pendingReferralCode');
-    }
-  };
 
   const signOut = async () => {
     await supabase.auth.signOut();
