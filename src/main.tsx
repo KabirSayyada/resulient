@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
-import './style/blog-content.css' // Import blog styling
+import './style/blog-content.css'
 import { AuthProvider } from './hooks/useAuth.tsx'
 import { HelmetProvider } from 'react-helmet-async'
 
