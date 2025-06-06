@@ -2,6 +2,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
+import { useReferralTracking } from "@/hooks/useReferralTracking";
 
 type AuthContextValue = {
   session: Session | null;
@@ -24,11 +25,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { processReferralOnSignup } = useReferralTracking();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      // Process referral when user signs up
+      if (event === 'SIGNED_IN' && session?.user) {
+        await processReferralOnSignup(session.user.id);
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -40,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [processReferralOnSignup]);
 
   const signOut = async () => {
     await supabase.auth.signOut();

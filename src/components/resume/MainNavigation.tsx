@@ -1,177 +1,126 @@
-
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu"
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { UserMenu } from "@/components/auth/UserMenu";
-import { Link } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export function MainNavigation() {
-  const { user } = useAuth();
-  const isMobile = useIsMobile();
-  const [menuOpen, setMenuOpen] = useState(false);
+export const MainNavigation = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Toggle mobile menu
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  const navigationItems = [
+    { name: "Resume Scoring", path: "/resume-scoring" },
+    { name: "Leaderboard", path: "/leaderboard" },
+    { name: "Referrals", path: "/referrals" },
+    { name: "Blog", path: "/blog" },
+    { name: "Pricing", path: "/pricing" },
+  ];
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
   };
 
   return (
-    <div className="w-full relative py-4">
-      {isMobile ? (
-        <div className="px-4">
-          <div className="flex justify-between items-center">
-            <Link to="/" className="font-bold text-xl text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text">Resulient</Link>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={toggleMenu}
-              className="p-1"
+    <div className="bg-white border-b shadow-sm">
+      <div className="container flex items-center justify-between py-4">
+        <Link to="/" className="font-bold text-xl">
+          Resulient
+        </Link>
+
+        <div className="hidden md:flex items-center space-x-6">
+          {navigationItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.path}
+              className={`text-gray-600 hover:text-gray-900 transition-colors duration-200 ${
+                isActive(item.path) ? "font-semibold" : ""
+              }`}
             >
-              {menuOpen ? <X size={24} /> : <Menu size={24} />}
-            </Button>
-          </div>
-          
-          {menuOpen && (
-            <div className="absolute top-full left-0 right-0 bg-background z-50 shadow-lg py-2 px-4 border-b">
-              <nav className="flex flex-col space-y-2">
-                <Link
-                  to="/"
-                  className="py-2 hover:text-primary"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Home
-                </Link>
-                <Link
-                  to="/resume-scoring"
-                  className="py-2 hover:text-primary"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Resume Score
-                </Link>
-                <Link
-                  to="/industry-leaderboard"
-                  className="py-2 hover:text-primary"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Leaderboard
-                </Link>
-                <Link
-                  to="/subscription"
-                  className="py-2 hover:text-primary"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Subscription
-                </Link>
-                <Link
-                  to="/blog"
-                  className="py-2 font-medium text-primary hover:text-primary/90"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Blog
-                </Link>
-                {!user && (
-                  <Link
-                    to="/auth"
-                    className="py-2 hover:text-primary"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Sign In
-                  </Link>
-                )}
-              </nav>
-              {user && (
-                <div className="mt-4 pt-4 border-t">
-                  <UserMenu />
-                </div>
-              )}
+              {item.name}
+            </Link>
+          ))}
+
+          {user ? (
+            <div className="flex items-center space-x-4">
+              <Avatar className="w-8 h-8">
+                <AvatarImage src={user?.user_metadata?.avatar_url as string} />
+                <AvatarFallback>{user?.email?.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <Button variant="outline" size="sm" onClick={handleSignOut}>
+                Sign Out
+              </Button>
             </div>
+          ) : (
+            <Link to="/auth">
+              <Button>Sign In</Button>
+            </Link>
           )}
         </div>
-      ) : (
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
+
+        <Sheet>
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="ghost" className="p-2">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-full sm:w-64">
+            <SheetHeader>
+              <SheetTitle>Menu</SheetTitle>
+              <SheetDescription>
+                Navigate through the application.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="py-4">
+              {navigationItems.map((item) => (
                 <Link
-                  to="/"
-                  className={navigationMenuTriggerStyle()}
+                  key={item.name}
+                  to={item.path}
+                  className={`block py-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 ${
+                    isActive(item.path) ? "font-semibold" : ""
+                  }`}
                 >
-                  Home
+                  {item.name}
                 </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  to="/resume-scoring"
-                  className={navigationMenuTriggerStyle()}
-                >
-                  Resume Score
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  to="/industry-leaderboard"
-                  className={navigationMenuTriggerStyle()}
-                >
-                  Leaderboard
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  to="/subscription"
-                  className={navigationMenuTriggerStyle()}
-                >
-                  Subscription
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  to="/blog"
-                  className={`${navigationMenuTriggerStyle()} font-medium text-primary hover:text-primary/90`}
-                >
-                  Blog
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            {user && (
-              <NavigationMenuItem>
-                <NavigationMenuContent>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            )}
-          </NavigationMenuList>
-          {user ? (
-            <UserMenu />
-          ) : (
-            <NavigationMenuLink asChild>
-              <Link
-                to="/auth"
-                className={navigationMenuTriggerStyle()}
-              >
-                Sign In
+              ))}
+            </div>
+            {user ? (
+              <div className="flex flex-col space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage
+                      src={user?.user_metadata?.avatar_url as string}
+                    />
+                    <AvatarFallback>{user?.email?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <span>{user?.email}</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button>Sign In</Button>
               </Link>
-            </NavigationMenuLink>
-          )}
-        </NavigationMenu>
-      )}
+            )}
+          </SheetContent>
+        </Sheet>
+      </div>
     </div>
-  )
-}
+  );
+};
