@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,13 +26,22 @@ import BlogCategory from "./pages/BlogCategory";
 import BlogAdmin from "./pages/BlogAdmin";
 import NotFound from "./pages/NotFound";
 import Referrals from "./pages/Referrals";
-import { useReferralTracking } from "@/hooks/useReferralTracking";
 import "./App.css";
 
 const queryClient = new QueryClient();
 
 function AppContent() {
-  useReferralTracking();
+  // Track referral on mount only for non-authenticated users
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const referralCode = urlParams.get('ref');
+    
+    if (referralCode) {
+      // Store referral code in localStorage for later use when user signs up
+      localStorage.setItem('pendingReferralCode', referralCode);
+      console.log('Referral code stored:', referralCode);
+    }
+  }, []);
   
   return (
     <Routes>
