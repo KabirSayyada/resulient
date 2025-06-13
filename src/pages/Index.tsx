@@ -1,8 +1,9 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { JobDescriptionInput } from "@/components/resume/JobDescriptionInput";
-import { FileUploadSection } from "@/components/resume/FileUploadSection";
+import { ResumeInputToggle } from "@/components/resume/ResumeInputToggle";
 import { OptimizedResumeDisplay } from "@/components/resume/OptimizedResumeDisplay";
 import { useToast } from "@/hooks/use-toast";
 import { useSupabaseFunction } from "@/hooks/useSupabaseFunction";
