@@ -33,79 +33,58 @@ serve(async (req) => {
     console.log('Analyzing resume and job description...')
 
     const analysisPrompt = `
-    As an expert ATS optimization specialist and career advisor, analyze this resume against the job description.
-    
-    CRITICAL ATS FORMATTING REQUIREMENTS:
-    1. Use ONLY these standardized section headers (exactly as written):
-       - PROFESSIONAL SUMMARY (not "Summary", "Objective", "Profile", etc.)
-       - PROFESSIONAL EXPERIENCE (not "Work Experience", "Experience", "Employment History", etc.)
-       - TECHNICAL SKILLS (not "Skills", "Core Competencies", "Competencies", etc.)
-       - EDUCATION (exactly this, not "Academic Background", "Qualifications", etc.)
-       - PROJECTS (if applicable)
-       - CERTIFICATIONS (if applicable, not "Certificates", "Credentials", etc.)
-       - ACHIEVEMENTS (if applicable, not "Accomplishments", "Awards", etc.)
-    
-    2. MANDATORY formatting rules:
-       - Each section header must be in ALL CAPS
-       - Under each section header, add a line of equal signs (=) the same length as the header
-       - Use bullet points (•) or dashes (-) for ALL items under sections when there are multiple items
-       - For PROFESSIONAL EXPERIENCE: Each job should have company/title on one line, then bullet points for responsibilities
-       - For TECHNICAL SKILLS: Use bullet points or commas to separate different skills/categories
-       - For EDUCATION: Each degree/institution should be on separate lines with bullet points if multiple entries
-       - For CERTIFICATIONS: Use bullet points for each certification
-       - Ensure consistent spacing between sections
-    
-    3. Content optimization:
-       - Match keywords from the job description naturally
-       - Quantify achievements with numbers, percentages, or dollar amounts where possible
-       - Use strong action verbs (led, developed, implemented, improved, etc.)
-       - Ensure all content is ATS-friendly (no special characters, tables, or complex formatting)
-    
-    4. Structure example:
-    \`\`\`
-    \\[Name\\]
-    \\[Contact Information: Email | Phone | LinkedIn | Location\\]
-    
-    PROFESSIONAL SUMMARY
-    =====================================
-    \\[2-3 lines summarizing key qualifications and value proposition\\]
-    
-    PROFESSIONAL EXPERIENCE
-    =========================================
-    Job Title - Company Name
-    Start Date - End Date | Location
-    • Achievement-focused bullet point with quantified results
-    • Another accomplishment using strong action verbs
-    • Technical skills and tools used in this role
-    
-    TECHNICAL SKILLS
-    ==============================
-    • Programming Languages: \\[list\\]
-    • Frameworks & Tools: \\[list\\]
-    • Databases: \\[list\\]
-    
-    EDUCATION
-    ===================
-    Degree - Institution Name
-    Graduation Date | Location
-    • Relevant coursework or achievements if applicable
-    \`\`\`
-    
-    After optimizing the resume content, identify any missing but important qualifications from the job description
-    that might be sensitive or require verification (certifications, specific experiences, etc.).
-    For each gap, provide:
-    1. What qualification/skill is missing
-    2. How important it is (Critical/Important/Nice to have)
-    3. Constructive advice on how to acquire it
-    
-    Format the gaps analysis as a JSON array of objects with these fields:
-    {
-      "skill": "qualification name",
-      "importance": "importance level",
-      "howToAcquire": "advice"
-    }
+    As an expert ATS optimization specialist, optimize this resume against the job description with STRICT LIMITATIONS on what you can add or modify.
 
-    Remember to be encouraging and empowering in the advice, suggesting practical ways to gain these qualifications.
+    CRITICAL RULES - DO NOT VIOLATE:
+    1. NEVER add sections that don't exist in the original resume (Education, Certifications, specific companies, degrees, etc.)
+    2. NEVER add placeholder text like "[Company Name]", "[Year]", "[Certification Name]", "TBD", etc.
+    3. NEVER invent specific experiences, companies, schools, certifications, or achievements
+    4. NEVER add sensitive information like specific workplace names, educational institutions, or credentials not mentioned
+    5. ONLY enhance and rewrite existing content for better ATS compatibility
+    6. ONLY add general, non-sensitive sections if they don't exist but are crucial (like TECHNICAL SKILLS)
+
+    WHAT YOU CAN DO:
+    - Rewrite existing bullet points with stronger action verbs and quantified results
+    - Reorganize existing content for better ATS readability
+    - Add relevant keywords from job description to existing experiences (naturally)
+    - Improve formatting with standard ATS section headers
+    - Add a TECHNICAL SKILLS section if it doesn't exist (using only skills mentioned in existing content)
+    - Enhance existing achievements with better formatting and stronger language
+
+    MANDATORY ATS FORMATTING:
+    1. Use ONLY these standardized section headers (exactly as written):
+       - PROFESSIONAL SUMMARY (if summary/objective exists in original)
+       - PROFESSIONAL EXPERIENCE (for work experience)
+       - TECHNICAL SKILLS (only if skills are mentioned in original content or crucial for role)
+       - EDUCATION (ONLY if education section exists in original)
+       - PROJECTS (ONLY if projects section exists in original)
+       - CERTIFICATIONS (ONLY if certifications exist in original)
+       - ACHIEVEMENTS (ONLY if achievements/awards exist in original)
+
+    2. Section header formatting:
+       - Each section header in ALL CAPS
+       - Under each header, add a line of equal signs (=) matching header length
+       - Use bullet points (•) for all items under sections
+       - Consistent spacing between sections
+
+    3. Content enhancement rules:
+       - Match keywords from job description naturally within existing experiences
+       - Quantify existing achievements with numbers/percentages where logical
+       - Use strong action verbs for existing responsibilities
+       - Ensure ATS-friendly formatting (no special characters, tables, or complex formatting)
+
+    EXAMPLE of what NOT to do:
+    ❌ Adding "CERTIFICATIONS" section if none exist in original
+    ❌ Adding "Bachelor's Degree - [University Name]" if education not mentioned
+    ❌ Adding "Google Cloud Certified - [Year]" if no certifications mentioned
+    ❌ Adding placeholder companies like "[Previous Company] - Software Developer"
+
+    EXAMPLE of what TO do:
+    ✅ Rewriting "Worked on software projects" to "Developed and maintained software applications, improving system performance by implementing efficient algorithms"
+    ✅ Adding TECHNICAL SKILLS section with "JavaScript, Python, SQL" if these are mentioned in existing experience
+    ✅ Improving "Managed team" to "Led cross-functional team of 5 developers, resulting in 25% faster project delivery"
+
+    After optimizing, identify any missing qualifications from the job description that the candidate would need to genuinely acquire (don't suggest adding fake credentials).
 
     Job Description:
     ${jobDescription}
@@ -115,8 +94,14 @@ serve(async (req) => {
 
     Response format:
     {
-      "optimizedResume": "the optimized resume content with proper ATS section headers and formatting",
-      "qualificationGaps": [gap objects array]
+      "optimizedResume": "the conservatively optimized resume content with proper ATS formatting",
+      "qualificationGaps": [
+        {
+          "skill": "qualification name",
+          "importance": "Critical/Important/Nice to have",
+          "howToAcquire": "honest advice on how to genuinely acquire this qualification"
+        }
+      ]
     }
     `
 
@@ -126,14 +111,14 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: "You are an expert ATS optimization specialist and career advisor. You MUST follow the exact formatting requirements for section headers and use proper bullet points throughout the resume."
+          content: "You are an expert ATS optimization specialist. You MUST be conservative and never add sensitive information, placeholders, or sections that don't exist in the original resume. Focus on enhancing existing content only."
         },
         {
           role: "user",
           content: analysisPrompt
         }
       ],
-      temperature: 0.7,
+      temperature: 0.3, // Lower temperature for more conservative responses
       max_tokens: 2500,
       response_format: { type: "json_object" }
     })
@@ -144,8 +129,8 @@ serve(async (req) => {
       throw new Error('Failed to generate complete analysis')
     }
 
-    console.log('Successfully generated optimized resume and qualification gaps analysis')
-    console.log(`Found ${response.qualificationGaps.length} qualification gaps`)
+    console.log('Successfully generated conservative resume optimization')
+    console.log(`Found ${response.qualificationGaps.length} genuine qualification gaps`)
 
     return new Response(
       JSON.stringify(response),
