@@ -18,23 +18,27 @@ export const useResumeBuilder = (userId?: string) => {
   }, [userId]);
 
   const loadResumeData = async () => {
+    if (!userId) return;
+    
     setLoading(true);
     try {
-      // Use raw SQL query since the table isn't in types yet
+      // Direct table access to get user resume data
       const { data, error } = await supabase
-        .rpc('get_user_resume_data', { user_uuid: userId });
+        .from('user_resume_data')
+        .select('resume_data')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
-        throw error;
+      if (error) {
+        console.error('Error loading resume data:', error);
+        return;
       }
 
-      if (data && data.length > 0) {
-        setResumeData(data[0].resume_data as ResumeData);
+      if (data) {
+        setResumeData(data.resume_data as ResumeData);
       }
     } catch (error) {
       console.error('Error loading resume data:', error);
-      // For now, we'll silently handle this since the function might not exist yet
-      // We can create the data later when saving
     } finally {
       setLoading(false);
     }
@@ -45,11 +49,15 @@ export const useResumeBuilder = (userId?: string) => {
     
     setSaving(true);
     try {
-      // Use raw SQL query since the table isn't in types yet
+      // Direct table access to save user resume data
       const { error } = await supabase
-        .rpc('upsert_user_resume_data', { 
-          user_uuid: userId,
-          resume_data_json: data
+        .from('user_resume_data')
+        .upsert({
+          user_id: userId,
+          resume_data: data,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) throw error;
@@ -61,33 +69,11 @@ export const useResumeBuilder = (userId?: string) => {
       });
     } catch (error) {
       console.error('Error saving resume data:', error);
-      // Fallback: try direct table access
-      try {
-        const { error: directError } = await supabase
-          .from('user_resume_data' as any)
-          .upsert({
-            user_id: userId,
-            resume_data: data,
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'user_id'
-          });
-
-        if (directError) throw directError;
-
-        setResumeData(data);
-        toast({
-          title: "Saved",
-          description: "Your resume information has been saved.",
-        });
-      } catch (fallbackError) {
-        console.error('Error saving resume data (fallback):', fallbackError);
-        toast({
-          title: "Error",
-          description: "Failed to save your resume data.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Error",
+        description: "Failed to save your resume data.",
+        variant: "destructive"
+      });
     } finally {
       setSaving(false);
     }
