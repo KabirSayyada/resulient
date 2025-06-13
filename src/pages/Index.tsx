@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -325,9 +324,10 @@ const Index = () => {
                   jobDescription={jobDescription} 
                   setJobDescription={setJobDescription} 
                 />
-                <FileUploadSection 
+                <ResumeInputToggle 
                   resumeContent={resumeContent} 
                   setResumeContent={setResumeContent} 
+                  userId={user?.id}
                 />
               </div>
               
