@@ -35,7 +35,7 @@ export const useResumeBuilder = (userId?: string) => {
       }
 
       if (data) {
-        setResumeData(data.resume_data as ResumeData);
+        setResumeData(data.resume_data as unknown as ResumeData);
       }
     } catch (error) {
       console.error('Error loading resume data:', error);
@@ -54,7 +54,7 @@ export const useResumeBuilder = (userId?: string) => {
         .from('user_resume_data')
         .upsert({
           user_id: userId,
-          resume_data: data,
+          resume_data: data as unknown as any,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id'
