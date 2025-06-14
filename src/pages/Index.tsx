@@ -48,6 +48,7 @@ const Index = () => {
   const [showResumeInput, setShowResumeInput] = useState(true);
   const [hasReachedLimit, setHasReachedLimit] = useState(false);
   const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
+  const [showStats, setShowStats] = useState(false);
 
   const { callFunction, loading: functionLoading, error: functionError } = useSupabaseFunction();
   const { saveOptimization } = useResumeOptimizationHistory(user?.id);
@@ -119,11 +120,11 @@ const Index = () => {
   ];
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!authLoading && !user) {
       // Don't redirect to auth page for landing page
       // We'll have signup/login buttons instead
     }
-  }, [user, loading, navigate]);
+  }, [user, authLoading, navigate]);
 
   const handleOptimizeResume = async () => {
     if (!resumeContent) {
@@ -201,7 +202,7 @@ const Index = () => {
     setShowResumeInput(true);
   };
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <span className="text-lg font-semibold">Loading...</span>
