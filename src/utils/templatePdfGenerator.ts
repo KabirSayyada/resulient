@@ -53,7 +53,7 @@ class TemplatePDFGenerator {
 
     const effectiveWidth = this.contentWidth - indent;
     const lines = this.pdf.splitTextToSize(text, effectiveWidth);
-    const lineHeight = fontSize * 1.5; // Increased line height for better spacing
+    const lineHeight = fontSize * 1.4; // Reduced from 1.5 for better spacing
 
     this.checkPageBreak(lines.length * lineHeight);
 
@@ -71,11 +71,11 @@ class TemplatePDFGenerator {
   }
 
   private addLine(color: string = '#cccccc', width: number = 0.5): void {
-    this.addSpace(4); // Add space before line
+    this.addSpace(6); // Increased space before line
     this.pdf.setDrawColor(color);
     this.pdf.setLineWidth(width);
     this.pdf.line(this.margin, this.currentY, this.pageWidth - this.margin, this.currentY);
-    this.addSpace(8); // Add space after line
+    this.addSpace(12); // Increased space after line to prevent text overlap
   }
 
   // Classic template formatting - Fixed spacing issues
@@ -109,14 +109,14 @@ class TemplatePDFGenerator {
       
       resume.workExperience.forEach((exp, index) => {
         this.addText(exp.position || '', 11, 'bold');
-        this.addSpace(2);
+        this.addSpace(3);
         this.addText(`${exp.company || ''} | ${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'normal', '#666666');
         this.addSpace(8);
         
         if (exp.responsibilities) {
           exp.responsibilities.forEach(resp => {
             this.addText(`• ${resp}`, 10, 'normal', '#000000', 'left', 15);
-            this.addSpace(2);
+            this.addSpace(3); // Reduced from excessive spacing
           });
         }
         
@@ -141,7 +141,7 @@ class TemplatePDFGenerator {
       resume.education.forEach(edu => {
         const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
         this.addText(degreeLine, 11, 'bold');
-        this.addSpace(2);
+        this.addSpace(3);
         this.addText(`${edu.institution || ''} | ${edu.graduationDate || ''}`, 10, 'normal', '#666666');
         this.addSpace(12);
       });
@@ -191,7 +191,7 @@ class TemplatePDFGenerator {
         if (exp.responsibilities) {
           exp.responsibilities.slice(0, 4).forEach(resp => {
             this.addText(`• ${resp}`, 10, 'normal', '#374151', 'left', 15);
-            this.addSpace(2);
+            this.addSpace(3);
           });
         }
         
@@ -286,7 +286,7 @@ class TemplatePDFGenerator {
         if (exp.responsibilities) {
           exp.responsibilities.slice(0, 3).forEach(resp => {
             this.addText(`• ${resp}`, 10, 'normal', '#4b5563', 'left', 15);
-            this.addSpace(2);
+            this.addSpace(3);
           });
         }
         
@@ -322,7 +322,7 @@ class TemplatePDFGenerator {
     }
   }
 
-  // Executive template formatting - Fixed spacing issues
+  // Executive template formatting - Fixed bullet points and spacing
   private generateExecutiveTemplate(resume: ParsedResume): void {
     // Executive header
     this.addText(resume.contact.name?.toUpperCase() || '', 20, 'bold', '#111827');
@@ -361,7 +361,7 @@ class TemplatePDFGenerator {
       skillsRows.forEach(row => {
         const rowText = row.map(skill => `• ${skill}`).join('   ');
         this.addText(rowText, 10, 'bold', '#4b5563');
-        this.addSpace(4);
+        this.addSpace(5);
       });
       this.addSpace(16);
     }
@@ -383,8 +383,9 @@ class TemplatePDFGenerator {
         
         if (exp.responsibilities) {
           exp.responsibilities.slice(0, 4).forEach(resp => {
-            this.addText(`▪ ${resp}`, 10, 'normal', '#374151', 'left', 10);
-            this.addSpace(3);
+            // Fixed bullet point rendering - using standard bullet character
+            this.addText(`• ${resp}`, 10, 'normal', '#374151', 'left', 10);
+            this.addSpace(4); // Reduced spacing after bullet points
           });
         }
         
