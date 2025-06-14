@@ -4,12 +4,12 @@ import { ParsedResume, ParsedContact, ParsedWorkExperience, ParsedEducation, Par
 // Common section header variations
 const SECTION_MAPPINGS = {
   contact: /^(contact|personal|info|information|details)$/i,
-  summary: /^(summary|profile|objective|about|overview|professional\s*summary|career\s*summary)$/i,
+  summary: /^(summary|profile|objective|about|overview|professional\s*summary|career\s*summary|executive\s*summary)$/i,
   experience: /^(experience|work|employment|professional\s*experience|work\s*experience|career|history|professional\s*history)$/i,
   education: /^(education|academic|qualifications|degrees|schooling)$/i,
-  skills: /^(skills|technical\s*skills|core\s*competencies|competencies|expertise|technologies|proficiencies|abilities)$/i,
-  projects: /^(projects|portfolio|work\s*samples|personal\s*projects)$/i,
-  certifications: /^(certifications|certificates|credentials|licenses|professional\s*development)$/i,
+  skills: /^(skills|technical\s*skills|core\s*competencies|competencies|expertise|technologies|proficiencies|abilities|tech\s*stack)$/i,
+  projects: /^(projects|portfolio|work\s*samples|personal\s*projects|key\s*projects)$/i,
+  certifications: /^(certifications|certificates|credentials|licenses|professional\s*development|professional\s*certifications)$/i,
   achievements: /^(achievements|accomplishments|awards|honors|recognition)$/i,
   languages: /^(languages|linguistic\s*skills)$/i
 };
@@ -48,8 +48,8 @@ export function parseResumeContent(resumeText: string): ParsedResume {
   let currentSection = '';
   let currentSectionContent: string[] = [];
   
-  // Extract contact information from the first few lines
-  parsedResume.contact = extractContactInfo(lines.slice(0, 10));
+  // Enhanced contact extraction - look at first 15 lines
+  parsedResume.contact = extractContactInfo(lines.slice(0, 15));
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -65,6 +65,9 @@ export function parseResumeContent(resumeText: string): ParsedResume {
       currentSectionContent = [];
     } else if (currentSection) {
       currentSectionContent.push(line);
+    } else if (!parsedResume.professionalSummary && line.length > 50 && !isContactInfo(line)) {
+      // If no section identified yet and it's a substantial line, treat as summary
+      parsedResume.professionalSummary = line;
     }
   }
   
@@ -73,18 +76,29 @@ export function parseResumeContent(resumeText: string): ParsedResume {
     processSectionContent(parsedResume, currentSection, currentSectionContent);
   }
   
+  // Post-processing to ensure data quality
+  cleanupParsedResume(parsedResume);
+  
   return parsedResume;
+}
+
+function isContactInfo(line: string): boolean {
+  return EMAIL_REGEX.test(line) || PHONE_REGEX.test(line) || LINKEDIN_REGEX.test(line);
 }
 
 function extractContactInfo(lines: string[]): ParsedContact {
   const contact: ParsedContact = {};
+  let foundName = false;
   
   for (const line of lines) {
-    // Extract name (usually the first substantial line)
-    if (!contact.name && line.length > 2 && !EMAIL_REGEX.test(line) && !PHONE_REGEX.test(line)) {
-      // Check if it looks like a name (not all caps, reasonable length)
-      if (line.length < 50 && !/^[A-Z\s]+$/.test(line)) {
+    // Extract name (usually the first substantial line that's not contact info)
+    if (!foundName && line.length > 2 && line.length < 80 && !EMAIL_REGEX.test(line) && 
+        !PHONE_REGEX.test(line) && !LINKEDIN_REGEX.test(line) && 
+        !line.match(/^\d+/) && !line.includes('|')) {
+      // Check if it looks like a name (not all caps unless short, reasonable length)
+      if (line.length < 50 && (!line.match(/^[A-Z\s]+$/) || line.length < 25)) {
         contact.name = line;
+        foundName = true;
       }
     }
     
@@ -96,7 +110,7 @@ function extractContactInfo(lines: string[]): ParsedContact {
     
     // Extract phone
     const phoneMatch = line.match(PHONE_REGEX);
-    if (phoneMatch && !contact.phone) {
+    if (phoneMatch && !contact.phone && line.length < 50) {
       contact.phone = phoneMatch[0];
     }
     
@@ -106,8 +120,12 @@ function extractContactInfo(lines: string[]): ParsedContact {
       contact.linkedin = linkedinMatch[0];
     }
     
-    // Extract address (lines with state abbreviations or zip codes)
-    if (!contact.address && (/\b[A-Z]{2}\s+\d{5}/.test(line) || /\d{5}/.test(line))) {
+    // Extract address (lines with state abbreviations, zip codes, or common address words)
+    if (!contact.address && (
+      /\b[A-Z]{2}\s+\d{5}/.test(line) || 
+      /\d{5}/.test(line) ||
+      /\b(Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd)\b/i.test(line)
+    )) {
       contact.address = line;
     }
   }
@@ -127,7 +145,7 @@ function identifySectionHeader(line: string): string | null {
   }
   
   // Additional heuristics for section detection
-  if (line.length < 50 && /^[A-Z\s]+$/.test(line.replace(/[^\w\s]/g, ''))) {
+  if (line.length < 50 && /^[A-Z\s]+$/.test(line.replace(/[^\w\s]/g, '')) && line.length > 3) {
     return 'unknown';
   }
   
@@ -137,7 +155,7 @@ function identifySectionHeader(line: string): string | null {
 function processSectionContent(resume: ParsedResume, sectionType: string, content: string[]): void {
   switch (sectionType) {
     case 'summary':
-      resume.professionalSummary = content.join(' ');
+      resume.professionalSummary = content.join(' ').replace(/\s+/g, ' ').trim();
       break;
     case 'experience':
       resume.workExperience = parseWorkExperience(content);
@@ -171,46 +189,61 @@ function parseWorkExperience(content: string[]): ParsedWorkExperience[] {
   let currentExperience: Partial<ParsedWorkExperience> | null = null;
   
   for (const line of content) {
-    // Check if this looks like a job title/company line
-    if (isJobTitleLine(line)) {
-      // Save previous experience if exists
-      if (currentExperience && currentExperience.position && currentExperience.company) {
-        experiences.push(currentExperience as ParsedWorkExperience);
+    if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
+      // This is a bullet point responsibility
+      if (currentExperience) {
+        if (!currentExperience.responsibilities) {
+          currentExperience.responsibilities = [];
+        }
+        currentExperience.responsibilities.push(line.replace(/^[•\-*]\s*/, ''));
+      }
+    } else if (isJobTitleLine(line)) {
+      // Save previous experience
+      if (currentExperience && (currentExperience.position || currentExperience.company)) {
+        experiences.push(fillExperienceDefaults(currentExperience));
       }
       
       currentExperience = parseJobTitleLine(line);
-    } else if (currentExperience && (line.startsWith('•') || line.startsWith('-') || line.startsWith('*'))) {
-      // This is a bullet point responsibility
-      if (!currentExperience.responsibilities) {
-        currentExperience.responsibilities = [];
+    } else if (currentExperience && line.trim().length > 10 && !line.match(/^\d{4}/)) {
+      // This might be a responsibility without bullet or additional company info
+      if (!currentExperience.company && line.length < 100) {
+        currentExperience.company = line;
+      } else {
+        if (!currentExperience.responsibilities) {
+          currentExperience.responsibilities = [];
+        }
+        currentExperience.responsibilities.push(line);
       }
-      currentExperience.responsibilities.push(line.replace(/^[•\-*]\s*/, ''));
-    } else if (currentExperience && line.trim().length > 10) {
-      // This might be a responsibility without bullet
-      if (!currentExperience.responsibilities) {
-        currentExperience.responsibilities = [];
-      }
-      currentExperience.responsibilities.push(line);
     }
   }
   
   // Add the last experience
-  if (currentExperience && currentExperience.position && currentExperience.company) {
-    experiences.push(currentExperience as ParsedWorkExperience);
+  if (currentExperience && (currentExperience.position || currentExperience.company)) {
+    experiences.push(fillExperienceDefaults(currentExperience));
   }
   
   return experiences;
 }
 
+function fillExperienceDefaults(exp: Partial<ParsedWorkExperience>): ParsedWorkExperience {
+  return {
+    position: exp.position || 'Position',
+    company: exp.company || 'Company',
+    startDate: exp.startDate || '',
+    endDate: exp.endDate || '',
+    responsibilities: exp.responsibilities || []
+  };
+}
+
 function isJobTitleLine(line: string): boolean {
-  // Heuristics for job title lines
   return (
     line.length > 5 && 
     line.length < 200 &&
     !line.startsWith('•') &&
     !line.startsWith('-') &&
     !line.startsWith('*') &&
-    (line.includes(' at ') || line.includes(' | ') || line.includes(' - ') || /\d{4}/.test(line))
+    (line.includes(' at ') || line.includes(' | ') || line.includes(' - ') || 
+     line.includes(' – ') || /\d{4}/.test(line) || line.includes(','))
   );
 }
 
@@ -219,7 +252,7 @@ function parseJobTitleLine(line: string): Partial<ParsedWorkExperience> {
     responsibilities: []
   };
   
-  // Try to extract dates first
+  // Extract dates first
   const dates = extractDates(line);
   if (dates.length >= 1) {
     experience.startDate = dates[0];
@@ -234,28 +267,45 @@ function parseJobTitleLine(line: string): Partial<ParsedWorkExperience> {
     cleanLine = cleanLine.replace(pattern, '').trim();
   });
   
+  // Clean up extra separators
+  cleanLine = cleanLine.replace(/\s*[|–-]\s*$/, '').replace(/^\s*[|–-]\s*/, '').trim();
+  
   // Try different separation patterns
-  const separators = [' at ', ' | ', ' - ', ' – ', ' — '];
+  const separators = [' at ', ' | ', ' – ', ' - ', ' — ', ','];
   
   for (const separator of separators) {
     if (cleanLine.includes(separator)) {
-      const parts = cleanLine.split(separator);
+      const parts = cleanLine.split(separator).map(p => p.trim()).filter(p => p.length > 0);
       if (parts.length >= 2) {
-        experience.position = parts[0].trim();
-        experience.company = parts[1].trim();
+        experience.position = parts[0];
+        experience.company = parts[1];
         break;
       }
     }
   }
   
   // If no separator found, try to guess based on line structure
-  if (!experience.position || !experience.company) {
-    const words = cleanLine.split(' ');
+  if (!experience.position && !experience.company) {
+    const words = cleanLine.split(/\s+/);
     if (words.length >= 2) {
-      // Assume first half is position, second half is company
-      const midPoint = Math.floor(words.length / 2);
-      experience.position = words.slice(0, midPoint).join(' ');
-      experience.company = words.slice(midPoint).join(' ');
+      // Look for common position words
+      const positionWords = ['manager', 'developer', 'engineer', 'analyst', 'director', 'specialist', 'coordinator'];
+      const positionIndex = words.findIndex(word => 
+        positionWords.some(posWord => word.toLowerCase().includes(posWord))
+      );
+      
+      if (positionIndex >= 0) {
+        experience.position = words.slice(0, positionIndex + 1).join(' ');
+        experience.company = words.slice(positionIndex + 1).join(' ');
+      } else {
+        // Default split
+        const midPoint = Math.ceil(words.length / 2);
+        experience.position = words.slice(0, midPoint).join(' ');
+        experience.company = words.slice(midPoint).join(' ');
+      }
+    } else {
+      experience.position = cleanLine;
+      experience.company = 'Company';
     }
   }
   
@@ -279,13 +329,13 @@ function parseEducation(content: string[]): ParsedEducation[] {
   const education: ParsedEducation[] = [];
   
   for (const line of content) {
-    if (line.length > 10) {
+    if (line.length > 5) {
       const edu: ParsedEducation = {
         institution: '',
         degree: ''
       };
       
-      // Try to parse education line
+      // Extract dates
       const dates = extractDates(line);
       if (dates.length > 0) {
         edu.graduationDate = dates[dates.length - 1];
@@ -298,19 +348,31 @@ function parseEducation(content: string[]): ParsedEducation[] {
       });
       
       // Look for degree indicators
-      const degreePatterns = /\b(B\.?S\.?|M\.?S\.?|PhD|Bachelor|Master|Associate|Doctor|Diploma|Certificate)\b/i;
+      const degreePatterns = /\b(B\.?A\.?|B\.?S\.?|M\.?A\.?|M\.?S\.?|PhD|Ph\.D\.?|Bachelor|Master|Associate|Doctor|Diploma|Certificate)\b/i;
       const degreeMatch = cleanLine.match(degreePatterns);
       
       if (degreeMatch) {
-        const parts = cleanLine.split(/\s+(?:at|from|,|\||-)\s+/i);
-        if (parts.length >= 2) {
-          edu.degree = parts[0].trim();
-          edu.institution = parts[1].trim();
-        } else {
+        const separators = [' at ', ' from ', ' - ', ' – ', ' | ', ','];
+        let parsed = false;
+        
+        for (const separator of separators) {
+          if (cleanLine.includes(separator)) {
+            const parts = cleanLine.split(separator).map(p => p.trim());
+            if (parts.length >= 2) {
+              edu.degree = parts[0];
+              edu.institution = parts[1];
+              parsed = true;
+              break;
+            }
+          }
+        }
+        
+        if (!parsed) {
           edu.degree = cleanLine;
-          edu.institution = 'Unknown';
+          edu.institution = 'Institution';
         }
       } else {
+        // Assume the whole line is institution if no degree pattern found
         edu.institution = cleanLine;
         edu.degree = 'Degree';
       }
@@ -335,7 +397,7 @@ function parseSkills(content: string[]): string[] {
     skills.push(...lineSkills);
   }
   
-  return skills.filter((skill, index, arr) => arr.indexOf(skill) === index); // Remove duplicates
+  return [...new Set(skills)]; // Remove duplicates
 }
 
 function parseProjects(content: string[]): ParsedProject[] {
@@ -343,10 +405,14 @@ function parseProjects(content: string[]): ParsedProject[] {
   let currentProject: Partial<ParsedProject> | null = null;
   
   for (const line of content) {
-    if (line.length > 5 && !line.startsWith('•') && !line.startsWith('-')) {
+    if (line.length > 3 && !line.startsWith('•') && !line.startsWith('-') && !line.startsWith('*')) {
       // This might be a project title
       if (currentProject && currentProject.name) {
-        projects.push(currentProject as ParsedProject);
+        projects.push({
+          name: currentProject.name,
+          description: currentProject.description || '',
+          technologies: currentProject.technologies || []
+        });
       }
       
       currentProject = {
@@ -355,17 +421,31 @@ function parseProjects(content: string[]): ParsedProject[] {
         technologies: []
       };
     } else if (currentProject && line.trim().length > 0) {
-      // This is project description
+      // This is project description or details
+      const cleanLine = line.replace(/^[•\-*]\s*/, '');
       if (!currentProject.description) {
-        currentProject.description = line;
+        currentProject.description = cleanLine;
       } else {
-        currentProject.description += ' ' + line;
+        currentProject.description += ' ' + cleanLine;
+      }
+      
+      // Look for technology mentions
+      const techKeywords = ['JavaScript', 'Python', 'React', 'Node.js', 'SQL', 'HTML', 'CSS', 'Java', 'C++'];
+      const foundTech = techKeywords.filter(tech => 
+        cleanLine.toLowerCase().includes(tech.toLowerCase())
+      );
+      if (foundTech.length > 0 && currentProject.technologies) {
+        currentProject.technologies.push(...foundTech);
       }
     }
   }
   
   if (currentProject && currentProject.name) {
-    projects.push(currentProject as ParsedProject);
+    projects.push({
+      name: currentProject.name,
+      description: currentProject.description || '',
+      technologies: currentProject.technologies || []
+    });
   }
   
   return projects;
@@ -375,24 +455,32 @@ function parseCertifications(content: string[]): ParsedCertification[] {
   const certifications: ParsedCertification[] = [];
   
   for (const line of content) {
-    if (line.length > 5) {
+    if (line.length > 3) {
       const cert: ParsedCertification = {
         name: line,
         issuer: 'Unknown'
       };
       
-      // Try to extract issuer and date
+      // Extract dates
       const dates = extractDates(line);
       if (dates.length > 0) {
         cert.date = dates[0];
       }
       
       // Look for issuer patterns
-      const issuerPatterns = /\b(?:by|from|issued by)\s+(.+)/i;
-      const issuerMatch = line.match(issuerPatterns);
-      if (issuerMatch) {
-        cert.issuer = issuerMatch[1].trim();
-        cert.name = line.replace(issuerMatch[0], '').trim();
+      const issuerPatterns = [
+        /\b(?:by|from|issued by)\s+(.+)/i,
+        /\b(?:-|–|—)\s*(.+)$/,
+        /\|\s*(.+)$/
+      ];
+      
+      for (const pattern of issuerPatterns) {
+        const issuerMatch = line.match(pattern);
+        if (issuerMatch) {
+          cert.issuer = issuerMatch[1].trim();
+          cert.name = line.replace(issuerMatch[0], '').trim();
+          break;
+        }
       }
       
       certifications.push(cert);
@@ -400,4 +488,45 @@ function parseCertifications(content: string[]): ParsedCertification[] {
   }
   
   return certifications;
+}
+
+function cleanupParsedResume(resume: ParsedResume): void {
+  // Clean up contact info
+  if (resume.contact.name) {
+    resume.contact.name = resume.contact.name.replace(/[^\w\s.-]/g, '').trim();
+  }
+  
+  // Ensure we have at least basic structure
+  if (!resume.contact.name) {
+    resume.contact.name = 'Your Name';
+  }
+  
+  // Clean up empty arrays and ensure minimum content
+  if (resume.workExperience.length === 0) {
+    resume.workExperience = [{
+      position: 'Position',
+      company: 'Company',
+      startDate: '',
+      endDate: '',
+      responsibilities: []
+    }];
+  }
+  
+  if (resume.skills.length === 0) {
+    resume.skills = ['Professional Skills'];
+  }
+  
+  if (resume.education.length === 0) {
+    resume.education = [{
+      institution: 'Institution',
+      degree: 'Degree'
+    }];
+  }
+  
+  // Limit array sizes for better formatting
+  resume.skills = resume.skills.slice(0, 25);
+  resume.workExperience = resume.workExperience.slice(0, 5);
+  resume.education = resume.education.slice(0, 3);
+  resume.projects = resume.projects.slice(0, 4);
+  resume.certifications = resume.certifications.slice(0, 5);
 }
