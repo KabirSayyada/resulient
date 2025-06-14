@@ -76,7 +76,7 @@ export const TechATSTemplate = ({ resume }: TechATSTemplateProps) => {
                   <div className="mt-3">
                     {exp.responsibilities.map((resp, idx) => (
                       <div key={idx} className="text-gray-700 mb-1 flex">
-                        <span className="text-green-500 mr-2">></span>
+                        <span className="text-green-500 mr-2">{'>'}</span>
                         <span>{resp}</span>
                       </div>
                     ))}
