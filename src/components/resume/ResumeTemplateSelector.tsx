@@ -7,6 +7,12 @@ import { ATSFriendlyResumePdfTemplate } from './ATSFriendlyResumePdfTemplate';
 import { ModernATSTemplate } from './templates/ModernATSTemplate';
 import { MinimalATSTemplate } from './templates/MinimalATSTemplate';
 import { ExecutiveATSTemplate } from './templates/ExecutiveATSTemplate';
+import { CreativeATSTemplate } from './templates/CreativeATSTemplate';
+import { TechATSTemplate } from './templates/TechATSTemplate';
+import { ProfessionalATSTemplate } from './templates/ProfessionalATSTemplate';
+import { CompactATSTemplate } from './templates/CompactATSTemplate';
+import { CleanATSTemplate } from './templates/CleanATSTemplate';
+import { BorderATSTemplate } from './templates/BorderATSTemplate';
 import { FileDown, Eye } from 'lucide-react';
 import { generateTemplatePDF } from '@/utils/templatePdfGenerator';
 import { useToast } from '@/hooks/use-toast';
@@ -16,7 +22,7 @@ interface ResumeTemplateSelectorProps {
   className?: string;
 }
 
-type TemplateType = 'classic' | 'modern' | 'minimal' | 'executive';
+type TemplateType = 'classic' | 'modern' | 'minimal' | 'executive' | 'creative' | 'tech' | 'professional' | 'compact' | 'clean' | 'border';
 
 const templates = {
   classic: {
@@ -38,6 +44,36 @@ const templates = {
     name: 'Executive',
     description: 'Bold, leadership-focused layout for senior positions',
     component: ExecutiveATSTemplate
+  },
+  creative: {
+    name: 'Creative Professional',
+    description: 'Stylish design with gradient accents and modern touches',
+    component: CreativeATSTemplate
+  },
+  tech: {
+    name: 'Tech Developer',
+    description: 'Code-inspired layout perfect for developers and tech roles',
+    component: TechATSTemplate
+  },
+  professional: {
+    name: 'Professional Serif',
+    description: 'Classic serif design with centered layout for formal roles',
+    component: ProfessionalATSTemplate
+  },
+  compact: {
+    name: 'Compact Layout',
+    description: 'Space-efficient design that fits more content on one page',
+    component: CompactATSTemplate
+  },
+  clean: {
+    name: 'Clean Simple',
+    description: 'Ultra-clean design with minimal styling and maximum readability',
+    component: CleanATSTemplate
+  },
+  border: {
+    name: 'Bordered Professional',
+    description: 'Distinctive bordered sections with bold visual hierarchy',
+    component: BorderATSTemplate
   }
 };
 
@@ -99,7 +135,7 @@ export const ResumeTemplateSelector = ({ resume, className = '' }: ResumeTemplat
       </div>
 
       {/* Template Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Object.entries(templates).map(([key, template]) => (
           <Card 
             key={key}

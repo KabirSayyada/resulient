@@ -1,8 +1,7 @@
-
 import jsPDF from 'jspdf';
 import { ParsedResume } from '@/types/resumeStructure';
 
-type TemplateType = 'classic' | 'modern' | 'minimal' | 'executive';
+type TemplateType = 'classic' | 'modern' | 'minimal' | 'executive' | 'creative' | 'tech' | 'professional' | 'compact' | 'clean' | 'border';
 
 // Enhanced PDF generator that creates text-based PDFs with proper formatting
 class TemplatePDFGenerator {
@@ -413,6 +412,511 @@ class TemplatePDFGenerator {
     }
   }
 
+  // Creative template formatting
+  private generateCreativeTemplate(resume: ParsedResume): void {
+    // Header with gradient effect (simulated)
+    this.addText(resume.contact.name || '', 22, 'normal', '#333333', 'center');
+    this.addSpace(8);
+    
+    const contactInfo = [
+      resume.contact.email,
+      resume.contact.phone,
+      resume.contact.linkedin,
+      resume.contact.address
+    ].filter(Boolean).join(' • ');
+    
+    this.addText(contactInfo, 10, 'normal', '#666666', 'center');
+    this.addSpace(20);
+
+    // Professional Summary
+    if (resume.professionalSummary) {
+      this.addText('Professional Summary', 14, 'normal', '#7c3aed');
+      this.addSpace(8);
+      this.addText(resume.professionalSummary, 10, 'normal', '#374151');
+      this.addSpace(16);
+    }
+
+    // Core Competencies as tags
+    if (resume.skills.length > 0) {
+      this.addText('Core Competencies', 14, 'normal', '#7c3aed');
+      this.addSpace(8);
+      this.addText(resume.skills.slice(0, 15).join(' • '), 10, 'normal', '#4b5563');
+      this.addSpace(16);
+    }
+
+    // Professional Experience
+    if (resume.workExperience.length > 0) {
+      this.addText('Professional Experience', 14, 'normal', '#7c3aed');
+      this.addSpace(8);
+      
+      resume.workExperience.forEach((exp, index) => {
+        this.addText(exp.position || '', 12, 'bold', '#111827');
+        this.addSpace(3);
+        this.addText(exp.company || '', 11, 'bold', '#7c3aed');
+        this.addSpace(3);
+        if (exp.startDate || exp.endDate) {
+          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'normal', '#6b7280');
+        }
+        this.addSpace(6);
+        
+        if (exp.responsibilities) {
+          exp.responsibilities.forEach(resp => {
+            this.addText(`• ${resp}`, 10, 'normal', '#374151', 'left', 15);
+            this.addSpace(3);
+          });
+        }
+        
+        if (index < resume.workExperience.length - 1) this.addSpace(12);
+      });
+      this.addSpace(16);
+    }
+
+    // Education
+    if (resume.education.length > 0) {
+      this.addText('Education', 14, 'normal', '#7c3aed');
+      this.addSpace(8);
+      
+      resume.education.forEach(edu => {
+        const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
+        this.addText(degreeLine, 11, 'bold', '#111827');
+        this.addSpace(3);
+        this.addText(edu.institution || '', 10, 'normal', '#7c3aed');
+        this.addSpace(3);
+        if (edu.graduationDate) {
+          this.addText(edu.graduationDate, 10, 'normal', '#6b7280');
+        }
+        this.addSpace(10);
+      });
+    }
+  }
+
+  // Tech template formatting
+  private generateTechTemplate(resume: ParsedResume): void {
+    // Header
+    this.addText(resume.contact.name || '', 18, 'bold', '#111827');
+    this.addSpace(8);
+    
+    if (resume.contact.email) {
+      this.addText(`📧 ${resume.contact.email}`, 10, 'normal', '#16a34a');
+      this.addSpace(2);
+    }
+    if (resume.contact.phone) {
+      this.addText(`📱 ${resume.contact.phone}`, 10, 'normal', '#16a34a');
+      this.addSpace(2);
+    }
+    if (resume.contact.linkedin) {
+      this.addText(`🔗 ${resume.contact.linkedin}`, 10, 'normal', '#16a34a');
+      this.addSpace(2);
+    }
+    this.addSpace(16);
+
+    // About section
+    if (resume.professionalSummary) {
+      this.addText('// ABOUT', 12, 'bold', '#111827');
+      this.addLine('#16a34a', 1);
+      this.addText(resume.professionalSummary, 10, 'normal', '#374151');
+      this.addSpace(16);
+    }
+
+    // Tech Stack
+    if (resume.skills.length > 0) {
+      this.addText('// TECH_STACK', 12, 'bold', '#111827');
+      this.addLine('#16a34a', 1);
+      this.addText('const skills = [', 10, 'normal', '#16a34a');
+      this.addSpace(4);
+      
+      resume.skills.slice(0, 12).forEach((skill, index) => {
+        const isLast = index === resume.skills.slice(0, 12).length - 1;
+        this.addText(`  "${skill}"${isLast ? '' : ','}`, 10, 'normal', '#eab308', 'left', 20);
+        this.addSpace(2);
+      });
+      
+      this.addText('];', 10, 'normal', '#16a34a');
+      this.addSpace(16);
+    }
+
+    // Experience
+    if (resume.workExperience.length > 0) {
+      this.addText('// EXPERIENCE', 12, 'bold', '#111827');
+      this.addLine('#16a34a', 1);
+      
+      resume.workExperience.forEach((exp, index) => {
+        this.addText(exp.position || '', 11, 'bold', '#111827');
+        this.addSpace(3);
+        this.addText(exp.company || '', 11, 'bold', '#16a34a');
+        this.addSpace(3);
+        if (exp.startDate || exp.endDate) {
+          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'bold', '#6b7280');
+        }
+        this.addSpace(6);
+        
+        if (exp.responsibilities) {
+          exp.responsibilities.forEach(resp => {
+            this.addText(`> ${resp}`, 10, 'normal', '#374151', 'left', 15);
+            this.addSpace(3);
+          });
+        }
+        
+        if (index < resume.workExperience.length - 1) this.addSpace(12);
+      });
+      this.addSpace(16);
+    }
+
+    // Education
+    if (resume.education.length > 0) {
+      this.addText('// EDUCATION', 12, 'bold', '#111827');
+      this.addLine('#16a34a', 1);
+      
+      resume.education.forEach(edu => {
+        const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
+        this.addText(degreeLine, 11, 'bold', '#111827');
+        this.addSpace(3);
+        this.addText(edu.institution || '', 10, 'normal', '#16a34a');
+        this.addSpace(3);
+        if (edu.graduationDate) {
+          this.addText(edu.graduationDate, 10, 'normal', '#6b7280');
+        }
+        this.addSpace(10);
+      });
+    }
+  }
+
+  // Professional template formatting
+  private generateProfessionalTemplate(resume: ParsedResume): void {
+    // Centered header
+    this.addText(resume.contact.name?.toUpperCase() || '', 20, 'bold', '#111827', 'center');
+    this.addSpace(8);
+    this.addLine('#6b7280', 1);
+    
+    const contactInfo = [
+      resume.contact.email,
+      resume.contact.phone,
+      resume.contact.linkedin,
+      resume.contact.address
+    ].filter(Boolean).join(' | ');
+    
+    this.addText(contactInfo, 10, 'normal', '#6b7280', 'center');
+    this.addSpace(20);
+
+    // Executive Summary
+    if (resume.professionalSummary) {
+      this.addText('EXECUTIVE SUMMARY', 14, 'bold', '#111827', 'center');
+      this.addSpace(8);
+      this.addText(`"${resume.professionalSummary}"`, 10, 'normal', '#374151', 'center');
+      this.addSpace(16);
+    }
+
+    // Core Competencies
+    if (resume.skills.length > 0) {
+      this.addText('CORE COMPETENCIES', 14, 'bold', '#111827', 'center');
+      this.addSpace(8);
+      
+      // Display skills in columns (simulated)
+      const skillsPerRow = 3;
+      for (let i = 0; i < resume.skills.slice(0, 15).length; i += skillsPerRow) {
+        const rowSkills = resume.skills.slice(i, i + skillsPerRow);
+        this.addText(rowSkills.join('   •   '), 10, 'normal', '#4b5563', 'center');
+        this.addSpace(4);
+      }
+      this.addSpace(12);
+    }
+
+    // Professional Experience
+    if (resume.workExperience.length > 0) {
+      this.addText('PROFESSIONAL EXPERIENCE', 14, 'bold', '#111827', 'center');
+      this.addSpace(8);
+      
+      resume.workExperience.forEach((exp, index) => {
+        this.addText(exp.position || '', 12, 'bold', '#111827');
+        this.addSpace(3);
+        this.addText(exp.company || '', 11, 'bold', '#6b7280');
+        this.addSpace(3);
+        if (exp.startDate || exp.endDate) {
+          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'bold', '#6b7280');
+        }
+        this.addSpace(6);
+        
+        if (exp.responsibilities) {
+          exp.responsibilities.forEach(resp => {
+            this.addText(`• ${resp}`, 10, 'normal', '#374151', 'left', 15);
+            this.addSpace(3);
+          });
+        }
+        
+        if (index < resume.workExperience.length - 1) this.addSpace(12);
+      });
+      this.addSpace(16);
+    }
+
+    // Education
+    if (resume.education.length > 0) {
+      this.addText('EDUCATION', 14, 'bold', '#111827', 'center');
+      this.addSpace(8);
+      
+      resume.education.forEach(edu => {
+        const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
+        this.addText(degreeLine, 11, 'bold', '#111827', 'center');
+        this.addSpace(3);
+        this.addText(edu.institution || '', 10, 'bold', '#6b7280', 'center');
+        this.addSpace(3);
+        if (edu.graduationDate) {
+          this.addText(edu.graduationDate, 10, 'normal', '#6b7280', 'center');
+        }
+        this.addSpace(10);
+      });
+    }
+  }
+
+  // Compact template formatting
+  private generateCompactTemplate(resume: ParsedResume): void {
+    // Compact header
+    this.addText(resume.contact.name || '', 16, 'bold', '#111827');
+    this.addSpace(4);
+    this.addText(`${resume.contact.email || ''} | ${resume.contact.phone || ''}`, 9, 'normal', '#6b7280');
+    this.addSpace(4);
+    if (resume.contact.linkedin || resume.contact.address) {
+      this.addText(`${resume.contact.linkedin || ''} | ${resume.contact.address || ''}`, 9, 'normal', '#6b7280');
+    }
+    this.addLine('#cccccc', 0.5);
+
+    // Two-column layout simulation
+    if (resume.professionalSummary) {
+      this.addText('SUMMARY', 11, 'bold', '#111827');
+      this.addSpace(4);
+      this.addText(resume.professionalSummary, 9, 'normal', '#374151');
+      this.addSpace(12);
+    }
+
+    // Experience (main column)
+    if (resume.workExperience.length > 0) {
+      this.addText('EXPERIENCE', 11, 'bold', '#111827');
+      this.addSpace(4);
+      
+      resume.workExperience.forEach((exp, index) => {
+        this.addText(exp.position || '', 10, 'bold', '#111827');
+        this.addSpace(2);
+        this.addText(exp.company || '', 9, 'normal', '#6b7280');
+        this.addSpace(2);
+        if (exp.startDate || exp.endDate) {
+          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 9, 'normal', '#6b7280');
+        }
+        this.addSpace(4);
+        
+        if (exp.responsibilities) {
+          exp.responsibilities.slice(0, 3).forEach(resp => {
+            this.addText(`• ${resp}`, 9, 'normal', '#374151', 'left', 10);
+            this.addSpace(2);
+          });
+        }
+        
+        if (index < resume.workExperience.length - 1) this.addSpace(8);
+      });
+      this.addSpace(12);
+    }
+
+    // Skills sidebar (simulated)
+    if (resume.skills.length > 0) {
+      this.addText('SKILLS', 11, 'bold', '#111827');
+      this.addSpace(4);
+      this.addText(resume.skills.slice(0, 12).join(' • '), 9, 'normal', '#374151');
+      this.addSpace(12);
+    }
+
+    // Education
+    if (resume.education.length > 0) {
+      this.addText('EDUCATION', 11, 'bold', '#111827');
+      this.addSpace(4);
+      
+      resume.education.forEach(edu => {
+        const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
+        this.addText(degreeLine, 10, 'bold', '#111827');
+        this.addSpace(2);
+        this.addText(edu.institution || '', 9, 'normal', '#6b7280');
+        this.addSpace(2);
+        if (edu.graduationDate) {
+          this.addText(edu.graduationDate, 9, 'normal', '#6b7280');
+        }
+        this.addSpace(6);
+      });
+    }
+  }
+
+  // Clean template formatting
+  private generateCleanTemplate(resume: ParsedResume): void {
+    // Simple header
+    this.addText(resume.contact.name || '', 18, 'normal', '#111827');
+    this.addSpace(6);
+    
+    if (resume.contact.email) {
+      this.addText(resume.contact.email, 10, 'normal', '#6b7280');
+      this.addSpace(2);
+    }
+    if (resume.contact.phone) {
+      this.addText(resume.contact.phone, 10, 'normal', '#6b7280');
+      this.addSpace(2);
+    }
+    if (resume.contact.linkedin) {
+      this.addText(resume.contact.linkedin, 10, 'normal', '#6b7280');
+      this.addSpace(2);
+    }
+    if (resume.contact.address) {
+      this.addText(resume.contact.address, 10, 'normal', '#6b7280');
+      this.addSpace(2);
+    }
+    this.addSpace(16);
+
+    // Summary
+    if (resume.professionalSummary) {
+      this.addText('Summary', 12, 'normal', '#111827');
+      this.addSpace(6);
+      this.addText(resume.professionalSummary, 10, 'normal', '#374151');
+      this.addSpace(16);
+    }
+
+    // Experience
+    if (resume.workExperience.length > 0) {
+      this.addText('Experience', 12, 'normal', '#111827');
+      this.addSpace(6);
+      
+      resume.workExperience.forEach((exp, index) => {
+        this.addText(exp.position || '', 11, 'normal', '#111827');
+        this.addSpace(3);
+        this.addText(exp.company || '', 10, 'normal', '#6b7280');
+        this.addSpace(3);
+        if (exp.startDate || exp.endDate) {
+          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'normal', '#6b7280');
+        }
+        this.addSpace(6);
+        
+        if (exp.responsibilities) {
+          exp.responsibilities.forEach(resp => {
+            this.addText(`• ${resp}`, 10, 'normal', '#374151', 'left', 15);
+            this.addSpace(3);
+          });
+        }
+        
+        if (index < resume.workExperience.length - 1) this.addSpace(12);
+      });
+      this.addSpace(16);
+    }
+
+    // Skills
+    if (resume.skills.length > 0) {
+      this.addText('Skills', 12, 'normal', '#111827');
+      this.addSpace(6);
+      this.addText(resume.skills.join(', '), 10, 'normal', '#374151');
+      this.addSpace(16);
+    }
+
+    // Education
+    if (resume.education.length > 0) {
+      this.addText('Education', 12, 'normal', '#111827');
+      this.addSpace(6);
+      
+      resume.education.forEach(edu => {
+        const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
+        this.addText(degreeLine, 11, 'normal', '#111827');
+        this.addSpace(3);
+        this.addText(edu.institution || '', 10, 'normal', '#6b7280');
+        this.addSpace(3);
+        if (edu.graduationDate) {
+          this.addText(edu.graduationDate, 10, 'normal', '#6b7280');
+        }
+        this.addSpace(10);
+      });
+    }
+  }
+
+  // Border template formatting
+  private generateBorderTemplate(resume: ParsedResume): void {
+    // Header with border styling
+    this.addText(resume.contact.name?.toUpperCase() || '', 20, 'bold', '#111827');
+    this.addSpace(6);
+    this.addLine('#111827', 2);
+    
+    // Contact info in grid format
+    const leftContact = [resume.contact.email, resume.contact.phone].filter(Boolean);
+    const rightContact = [resume.contact.linkedin, resume.contact.address].filter(Boolean);
+    
+    leftContact.forEach(info => {
+      this.addText(info, 10, 'normal', '#6b7280');
+      this.addSpace(2);
+    });
+    rightContact.forEach(info => {
+      this.addText(info, 10, 'normal', '#6b7280');
+      this.addSpace(2);
+    });
+    this.addSpace(16);
+
+    // Professional Summary with border
+    if (resume.professionalSummary) {
+      this.addText('PROFESSIONAL SUMMARY', 12, 'bold', '#ffffff', 'left', 0);
+      this.addSpace(8);
+      this.addText(resume.professionalSummary, 10, 'normal', '#374151');
+      this.addSpace(16);
+    }
+
+    // Experience with borders
+    if (resume.workExperience.length > 0) {
+      this.addText('PROFESSIONAL EXPERIENCE', 12, 'bold', '#ffffff', 'left', 0);
+      this.addSpace(8);
+      
+      resume.workExperience.forEach((exp, index) => {
+        this.addText(exp.position || '', 11, 'bold', '#111827');
+        this.addSpace(3);
+        this.addText(exp.company || '', 10, 'bold', '#6b7280');
+        this.addSpace(3);
+        if (exp.startDate || exp.endDate) {
+          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'normal', '#6b7280');
+        }
+        this.addSpace(6);
+        
+        if (exp.responsibilities) {
+          exp.responsibilities.forEach(resp => {
+            this.addText(`• ${resp}`, 10, 'normal', '#374151', 'left', 15);
+            this.addSpace(3);
+          });
+        }
+        
+        if (index < resume.workExperience.length - 1) this.addSpace(12);
+      });
+      this.addSpace(16);
+    }
+
+    // Skills with border
+    if (resume.skills.length > 0) {
+      this.addText('CORE SKILLS', 12, 'bold', '#ffffff', 'left', 0);
+      this.addSpace(8);
+      
+      // Display skills in a grid format
+      const skillsPerRow = 3;
+      for (let i = 0; i < resume.skills.slice(0, 18).length; i += skillsPerRow) {
+        const rowSkills = resume.skills.slice(i, i + skillsPerRow);
+        this.addText(rowSkills.join('   |   '), 10, 'normal', '#4b5563');
+        this.addSpace(4);
+      }
+      this.addSpace(12);
+    }
+
+    // Education with border
+    if (resume.education.length > 0) {
+      this.addText('EDUCATION', 12, 'bold', '#ffffff', 'left', 0);
+      this.addSpace(8);
+      
+      resume.education.forEach(edu => {
+        const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
+        this.addText(degreeLine, 11, 'bold', '#111827');
+        this.addSpace(3);
+        this.addText(edu.institution || '', 10, 'bold', '#6b7280');
+        this.addSpace(3);
+        if (edu.graduationDate) {
+          this.addText(edu.graduationDate, 10, 'normal', '#6b7280');
+        }
+        this.addSpace(10);
+      });
+    }
+  }
+
   public generate(resume: ParsedResume, templateType: TemplateType): void {
     this.currentY = this.margin;
     
@@ -428,6 +932,24 @@ class TemplatePDFGenerator {
         break;
       case 'executive':
         this.generateExecutiveTemplate(resume);
+        break;
+      case 'creative':
+        this.generateCreativeTemplate(resume);
+        break;
+      case 'tech':
+        this.generateTechTemplate(resume);
+        break;
+      case 'professional':
+        this.generateProfessionalTemplate(resume);
+        break;
+      case 'compact':
+        this.generateCompactTemplate(resume);
+        break;
+      case 'clean':
+        this.generateCleanTemplate(resume);
+        break;
+      case 'border':
+        this.generateBorderTemplate(resume);
         break;
       default:
         this.generateClassicTemplate(resume);
