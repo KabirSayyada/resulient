@@ -2,7 +2,7 @@
 import { ParsedResume } from '@/types/resumeStructure';
 import { extractContactInfo } from './resume/contactExtractor';
 import { identifySectionHeader } from './resume/sectionParser';
-import { parseExperience } from './resume/experienceParser';
+import { parseWorkExperience } from './resume/experienceParser';
 import { parseEducation } from './resume/educationParser';
 import { parseSkills } from './resume/skillsParser';
 import { parseProjects } from './resume/projectsParser';
@@ -27,8 +27,8 @@ export function parseResumeContent(content: string): ParsedResume {
     additionalSections: {}
   };
 
-  // Enhanced contact extraction - look at first 10 lines for contact info
-  const headerLines = lines.slice(0, Math.min(10, lines.length));
+  // Enhanced contact extraction - look at first 15 lines for contact info
+  const headerLines = lines.slice(0, Math.min(15, lines.length));
   console.log('Header lines for contact extraction:', headerLines);
   
   const extractedContact = extractContactInfo(headerLines);
@@ -61,7 +61,7 @@ export function parseResumeContent(content: string): ParsedResume {
     }
 
     // If we haven't identified a section yet and haven't processed contact info fully
-    if (!currentSection && !contactProcessed && i < 10) {
+    if (!currentSection && !contactProcessed && i < 15) {
       // This might be additional contact info - skip for now as it's handled above
       continue;
     }
@@ -91,12 +91,14 @@ export function parseResumeContent(content: string): ParsedResume {
     processSectionContent(resume, currentSection, sectionContent);
   }
 
-  // Fallback: if no name was extracted, try to find it in the first few lines
+  // Enhanced fallback: if no name was extracted, try to find it in the first few lines
   if (!resume.contact.name) {
-    for (const line of headerLines) {
-      if (couldBeName(line) && !line.includes('@') && !line.match(/\d{3}/)) {
+    console.log('No name found, trying fallback extraction...');
+    for (let i = 0; i < Math.min(8, headerLines.length); i++) {
+      const line = headerLines[i];
+      if (couldBeName(line) && !line.includes('@') && !line.match(/\d{3}/) && !line.includes('http')) {
         resume.contact.name = line;
-        console.log('Fallback name extraction:', line);
+        console.log('Fallback name extraction succeeded:', line);
         break;
       }
     }
@@ -127,7 +129,7 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
       resume.professionalSummary = content.join(' ').trim();
       break;
     case 'experience':
-      resume.workExperience = parseExperience(content);
+      resume.workExperience = parseWorkExperience(content);
       break;
     case 'education':
       resume.education = parseEducation(content);
