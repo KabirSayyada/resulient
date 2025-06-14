@@ -111,15 +111,8 @@ export function parseResumeContent(content: string): ParsedResume {
       const line = moreHeaderLines[i];
       console.log(`Fallback check line ${i}: "${line}"`);
       
-      // Very permissive name check for fallback
-      if (line.length > 1 && 
-          line.length < 100 && 
-          !line.includes('@') && 
-          !line.includes('http') &&
-          !line.match(/^\d+/) &&
-          !line.match(/^[A-Z\s]{10,}$/) &&
-          !line.match(/^(RESUME|CV|CURRICULUM|VITAE|PROFILE|SUMMARY|OBJECTIVE|EXPERIENCE|EDUCATION|SKILLS|PROJECTS|CERTIFICATIONS|CONTACT|PERSONAL|INFORMATION)$/i)) {
-        
+      // Very permissive name check for fallback - using imported couldBeName function
+      if (couldBeName(line)) {
         console.log(`Aggressive fallback: Using "${line}" as name`);
         resume.contact.name = line;
         break;
@@ -134,19 +127,6 @@ export function parseResumeContent(content: string): ParsedResume {
   console.log('Skills count:', resume.skills.length);
   
   return resume;
-}
-
-function couldBeName(line: string): boolean {
-  return (
-    line.length > 2 && 
-    line.length < 80 && 
-    !line.includes('http') &&
-    !line.includes('@') &&
-    !line.match(/^\d/) && 
-    line.split(' ').length >= 1 &&
-    line.split(' ').length <= 5 &&
-    !line.match(/^[A-Z\s]{10,}$/) // Not a long all-caps header
-  );
 }
 
 function processSectionContent(resume: ParsedResume, sectionType: string, content: string[]): void {
