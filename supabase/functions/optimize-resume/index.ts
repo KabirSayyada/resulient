@@ -92,7 +92,7 @@ serve(async (req) => {
     Original Resume:
     ${resumeContent}
 
-    Response format:
+    Please respond with a JSON object containing the optimized resume and qualification gaps:
     {
       "optimizedResume": "the conservatively optimized resume content with proper ATS formatting",
       "qualificationGaps": [
@@ -111,7 +111,7 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: "You are an expert ATS optimization specialist. You MUST be conservative and never add sensitive information, placeholders, or sections that don't exist in the original resume. Focus on enhancing existing content only."
+          content: "You are an expert ATS optimization specialist. You MUST be conservative and never add sensitive information, placeholders, or sections that don't exist in the original resume. Focus on enhancing existing content only. Always respond with valid JSON format."
         },
         {
           role: "user",
