@@ -8,7 +8,7 @@ import { ModernATSTemplate } from './templates/ModernATSTemplate';
 import { MinimalATSTemplate } from './templates/MinimalATSTemplate';
 import { ExecutiveATSTemplate } from './templates/ExecutiveATSTemplate';
 import { FileDown, Eye } from 'lucide-react';
-import { generateDirectResumePDF } from '@/utils/resumePdfGenerator';
+import { generateTemplatePDF } from '@/utils/templatePdfGenerator';
 import { useToast } from '@/hooks/use-toast';
 
 interface ResumeTemplateSelectorProps {
@@ -58,13 +58,16 @@ export const ResumeTemplateSelector = ({ resume, className = '' }: ResumeTemplat
     try {
       const filename = `resume-${templateType}-${new Date().toISOString().split('T')[0]}.pdf`;
       
-      // Use the generateDirectResumePDF function which handles PDF generation properly
-      generateDirectResumePDF(resume, filename);
+      const success = await generateTemplatePDF(resume, templateType, filename);
 
-      toast({
-        title: "Resume Downloaded",
-        description: `Your ${templates[templateType].name.toLowerCase()} resume has been downloaded successfully!`,
-      });
+      if (success) {
+        toast({
+          title: "Resume Downloaded",
+          description: `Your ${templates[templateType].name.toLowerCase()} resume has been downloaded successfully!`,
+        });
+      } else {
+        throw new Error("PDF generation failed");
+      }
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast({

@@ -31,7 +31,7 @@ import { ArrowRight, BookOpen, CheckCircle, ChevronDown, FileText, Star, Clock, 
 import { useReferralTracking } from "@/hooks/useReferralTracking";
 
 const Index = () => {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { subscription } = useSubscription();
@@ -44,8 +44,10 @@ const Index = () => {
   const [resumeContent, setResumeContent] = useState("");
   const [optimizedResume, setOptimizedResume] = useState("");
   const [qualificationGaps, setQualificationGaps] = useState<QualificationGap[]>([]);
-  const [optimizing, setOptimizing] = useState(false);
-  const [showStats, setShowStats] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [showResumeInput, setShowResumeInput] = useState(true);
+  const [hasReachedLimit, setHasReachedLimit] = useState(false);
+  const [showUpgradeAlert, setShowUpgradeAlert] = useState(false);
 
   const { callFunction, loading: functionLoading, error: functionError } = useSupabaseFunction();
   const { saveOptimization } = useResumeOptimizationHistory(user?.id);
@@ -142,7 +144,7 @@ const Index = () => {
       return;
     }
 
-    setOptimizing(true);
+    setIsOptimizing(true);
 
     try {
       const response = await callFunction("optimize-resume", {
@@ -187,8 +189,16 @@ const Index = () => {
         variant: "destructive",
       });
     } finally {
-      setOptimizing(false);
+      setIsOptimizing(false);
     }
+  };
+
+  const handleResumeSelected = () => {
+    setShowResumeInput(false);
+  };
+
+  const handleShowResumeInput = () => {
+    setShowResumeInput(true);
   };
 
   if (loading) {
@@ -328,13 +338,14 @@ const Index = () => {
                   resumeContent={resumeContent} 
                   setResumeContent={setResumeContent} 
                   userId={user?.id}
+                  onResumeSelected={handleResumeSelected}
                 />
               </div>
               
               <div className="flex justify-center">
                 <Button 
                   onClick={handleOptimizeResume} 
-                  disabled={optimizing || !resumeContent || !jobDescription}
+                  disabled={isOptimizing || !resumeContent || !jobDescription || (hasReachedLimit && subscription.tier === "free")}
                   className={`px-7 py-3 text-lg font-bold rounded-full shadow transition-all ${
                     subscription.tier === "premium" 
                       ? "bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600" 
@@ -343,7 +354,7 @@ const Index = () => {
                         : "bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500"
                   }`}
                 >
-                  {optimizing ? "Optimizing..." : "Optimize Resume"}
+                  {isOptimizing ? "Optimizing..." : "🚀 Optimize Resume"}
                 </Button>
               </div>
               
