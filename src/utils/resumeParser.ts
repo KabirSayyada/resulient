@@ -1,6 +1,6 @@
 
 import { ParsedResume } from '@/types/resumeStructure';
-import { extractContactInfo, couldBeName } from './resume/contactExtractor';
+import { extractContactInfo } from './resume/contactExtractor';
 import { identifySectionHeader } from './resume/sectionParser';
 import { parseWorkExperience } from './resume/experienceParser';
 import { parseEducation } from './resume/educationParser';
@@ -49,8 +49,16 @@ export function parseResumeContent(content: string): ParsedResume {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     
-    // Skip empty lines and dividers
-    if (!line || line.match(/^[=\-_]{3,}$/)) continue;
+    console.log(`Processing line ${i}: "${line}"`);
+    
+    // Skip empty lines and dividers - but don't reset section for dividers
+    if (!line) continue;
+    
+    // Check if this is just a divider line (but don't treat it as section header)
+    if (line.match(/^[=\-_]{3,}$/)) {
+      console.log(`Skipping divider line: "${line}"`);
+      continue;
+    }
 
     // Check if this is a section header
     const sectionType = identifySectionHeader(line);
@@ -60,36 +68,42 @@ export function parseResumeContent(content: string): ParsedResume {
       
       // Process previous section if we have one
       if (currentSection && sectionContent.length > 0) {
+        console.log(`Processing previous section: ${currentSection} with ${sectionContent.length} lines`);
         processSectionContent(resume, currentSection, sectionContent);
       }
       
       currentSection = sectionType;
       sectionContent = [];
       contactProcessed = true; // Mark that we've moved past the header
+      console.log(`Set current section to: ${currentSection}`);
       continue;
     }
 
     // If we haven't identified a section yet and haven't processed contact info fully
     if (!currentSection && !contactProcessed && i < 20) {
-      // This might be additional contact info - skip for now as it's handled above
+      console.log(`Still in contact area, skipping line: "${line}"`);
       continue;
     }
 
     // If we have a current section, add content to it
     if (currentSection) {
+      console.log(`Adding to ${currentSection}: "${line}"`);
       sectionContent.push(line);
     } else if (!contactProcessed) {
       // Try to identify what this line might be
       if (line.toLowerCase().includes('summary') || line.toLowerCase().includes('objective')) {
         currentSection = 'summary';
         sectionContent = [];
+        console.log(`Detected summary section from: "${line}"`);
       } else if (line.toLowerCase().includes('experience') || line.toLowerCase().includes('work')) {
         currentSection = 'experience';
         sectionContent = [];
+        console.log(`Detected experience section from: "${line}"`);
       } else {
         // This might be professional summary content without a header
         if (line.length > 20 && !line.includes('@') && !line.match(/\d{3}/)) {
           resume.professionalSummary += (resume.professionalSummary ? ' ' : '') + line;
+          console.log(`Added to professional summary: "${line}"`);
         }
       }
     }
@@ -97,6 +111,7 @@ export function parseResumeContent(content: string): ParsedResume {
 
   // Process the last section
   if (currentSection && sectionContent.length > 0) {
+    console.log(`Processing final section: ${currentSection} with ${sectionContent.length} lines`);
     processSectionContent(resume, currentSection, sectionContent);
   }
 
@@ -132,54 +147,52 @@ export function parseResumeContent(content: string): ParsedResume {
   console.log('Work Experience count:', resume.workExperience.length);
   console.log('Education count:', resume.education.length);
   console.log('Skills count:', resume.skills.length);
+  console.log('Professional Summary:', resume.professionalSummary);
   
   return resume;
 }
 
-function couldBeName(line: string): boolean {
-  return (
-    line.length > 2 && 
-    line.length < 80 && 
-    !line.includes('http') &&
-    !line.includes('@') &&
-    !line.match(/^\d/) && 
-    line.split(' ').length >= 1 &&
-    line.split(' ').length <= 5 &&
-    !line.match(/^[A-Z\s]{10,}$/) // Not a long all-caps header
-  );
-}
-
 function processSectionContent(resume: ParsedResume, sectionType: string, content: string[]): void {
   console.log(`Processing section: ${sectionType} with ${content.length} lines`);
+  console.log(`Section content:`, content);
   
   switch (sectionType) {
     case 'summary':
       resume.professionalSummary = content.join(' ').trim();
+      console.log(`Set professional summary to: "${resume.professionalSummary}"`);
       break;
     case 'experience':
       resume.workExperience = parseWorkExperience(content);
+      console.log(`Parsed ${resume.workExperience.length} work experiences`);
       break;
     case 'education':
       resume.education = parseEducation(content);
+      console.log(`Parsed ${resume.education.length} education entries`);
       break;
     case 'skills':
       resume.skills = parseSkills(content);
+      console.log(`Parsed ${resume.skills.length} skills`);
       break;
     case 'projects':
       resume.projects = parseProjects(content);
+      console.log(`Parsed ${resume.projects.length} projects`);
       break;
     case 'certifications':
       resume.certifications = parseCertifications(content);
+      console.log(`Parsed ${resume.certifications.length} certifications`);
       break;
     case 'achievements':
       resume.achievements = content.map(line => line.replace(/^[•\-*]\s*/, ''));
+      console.log(`Parsed ${resume.achievements.length} achievements`);
       break;
     case 'languages':
       resume.additionalSections.languages = content;
+      console.log(`Added ${content.length} language entries`);
       break;
     default:
       // Store unknown sections
       resume.additionalSections[sectionType] = content;
+      console.log(`Added to additional section ${sectionType}: ${content.length} entries`);
       break;
   }
 }
