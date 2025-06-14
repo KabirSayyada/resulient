@@ -44,9 +44,12 @@ const templates = {
 export const ResumeTemplateSelector = ({ resume, className = '' }: ResumeTemplateSelectorProps) => {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('classic');
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isDownloading, setIsDownloading] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleDownloadPDF = async (templateType: TemplateType) => {
+    setIsDownloading(templateType);
+    
     toast({
       title: "Generating PDF",
       description: `Creating your resume with the ${templates[templateType].name} template...`,
@@ -55,28 +58,8 @@ export const ResumeTemplateSelector = ({ resume, className = '' }: ResumeTemplat
     try {
       const filename = `resume-${templateType}-${new Date().toISOString().split('T')[0]}.pdf`;
       
-      // Create a temporary element with the selected template
-      const tempDiv = document.createElement('div');
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.top = '0';
-      tempDiv.style.width = '800px';
-      document.body.appendChild(tempDiv);
-
-      const TemplateComponent = templates[templateType].component;
-      const React = require('react');
-      const ReactDOM = require('react-dom/client');
-      
-      const root = ReactDOM.createRoot(tempDiv);
-      root.render(React.createElement(TemplateComponent, { resume }));
-
-      // Wait a moment for rendering
-      await new Promise(resolve => setTimeout(resolve, 500));
-
+      // Use the generateDirectResumePDF function which handles PDF generation properly
       generateDirectResumePDF(resume, filename);
-      
-      // Cleanup
-      document.body.removeChild(tempDiv);
 
       toast({
         title: "Resume Downloaded",
@@ -89,6 +72,8 @@ export const ResumeTemplateSelector = ({ resume, className = '' }: ResumeTemplat
         description: "There was an error generating your resume PDF. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsDownloading(null);
     }
   };
 
@@ -129,10 +114,11 @@ export const ResumeTemplateSelector = ({ resume, className = '' }: ResumeTemplat
                     e.stopPropagation();
                     handleDownloadPDF(key as TemplateType);
                   }}
+                  disabled={isDownloading === key}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
                   <FileDown className="h-4 w-4 mr-1" />
-                  Download
+                  {isDownloading === key ? 'Generating...' : 'Download'}
                 </Button>
               </div>
               <p className="text-sm text-gray-600">{template.description}</p>

@@ -17,7 +17,9 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
     skills: [],
     education: [],
     projects: [],
-    certifications: []
+    certifications: [],
+    achievements: [],
+    additionalSections: {}
   };
 
   let currentSection = '';
@@ -160,6 +162,11 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
           issuer: 'Unknown',
           date: ''
         };
+      }
+    }
+    else if (currentSection.includes('achievement')) {
+      if (trimmedLine.startsWith('•')) {
+        resume.achievements.push(trimmedLine.substring(1).trim());
       }
     }
     else if (!currentSection && trimmedLine) {
