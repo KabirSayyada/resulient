@@ -53,7 +53,7 @@ class TemplatePDFGenerator {
 
     const effectiveWidth = this.contentWidth - indent;
     const lines = this.pdf.splitTextToSize(text, effectiveWidth);
-    const lineHeight = fontSize * 1.4;
+    const lineHeight = fontSize * 1.5; // Increased line height for better spacing
 
     this.checkPageBreak(lines.length * lineHeight);
 
@@ -71,17 +71,18 @@ class TemplatePDFGenerator {
   }
 
   private addLine(color: string = '#cccccc', width: number = 0.5): void {
+    this.addSpace(4); // Add space before line
     this.pdf.setDrawColor(color);
     this.pdf.setLineWidth(width);
     this.pdf.line(this.margin, this.currentY, this.pageWidth - this.margin, this.currentY);
-    this.addSpace(6);
+    this.addSpace(8); // Add space after line
   }
 
-  // Classic template formatting
+  // Classic template formatting - Fixed spacing issues
   private generateClassicTemplate(resume: ParsedResume): void {
     // Header
     this.addText(resume.contact.name || '', 18, 'bold', '#000000', 'center');
-    this.addSpace(8);
+    this.addSpace(12);
     
     const contactInfo = [
       resume.contact.email,
@@ -91,14 +92,14 @@ class TemplatePDFGenerator {
     ].filter(Boolean).join(' | ');
     
     this.addText(contactInfo, 10, 'normal', '#666666', 'center');
-    this.addSpace(20);
+    this.addSpace(24);
 
     // Professional Summary
     if (resume.professionalSummary) {
       this.addText('PROFESSIONAL SUMMARY', 12, 'bold', '#333333');
       this.addLine();
       this.addText(resume.professionalSummary, 10);
-      this.addSpace(16);
+      this.addSpace(20);
     }
 
     // Work Experience
@@ -108,18 +109,20 @@ class TemplatePDFGenerator {
       
       resume.workExperience.forEach((exp, index) => {
         this.addText(exp.position || '', 11, 'bold');
+        this.addSpace(2);
         this.addText(`${exp.company || ''} | ${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'normal', '#666666');
-        this.addSpace(4);
+        this.addSpace(8);
         
         if (exp.responsibilities) {
           exp.responsibilities.forEach(resp => {
             this.addText(`• ${resp}`, 10, 'normal', '#000000', 'left', 15);
+            this.addSpace(2);
           });
         }
         
-        if (index < resume.workExperience.length - 1) this.addSpace(12);
+        if (index < resume.workExperience.length - 1) this.addSpace(16);
       });
-      this.addSpace(16);
+      this.addSpace(20);
     }
 
     // Skills
@@ -127,7 +130,7 @@ class TemplatePDFGenerator {
       this.addText('TECHNICAL SKILLS', 12, 'bold', '#333333');
       this.addLine();
       this.addText(resume.skills.join(' • '), 10);
-      this.addSpace(16);
+      this.addSpace(20);
     }
 
     // Education
@@ -138,8 +141,9 @@ class TemplatePDFGenerator {
       resume.education.forEach(edu => {
         const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
         this.addText(degreeLine, 11, 'bold');
+        this.addSpace(2);
         this.addText(`${edu.institution || ''} | ${edu.graduationDate || ''}`, 10, 'normal', '#666666');
-        this.addSpace(8);
+        this.addSpace(12);
       });
     }
   }
@@ -148,7 +152,7 @@ class TemplatePDFGenerator {
   private generateModernTemplate(resume: ParsedResume): void {
     // Header with blue accent
     this.addText(resume.contact.name || '', 20, 'bold', '#1e40af');
-    this.addSpace(8);
+    this.addSpace(12);
     
     const contactInfo = [
       resume.contact.email,
@@ -159,44 +163,47 @@ class TemplatePDFGenerator {
     
     this.addText(contactInfo, 10, 'normal', '#374151');
     this.addLine('#3b82f6', 2);
-    this.addSpace(16);
+    this.addSpace(20);
 
     // Professional Summary with background effect (simulated with spacing)
     if (resume.professionalSummary) {
       this.addText('PROFESSIONAL SUMMARY', 12, 'bold', '#1e40af');
-      this.addSpace(8);
+      this.addSpace(12);
       this.addText(resume.professionalSummary, 10, 'normal', '#111827');
-      this.addSpace(16);
+      this.addSpace(20);
     }
 
     // Work Experience with left border effect
     if (resume.workExperience.length > 0) {
       this.addText('PROFESSIONAL EXPERIENCE', 12, 'bold', '#1e40af');
-      this.addSpace(8);
+      this.addSpace(12);
       
       resume.workExperience.forEach((exp, index) => {
         this.addText(exp.position || '', 11, 'bold', '#111827');
+        this.addSpace(3);
         this.addText(exp.company || '', 10, 'bold', '#3b82f6');
+        this.addSpace(3);
         if (exp.startDate || exp.endDate) {
           this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'normal', '#6b7280');
         }
-        this.addSpace(4);
+        this.addSpace(8);
         
         if (exp.responsibilities) {
           exp.responsibilities.slice(0, 4).forEach(resp => {
             this.addText(`• ${resp}`, 10, 'normal', '#374151', 'left', 15);
+            this.addSpace(2);
           });
         }
         
-        if (index < resume.workExperience.length - 1) this.addSpace(12);
+        if (index < resume.workExperience.length - 1) this.addSpace(16);
       });
-      this.addSpace(16);
+      this.addSpace(20);
     }
 
     // Skills in tag-like format
     if (resume.skills.length > 0) {
       this.addText('TECHNICAL SKILLS', 12, 'bold', '#1e40af');
-      this.addSpace(8);
+      this.addSpace(12);
       
       let skillsLine = '';
       resume.skills.slice(0, 15).forEach((skill, index) => {
@@ -204,22 +211,24 @@ class TemplatePDFGenerator {
         if (index < resume.skills.slice(0, 15).length - 1) skillsLine += ' | ';
       });
       this.addText(skillsLine, 10, 'normal', '#374151');
-      this.addSpace(16);
+      this.addSpace(20);
     }
 
     // Education
     if (resume.education.length > 0) {
       this.addText('EDUCATION', 12, 'bold', '#1e40af');
-      this.addSpace(8);
+      this.addSpace(12);
       
       resume.education.forEach(edu => {
         const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
         this.addText(degreeLine, 11, 'bold', '#111827');
+        this.addSpace(3);
         this.addText(edu.institution || '', 10, 'normal', '#374151');
+        this.addSpace(3);
         if (edu.graduationDate) {
           this.addText(edu.graduationDate, 10, 'normal', '#6b7280');
         }
-        this.addSpace(8);
+        this.addSpace(12);
       });
     }
   }
@@ -228,7 +237,7 @@ class TemplatePDFGenerator {
   private generateMinimalTemplate(resume: ParsedResume): void {
     // Clean header
     this.addText(resume.contact.name || '', 22, 'normal', '#111827', 'center');
-    this.addSpace(12);
+    this.addSpace(16);
     
     const contactInfo = [
       resume.contact.email,
@@ -239,77 +248,85 @@ class TemplatePDFGenerator {
     
     contactInfo.forEach(info => {
       this.addText(info, 10, 'normal', '#6b7280', 'center');
+      this.addSpace(2);
     });
     
     // Small decorative line
+    this.addSpace(12);
     this.pdf.setDrawColor('#d1d5db');
     this.pdf.setLineWidth(0.5);
     const lineStart = this.pageWidth / 2 - 30;
     const lineEnd = this.pageWidth / 2 + 30;
     this.pdf.line(lineStart, this.currentY, lineEnd, this.currentY);
-    this.addSpace(20);
+    this.addSpace(24);
 
     // Summary
     if (resume.professionalSummary) {
       this.addText('SUMMARY', 11, 'normal', '#374151');
-      this.addSpace(8);
+      this.addSpace(12);
       this.addText(resume.professionalSummary, 10, 'normal', '#4b5563');
-      this.addSpace(16);
+      this.addSpace(20);
     }
 
     // Experience
     if (resume.workExperience.length > 0) {
       this.addText('EXPERIENCE', 11, 'normal', '#374151');
-      this.addSpace(8);
+      this.addSpace(12);
       
       resume.workExperience.forEach((exp, index) => {
         this.addText(exp.position || '', 11, 'bold', '#111827');
+        this.addSpace(3);
         this.addText(exp.company || '', 10, 'normal', '#6b7280');
+        this.addSpace(3);
         if (exp.startDate || exp.endDate) {
           this.addText(`${exp.startDate || ''} – ${exp.endDate || ''}`, 9, 'normal', '#9ca3af');
         }
-        this.addSpace(4);
+        this.addSpace(8);
         
         if (exp.responsibilities) {
           exp.responsibilities.slice(0, 3).forEach(resp => {
             this.addText(`• ${resp}`, 10, 'normal', '#4b5563', 'left', 15);
+            this.addSpace(2);
           });
         }
         
-        if (index < resume.workExperience.length - 1) this.addSpace(12);
+        if (index < resume.workExperience.length - 1) this.addSpace(16);
       });
-      this.addSpace(16);
+      this.addSpace(20);
     }
 
     // Skills
     if (resume.skills.length > 0) {
       this.addText('SKILLS', 11, 'normal', '#374151');
-      this.addSpace(8);
+      this.addSpace(12);
       this.addText(resume.skills.slice(0, 20).join(' • '), 10, 'normal', '#4b5563');
-      this.addSpace(16);
+      this.addSpace(20);
     }
 
     // Education
     if (resume.education.length > 0) {
       this.addText('EDUCATION', 11, 'normal', '#374151');
-      this.addSpace(8);
+      this.addSpace(12);
       
       resume.education.forEach(edu => {
         const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
         this.addText(degreeLine, 11, 'bold', '#111827');
+        this.addSpace(3);
         this.addText(edu.institution || '', 10, 'normal', '#6b7280');
+        this.addSpace(3);
         if (edu.graduationDate) {
           this.addText(edu.graduationDate, 9, 'normal', '#9ca3af');
         }
-        this.addSpace(8);
+        this.addSpace(12);
       });
     }
   }
 
-  // Executive template formatting
+  // Executive template formatting - Fixed spacing issues
   private generateExecutiveTemplate(resume: ParsedResume): void {
     // Executive header
     this.addText(resume.contact.name?.toUpperCase() || '', 20, 'bold', '#111827');
+    this.addSpace(8);
     this.addLine('#1f2937', 1);
     
     const contactInfo = [
@@ -320,14 +337,14 @@ class TemplatePDFGenerator {
     ].filter(Boolean).join(' | ');
     
     this.addText(contactInfo, 10, 'bold', '#4b5563');
-    this.addSpace(20);
+    this.addSpace(24);
 
     // Executive Summary
     if (resume.professionalSummary) {
       this.addText('EXECUTIVE SUMMARY', 12, 'bold', '#111827');
       this.addLine('#6b7280');
       this.addText(resume.professionalSummary, 10, 'bold', '#374151');
-      this.addSpace(16);
+      this.addSpace(20);
     }
 
     // Core Competencies
@@ -344,6 +361,7 @@ class TemplatePDFGenerator {
       skillsRows.forEach(row => {
         const rowText = row.map(skill => `• ${skill}`).join('   ');
         this.addText(rowText, 10, 'bold', '#4b5563');
+        this.addSpace(4);
       });
       this.addSpace(16);
     }
@@ -355,21 +373,24 @@ class TemplatePDFGenerator {
       
       resume.workExperience.forEach((exp, index) => {
         this.addText((exp.position || '').toUpperCase(), 11, 'bold', '#111827');
+        this.addSpace(4);
         this.addText(exp.company || '', 10, 'bold', '#4b5563');
+        this.addSpace(4);
         if (exp.startDate || exp.endDate) {
           this.addText(`${exp.startDate || ''} – ${exp.endDate || ''}`, 10, 'bold', '#6b7280');
         }
-        this.addSpace(4);
+        this.addSpace(8);
         
         if (exp.responsibilities) {
           exp.responsibilities.slice(0, 4).forEach(resp => {
             this.addText(`▪ ${resp}`, 10, 'normal', '#374151', 'left', 10);
+            this.addSpace(3);
           });
         }
         
-        if (index < resume.workExperience.length - 1) this.addSpace(12);
+        if (index < resume.workExperience.length - 1) this.addSpace(16);
       });
-      this.addSpace(16);
+      this.addSpace(20);
     }
 
     // Education
@@ -380,11 +401,13 @@ class TemplatePDFGenerator {
       resume.education.forEach(edu => {
         const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
         this.addText(degreeLine, 11, 'bold', '#111827');
+        this.addSpace(4);
         this.addText(edu.institution || '', 10, 'bold', '#4b5563');
+        this.addSpace(4);
         if (edu.graduationDate) {
           this.addText(edu.graduationDate, 10, 'bold', '#6b7280');
         }
-        this.addSpace(8);
+        this.addSpace(12);
       });
     }
   }
