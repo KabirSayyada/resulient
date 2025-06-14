@@ -1,3 +1,4 @@
+
 import { useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,8 +11,10 @@ import { AnalysisCards } from "./components/AnalysisCards";
 import { ReportHeader } from "./components/ReportHeader";
 import { OptimizedResumeContent } from "./components/OptimizedResumeContent";
 import { DownloadReportButton } from "./components/DownloadReportButton";
+import { ResumeTemplateSelector } from "./ResumeTemplateSelector";
 import { generatePDFFromElement } from "@/utils/reportGenerationUtils";
 import { generateTextFormattedPDF } from "@/utils/textFormattedPdfGenerator";
+import { parseOptimizedResumeContent } from "@/utils/resumeContentParser";
 import { 
   formatResumeContent, 
   calculateKeywordScore, 
@@ -125,6 +128,9 @@ export const OptimizedResumeDisplay = ({
   const overallScore = Math.round((keywordScore + structureScore + atsScore) / 3);
   const suggestions = generateSuggestions(keywordScore, structureScore, atsScore, formattedResumeContent, jobDescription || "");
   
+  // Parse the optimized resume content for template rendering
+  const parsedResume = parseOptimizedResumeContent(formattedResumeContent);
+  
   const currentDate = new Date();
   const formattedDate = currentDate.toLocaleDateString();
   const formattedTime = currentDate.toLocaleTimeString();
@@ -166,51 +172,18 @@ export const OptimizedResumeDisplay = ({
 
               <OptimizedResumeContent content={formattedResumeContent} />
               
-              {/* Enhanced Optimized Resume Download Section - PDF only */}
-              <div className="mt-4 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border border-indigo-200 dark:border-indigo-700">
-                <div className="flex flex-col space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                      Download Professional Resume (PDF)
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Get your AI-optimized resume as a professionally formatted PDF, ready to submit to employers.
-                    </p>
-                  </div>
-                  
-                  <div className="flex justify-center">
-                    <Button 
-                      onClick={handleOptimizedResumePdfDownload}
-                      disabled={isPdfDownloading}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 disabled:cursor-not-allowed px-8 py-3"
-                      size="lg"
-                    >
-                      {isPdfDownloading ? (
-                        <>
-                          <FileText className="h-5 w-5 mr-2 animate-pulse" />
-                          Preparing PDF...
-                        </>
-                      ) : (
-                        <>
-                          <FileDown className="h-5 w-5 mr-2" />
-                          Download Professional Resume
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  
-                  <div className="text-xs text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
-                    <p className="font-medium mb-1">✨ PDF Benefits:</p>
-                    <ul className="space-y-1">
-                      <li>• <strong>Professional Presentation:</strong> Clean, polished formatting that looks great</li>
-                      <li>• <strong>ATS-Optimized:</strong> Designed to pass through Applicant Tracking Systems</li>
-                      <li>• <strong>Universal Compatibility:</strong> Works on all devices and platforms</li>
-                      <li>• <strong>Print-Ready:</strong> Perfect for both digital submissions and physical copies</li>
-                      <li>• <strong>Consistent Formatting:</strong> Maintains exact layout across all viewers</li>
-                      <li>• <strong>Contact Info Optimization:</strong> Single-line contact details for better ATS parsing</li>
-                    </ul>
-                  </div>
+              {/* Template Selector for Optimized Resume Download */}
+              <div className="mt-6 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border border-indigo-200 dark:border-indigo-700">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    Download Your Optimized Resume
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Choose from professional templates and download your AI-optimized resume in your preferred style.
+                  </p>
                 </div>
+                
+                <ResumeTemplateSelector resume={parsedResume} />
               </div>
             </div>
             
