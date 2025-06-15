@@ -77,40 +77,8 @@ class TemplatePDFGenerator {
     this.addSpace(12);
   }
 
-  // Helper method to add volunteer experience section
-  private addVolunteerExperience(volunteerExperience: ParsedWorkExperience[], headerColor: string = '#333333', contentColor: string = '#000000'): void {
-    if (volunteerExperience && volunteerExperience.length > 0) {
-      this.addText('VOLUNTEER EXPERIENCE', 12, 'bold', headerColor);
-      this.addLine();
-      
-      volunteerExperience.forEach((exp, index) => {
-        this.addText(exp.position || '', 11, 'bold', contentColor);
-        this.addSpace(3);
-        this.addText(exp.company || '', 10, 'normal', headerColor);
-        this.addSpace(3);
-        if (exp.startDate || exp.endDate) {
-          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'normal', '#666666');
-        }
-        this.addSpace(8);
-        
-        if (exp.responsibilities && exp.responsibilities.length > 0) {
-          exp.responsibilities.forEach(resp => {
-            this.addText(`• ${resp}`, 10, 'normal', contentColor, 'left', 15);
-            this.addSpace(4);
-          });
-        }
-        
-        if (index < volunteerExperience.length - 1) this.addSpace(12);
-      });
-      this.addSpace(16);
-    }
-  }
-
   // Helper method to add additional sections
   private addAdditionalSections(resume: ParsedResume, headerColor: string = '#333333', contentColor: string = '#000000'): void {
-    // Handle volunteer experience with proper structure
-    this.addVolunteerExperience(resume.volunteerExperience, headerColor, contentColor);
-
     // Handle certifications
     if (resume.certifications && resume.certifications.length > 0) {
       this.addText('CERTIFICATIONS', 12, 'bold', headerColor);
@@ -157,7 +125,7 @@ class TemplatePDFGenerator {
       });
     }
 
-    // Handle additional sections (hobbies, languages, etc.)
+    // Handle additional sections (references, languages, etc.)
     if (resume.additionalSections) {
       Object.entries(resume.additionalSections).forEach(([sectionName, sectionContent]) => {
         if (Array.isArray(sectionContent) && sectionContent.length > 0) {
@@ -176,14 +144,6 @@ class TemplatePDFGenerator {
           this.addSpace(16);
         }
       });
-    }
-
-    // Handle languages separately if they exist
-    if (resume.languages && resume.languages.length > 0) {
-      this.addText('LANGUAGES', 12, 'bold', headerColor);
-      this.addLine();
-      this.addText(resume.languages.join(' • '), 10, 'normal', contentColor);
-      this.addSpace(16);
     }
   }
 
