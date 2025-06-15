@@ -1,30 +1,62 @@
 
-// Common section header variations
-export const SECTION_MAPPINGS = {
-  contact: /^(contact|personal|info|information|details)$/i,
-  summary: /^(summary|profile|objective|about|overview|professional\s*summary|career\s*summary|executive\s*summary)$/i,
-  experience: /^(experience|work|employment|professional\s*experience|work\s*experience|career|history|professional\s*history)$/i,
-  education: /^(education|academic|qualifications|degrees|schooling)$/i,
-  skills: /^(skills|technical\s*skills|core\s*competencies|competencies|expertise|technologies|proficiencies|abilities|tech\s*stack)$/i,
-  projects: /^(projects|portfolio|work\s*samples|personal\s*projects|key\s*projects)$/i,
-  certifications: /^(certifications|certificates|credentials|licenses|professional\s*development|professional\s*certifications)$/i,
-  achievements: /^(achievements|accomplishments|awards|honors|recognition)$/i,
-  languages: /^(languages|linguistic\s*skills)$/i
+/**
+ * Constants for resume parsing
+ */
+
+// Enhanced section mappings with regex patterns for better detection
+export const SECTION_MAPPINGS: { [key: string]: RegExp } = {
+  // Summary variations
+  'summary': /^(PROFESSIONAL\s+SUMMARY|EXECUTIVE\s+SUMMARY|SUMMARY|OBJECTIVE|CAREER\s+OBJECTIVE|CAREER\s+SUMMARY|PROFILE|ABOUT(\s+ME)?|PROFESSIONAL\s+PROFILE|PERSONAL\s+STATEMENT|OVERVIEW|SYNOPSIS)(\s+SECTION)?$/i,
+  
+  // Experience variations
+  'experience': /^(PROFESSIONAL\s+EXPERIENCE|WORK\s+EXPERIENCE|EXPERIENCE|EMPLOYMENT(\s+HISTORY)?|CAREER\s+HISTORY|PROFESSIONAL\s+HISTORY|WORK\s+HISTORY|JOB\s+EXPERIENCE|EMPLOYMENT\s+RECORD)(\s+SECTION)?$/i,
+  
+  // Skills variations
+  'skills': /^(TECHNICAL\s+SKILLS|SKILLS|CORE\s+COMPETENCIES|COMPETENCIES|TECHNOLOGIES|KEY\s+SKILLS|PROFESSIONAL\s+SKILLS|TECHNICAL\s+COMPETENCIES|CORE\s+SKILLS|SKILL\s+SET|EXPERTISE|PROFICIENCIES|CAPABILITIES)(\s+SECTION)?$/i,
+  
+  // Education variations
+  'education': /^(EDUCATION|ACADEMIC\s+BACKGROUND|QUALIFICATIONS|ACADEMIC\s+QUALIFICATIONS|EDUCATIONAL\s+BACKGROUND|ACADEMIC\s+HISTORY|LEARNING|STUDIES)(\s+SECTION)?$/i,
+  
+  // Projects variations
+  'projects': /^(PROJECTS|KEY\s+PROJECTS|NOTABLE\s+PROJECTS|SELECTED\s+PROJECTS|PROJECT\s+EXPERIENCE|RELEVANT\s+PROJECTS|PERSONAL\s+PROJECTS|SIDE\s+PROJECTS|PORTFOLIO)(\s+SECTION)?$/i,
+  
+  // Certifications variations
+  'certifications': /^(CERTIFICATIONS?|CERTIFICATES|LICENSES|PROFESSIONAL\s+CERTIFICATIONS|CERTIFICATIONS?\s+AND\s+LICENSES|LICENSES\s+AND\s+CERTIFICATIONS|CREDENTIALS|ACCREDITATIONS)(\s+SECTION)?$/i,
+  
+  // Achievements variations
+  'achievements': /^(ACHIEVEMENTS|ACCOMPLISHMENTS|AWARDS|HONORS|KEY\s+ACHIEVEMENTS|RECOGNITION|AWARDS\s+AND\s+HONORS|ACCOLADES|DISTINCTIONS)(\s+SECTION)?$/i,
+  
+  // Languages variations
+  'languages': /^(LANGUAGES?|LANGUAGE\s+SKILLS|LINGUISTIC\s+SKILLS|FOREIGN\s+LANGUAGES)(\s+SECTION)?$/i,
+  
+  // Additional common sections
+  'volunteer': /^(VOLUNTEER(\s+EXPERIENCE)?|VOLUNTEER\s+WORK|VOLUNTEER\s+ACTIVITIES|VOLUNTEERING|COMMUNITY\s+SERVICE|SOCIAL\s+WORK)(\s+SECTION)?$/i,
+  'publications': /^(PUBLICATIONS?|RESEARCH|PAPERS|ARTICLES|PUBLICATIONS\s+AND\s+RESEARCH|SCHOLARLY\s+WORK|ACADEMIC\s+PUBLICATIONS)(\s+SECTION)?$/i,
+  'references': /^(REFERENCES|PROFESSIONAL\s+REFERENCES|REFEREES|RECOMMENDATIONS)(\s+SECTION)?$/i,
+  'interests': /^(INTERESTS|HOBBIES|PERSONAL\s+INTERESTS|HOBBIES\s+AND\s+INTERESTS|ACTIVITIES|LEISURE\s+ACTIVITIES)(\s+SECTION)?$/i,
+  'training': /^(TRAINING|PROFESSIONAL\s+DEVELOPMENT|WORKSHOPS|COURSES|CONTINUING\s+EDUCATION|ADDITIONAL\s+TRAINING|PROFESSIONAL\s+TRAINING)(\s+SECTION)?$/i,
+  'additional': /^(ADDITIONAL\s+INFORMATION|MISCELLANEOUS|OTHER|EXTRAS|SUPPLEMENTARY|FURTHER\s+INFORMATION)(\s+SECTION)?$/i
 };
 
-// Email regex pattern
-export const EMAIL_REGEX = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
-
-// Phone regex pattern (supports various formats)
-export const PHONE_REGEX = /(\+?1?[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/;
-
-// LinkedIn URL pattern
-export const LINKEDIN_REGEX = /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+/i;
-
-// Date patterns for experience
-export const DATE_PATTERNS = [
-  /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}\b/gi,
-  /\b\d{1,2}\/\d{4}\b/g,
-  /\b\d{4}\b/g,
-  /\b(?:Present|Current|Now)\b/gi
+// Patterns that should be completely ignored (not treated as sections)
+export const IGNORE_PATTERNS: RegExp[] = [
+  /^(PAGE\s+\d+|\d+\s+OF\s+\d+)$/i, // Page numbers
+  /^(RESUME|CV|CURRICULUM\s+VITAE)$/i, // Document titles
+  /^[=\-_]{3,}$/, // Divider lines
+  /^[•\-*]+$/, // Bullet point lines
+  /^\d+$/, // Just numbers
+  /^(CONFIDENTIAL|PRIVATE|DRAFT)$/i, // Document status
+  /^(CONTACT\s+INFORMATION|PERSONAL\s+DETAILS)$/i // Redundant contact headers
 ];
+
+// Minimum requirements for a valid section header
+export const SECTION_VALIDATION = {
+  MIN_LENGTH: 2,
+  MAX_LENGTH: 100,
+  // Must contain at least one letter
+  MUST_CONTAIN_LETTER: /[a-zA-Z]/,
+  // Should not be mostly numbers or symbols
+  NOT_MOSTLY_NUMBERS: /^[0-9\s]{0,2}[a-zA-Z]/,
+  // Should not contain too many special characters
+  MAX_SPECIAL_CHARS: 0.3 // 30% of characters can be special
+};
