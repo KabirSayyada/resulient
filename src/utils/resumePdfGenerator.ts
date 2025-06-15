@@ -200,6 +200,45 @@ class ResumePDFGenerator {
     this.addSpace(6);
   }
 
+  private addVolunteerExperience(experiences: any[]): void {
+    if (!experiences || experiences.length === 0) return;
+    
+    this.addSectionHeader('Volunteer Experience');
+
+    experiences.forEach((exp, index) => {
+      // Position and organization
+      const titleLine = exp.position && exp.company ? 
+        `${exp.position} - ${exp.company}` : 
+        exp.position || exp.company || 'Volunteer';
+      
+      this.addText(titleLine, this.settings.fontSize.subheader, 'bold');
+
+      // Dates and location
+      if (exp.startDate || exp.endDate || exp.location) {
+        const dateLocation = [];
+        if (exp.startDate) dateLocation.push(exp.startDate);
+        if (exp.endDate) dateLocation.push(`- ${exp.endDate}`);
+        if (exp.location) dateLocation.push(`| ${exp.location}`);
+        
+        this.addText(dateLocation.join(' '), this.settings.fontSize.small, 'normal', this.settings.colors.secondary);
+      }
+
+      // Responsibilities
+      if (exp.responsibilities && exp.responsibilities.length > 0) {
+        this.addSpace(2);
+        exp.responsibilities.forEach((resp: string) => {
+          const bulletText = `• ${resp}`;
+          this.addText(bulletText, this.settings.fontSize.body, 'normal', this.settings.colors.text, 10);
+        });
+      }
+
+      if (index < experiences.length - 1) {
+        this.addSpace(6);
+      }
+    });
+    this.addSpace(6);
+  }
+
   private addSkills(skills: string[]): void {
     if (!skills || skills.length === 0) return;
     this.addSectionHeader('Technical Skills');
@@ -305,6 +344,9 @@ class ResumePDFGenerator {
     this.addCertifications(resume.certifications);
     this.addAchievements(resume.achievements);
     this.addLanguages(resume.languages);
+    
+    // Add volunteer experience if it exists
+    this.addVolunteerExperience(resume.volunteerExperience);
 
     // Add any additional sections
     if (resume.additionalSections) {
@@ -339,12 +381,13 @@ export function parseOptimizedResumeContent(content: string): ParsedResume {
     },
     professionalSummary: '',
     workExperience: [],
-    skills: [],
     education: [],
+    skills: [],
     projects: [],
     certifications: [],
     achievements: [],
     languages: [],
+    volunteerExperience: [],
     additionalSections: {}
   };
 
@@ -382,6 +425,9 @@ export function parseOptimizedResumeContent(content: string): ParsedResume {
       continue;
     } else if (upperLine.includes('LANGUAGES')) {
       currentSection = 'languages';
+      continue;
+    } else if (upperLine.includes('VOLUNTEER')) {
+      currentSection = 'volunteer';
       continue;
     }
 
@@ -427,6 +473,39 @@ export function parseOptimizedResumeContent(content: string): ParsedResume {
             resume.workExperience.push(currentExperience);
           }
           // Start new experience
+          const parts = line.split('-');
+          currentExperience = {
+            position: parts[0]?.trim() || '',
+            company: parts[1]?.trim() || '',
+            startDate: '',
+            endDate: '',
+            location: '',
+            responsibilities: []
+          };
+        } else if (currentExperience && line.match(/\d{4}/)) {
+          // Date line
+          const dateParts = line.split('|');
+          if (dateParts.length > 1) {
+            currentExperience.location = dateParts[1].trim();
+          }
+          const dateRange = dateParts[0].trim();
+          const dates = dateRange.split('-').map(d => d.trim());
+          currentExperience.startDate = dates[0] || '';
+          currentExperience.endDate = dates[1] || '';
+        }
+        break;
+
+      case 'volunteer':
+        if (line.startsWith('•')) {
+          if (currentExperience) {
+            currentExperience.responsibilities.push(line.substring(1).trim());
+          }
+        } else if (line.includes('-') && !line.startsWith('•')) {
+          // Save previous volunteer experience
+          if (currentExperience) {
+            resume.volunteerExperience.push(currentExperience);
+          }
+          // Start new volunteer experience
           const parts = line.split('-');
           currentExperience = {
             position: parts[0]?.trim() || '',
@@ -530,7 +609,11 @@ export function parseOptimizedResumeContent(content: string): ParsedResume {
 
   // Add final items
   if (currentExperience) {
-    resume.workExperience.push(currentExperience);
+    if (currentSection === 'volunteer') {
+      resume.volunteerExperience.push(currentExperience);
+    } else {
+      resume.workExperience.push(currentExperience);
+    }
   }
   if (currentEducation) {
     resume.education.push(currentEducation);

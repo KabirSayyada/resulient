@@ -124,6 +124,13 @@ export function cleanResumeContent(content: string): string {
 }
 
 /**
+ * Legacy function for backward compatibility
+ */
+export function cleanText(content: string): string {
+  return cleanResumeContent(content);
+}
+
+/**
  * Check if a line contains contact information
  */
 function isContactLine(line: string): boolean {
