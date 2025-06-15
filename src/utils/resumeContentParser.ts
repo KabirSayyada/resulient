@@ -1,11 +1,23 @@
 import { ParsedResume } from '@/types/resumeStructure';
+import { 
+  cleanResumeContent, 
+  normalizeForSectionIdentification, 
+  cleanSpecialCharacters,
+  isBulletPoint,
+  cleanBulletPoint,
+  removeEmojis
+} from './resume/textCleaner';
 
 export const parseOptimizedResumeContent = (content: string): ParsedResume => {
   console.log('=== PARSING OPTIMIZED RESUME CONTENT ===');
   console.log('Content length:', content.length);
   console.log('First 500 chars:', content.substring(0, 500));
   
-  const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+  // Clean the content first to handle emojis and special characters
+  const cleanedContent = cleanResumeContent(content);
+  console.log('Cleaned content preview:', cleanedContent.substring(0, 500));
+  
+  const lines = cleanedContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
   console.log('Total lines after filtering:', lines.length);
   
   const resume: ParsedResume = {
@@ -51,16 +63,19 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
         !line.includes('✉️') &&
         !line.includes('🔗') &&
         !line.match(/^[=\-_]{3,}$/) &&
-        line.length > 2 && line.length < 60 &&
-        line.match(/^[A-Za-z\s\-'\.]+$/)) {
-      resume.contact.name = line;
-      console.log('Found name:', resume.contact.name);
-      continue;
+        line.length > 2 && line.length < 60) {
+      // Clean the name of any remaining emojis or special characters
+      const cleanName = cleanSpecialCharacters(removeEmojis(line));
+      if (cleanName.match(/^[A-Za-z\s\-'\.]+$/)) {
+        resume.contact.name = cleanName;
+        console.log('Found name:', resume.contact.name);
+        continue;
+      }
     }
     
     // Contact line with multiple pieces of info
     if (line.includes('|')) {
-      const parts = line.split('|').map(p => p.trim());
+      const parts = line.split('|').map(p => cleanSpecialCharacters(p.trim()));
       parts.forEach(part => {
         if (part.includes('@') && !resume.contact.email) {
           const emailMatch = part.match(/[\w\.-]+@[\w\.-]+\.\w+/);
@@ -81,32 +96,33 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
           resume.contact.linkedin = part;
           console.log('Found website/LinkedIn:', resume.contact.linkedin);
         } else if (!resume.contact.address && (part.includes(',') || part.match(/[A-Z]{2}\s*\d{5}/))) {
-          resume.contact.address = part.replace('📍', '').trim();
+          resume.contact.address = removeEmojis(part).trim();
           console.log('Found address:', resume.contact.address);
         }
       });
       contactProcessed = true;
     }
     
-    // Individual contact info lines
+    // Individual contact info lines - clean them properly
     if (!contactProcessed) {
-      if (line.includes('@') && !resume.contact.email) {
-        const emailMatch = line.match(/[\w\.-]+@[\w\.-]+\.\w+/);
+      const cleanLine = cleanSpecialCharacters(line);
+      if (cleanLine.includes('@') && !resume.contact.email) {
+        const emailMatch = cleanLine.match(/[\w\.-]+@[\w\.-]+\.\w+/);
         if (emailMatch) {
           resume.contact.email = emailMatch[0];
           console.log('Found email:', resume.contact.email);
         }
-      } else if (line.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/) && !resume.contact.phone) {
-        const phoneMatch = line.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/);
+      } else if (cleanLine.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/) && !resume.contact.phone) {
+        const phoneMatch = cleanLine.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/);
         if (phoneMatch) {
           resume.contact.phone = phoneMatch[0];
           console.log('Found phone:', resume.contact.phone);
         }
-      } else if ((line.toLowerCase().includes('linkedin') || line.includes('linkedin.com')) && !resume.contact.linkedin) {
-        resume.contact.linkedin = line.replace(/^linkedin:?\s*/i, '').trim();
+      } else if ((cleanLine.toLowerCase().includes('linkedin') || cleanLine.includes('linkedin.com')) && !resume.contact.linkedin) {
+        resume.contact.linkedin = cleanLine.replace(/^linkedin:?\s*/i, '').trim();
         console.log('Found LinkedIn:', resume.contact.linkedin);
-      } else if ((line.includes(',') || line.match(/[A-Z]{2}\s*\d{5}/)) && !resume.contact.address) {
-        resume.contact.address = line.replace('📍', '').trim();
+      } else if ((cleanLine.includes(',') || cleanLine.match(/[A-Z]{2}\s*\d{5}/)) && !resume.contact.address) {
+        resume.contact.address = removeEmojis(cleanLine).trim();
         console.log('Found address:', resume.contact.address);
       }
     }
@@ -123,7 +139,7 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
       continue;
     }
 
-    // Detect section headers
+    // Detect section headers with enhanced cleaning
     const sectionType = identifySection(line);
     
     if (sectionType) {
@@ -169,9 +185,11 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
 };
 
 function identifySection(line: string): string | null {
-  const upperLine = line.toUpperCase().trim();
+  // Use the enhanced text cleaning for section identification
+  const normalizedLine = normalizeForSectionIdentification(line);
+  console.log(`Identifying section for: "${line}" -> normalized: "${normalizedLine}"`);
   
-  // Common section headers - comprehensive list
+  // Enhanced section headers - comprehensive list with emoji support
   const sections = {
     'PROFESSIONAL SUMMARY': 'summary',
     'SUMMARY': 'summary',
@@ -250,13 +268,13 @@ function identifySection(line: string): string | null {
   };
 
   // Exact match first
-  if (sections[upperLine]) {
-    return sections[upperLine];
+  if (sections[normalizedLine]) {
+    return sections[normalizedLine];
   }
 
-  // Partial matches for flexibility - but be more careful
+  // Partial matches for flexibility
   for (const [key, value] of Object.entries(sections)) {
-    if (upperLine === key) {
+    if (normalizedLine.includes(key) || key.includes(normalizedLine)) {
       return value;
     }
   }
@@ -300,36 +318,36 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
       break;
       
     case 'languages':
-      resume.additionalSections.languages = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
+      resume.additionalSections.languages = content.map(line => cleanBulletPoint(line)).filter(item => item);
       break;
       
     case 'references':
-      resume.additionalSections.references = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
+      resume.additionalSections.references = content.map(line => cleanBulletPoint(line)).filter(item => item);
       break;
       
     case 'volunteer':
-      resume.additionalSections.volunteer = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
+      resume.additionalSections.volunteer = content.map(line => cleanBulletPoint(line)).filter(item => item);
       break;
       
     case 'publications':
-      resume.additionalSections.publications = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
+      resume.additionalSections.publications = content.map(line => cleanBulletPoint(line)).filter(item => item);
       break;
       
     case 'interests':
-      resume.additionalSections.interests = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
+      resume.additionalSections.interests = content.map(line => cleanBulletPoint(line)).filter(item => item);
       break;
       
     case 'training':
-      resume.additionalSections.training = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
+      resume.additionalSections.training = content.map(line => cleanBulletPoint(line)).filter(item => item);
       break;
       
     case 'additional':
-      resume.additionalSections.additional = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
+      resume.additionalSections.additional = content.map(line => cleanBulletPoint(line)).filter(item => item);
       break;
       
     default:
       // Store unknown sections in additionalSections
-      resume.additionalSections[sectionType] = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
+      resume.additionalSections[sectionType] = content.map(line => cleanBulletPoint(line)).filter(item => item);
       break;
   }
 }
@@ -346,10 +364,10 @@ function parseWorkExperience(content: string[]) {
     const line = content[i];
     console.log(`Processing experience line ${i}: "${line}"`);
 
-    // Check if this is a bullet point (responsibility)
-    if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
+    // Check if this is a bullet point (responsibility) - use enhanced detection
+    if (isBulletPoint(line)) {
       if (currentExp) {
-        const responsibility = line.replace(/^[•\-*]\s*/, '').trim();
+        const responsibility = cleanBulletPoint(line);
         currentExp.responsibilities.push(responsibility);
         console.log(`Added responsibility: "${responsibility}"`);
       }
@@ -380,15 +398,15 @@ function parseWorkExperience(content: string[]) {
         console.log(`Saved experience:`, currentExp);
       }
 
-      // Start new experience
+      // Start new experience - clean the position title
       currentExp = {
-        position: line.trim(),
+        position: cleanSpecialCharacters(line.trim()),
         company: '',
         startDate: '',
         endDate: '',
         responsibilities: []
       };
-      console.log(`Started new experience with position: "${line}"`);
+      console.log(`Started new experience with position: "${currentExp.position}"`);
 
       // Look ahead for company name and dates
       if (i + 1 < content.length) {
@@ -397,7 +415,7 @@ function parseWorkExperience(content: string[]) {
         
         // If next line contains a dash/separator and looks like company info
         if (nextLine.includes('–') || nextLine.includes('-') || nextLine.includes('|')) {
-          const parts = nextLine.split(/[–\-|]/).map(p => p.trim());
+          const parts = nextLine.split(/[–\-|]/).map(p => cleanSpecialCharacters(p.trim()));
           if (parts.length >= 1) {
             currentExp.company = parts[0] || '';
             // Check if there are dates in the same line
@@ -412,9 +430,9 @@ function parseWorkExperience(content: string[]) {
             console.log(`Set company: "${currentExp.company}"`);
             i++; // Skip the next line since we processed it
           }
-        } else if (!nextLine.startsWith('•') && !nextLine.startsWith('-') && !nextLine.startsWith('*')) {
+        } else if (!isBulletPoint(nextLine)) {
           // Next line might be just the company name
-          currentExp.company = nextLine.trim();
+          currentExp.company = cleanSpecialCharacters(nextLine.trim());
           console.log(`Set company from next line: "${currentExp.company}"`);
           i++; // Skip the next line
         }
@@ -442,11 +460,11 @@ function parseSkills(content: string[]) {
   const skills = [];
   
   for (const line of content) {
-    // Split by common delimiters
-    const lineSkills = line
-      .replace(/^[•\-*]\s*/, '')
+    // Clean and split by common delimiters
+    const cleanedLine = cleanBulletPoint(line);
+    const lineSkills = cleanedLine
       .split(/[,|•·]/)
-      .map(s => s.trim())
+      .map(s => cleanSpecialCharacters(s.trim()))
       .filter(s => s && s.length > 1);
     
     skills.push(...lineSkills);
@@ -460,29 +478,31 @@ function parseEducation(content: string[]) {
   let currentEdu = null;
 
   for (const line of content) {
-    if (line.includes('|') || line.includes('–') || line.includes(' - ')) {
+    const cleanedLine = cleanSpecialCharacters(line);
+    
+    if (cleanedLine.includes('|') || cleanedLine.includes('–') || cleanedLine.includes(' - ')) {
       if (currentEdu) {
         education.push(currentEdu);
       }
       
-      const parts = line.split(/[|–-]/).map(p => p.trim());
+      const parts = cleanedLine.split(/[|–-]/).map(p => p.trim());
       currentEdu = {
         degree: parts[0] || '',
         field: '',
         institution: parts[1] || '',
         graduationDate: parts[2] || ''
       };
-    } else if (line.trim() && !currentEdu) {
+    } else if (cleanedLine.trim() && !currentEdu) {
       currentEdu = {
-        degree: line.trim(),
+        degree: cleanedLine.trim(),
         field: '',
         institution: '',
         graduationDate: ''
       };
-    } else if (currentEdu && !currentEdu.institution && line.trim() && !line.match(/\d{4}/)) {
-      currentEdu.institution = line.trim();
-    } else if (currentEdu && line.trim() && line.match(/\d{4}/)) {
-      currentEdu.graduationDate = line.trim();
+    } else if (currentEdu && !currentEdu.institution && cleanedLine.trim() && !cleanedLine.match(/\d{4}/)) {
+      currentEdu.institution = cleanedLine.trim();
+    } else if (currentEdu && cleanedLine.trim() && cleanedLine.match(/\d{4}/)) {
+      currentEdu.graduationDate = cleanedLine.trim();
     }
   }
 
@@ -498,25 +518,27 @@ function parseProjects(content: string[]) {
   let currentProject = null;
 
   for (const line of content) {
-    if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
+    const cleanedLine = cleanSpecialCharacters(line);
+    
+    if (isBulletPoint(line)) {
       if (currentProject) {
         currentProject.description += (currentProject.description ? ' ' : '') + 
-          line.replace(/^[•\-*]\s*/, '').trim();
+          cleanBulletPoint(line);
       }
-    } else if (line.trim() && !line.toLowerCase().startsWith('tech')) {
+    } else if (cleanedLine.trim() && !cleanedLine.toLowerCase().startsWith('tech')) {
       if (currentProject) {
         projects.push(currentProject);
       }
       
       currentProject = {
-        name: line.trim(),
+        name: cleanedLine.trim(),
         description: '',
         technologies: []
       };
-    } else if (currentProject && line.toLowerCase().includes('tech')) {
-      const techPart = line.split(':')[1];
+    } else if (currentProject && cleanedLine.toLowerCase().includes('tech')) {
+      const techPart = cleanedLine.split(':')[1];
       if (techPart) {
-        currentProject.technologies = techPart.split(',').map(t => t.trim());
+        currentProject.technologies = techPart.split(',').map(t => cleanSpecialCharacters(t.trim()));
       }
     }
   }
@@ -532,17 +554,19 @@ function parseCertifications(content: string[]) {
   const certifications = [];
 
   for (const line of content) {
-    if (line.includes('|') || line.includes('–') || line.includes(' - ')) {
-      const parts = line.split(/[|–-]/).map(p => p.trim());
+    const cleanedLine = cleanSpecialCharacters(line);
+    
+    if (cleanedLine.includes('|') || cleanedLine.includes('–') || cleanedLine.includes(' - ')) {
+      const parts = cleanedLine.split(/[|–-]/).map(p => p.trim());
       certifications.push({
         name: parts[0] || '',
         issuer: parts[1] || 'Unknown',
         date: parts[2] || ''
       });
-    } else if (line.trim()) {
-      const cleanLine = line.replace(/^[•\-*]\s*/, '').trim();
+    } else if (cleanedLine.trim()) {
+      const processedLine = cleanBulletPoint(cleanedLine);
       // Check if line has date in parentheses
-      const dateMatch = cleanLine.match(/^(.+?)\s*\((.+?)\)$/);
+      const dateMatch = processedLine.match(/^(.+?)\s*\((.+?)\)$/);
       if (dateMatch) {
         certifications.push({
           name: dateMatch[1].trim(),
@@ -551,7 +575,7 @@ function parseCertifications(content: string[]) {
         });
       } else {
         certifications.push({
-          name: cleanLine,
+          name: processedLine,
           issuer: 'Unknown',
           date: ''
         });
@@ -563,5 +587,5 @@ function parseCertifications(content: string[]) {
 }
 
 function parseAchievements(content: string[]) {
-  return content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item && item.length > 0);
+  return content.map(line => cleanBulletPoint(line)).filter(item => item && item.length > 0);
 }

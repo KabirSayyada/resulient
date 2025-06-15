@@ -1,19 +1,23 @@
 
 import { SECTION_MAPPINGS } from './constants';
+import { normalizeForSectionIdentification } from './textCleaner';
 
 export function identifySectionHeader(line: string): string | null {
-  // Clean the line for comparison
-  const cleanLine = line.replace(/[^\w\s]/g, '').trim();
+  // Use the enhanced text cleaning for section identification
+  const normalizedLine = normalizeForSectionIdentification(line);
   
   // Check each section mapping
   for (const [sectionType, regex] of Object.entries(SECTION_MAPPINGS)) {
-    if (regex.test(cleanLine)) {
+    if (regex.test(normalizedLine)) {
       return sectionType;
     }
   }
   
-  // Additional heuristics for section detection
-  if (line.length < 50 && /^[A-Z\s]+$/.test(line.replace(/[^\w\s]/g, '')) && line.length > 3) {
+  // Additional heuristics for section detection with cleaned text
+  const cleanedForHeuristics = normalizedLine.replace(/[^\w\s]/g, '').trim();
+  if (line.length < 50 && 
+      /^[A-Z\s]+$/.test(cleanedForHeuristics) && 
+      cleanedForHeuristics.length > 3) {
     return 'unknown';
   }
   
