@@ -12,6 +12,8 @@ export const ATSFriendlyResumePdfTemplate = ({ resume, className = '' }: ATSFrie
   console.log('Resume object:', resume);
   console.log('Professional Summary:', resume.professionalSummary);
   console.log('Professional Summary length:', resume.professionalSummary?.length);
+  console.log('Professional Summary type:', typeof resume.professionalSummary);
+  console.log('Professional Summary exists:', !!resume.professionalSummary);
 
   return (
     <div className={`bg-white p-6 max-w-2xl mx-auto font-sans text-gray-900 leading-tight ${className}`} 
@@ -44,15 +46,15 @@ export const ATSFriendlyResumePdfTemplate = ({ resume, className = '' }: ATSFrie
         </div>
       </div>
 
-      {/* Professional Summary - Fixed condition */}
-      {resume.professionalSummary && resume.professionalSummary.trim().length > 0 && (
+      {/* Professional Summary - Always show if it exists */}
+      {resume.professionalSummary && (
         <div className="mb-4">
           <h2 className="text-sm font-bold mb-2 text-gray-900 border-b border-gray-200" 
               style={{ fontSize: '12px', marginBottom: '6px' }}>
             PROFESSIONAL SUMMARY
           </h2>
           <p className="text-xs text-gray-800" style={{ fontSize: '10px', lineHeight: '1.4' }}>
-            {resume.professionalSummary.trim()}
+            {resume.professionalSummary}
           </p>
         </div>
       )}
