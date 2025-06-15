@@ -1,3 +1,4 @@
+
 import { ParsedResume } from '@/types/resumeStructure';
 import { 
   cleanResumeContent, 
@@ -7,6 +8,8 @@ import {
   cleanBulletPoint,
   removeEmojis
 } from './resume/textCleaner';
+import { identifySectionHeader, shouldIncludeInSection } from './resume/sectionParser';
+import { sanitizeSectionName } from './resume/constants';
 
 export const parseOptimizedResumeContent = (content: string): ParsedResume => {
   console.log('=== PARSING OPTIMIZED RESUME CONTENT ===');
@@ -48,7 +51,7 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
     console.log(`Contact extraction line ${i}: "${line}"`);
     
     // Skip section headers during contact extraction
-    if (identifySection(line)) {
+    if (identifySectionHeader(line)) {
       break;
     }
     
@@ -139,16 +142,22 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
       continue;
     }
 
-    // Detect section headers with enhanced cleaning
-    const sectionType = identifySection(line);
+    // Detect section headers with enhanced validation
+    const sectionType = identifySectionHeader(line);
     
     if (sectionType) {
       console.log(`Found section: ${line} -> ${sectionType}`);
       
-      // Process previous section
+      // Process previous section with validation
       if (currentSection && sectionContent.length > 0) {
         console.log(`Processing previous section: ${currentSection} with ${sectionContent.length} lines`);
-        processSectionContent(resume, currentSection, sectionContent);
+        
+        // Check if we should include this section
+        if (shouldIncludeInSection(currentSection, sectionContent)) {
+          processSectionContent(resume, currentSection, sectionContent);
+        } else {
+          console.log(`Skipping section ${currentSection} due to validation failure`);
+        }
       }
       
       currentSection = sectionType;
@@ -163,10 +172,15 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
     }
   }
 
-  // Process final section
+  // Process final section with validation
   if (currentSection && sectionContent.length > 0) {
     console.log(`Processing final section: ${currentSection} with ${sectionContent.length} lines`);
-    processSectionContent(resume, currentSection, sectionContent);
+    
+    if (shouldIncludeInSection(currentSection, sectionContent)) {
+      processSectionContent(resume, currentSection, sectionContent);
+    } else {
+      console.log(`Skipping final section ${currentSection} due to validation failure`);
+    }
   }
 
   console.log('=== FINAL PARSED RESUME ===');
@@ -346,8 +360,14 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
       break;
       
     default:
-      // Store unknown sections in additionalSections
-      resume.additionalSections[sectionType] = content.map(line => cleanBulletPoint(line)).filter(item => item);
+      // Store unknown sections in additionalSections with sanitized names
+      const sanitizedSectionName = sanitizeSectionName(sectionType);
+      if (sanitizedSectionName && sanitizedSectionName.length > 0) {
+        resume.additionalSections[sanitizedSectionName] = content.map(line => cleanBulletPoint(line)).filter(item => item);
+        console.log(`Added unknown section "${sanitizedSectionName}" with ${content.length} items`);
+      } else {
+        console.log(`Skipped section with invalid name: "${sectionType}"`);
+      }
       break;
   }
 }
