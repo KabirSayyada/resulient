@@ -244,21 +244,29 @@ function identifySection(line: string): string | null {
     'KEY ACHIEVEMENTS': 'achievements',
     'RECOGNITION': 'achievements',
     'AWARDS AND HONORS': 'achievements',
-    'LANGUAGES': 'languages',
-    'LANGUAGE SKILLS': 'languages',
-    'ADDITIONAL INFORMATION': 'additional',
+    'HONORS AND AWARDS': 'achievements',
     'VOLUNTEER EXPERIENCE': 'volunteer',
     'VOLUNTEER WORK': 'volunteer',  
     'VOLUNTEER ACTIVITIES': 'volunteer',
     'VOLUNTEERING': 'volunteer',
-    'PUBLICATIONS': 'publications',
-    'RESEARCH': 'publications',
-    'REFERENCES': 'references',
-    'PROFESSIONAL REFERENCES': 'references',
+    'COMMUNITY SERVICE': 'volunteer',
+    'COMMUNITY INVOLVEMENT': 'volunteer',
+    'CIVIC ACTIVITIES': 'volunteer',
+    'NONPROFIT WORK': 'volunteer',
     'INTERESTS': 'interests',
     'HOBBIES': 'interests',
     'PERSONAL INTERESTS': 'interests',
     'HOBBIES AND INTERESTS': 'interests',
+    'ACTIVITIES': 'interests',
+    'EXTRACURRICULAR ACTIVITIES': 'interests',
+    'PERSONAL ACTIVITIES': 'interests',
+    'LANGUAGES': 'languages',
+    'LANGUAGE SKILLS': 'languages',
+    'ADDITIONAL INFORMATION': 'additional',
+    'PUBLICATIONS': 'publications',
+    'RESEARCH': 'publications',
+    'REFERENCES': 'references',
+    'PROFESSIONAL REFERENCES': 'references',
     'TRAINING': 'training',
     'PROFESSIONAL DEVELOPMENT': 'training',
     'WORKSHOPS': 'training',
@@ -277,6 +285,19 @@ function identifySection(line: string): string | null {
     if (normalizedLine.includes(key) || key.includes(normalizedLine)) {
       return value;
     }
+  }
+
+  // Enhanced keyword-based detection for unforeseen variations
+  if (normalizedLine.match(/\b(awards?|honors?|recognition|accomplishments?)\b/i)) {
+    return 'achievements';
+  }
+  
+  if (normalizedLine.match(/\b(volunteer|volunteering|community\s*service|civic|nonprofit)\b/i)) {
+    return 'volunteer';
+  }
+  
+  if (normalizedLine.match(/\b(hobbies|interests|activities|personal|extracurricular)\b/i)) {
+    return 'interests';
   }
 
   return null;
@@ -315,6 +336,17 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
       
     case 'achievements':
       resume.achievements = parseAchievements(content);
+      console.log(`Parsed ${resume.achievements.length} achievements`);
+      break;
+      
+    case 'volunteer':
+      resume.additionalSections.volunteer = content.map(line => cleanBulletPoint(line)).filter(item => item);
+      console.log(`Parsed ${resume.additionalSections.volunteer.length} volunteer entries`);
+      break;
+      
+    case 'interests':
+      resume.additionalSections.interests = content.map(line => cleanBulletPoint(line)).filter(item => item);
+      console.log(`Parsed ${resume.additionalSections.interests.length} interest entries`);
       break;
       
     case 'languages':
@@ -325,16 +357,8 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
       resume.additionalSections.references = content.map(line => cleanBulletPoint(line)).filter(item => item);
       break;
       
-    case 'volunteer':
-      resume.additionalSections.volunteer = content.map(line => cleanBulletPoint(line)).filter(item => item);
-      break;
-      
     case 'publications':
       resume.additionalSections.publications = content.map(line => cleanBulletPoint(line)).filter(item => item);
-      break;
-      
-    case 'interests':
-      resume.additionalSections.interests = content.map(line => cleanBulletPoint(line)).filter(item => item);
       break;
       
     case 'training':
@@ -348,6 +372,7 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
     default:
       // Store unknown sections in additionalSections
       resume.additionalSections[sectionType] = content.map(line => cleanBulletPoint(line)).filter(item => item);
+      console.log(`Added to additional section ${sectionType}: ${content.length} entries`);
       break;
   }
 }

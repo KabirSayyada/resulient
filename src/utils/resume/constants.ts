@@ -1,4 +1,3 @@
-
 // Common section header variations
 export const SECTION_MAPPINGS = {
   contact: /^(contact|personal|info|information|details)$/i,
@@ -8,7 +7,9 @@ export const SECTION_MAPPINGS = {
   skills: /^(skills|technical\s*skills|core\s*competencies|competencies|expertise|technologies|proficiencies|abilities|tech\s*stack)$/i,
   projects: /^(projects|portfolio|work\s*samples|personal\s*projects|key\s*projects)$/i,
   certifications: /^(certifications|certificates|credentials|licenses|professional\s*development|professional\s*certifications)$/i,
-  achievements: /^(achievements|accomplishments|awards|honors|recognition)$/i,
+  achievements: /^(achievements|accomplishments|awards|honors|recognition|awards\s*and\s*honors)$/i,
+  volunteer: /^(volunteer|volunteer\s*experience|volunteer\s*work|volunteer\s*activities|volunteering|community\s*service|community\s*involvement)$/i,
+  interests: /^(interests|hobbies|personal\s*interests|hobbies\s*and\s*interests|activities|extracurricular)$/i,
   languages: /^(languages|linguistic\s*skills)$/i
 };
 
