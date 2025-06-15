@@ -70,37 +70,6 @@ export const CompactATSTemplate = ({ resume }: CompactATSTemplateProps) => {
               </div>
             </div>
           )}
-
-          {/* Volunteer Experience */}
-          {resume.volunteerExperience && resume.volunteerExperience.length > 0 && (
-            <div>
-              <h2 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">
-                Volunteer Experience
-              </h2>
-              <div className="space-y-3">
-                {resume.volunteerExperience.map((exp, index) => (
-                  <div key={index}>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-sm font-semibold text-gray-900">{exp.position}</h3>
-                        <p className="text-xs text-gray-600">{exp.company}</p>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {exp.startDate} - {exp.endDate || 'Present'}
-                      </div>
-                    </div>
-                    {exp.responsibilities && (
-                      <ul className="list-disc list-inside text-xs text-gray-700 mt-1 space-y-0.5">
-                        {exp.responsibilities.slice(0, 2).map((resp, idx) => (
-                          <li key={idx}>{resp}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Right Column */}

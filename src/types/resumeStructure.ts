@@ -51,6 +51,5 @@ export interface ParsedResume {
   certifications: ParsedCertification[];
   achievements: string[];
   languages?: string[];
-  volunteerExperience: ParsedWorkExperience[]; // Use same structure as work experience
   additionalSections: { [key: string]: string[] };
 }

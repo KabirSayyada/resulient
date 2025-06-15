@@ -71,37 +71,6 @@ export const BorderATSTemplate = ({ resume }: BorderATSTemplateProps) => {
         </div>
       )}
 
-      {/* Volunteer Experience */}
-      {resume.volunteerExperience && resume.volunteerExperience.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-lg font-bold text-gray-900 mb-4 bg-gray-800 text-white px-2 py-1 inline-block">
-            VOLUNTEER EXPERIENCE
-          </h2>
-          <div className="space-y-6 mt-4">
-            {resume.volunteerExperience.map((exp, index) => (
-              <div key={index} className="border-2 border-gray-300 p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="font-bold text-gray-900">{exp.position}</h3>
-                    <p className="text-gray-600 font-semibold">{exp.company}</p>
-                  </div>
-                  <div className="text-gray-500 text-sm border border-gray-300 px-2 py-1">
-                    {exp.startDate} - {exp.endDate || 'Present'}
-                  </div>
-                </div>
-                {exp.responsibilities && (
-                  <ul className="list-disc list-inside text-gray-700 space-y-1 mt-3">
-                    {exp.responsibilities.map((resp, idx) => (
-                      <li key={idx}>{resp}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Skills */}
       {resume.skills.length > 0 && (
         <div className="mb-8">

@@ -14,8 +14,6 @@ export const ATSFriendlyResumePdfTemplate = ({ resume, className = '' }: ATSFrie
   console.log('Professional Summary length:', resume.professionalSummary?.length);
   console.log('Professional Summary type:', typeof resume.professionalSummary);
   console.log('Professional Summary exists:', !!resume.professionalSummary);
-  console.log('Volunteer Experience:', resume.volunteerExperience);
-  console.log('Volunteer Experience length:', resume.volunteerExperience?.length);
 
   return (
     <div className={`bg-white p-6 max-w-2xl mx-auto font-sans text-gray-900 leading-tight ${className}`} 
@@ -83,47 +81,6 @@ export const ATSFriendlyResumePdfTemplate = ({ resume, className = '' }: ATSFrie
           </h2>
           
           {resume.workExperience.map((exp, index) => (
-            <div key={index} className="mb-3" style={{ marginBottom: '10px' }}>
-              <div className="flex justify-between items-start mb-1">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-xs text-gray-900" style={{ fontSize: '11px' }}>
-                    {exp.position}
-                  </h3>
-                  <p className="text-xs text-gray-700" style={{ fontSize: '10px' }}>
-                    {exp.company}{exp.location && ` – ${exp.location}`}
-                  </p>
-                </div>
-                {(exp.startDate || exp.endDate) && (
-                  <div className="text-xs text-gray-600 text-right" style={{ fontSize: '10px' }}>
-                    {exp.startDate} {exp.endDate && `– ${exp.endDate}`}
-                  </div>
-                )}
-              </div>
-              
-              {exp.responsibilities && exp.responsibilities.length > 0 && (
-                <ul className="list-disc list-inside ml-2 text-xs text-gray-800 space-y-1" 
-                    style={{ fontSize: '10px', lineHeight: '1.3' }}>
-                  {exp.responsibilities.map((responsibility, respIndex) => (
-                    <li key={respIndex} className="leading-tight">
-                      {responsibility}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Volunteer Experience */}
-      {resume.volunteerExperience && resume.volunteerExperience.length > 0 && (
-        <div className="mb-4">
-          <h2 className="text-sm font-bold mb-2 text-gray-900 border-b border-gray-200" 
-              style={{ fontSize: '12px', marginBottom: '6px' }}>
-            VOLUNTEER EXPERIENCE
-          </h2>
-          
-          {resume.volunteerExperience.map((exp, index) => (
             <div key={index} className="mb-3" style={{ marginBottom: '10px' }}>
               <div className="flex justify-between items-start mb-1">
                 <div className="flex-1">

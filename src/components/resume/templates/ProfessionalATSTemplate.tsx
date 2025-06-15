@@ -83,37 +83,6 @@ export const ProfessionalATSTemplate = ({ resume }: ProfessionalATSTemplateProps
         </div>
       )}
 
-      {/* Volunteer Experience */}
-      {resume.volunteerExperience && resume.volunteerExperience.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">
-            VOLUNTEER EXPERIENCE
-          </h2>
-          <div className="space-y-8">
-            {resume.volunteerExperience.map((exp, index) => (
-              <div key={index} className="border-l-4 border-gray-300 pl-6">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">{exp.position}</h3>
-                    <p className="text-gray-600 font-semibold">{exp.company}</p>
-                  </div>
-                  <div className="text-gray-500 text-sm font-semibold">
-                    {exp.startDate} - {exp.endDate || 'Present'}
-                  </div>
-                </div>
-                {exp.responsibilities && (
-                  <ul className="list-disc list-inside text-gray-700 space-y-1 mt-3">
-                    {exp.responsibilities.map((resp, idx) => (
-                      <li key={idx}>{resp}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Projects */}
       {resume.projects.length > 0 && (
         <div className="mb-8">

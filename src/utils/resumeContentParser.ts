@@ -35,8 +35,6 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
     projects: [],
     certifications: [],
     achievements: [],
-    languages: [],
-    volunteerExperience: [],
     additionalSections: {}
   };
 
@@ -181,7 +179,6 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
   console.log('Projects count:', resume.projects.length);
   console.log('Certifications count:', resume.certifications.length);
   console.log('Achievements count:', resume.achievements.length);
-  console.log('Volunteer Experience count:', resume.volunteerExperience.length);
   console.log('Additional sections:', Object.keys(resume.additionalSections));
 
   return resume;
@@ -343,9 +340,8 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
       break;
       
     case 'volunteer':
-      // Parse volunteer experience using the same structure as work experience
-      resume.volunteerExperience = parseVolunteerExperience(content);
-      console.log(`Parsed ${resume.volunteerExperience.length} volunteer experiences`);
+      resume.additionalSections.volunteer = content.map(line => cleanBulletPoint(line)).filter(item => item);
+      console.log(`Parsed ${resume.additionalSections.volunteer.length} volunteer entries`);
       break;
       
     case 'interests':
@@ -354,7 +350,7 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
       break;
       
     case 'languages':
-      resume.languages = content.map(line => cleanBulletPoint(line)).filter(item => item);
+      resume.additionalSections.languages = content.map(line => cleanBulletPoint(line)).filter(item => item);
       break;
       
     case 'references':
@@ -483,11 +479,6 @@ function parseWorkExperience(content: string[]) {
   });
 
   return experiences;
-}
-
-function parseVolunteerExperience(content: string[]) {
-  // Use the same parsing logic as work experience
-  return parseWorkExperience(content);
 }
 
 function parseSkills(content: string[]) {

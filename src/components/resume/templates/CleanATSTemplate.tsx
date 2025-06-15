@@ -63,35 +63,6 @@ export const CleanATSTemplate = ({ resume }: CleanATSTemplateProps) => {
         </div>
       )}
 
-      {/* Volunteer Experience */}
-      {resume.volunteerExperience && resume.volunteerExperience.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-lg font-normal text-gray-900 mb-4">
-            Volunteer Experience
-          </h2>
-          <div className="space-y-6">
-            {resume.volunteerExperience.map((exp, index) => (
-              <div key={index}>
-                <div className="flex justify-between items-baseline mb-1">
-                  <h3 className="font-medium text-gray-900">{exp.position}</h3>
-                  <span className="text-gray-500 text-sm">
-                    {exp.startDate} - {exp.endDate || 'Present'}
-                  </span>
-                </div>
-                <p className="text-gray-600 mb-2">{exp.company}</p>
-                {exp.responsibilities && (
-                  <ul className="list-disc list-inside text-gray-700 space-y-1">
-                    {exp.responsibilities.map((resp, idx) => (
-                      <li key={idx}>{resp}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Skills */}
       {resume.skills.length > 0 && (
         <div className="mb-8">
