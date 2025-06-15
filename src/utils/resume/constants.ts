@@ -60,3 +60,20 @@ export const SECTION_VALIDATION = {
   // Should not contain too many special characters
   MAX_SPECIAL_CHARS: 0.3 // 30% of characters can be special
 };
+
+// Email regex for contact extraction
+export const EMAIL_REGEX = /[\w\.-]+@[\w\.-]+\.\w+/;
+
+// Phone regex for contact extraction
+export const PHONE_REGEX = /(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/;
+
+// LinkedIn regex for contact extraction
+export const LINKEDIN_REGEX = /(linkedin\.com\/in\/[\w\-]+|linkedin\.com\/pub\/[\w\-]+)/i;
+
+// Date patterns for parsing dates in resumes
+export const DATE_PATTERNS = [
+  /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}\b/gi,
+  /\b\d{1,2}\/\d{1,2}\/\d{4}\b/g,
+  /\b\d{4}\s*[-–—]\s*(\d{4}|Present|Current)\b/gi,
+  /\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}\b/gi
+];
