@@ -8,6 +8,11 @@ interface ATSFriendlyResumePdfTemplateProps {
 }
 
 export const ATSFriendlyResumePdfTemplate = ({ resume, className = '' }: ATSFriendlyResumePdfTemplateProps) => {
+  console.log('=== ATSFriendlyResumePdfTemplate Debug ===');
+  console.log('Resume object:', resume);
+  console.log('Professional Summary:', resume.professionalSummary);
+  console.log('Professional Summary length:', resume.professionalSummary?.length);
+
   return (
     <div className={`bg-white p-6 max-w-2xl mx-auto font-sans text-gray-900 leading-tight ${className}`} 
          style={{ fontFamily: 'Arial, sans-serif', fontSize: '11px', lineHeight: '1.3' }}>
@@ -39,21 +44,21 @@ export const ATSFriendlyResumePdfTemplate = ({ resume, className = '' }: ATSFrie
         </div>
       </div>
 
-      {/* Professional Summary */}
-      {resume.professionalSummary && (
+      {/* Professional Summary - Fixed condition */}
+      {resume.professionalSummary && resume.professionalSummary.trim().length > 0 && (
         <div className="mb-4">
           <h2 className="text-sm font-bold mb-2 text-gray-900 border-b border-gray-200" 
               style={{ fontSize: '12px', marginBottom: '6px' }}>
             PROFESSIONAL SUMMARY
           </h2>
           <p className="text-xs text-gray-800" style={{ fontSize: '10px', lineHeight: '1.4' }}>
-            {resume.professionalSummary}
+            {resume.professionalSummary.trim()}
           </p>
         </div>
       )}
 
       {/* Technical Skills */}
-      {resume.skills.length > 0 && (
+      {resume.skills && resume.skills.length > 0 && (
         <div className="mb-4">
           <h2 className="text-sm font-bold mb-2 text-gray-900 border-b border-gray-200" 
               style={{ fontSize: '12px', marginBottom: '6px' }}>
@@ -66,7 +71,7 @@ export const ATSFriendlyResumePdfTemplate = ({ resume, className = '' }: ATSFrie
       )}
 
       {/* Professional Experience */}
-      {resume.workExperience.length > 0 && (
+      {resume.workExperience && resume.workExperience.length > 0 && (
         <div className="mb-4">
           <h2 className="text-sm font-bold mb-2 text-gray-900 border-b border-gray-200" 
               style={{ fontSize: '12px', marginBottom: '6px' }}>
@@ -107,7 +112,7 @@ export const ATSFriendlyResumePdfTemplate = ({ resume, className = '' }: ATSFrie
       )}
 
       {/* Education */}
-      {resume.education.length > 0 && (
+      {resume.education && resume.education.length > 0 && (
         <div className="mb-4">
           <h2 className="text-sm font-bold mb-2 text-gray-900 border-b border-gray-200" 
               style={{ fontSize: '12px', marginBottom: '6px' }}>
@@ -140,7 +145,7 @@ export const ATSFriendlyResumePdfTemplate = ({ resume, className = '' }: ATSFrie
       )}
 
       {/* Projects */}
-      {resume.projects.length > 0 && (
+      {resume.projects && resume.projects.length > 0 && (
         <div className="mb-4">
           <h2 className="text-sm font-bold mb-2 text-gray-900 border-b border-gray-200" 
               style={{ fontSize: '12px', marginBottom: '6px' }}>
@@ -180,7 +185,7 @@ export const ATSFriendlyResumePdfTemplate = ({ resume, className = '' }: ATSFrie
       )}
 
       {/* Certifications */}
-      {resume.certifications.length > 0 && (
+      {resume.certifications && resume.certifications.length > 0 && (
         <div className="mb-4">
           <h2 className="text-sm font-bold mb-2 text-gray-900 border-b border-gray-200" 
               style={{ fontSize: '12px', marginBottom: '6px' }}>
@@ -209,7 +214,7 @@ export const ATSFriendlyResumePdfTemplate = ({ resume, className = '' }: ATSFrie
       )}
 
       {/* Achievements */}
-      {resume.achievements.length > 0 && (
+      {resume.achievements && resume.achievements.length > 0 && (
         <div className="mb-4">
           <h2 className="text-sm font-bold mb-2 text-gray-900 border-b border-gray-200" 
               style={{ fontSize: '12px', marginBottom: '6px' }}>
