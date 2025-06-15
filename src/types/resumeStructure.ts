@@ -1,55 +1,65 @@
 
-export interface ParsedContact {
+export interface ContactInfo {
   name?: string;
   email?: string;
   phone?: string;
   address?: string;
   linkedin?: string;
-  website?: string;
 }
 
-export interface ParsedWorkExperience {
-  company: string;
+export interface WorkExperience {
   position: string;
-  startDate?: string;
-  endDate?: string;
-  location?: string;
+  company: string;
+  startDate: string;
+  endDate: string;
   responsibilities: string[];
 }
 
-export interface ParsedEducation {
-  institution: string;
+export interface Education {
   degree: string;
   field?: string;
-  graduationDate?: string;
-  gpa?: string;
-  location?: string;
+  institution: string;
+  graduationDate: string;
 }
 
-export interface ParsedProject {
+export interface Project {
   name: string;
   description: string;
-  technologies?: string[];
-  date?: string;
-  url?: string;
+  technologies: string[];
 }
 
-export interface ParsedCertification {
+export interface Certification {
   name: string;
   issuer: string;
-  date?: string;
-  expirationDate?: string;
+  date: string;
+}
+
+export interface VolunteerExperience {
+  role: string;
+  organization: string;
+  startDate: string;
+  endDate: string;
+  description: string;
 }
 
 export interface ParsedResume {
-  contact: ParsedContact;
-  professionalSummary?: string;
-  workExperience: ParsedWorkExperience[];
-  education: ParsedEducation[];
+  contact: ContactInfo;
+  professionalSummary: string;
+  workExperience: WorkExperience[];
+  education: Education[];
   skills: string[];
-  projects: ParsedProject[];
-  certifications: ParsedCertification[];
+  projects: Project[];
+  certifications: Certification[];
   achievements: string[];
   languages?: string[];
-  additionalSections: { [key: string]: string[] };
+  additionalSections: {
+    volunteer?: VolunteerExperience[];
+    interests?: string[];
+    languages?: string[];
+    references?: string[];
+    publications?: string[];
+    training?: string[];
+    additional?: string[];
+    [key: string]: any;
+  };
 }

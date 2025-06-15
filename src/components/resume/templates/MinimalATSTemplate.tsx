@@ -64,7 +64,7 @@ export const MinimalATSTemplate = ({ resume, className = '' }: MinimalATSTemplat
                   </div>
                 )}
               </div>
-              <p className="text-xs text-gray-600 mb-2" style={{ fontSize: '10px' }}>
+              <p className="text-xs text-gray-600 mb-2" style={{fontSize: '10px' }}>
                 {exp.company}
               </p>
               
@@ -172,6 +172,42 @@ export const MinimalATSTemplate = ({ resume, className = '' }: MinimalATSTemplat
                 <div className="text-xs text-gray-500" style={{ fontSize: '9px' }}>
                   {cert.date}
                 </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Volunteer Experience */}
+      {resume.additionalSections.volunteer && resume.additionalSections.volunteer.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-sm font-medium mb-3 text-gray-800 tracking-wider" 
+              style={{ fontSize: '11px', marginBottom: '8px', fontWeight: '500' }}>
+            VOLUNTEER
+          </h2>
+          
+          {resume.additionalSections.volunteer.slice(0, 2).map((vol, index) => (
+            <div key={index} className="mb-3" style={{ marginBottom: '8px' }}>
+              <div className="flex justify-between items-baseline mb-1">
+                <h3 className="text-xs font-medium text-gray-900" style={{ fontSize: '10px' }}>
+                  {vol.role}
+                </h3>
+                {(vol.startDate || vol.endDate) && (
+                  <div className="text-xs text-gray-500" style={{ fontSize: '9px' }}>
+                    {vol.startDate} {vol.endDate && `– ${vol.endDate}`}
+                  </div>
+                )}
+              </div>
+              {vol.organization && (
+                <p className="text-xs text-gray-600 mb-1" style={{ fontSize: '9px' }}>
+                  {vol.organization}
+                </p>
+              )}
+              {vol.description && (
+                <p className="text-xs text-gray-700" style={{ fontSize: '9px', lineHeight: '1.3' }}>
+                  {vol.description.substring(0, 80)}
+                  {vol.description.length > 80 ? '...' : ''}
+                </p>
               )}
             </div>
           ))}
