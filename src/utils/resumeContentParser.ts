@@ -1,3 +1,4 @@
+
 import { ParsedResume } from '@/types/resumeStructure';
 
 export const parseOptimizedResumeContent = (content: string): ParsedResume => {
@@ -156,6 +157,7 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
   console.log('=== FINAL PARSED RESUME ===');
   console.log('Contact:', resume.contact);
   console.log('Professional Summary:', resume.professionalSummary);
+  console.log('Professional Summary length:', resume.professionalSummary?.length);
   console.log('Work Experience count:', resume.workExperience.length);
   console.log('Education count:', resume.education.length);
   console.log('Skills count:', resume.skills.length);
@@ -253,9 +255,9 @@ function identifySection(line: string): string | null {
     return sections[upperLine];
   }
 
-  // Partial matches for flexibility
+  // Partial matches for flexibility - but be more careful
   for (const [key, value] of Object.entries(sections)) {
-    if (upperLine.includes(key) || key.includes(upperLine)) {
+    if (upperLine === key) {
       return value;
     }
   }
@@ -270,6 +272,7 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
   switch (sectionType) {
     case 'summary':
       resume.professionalSummary = content.join(' ').trim();
+      console.log(`Set professional summary to: "${resume.professionalSummary}"`);
       break;
       
     case 'experience':
