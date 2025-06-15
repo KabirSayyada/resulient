@@ -163,40 +163,6 @@ export const ExecutiveATSTemplate = ({ resume, className = '' }: ExecutiveATSTem
           ))}
         </div>
       )}
-
-      {/* Volunteer Experience - Fixed to properly handle the new structure */}
-      {resume.additionalSections.volunteer && resume.additionalSections.volunteer.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-bold mb-6 text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-2">
-            Volunteer Experience
-          </h2>
-          
-          {resume.additionalSections.volunteer.map((vol, index) => (
-            <div key={index} className="mb-6">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg text-gray-900">{vol.role}</h3>
-                  {vol.organization && (
-                    <p className="text-gray-700 font-semibold">{vol.organization}</p>
-                  )}
-                </div>
-                {(vol.startDate || vol.endDate) && (
-                  <div className="text-gray-600 font-medium">
-                    {vol.startDate} {vol.endDate && `– ${vol.endDate}`}
-                  </div>
-                )}
-              </div>
-              
-              {vol.description && (
-                <p className="text-gray-800 leading-relaxed ml-4">
-                  <span className="text-gray-500 mr-3">•</span>
-                  {vol.description}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 };

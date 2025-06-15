@@ -1,9 +1,9 @@
 
-import { Project } from "@/types/resumeStructure";
+import { ParsedProject } from "@/types/resumeStructure";
 
-export function parseProjects(content: string[]): Project[] {
-  const projects: Project[] = [];
-  let currentProject: Partial<Project> | null = null;
+export function parseProjects(content: string[]): ParsedProject[] {
+  const projects: ParsedProject[] = [];
+  let currentProject: Partial<ParsedProject> | null = null;
   
   for (const line of content) {
     if (line.length > 3 && !line.startsWith('•') && !line.startsWith('-') && !line.startsWith('*')) {

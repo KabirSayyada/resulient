@@ -1,5 +1,5 @@
 
-export interface ContactInfo {
+export interface ParsedContact {
   name?: string;
   email?: string;
   phone?: string;
@@ -8,74 +8,48 @@ export interface ContactInfo {
   website?: string;
 }
 
-export interface WorkExperience {
-  position: string;
+export interface ParsedWorkExperience {
   company: string;
-  startDate: string;
-  endDate: string;
+  position: string;
+  startDate?: string;
+  endDate?: string;
   location?: string;
   responsibilities: string[];
 }
 
-export interface Education {
+export interface ParsedEducation {
+  institution: string;
   degree: string;
   field?: string;
-  institution: string;
-  graduationDate: string;
-  location?: string;
+  graduationDate?: string;
   gpa?: string;
+  location?: string;
 }
 
-export interface Project {
+export interface ParsedProject {
   name: string;
   description: string;
-  technologies: string[];
+  technologies?: string[];
   date?: string;
   url?: string;
 }
 
-export interface Certification {
+export interface ParsedCertification {
   name: string;
   issuer: string;
-  date: string;
+  date?: string;
   expirationDate?: string;
 }
 
-export interface VolunteerExperience {
-  role: string;
-  organization: string;
-  startDate: string;
-  endDate: string;
-  description: string;
-}
-
 export interface ParsedResume {
-  contact: ContactInfo;
-  professionalSummary: string;
-  workExperience: WorkExperience[];
-  education: Education[];
+  contact: ParsedContact;
+  professionalSummary?: string;
+  workExperience: ParsedWorkExperience[];
+  education: ParsedEducation[];
   skills: string[];
-  projects: Project[];
-  certifications: Certification[];
+  projects: ParsedProject[];
+  certifications: ParsedCertification[];
   achievements: string[];
   languages?: string[];
-  additionalSections: {
-    volunteer?: VolunteerExperience[];
-    interests?: string[];
-    languages?: string[];
-    references?: string[];
-    publications?: string[];
-    training?: string[];
-    additional?: string[];
-    awards?: string[];
-    hobbies?: string[];
-    [key: string]: any;
-  };
+  additionalSections: { [key: string]: string[] };
 }
-
-// Export aliases for parser compatibility
-export type ParsedContact = ContactInfo;
-export type ParsedWorkExperience = WorkExperience;
-export type ParsedEducation = Education;
-export type ParsedProject = Project;
-export type ParsedCertification = Certification;

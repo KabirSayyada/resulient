@@ -157,35 +157,6 @@ export const CleanATSTemplate = ({ resume }: CleanATSTemplateProps) => {
         </div>
       )}
 
-      {/* Volunteer Experience */}
-      {resume.additionalSections.volunteer && resume.additionalSections.volunteer.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-lg font-normal text-gray-900 mb-4">
-            Volunteer Experience
-          </h2>
-          <div className="space-y-4">
-            {resume.additionalSections.volunteer.map((vol, index) => (
-              <div key={index}>
-                <div className="flex justify-between items-baseline mb-1">
-                  <h3 className="font-medium text-gray-900">{vol.role}</h3>
-                  {(vol.startDate || vol.endDate) && (
-                    <span className="text-gray-500 text-sm">
-                      {vol.startDate} {vol.endDate && `- ${vol.endDate}`}
-                    </span>
-                  )}
-                </div>
-                {vol.organization && (
-                  <p className="text-gray-600 mb-2">{vol.organization}</p>
-                )}
-                {vol.description && (
-                  <p className="text-gray-700">{vol.description}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Languages */}
       {resume.languages && resume.languages.length > 0 && (
         <div className="mb-8">
@@ -198,28 +169,25 @@ export const CleanATSTemplate = ({ resume }: CleanATSTemplateProps) => {
         </div>
       )}
 
-      {/* Additional Sections - Fixed to handle objects properly */}
+      {/* Additional Sections */}
       {resume.additionalSections && Object.keys(resume.additionalSections).length > 0 && (
         <>
           {Object.entries(resume.additionalSections).map(([sectionName, sectionContent]) => {
-            // Skip volunteer section as it's already handled above
-            if (sectionName === 'volunteer' || !Array.isArray(sectionContent) || sectionContent.length === 0) {
-              return null;
+            if (Array.isArray(sectionContent) && sectionContent.length > 0) {
+              return (
+                <div key={sectionName} className="mb-8">
+                  <h2 className="text-lg font-normal text-gray-900 mb-4">
+                    {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
+                  </h2>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    {sectionContent.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              );
             }
-            return (
-              <div key={sectionName} className="mb-8">
-                <h2 className="text-lg font-normal text-gray-900 mb-4">
-                  {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
-                </h2>
-                <ul className="list-disc list-inside text-gray-700 space-y-1">
-                  {sectionContent.map((item, index) => (
-                    <li key={index}>
-                      {typeof item === 'string' ? item : JSON.stringify(item)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
+            return null;
           })}
         </>
       )}

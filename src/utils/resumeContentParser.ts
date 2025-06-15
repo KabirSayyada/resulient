@@ -340,7 +340,7 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
       break;
       
     case 'volunteer':
-      resume.additionalSections.volunteer = parseVolunteerExperience(content);
+      resume.additionalSections.volunteer = content.map(line => cleanBulletPoint(line)).filter(item => item);
       console.log(`Parsed ${resume.additionalSections.volunteer.length} volunteer entries`);
       break;
       
@@ -479,125 +479,6 @@ function parseWorkExperience(content: string[]) {
   });
 
   return experiences;
-}
-
-function parseVolunteerExperience(content: string[]) {
-  const volunteerExperiences = [];
-  let currentVolunteer = null;
-  let i = 0;
-
-  console.log('=== PARSING VOLUNTEER EXPERIENCE ===');
-  console.log('Content lines:', content);
-
-  while (i < content.length) {
-    const line = content[i];
-    console.log(`Processing volunteer line ${i}: "${line}"`);
-
-    // Check if this is a bullet point (description/responsibility)
-    if (isBulletPoint(line)) {
-      if (currentVolunteer) {
-        const description = cleanBulletPoint(line);
-        if (currentVolunteer.description) {
-          currentVolunteer.description += '; ' + description;
-        } else {
-          currentVolunteer.description = description;
-        }
-        console.log(`Added volunteer description: "${description}"`);
-      }
-      i++;
-      continue;
-    }
-
-    // Check if this looks like dates only (e.g., "2019 - 2020" or "March 2020 – Present")
-    if (line.match(/^\d{4}\s*[–-]\s*(\d{4}|Present)$/i) || 
-        line.match(/^\w+\s+\d{4}\s*[–-]\s*(\w+\s+\d{4}|Present)$/i)) {
-      if (currentVolunteer) {
-        const dateParts = line.split(/\s*[–-]\s*/);
-        currentVolunteer.startDate = dateParts[0]?.trim() || '';
-        currentVolunteer.endDate = dateParts[1]?.trim() || '';
-        console.log(`Added volunteer dates: ${currentVolunteer.startDate} - ${currentVolunteer.endDate}`);
-      }
-      i++;
-      continue;
-    }
-
-    // Check if this could be a volunteer position/organization (not a bullet point and meaningful content)
-    if (line.length > 2 && 
-        !line.toLowerCase().includes('responsibilities') &&
-        !line.toLowerCase().includes('duties') &&
-        !line.toLowerCase().includes('activities')) {
-      
-      // If we have a current volunteer experience, save it
-      if (currentVolunteer) {
-        volunteerExperiences.push(currentVolunteer);
-        console.log(`Saved volunteer experience:`, currentVolunteer);
-      }
-
-      // Start new volunteer experience
-      // Check if the line contains organization and role separated by common delimiters
-      if (line.includes(' | ') || line.includes(' – ') || line.includes(' - ')) {
-        const parts = line.split(/\s*[|–-]\s*/).map(p => cleanSpecialCharacters(p.trim()));
-        currentVolunteer = {
-          role: parts[0] || '',
-          organization: parts[1] || '',
-          startDate: '',
-          endDate: '',
-          description: ''
-        };
-        
-        // Check if there are dates in the same line (third part)
-        if (parts.length >= 3 && parts[2].match(/\d{4}/)) {
-          const datePart = parts[2];
-          const dateMatch = datePart.match(/(\d{4}|[A-Za-z]+\s+\d{4})\s*[–-]\s*(\d{4}|[A-Za-z]+\s+\d{4}|Present)/i);
-          if (dateMatch) {
-            currentVolunteer.startDate = dateMatch[1];
-            currentVolunteer.endDate = dateMatch[2];
-          }
-        }
-      } else {
-        // Single line - treat as role/organization
-        currentVolunteer = {
-          role: cleanSpecialCharacters(line.trim()),
-          organization: '',
-          startDate: '',
-          endDate: '',
-          description: ''
-        };
-      }
-      
-      console.log(`Started new volunteer experience:`, currentVolunteer);
-
-      // Look ahead for organization name and dates if not already set
-      if (i + 1 < content.length && !currentVolunteer.organization) {
-        const nextLine = content[i + 1];
-        console.log(`Next line: "${nextLine}"`);
-        
-        // If next line is not a bullet point and not dates, it might be organization
-        if (!isBulletPoint(nextLine) && 
-            !nextLine.match(/^\d{4}/) && 
-            !nextLine.match(/^\w+\s+\d{4}/)) {
-          currentVolunteer.organization = cleanSpecialCharacters(nextLine.trim());
-          console.log(`Set volunteer organization: "${currentVolunteer.organization}"`);
-          i++; // Skip the next line since we processed it
-        }
-      }
-    }
-
-    i++;
-  }
-
-  // Add the last volunteer experience
-  if (currentVolunteer) {
-    volunteerExperiences.push(currentVolunteer);
-    console.log(`Saved final volunteer experience:`, currentVolunteer);
-  }
-
-  console.log(`=== FINAL VOLUNTEER EXPERIENCES (${volunteerExperiences.length}) ===`);
-  volunteerExperiences.forEach((vol, idx) => {
-    console.log(`Volunteer ${idx}:`, vol);
-  });
-
-  return volunteerExperiences;
 }
 
 function parseSkills(content: string[]) {
