@@ -83,6 +83,45 @@ export const MinimalATSTemplate = ({ resume, className = '' }: MinimalATSTemplat
         </div>
       )}
 
+      {/* Volunteer Experience */}
+      {resume.volunteerExperience && resume.volunteerExperience.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-sm font-medium mb-3 text-gray-800 tracking-wider" 
+              style={{ fontSize: '11px', marginBottom: '8px', fontWeight: '500' }}>
+            VOLUNTEER EXPERIENCE
+          </h2>
+          
+          {resume.volunteerExperience.map((exp, index) => (
+            <div key={index} className="mb-4" style={{ marginBottom: '16px' }}>
+              <div className="flex justify-between items-baseline mb-1">
+                <h3 className="text-xs font-medium text-gray-900" style={{ fontSize: '11px' }}>
+                  {exp.position}
+                </h3>
+                {(exp.startDate || exp.endDate) && (
+                  <div className="text-xs text-gray-500" style={{ fontSize: '9px' }}>
+                    {exp.startDate} {exp.endDate && `– ${exp.endDate}`}
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-600 mb-2" style={{ fontSize: '10px' }}>
+                {exp.company}
+              </p>
+              
+              {exp.responsibilities && exp.responsibilities.length > 0 && (
+                <ul className="text-xs text-gray-700 space-y-1 ml-4" 
+                    style={{ fontSize: '10px', lineHeight: '1.4' }}>
+                  {exp.responsibilities.slice(0, 3).map((responsibility, respIndex) => (
+                    <li key={respIndex} className="list-disc">
+                      {responsibility}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Skills */}
       {resume.skills.length > 0 && (
         <div className="mb-6">

@@ -92,6 +92,37 @@ export const ModernATSTemplate = ({ resume, className = '' }: ModernATSTemplateP
         </div>
       )}
 
+      {/* Volunteer Experience */}
+      {resume.volunteerExperience && resume.volunteerExperience.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 text-blue-800 border-l-4 border-blue-600 pl-3">
+            VOLUNTEER EXPERIENCE
+          </h2>
+          <div className="space-y-6">
+            {resume.volunteerExperience.map((exp, index) => (
+              <div key={index} className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="font-bold text-gray-900">{exp.position}</h3>
+                    <p className="text-blue-600 font-semibold">{exp.company}</p>
+                  </div>
+                  <div className="text-gray-500 text-sm bg-white px-2 py-1 rounded">
+                    {exp.startDate} - {exp.endDate || 'Present'}
+                  </div>
+                </div>
+                {exp.responsibilities && exp.responsibilities.length > 0 && (
+                  <ul className="list-disc list-inside text-gray-700 space-y-1 mt-3">
+                    {exp.responsibilities.map((resp, idx) => (
+                      <li key={idx}>{resp}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Education */}
       {resume.education.length > 0 && (
         <div className="mb-8">

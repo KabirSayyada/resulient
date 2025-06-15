@@ -91,6 +91,42 @@ export const ExecutiveATSTemplate = ({ resume, className = '' }: ExecutiveATSTem
         </div>
       )}
 
+      {/* Volunteer Experience */}
+      {resume.volunteerExperience && resume.volunteerExperience.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-6 text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-2">
+            Community Leadership
+          </h2>
+          
+          {resume.volunteerExperience.map((exp, index) => (
+            <div key={index} className="mb-8">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg text-gray-900 uppercase tracking-wide">{exp.position}</h3>
+                  <p className="text-gray-700 font-semibold text-lg">{exp.company}</p>
+                </div>
+                {(exp.startDate || exp.endDate) && (
+                  <div className="text-gray-600 font-medium">
+                    {exp.startDate} {exp.endDate && `– ${exp.endDate}`}
+                  </div>
+                )}
+              </div>
+              
+              {exp.responsibilities && exp.responsibilities.length > 0 && (
+                <ul className="text-gray-800 space-y-2 ml-4">
+                  {exp.responsibilities.map((responsibility, respIndex) => (
+                    <li key={respIndex} className="flex items-start leading-relaxed">
+                      <span className="text-gray-500 mr-3 mt-1">•</span>
+                      <span>{responsibility}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Education */}
       {resume.education.length > 0 && (
         <div className="mb-8">

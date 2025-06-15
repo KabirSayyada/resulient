@@ -88,6 +88,40 @@ export const TechATSTemplate = ({ resume }: TechATSTemplateProps) => {
         </div>
       )}
 
+      {/* Volunteer Experience */}
+      {resume.volunteerExperience && resume.volunteerExperience.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-3 border-b-2 border-green-500 pb-1">
+            // VOLUNTEER_WORK
+          </h2>
+          <div className="space-y-6">
+            {resume.volunteerExperience.map((exp, index) => (
+              <div key={index} className="border border-gray-200 rounded p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="font-bold text-gray-900">{exp.position}</h3>
+                    <p className="text-green-600 font-semibold">{exp.company}</p>
+                  </div>
+                  <span className="text-gray-500 text-sm bg-gray-100 px-2 py-1 rounded">
+                    {exp.startDate} - {exp.endDate || 'Present'}
+                  </span>
+                </div>
+                {exp.responsibilities && (
+                  <div className="mt-3">
+                    {exp.responsibilities.map((resp, idx) => (
+                      <div key={idx} className="text-gray-700 mb-1 flex">
+                        <span className="text-green-500 mr-2">{'>'}</span>
+                        <span>{resp}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Projects */}
       {resume.projects.length > 0 && (
         <div className="mb-8">
