@@ -139,23 +139,6 @@ export const ExecutiveATSTemplate = ({ resume, className = '' }: ExecutiveATSTem
         </div>
       )}
 
-      {/* Achievements - Show ALL achievements */}
-      {resume.achievements && resume.achievements.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-bold mb-6 text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-2">
-            Awards & Achievements
-          </h2>
-          <ul className="text-gray-800 space-y-2 ml-4">
-            {resume.achievements.map((achievement, index) => (
-              <li key={index} className="flex items-start leading-relaxed">
-                <span className="text-gray-500 mr-3 mt-1">•</span>
-                <span>{achievement}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       {/* Certifications */}
       {resume.certifications.length > 0 && (
         <div className="mb-8">

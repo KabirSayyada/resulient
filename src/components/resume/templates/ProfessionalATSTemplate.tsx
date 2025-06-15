@@ -151,11 +151,11 @@ export const ProfessionalATSTemplate = ({ resume }: ProfessionalATSTemplateProps
         </div>
       )}
 
-      {/* Achievements - Show ALL achievements */}
-      {resume.achievements && resume.achievements.length > 0 && (
+      {/* Achievements */}
+      {resume.achievements.length > 0 && (
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">
-            AWARDS & ACHIEVEMENTS
+            ACHIEVEMENTS & HONORS
           </h2>
           <ul className="list-disc list-inside text-gray-700 space-y-2 text-center" style={{ listStylePosition: 'inside' }}>
             {resume.achievements.map((achievement, index) => (

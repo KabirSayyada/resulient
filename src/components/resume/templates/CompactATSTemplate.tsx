@@ -154,14 +154,14 @@ export const CompactATSTemplate = ({ resume }: CompactATSTemplateProps) => {
             </div>
           )}
 
-          {/* Achievements - Show ALL achievements */}
+          {/* Achievements */}
           {resume.achievements.length > 0 && (
             <div>
               <h2 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">
                 Achievements
               </h2>
               <ul className="list-disc list-inside text-xs text-gray-700 space-y-0.5">
-                {resume.achievements.map((achievement, index) => (
+                {resume.achievements.slice(0, 3).map((achievement, index) => (
                   <li key={index}>{achievement}</li>
                 ))}
               </ul>

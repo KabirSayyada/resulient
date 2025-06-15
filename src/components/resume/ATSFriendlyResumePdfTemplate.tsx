@@ -215,7 +215,7 @@ export const ATSFriendlyResumePdfTemplate = ({ resume, className = '' }: ATSFrie
         </div>
       )}
 
-      {/* Achievements - Show ALL achievements */}
+      {/* Achievements */}
       {resume.achievements && resume.achievements.length > 0 && (
         <div className="mb-4">
           <h2 className="text-sm font-bold mb-2 text-gray-900 border-b border-gray-200" 

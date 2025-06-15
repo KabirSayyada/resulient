@@ -148,24 +148,6 @@ export const MinimalATSTemplate = ({ resume, className = '' }: MinimalATSTemplat
         </div>
       )}
 
-      {/* Achievements - Show ALL achievements */}
-      {resume.achievements && resume.achievements.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-sm font-medium mb-3 text-gray-800 tracking-wider" 
-              style={{ fontSize: '11px', marginBottom: '8px', fontWeight: '500' }}>
-            AWARDS & ACHIEVEMENTS
-          </h2>
-          <ul className="text-xs text-gray-700 space-y-1 ml-4" 
-              style={{ fontSize: '10px', lineHeight: '1.4' }}>
-            {resume.achievements.map((achievement, index) => (
-              <li key={index} className="list-disc">
-                {achievement}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       {/* Certifications */}
       {resume.certifications.length > 0 && (
         <div className="mb-4">
