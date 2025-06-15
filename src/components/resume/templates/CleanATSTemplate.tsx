@@ -143,7 +143,7 @@ export const CleanATSTemplate = ({ resume }: CleanATSTemplateProps) => {
         </div>
       )}
 
-      {/* Achievements */}
+      {/* Achievements - Show ALL achievements */}
       {resume.achievements.length > 0 && (
         <div className="mb-8">
           <h2 className="text-lg font-normal text-gray-900 mb-4">
