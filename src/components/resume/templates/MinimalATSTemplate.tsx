@@ -178,7 +178,7 @@ export const MinimalATSTemplate = ({ resume, className = '' }: MinimalATSTemplat
         </div>
       )}
 
-      {/* Volunteer Experience */}
+      {/* Volunteer Experience - Fixed to properly handle the new structure */}
       {resume.additionalSections.volunteer && resume.additionalSections.volunteer.length > 0 && (
         <div className="mb-4">
           <h2 className="text-sm font-medium mb-3 text-gray-800 tracking-wider" 

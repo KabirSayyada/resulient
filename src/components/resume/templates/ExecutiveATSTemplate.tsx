@@ -164,7 +164,7 @@ export const ExecutiveATSTemplate = ({ resume, className = '' }: ExecutiveATSTem
         </div>
       )}
 
-      {/* Volunteer Experience */}
+      {/* Volunteer Experience - Fixed to properly handle the new structure */}
       {resume.additionalSections.volunteer && resume.additionalSections.volunteer.length > 0 && (
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-6 text-gray-900 uppercase tracking-wide border-b border-gray-300 pb-2">
