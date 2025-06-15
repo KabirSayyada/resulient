@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -94,16 +93,14 @@ export const ResumeTemplateSelector = ({ resume, className = '' }: ResumeTemplat
     try {
       const filename = `resume-${templateType}-${new Date().toISOString().split('T')[0]}.pdf`;
       
-      const success = await generateTemplatePDF(resume, templateType, filename);
+      // Fix: Pass parameters in correct order - templateId, resume, filename
+      generateTemplatePDF(templateType, resume, filename);
 
-      if (success) {
-        toast({
-          title: "Resume Downloaded",
-          description: `Your ${templates[templateType].name.toLowerCase()} resume has been downloaded successfully!`,
-        });
-      } else {
-        throw new Error("PDF generation failed");
-      }
+      // Since generateTemplatePDF doesn't return a value, we assume success if no error is thrown
+      toast({
+        title: "Resume Downloaded",
+        description: `Your ${templates[templateType].name.toLowerCase()} resume has been downloaded successfully!`,
+      });
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast({
