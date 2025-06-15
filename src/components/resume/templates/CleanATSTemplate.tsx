@@ -198,7 +198,7 @@ export const CleanATSTemplate = ({ resume }: CleanATSTemplateProps) => {
         </div>
       )}
 
-      {/* Additional Sections */}
+      {/* Additional Sections - Fixed to handle objects properly */}
       {resume.additionalSections && Object.keys(resume.additionalSections).length > 0 && (
         <>
           {Object.entries(resume.additionalSections).map(([sectionName, sectionContent]) => {
@@ -213,7 +213,9 @@ export const CleanATSTemplate = ({ resume }: CleanATSTemplateProps) => {
                 </h2>
                 <ul className="list-disc list-inside text-gray-700 space-y-1">
                   {sectionContent.map((item, index) => (
-                    <li key={index}>{item}</li>
+                    <li key={index}>
+                      {typeof item === 'string' ? item : JSON.stringify(item)}
+                    </li>
                   ))}
                 </ul>
               </div>
