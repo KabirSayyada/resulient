@@ -88,6 +88,30 @@ export const TechATSTemplate = ({ resume }: TechATSTemplateProps) => {
         </div>
       )}
 
+      {/* Projects */}
+      {resume.projects.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-3 border-b-2 border-green-500 pb-1">
+            // PROJECTS
+          </h2>
+          <div className="space-y-4">
+            {resume.projects.map((project, index) => (
+              <div key={index} className="bg-gray-50 p-3 rounded border-l-4 border-green-200">
+                <h3 className="font-bold text-gray-900">{project.name}</h3>
+                {project.description && (
+                  <p className="text-gray-700 mt-2">{project.description}</p>
+                )}
+                {project.technologies && (
+                  <p className="text-green-600 text-sm mt-1">
+                    Tech: {project.technologies.join(', ')}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Education */}
       {resume.education.length > 0 && (
         <div className="mb-8">
@@ -108,6 +132,95 @@ export const TechATSTemplate = ({ resume }: TechATSTemplateProps) => {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Certifications */}
+      {resume.certifications.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-3 border-b-2 border-green-500 pb-1">
+            // CERTIFICATIONS
+          </h2>
+          <div className="space-y-2">
+            {resume.certifications.map((cert, index) => (
+              <div key={index} className="bg-gray-50 p-3 rounded border-l-4 border-green-200">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="font-bold text-gray-900">{cert.name}</span>
+                    {cert.issuer && cert.issuer !== 'Unknown' && (
+                      <p className="text-green-600 text-sm">{cert.issuer}</p>
+                    )}
+                  </div>
+                  {cert.date && (
+                    <span className="text-gray-500 text-sm">{cert.date}</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Achievements */}
+      {resume.achievements.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-3 border-b-2 border-green-500 pb-1">
+            // ACHIEVEMENTS
+          </h2>
+          <div className="space-y-1">
+            {resume.achievements.map((achievement, index) => (
+              <div key={index} className="text-gray-700 flex">
+                <span className="text-green-500 mr-2">{'>'}</span>
+                <span>{achievement}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Languages */}
+      {resume.languages && resume.languages.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-3 border-b-2 border-green-500 pb-1">
+            // LANGUAGES
+          </h2>
+          <div className="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm">
+            <div className="mb-2">const languages = [</div>
+            <div className="ml-4">
+              {resume.languages.map((lang, index) => (
+                <div key={index} className="text-yellow-300">
+                  "{lang}"{index < resume.languages.length - 1 ? ',' : ''}
+                </div>
+              ))}
+            </div>
+            <div>];</div>
+          </div>
+        </div>
+      )}
+
+      {/* Additional Sections */}
+      {resume.additionalSections && Object.keys(resume.additionalSections).length > 0 && (
+        <>
+          {Object.entries(resume.additionalSections).map(([sectionName, sectionContent]) => {
+            if (Array.isArray(sectionContent) && sectionContent.length > 0) {
+              return (
+                <div key={sectionName} className="mb-8">
+                  <h2 className="text-lg font-bold text-gray-900 mb-3 border-b-2 border-green-500 pb-1">
+                    // {sectionName.toUpperCase()}
+                  </h2>
+                  <div className="space-y-1">
+                    {sectionContent.map((item, index) => (
+                      <div key={index} className="text-gray-700 flex">
+                        <span className="text-green-500 mr-2">{'>'}</span>
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          })}
+        </>
       )}
     </div>
   );

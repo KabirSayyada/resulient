@@ -131,6 +131,81 @@ export const CompactATSTemplate = ({ resume }: CompactATSTemplateProps) => {
               </div>
             </div>
           )}
+
+          {/* Certifications */}
+          {resume.certifications.length > 0 && (
+            <div>
+              <h2 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">
+                Certifications
+              </h2>
+              <div className="space-y-1">
+                {resume.certifications.slice(0, 4).map((cert, index) => (
+                  <div key={index}>
+                    <h3 className="text-xs font-semibold text-gray-900">{cert.name}</h3>
+                    {cert.issuer && cert.issuer !== 'Unknown' && (
+                      <p className="text-xs text-gray-600">{cert.issuer}</p>
+                    )}
+                    {cert.date && (
+                      <p className="text-xs text-gray-500">{cert.date}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Achievements */}
+          {resume.achievements.length > 0 && (
+            <div>
+              <h2 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">
+                Achievements
+              </h2>
+              <ul className="list-disc list-inside text-xs text-gray-700 space-y-0.5">
+                {resume.achievements.slice(0, 3).map((achievement, index) => (
+                  <li key={index}>{achievement}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Languages */}
+          {resume.languages && resume.languages.length > 0 && (
+            <div>
+              <h2 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">
+                Languages
+              </h2>
+              <div className="space-y-1">
+                {resume.languages.slice(0, 4).map((language, index) => (
+                  <div key={index} className="text-xs text-gray-700 bg-gray-100 px-2 py-1 rounded">
+                    {language}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Additional Sections */}
+          {resume.additionalSections && Object.keys(resume.additionalSections).length > 0 && (
+            <>
+              {Object.entries(resume.additionalSections).slice(0, 2).map(([sectionName, sectionContent]) => {
+                if (Array.isArray(sectionContent) && sectionContent.length > 0) {
+                  return (
+                    <div key={sectionName}>
+                      <h2 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">
+                        {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
+                      </h2>
+                      <ul className="list-disc list-inside text-xs text-gray-700 space-y-0.5">
+                        {sectionContent.slice(0, 3).map((item, index) => (
+                          <li key={index}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                }
+                return null;
+              })}
+            </>
+          )}
         </div>
       </div>
     </div>

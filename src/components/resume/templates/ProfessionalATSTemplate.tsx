@@ -83,6 +83,30 @@ export const ProfessionalATSTemplate = ({ resume }: ProfessionalATSTemplateProps
         </div>
       )}
 
+      {/* Projects */}
+      {resume.projects.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">
+            KEY PROJECTS
+          </h2>
+          <div className="space-y-6">
+            {resume.projects.map((project, index) => (
+              <div key={index} className="border-l-4 border-gray-300 pl-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{project.name}</h3>
+                {project.description && (
+                  <p className="text-gray-700 mb-3">{project.description}</p>
+                )}
+                {project.technologies && (
+                  <p className="text-gray-600 text-sm">
+                    <span className="font-semibold">Technologies:</span> {project.technologies.join(', ')}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Education */}
       {resume.education.length > 0 && (
         <div className="mb-8">
@@ -103,6 +127,81 @@ export const ProfessionalATSTemplate = ({ resume }: ProfessionalATSTemplateProps
             ))}
           </div>
         </div>
+      )}
+
+      {/* Certifications */}
+      {resume.certifications.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">
+            PROFESSIONAL CERTIFICATIONS
+          </h2>
+          <div className="space-y-3">
+            {resume.certifications.map((cert, index) => (
+              <div key={index} className="text-center border-b border-gray-200 pb-3">
+                <h3 className="font-bold text-gray-900">{cert.name}</h3>
+                {cert.issuer && cert.issuer !== 'Unknown' && (
+                  <p className="text-gray-600">{cert.issuer}</p>
+                )}
+                {cert.date && (
+                  <p className="text-gray-500 text-sm">{cert.date}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Achievements */}
+      {resume.achievements.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">
+            ACHIEVEMENTS & HONORS
+          </h2>
+          <ul className="list-disc list-inside text-gray-700 space-y-2 text-center" style={{ listStylePosition: 'inside' }}>
+            {resume.achievements.map((achievement, index) => (
+              <li key={index} className="leading-relaxed">{achievement}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Languages */}
+      {resume.languages && resume.languages.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 text-center">
+            LANGUAGES
+          </h2>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            {resume.languages.map((language, index) => (
+              <div key={index} className="text-gray-700 py-2 border-b border-gray-200">
+                {language}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Additional Sections */}
+      {resume.additionalSections && Object.keys(resume.additionalSections).length > 0 && (
+        <>
+          {Object.entries(resume.additionalSections).map(([sectionName, sectionContent]) => {
+            if (Array.isArray(sectionContent) && sectionContent.length > 0) {
+              return (
+                <div key={sectionName} className="mb-8">
+                  <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">
+                    {sectionName.toUpperCase()}
+                  </h2>
+                  <ul className="list-disc list-inside text-gray-700 space-y-2 text-center" style={{ listStylePosition: 'inside' }}>
+                    {sectionContent.map((item, index) => (
+                      <li key={index} className="leading-relaxed">{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            }
+            return null;
+          })}
+        </>
       )}
     </div>
   );

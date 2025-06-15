@@ -118,6 +118,79 @@ export const CleanATSTemplate = ({ resume }: CleanATSTemplateProps) => {
           </div>
         </div>
       )}
+
+      {/* Certifications */}
+      {resume.certifications.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-normal text-gray-900 mb-4">
+            Certifications
+          </h2>
+          <div className="space-y-2">
+            {resume.certifications.map((cert, index) => (
+              <div key={index} className="flex justify-between items-baseline">
+                <div>
+                  <span className="font-medium text-gray-900">{cert.name}</span>
+                  {cert.issuer && cert.issuer !== 'Unknown' && (
+                    <span className="text-gray-600 ml-2">- {cert.issuer}</span>
+                  )}
+                </div>
+                {cert.date && (
+                  <span className="text-gray-500 text-sm">{cert.date}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Achievements */}
+      {resume.achievements.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-normal text-gray-900 mb-4">
+            Achievements
+          </h2>
+          <ul className="list-disc list-inside text-gray-700 space-y-1">
+            {resume.achievements.map((achievement, index) => (
+              <li key={index}>{achievement}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Languages */}
+      {resume.languages && resume.languages.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-normal text-gray-900 mb-3">
+            Languages
+          </h2>
+          <p className="text-gray-700">
+            {resume.languages.join(', ')}
+          </p>
+        </div>
+      )}
+
+      {/* Additional Sections */}
+      {resume.additionalSections && Object.keys(resume.additionalSections).length > 0 && (
+        <>
+          {Object.entries(resume.additionalSections).map(([sectionName, sectionContent]) => {
+            if (Array.isArray(sectionContent) && sectionContent.length > 0) {
+              return (
+                <div key={sectionName} className="mb-8">
+                  <h2 className="text-lg font-normal text-gray-900 mb-4">
+                    {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
+                  </h2>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    {sectionContent.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            }
+            return null;
+          })}
+        </>
+      )}
     </div>
   );
 };

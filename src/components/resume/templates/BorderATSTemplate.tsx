@@ -89,6 +89,30 @@ export const BorderATSTemplate = ({ resume }: BorderATSTemplateProps) => {
         </div>
       )}
 
+      {/* Projects */}
+      {resume.projects.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 bg-gray-800 text-white px-2 py-1 inline-block">
+            KEY PROJECTS
+          </h2>
+          <div className="space-y-4 mt-4">
+            {resume.projects.map((project, index) => (
+              <div key={index} className="border-2 border-gray-300 p-4">
+                <h3 className="font-bold text-gray-900 mb-2">{project.name}</h3>
+                {project.description && (
+                  <p className="text-gray-700 mb-2">{project.description}</p>
+                )}
+                {project.technologies && (
+                  <p className="text-gray-600 text-sm">
+                    <span className="font-semibold">Technologies:</span> {project.technologies.join(', ')}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Education */}
       {resume.education.length > 0 && (
         <div className="mb-8">
@@ -109,6 +133,93 @@ export const BorderATSTemplate = ({ resume }: BorderATSTemplateProps) => {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Certifications */}
+      {resume.certifications.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 bg-gray-800 text-white px-2 py-1 inline-block">
+            CERTIFICATIONS
+          </h2>
+          <div className="border-2 border-gray-300 p-4 mt-4">
+            <div className="space-y-3">
+              {resume.certifications.map((cert, index) => (
+                <div key={index} className="border border-gray-300 p-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold text-gray-900">{cert.name}</h3>
+                      {cert.issuer && cert.issuer !== 'Unknown' && (
+                        <p className="text-gray-600">{cert.issuer}</p>
+                      )}
+                    </div>
+                    {cert.date && (
+                      <span className="text-gray-500 text-sm">{cert.date}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Achievements */}
+      {resume.achievements.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 bg-gray-800 text-white px-2 py-1 inline-block">
+            ACHIEVEMENTS
+          </h2>
+          <div className="border-2 border-gray-300 p-4 mt-4">
+            <ul className="list-disc list-inside text-gray-700 space-y-2">
+              {resume.achievements.map((achievement, index) => (
+                <li key={index}>{achievement}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Languages */}
+      {resume.languages && resume.languages.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 bg-gray-800 text-white px-2 py-1 inline-block">
+            LANGUAGES
+          </h2>
+          <div className="border-2 border-gray-300 p-4 mt-4">
+            <div className="grid grid-cols-3 gap-2">
+              {resume.languages.map((language, index) => (
+                <div key={index} className="border border-gray-300 p-2 text-center text-sm">
+                  {language}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Additional Sections */}
+      {resume.additionalSections && Object.keys(resume.additionalSections).length > 0 && (
+        <>
+          {Object.entries(resume.additionalSections).map(([sectionName, sectionContent]) => {
+            if (Array.isArray(sectionContent) && sectionContent.length > 0) {
+              return (
+                <div key={sectionName} className="mb-8">
+                  <h2 className="text-lg font-bold text-gray-900 mb-4 bg-gray-800 text-white px-2 py-1 inline-block">
+                    {sectionName.toUpperCase()}
+                  </h2>
+                  <div className="border-2 border-gray-300 p-4 mt-4">
+                    <ul className="list-disc list-inside text-gray-700 space-y-2">
+                      {sectionContent.map((item, index) => (
+                        <li key={index}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          })}
+        </>
       )}
     </div>
   );
