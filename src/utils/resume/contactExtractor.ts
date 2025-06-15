@@ -1,5 +1,5 @@
 
-import { ParsedContact } from "@/types/resumeStructure";
+import { ContactInfo } from "@/types/resumeStructure";
 import { EMAIL_REGEX, PHONE_REGEX, LINKEDIN_REGEX } from './constants';
 
 export function couldBeName(line: string): boolean {
@@ -37,8 +37,8 @@ export function isContactInfo(line: string): boolean {
   return result;
 }
 
-export function extractContactInfo(lines: string[]): ParsedContact {
-  const contact: ParsedContact = {};
+export function extractContactInfo(lines: string[]): ContactInfo {
+  const contact: ContactInfo = {};
   let potentialNames: string[] = [];
   
   console.log('=== Starting contact extraction ===');
@@ -97,64 +97,41 @@ export function extractContactInfo(lines: string[]): ParsedContact {
         if (partEmailMatch && !contact.email) {
           contact.email = partEmailMatch[0];
           console.log('  ✓ Found email in multi-part:', partEmailMatch[0]);
-        }
-        if (partPhoneMatch && !contact.phone) {
+        } else if (partPhoneMatch && !contact.phone) {
           contact.phone = partPhoneMatch[0];
           console.log('  ✓ Found phone in multi-part:', partPhoneMatch[0]);
-        }
-        if (partLinkedinMatch && !contact.linkedin) {
+        } else if (partLinkedinMatch && !contact.linkedin) {
           contact.linkedin = partLinkedinMatch[0];
           console.log('  ✓ Found LinkedIn in multi-part:', partLinkedinMatch[0]);
-        }
-        
-        // Check if remaining part could be a name
-        let cleanPart = part;
-        if (partEmailMatch) cleanPart = cleanPart.replace(partEmailMatch[0], '').trim();
-        if (partPhoneMatch) cleanPart = cleanPart.replace(partPhoneMatch[0], '').trim();
-        if (partLinkedinMatch) cleanPart = cleanPart.replace(partLinkedinMatch[0], '').trim();
-        
-        if (cleanPart && couldBeName(cleanPart) && !potentialNames.includes(cleanPart)) {
-          potentialNames.push(cleanPart);
-          console.log('  ✓ Found potential name in multi-part:', cleanPart);
+        } else if (part.includes('http') || part.includes('www.')) {
+          if (!contact.website) {
+            contact.website = part;
+            console.log('  ✓ Found website in multi-part:', part);
+          }
+        } else if (couldBeName(part) && !contact.name) {
+          contact.name = part;
+          console.log('  ✓ Found name in multi-part:', part);
         }
       }
+      continue;
     }
     
-    // Collect potential names (lines that aren't contact info and could be names)
-    if (!isContactInfo(line) && couldBeName(line)) {
-      if (!potentialNames.includes(line)) {
-        potentialNames.push(line);
-        console.log('✓ Added potential name:', line);
-      }
+    // Check if this could be a name
+    if (couldBeName(line) && !contact.name && i < 3) {
+      contact.name = line;
+      console.log('✓ Found name:', line);
+      continue;
     }
-  }
-  
-  console.log('All potential names found:', potentialNames);
-  
-  // Select the best name candidate
-  if (!contact.name && potentialNames.length > 0) {
-    // Prefer names that are:
-    // 1. Not too short (at least 2 words or 4+ characters)
-    // 2. Don't contain numbers or special characters
-    // 3. Are reasonable length (not too long)
-    const filteredNames = potentialNames.filter(name => {
-      const words = name.split(' ').filter(w => w.length > 0);
-      return (
-        (words.length >= 2 || name.length >= 4) &&
-        !name.match(/\d/) &&
-        !name.match(/[!@#$%^&*()_+=\[\]{}|\\:";'<>?,./]/) &&
-        name.length <= 50
-      );
-    });
     
-    console.log('Filtered potential names:', filteredNames);
-    
-    // Pick the first good candidate, or fall back to any name
-    contact.name = filteredNames[0] || potentialNames[0];
-    console.log('✓ Selected final name:', contact.name);
+    // Check for website
+    if (!contact.website && (line.includes('http') || line.includes('www.'))) {
+      contact.website = line;
+      console.log('✓ Found website:', line);
+    }
   }
   
   console.log('=== Final extracted contact ===');
   console.log(contact);
+  
   return contact;
 }

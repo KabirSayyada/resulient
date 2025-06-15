@@ -1,15 +1,16 @@
 
-import { ParsedCertification } from "@/types/resumeStructure";
+import { Certification } from "@/types/resumeStructure";
 import { extractDates } from './dateExtractor';
 
-export function parseCertifications(content: string[]): ParsedCertification[] {
-  const certifications: ParsedCertification[] = [];
+export function parseCertifications(content: string[]): Certification[] {
+  const certifications: Certification[] = [];
   
   for (const line of content) {
     if (line.length > 3) {
-      const cert: ParsedCertification = {
+      const cert: Certification = {
         name: line,
-        issuer: 'Unknown'
+        issuer: 'Unknown',
+        date: ''
       };
       
       // Extract dates

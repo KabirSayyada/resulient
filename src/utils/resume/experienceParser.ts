@@ -1,11 +1,11 @@
 
-import { ParsedWorkExperience } from "@/types/resumeStructure";
+import { WorkExperience } from "@/types/resumeStructure";
 import { extractDates } from './dateExtractor';
 import { DATE_PATTERNS } from './constants';
 
-export function parseWorkExperience(content: string[]): ParsedWorkExperience[] {
-  const experiences: ParsedWorkExperience[] = [];
-  let currentExperience: Partial<ParsedWorkExperience> | null = null;
+export function parseWorkExperience(content: string[]): WorkExperience[] {
+  const experiences: WorkExperience[] = [];
+  let currentExperience: Partial<WorkExperience> | null = null;
   
   for (const line of content) {
     if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
@@ -44,7 +44,7 @@ export function parseWorkExperience(content: string[]): ParsedWorkExperience[] {
   return experiences;
 }
 
-function fillExperienceDefaults(exp: Partial<ParsedWorkExperience>): ParsedWorkExperience {
+function fillExperienceDefaults(exp: Partial<WorkExperience>): WorkExperience {
   return {
     position: exp.position || 'Position',
     company: exp.company || 'Company',
@@ -66,8 +66,8 @@ function isJobTitleLine(line: string): boolean {
   );
 }
 
-function parseJobTitleLine(line: string): Partial<ParsedWorkExperience> {
-  const experience: Partial<ParsedWorkExperience> = {
+function parseJobTitleLine(line: string): Partial<WorkExperience> {
+  const experience: Partial<WorkExperience> = {
     responsibilities: []
   };
   

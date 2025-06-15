@@ -1,16 +1,17 @@
 
-import { ParsedEducation } from "@/types/resumeStructure";
+import { Education } from "@/types/resumeStructure";
 import { extractDates } from './dateExtractor';
 import { DATE_PATTERNS } from './constants';
 
-export function parseEducation(content: string[]): ParsedEducation[] {
-  const education: ParsedEducation[] = [];
+export function parseEducation(content: string[]): Education[] {
+  const education: Education[] = [];
   
   for (const line of content) {
     if (line.length > 5) {
-      const edu: ParsedEducation = {
+      const edu: Education = {
         institution: '',
-        degree: ''
+        degree: '',
+        graduationDate: ''
       };
       
       // Extract dates
