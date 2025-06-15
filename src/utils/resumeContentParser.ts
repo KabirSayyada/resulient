@@ -7,7 +7,6 @@ import {
   cleanBulletPoint,
   removeEmojis
 } from './resume/textCleaner';
-import { identifySectionHeader, shouldIncludeInSection } from './resume/sectionParser';
 
 export const parseOptimizedResumeContent = (content: string): ParsedResume => {
   console.log('=== PARSING OPTIMIZED RESUME CONTENT ===');
@@ -49,14 +48,14 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
     console.log(`Contact extraction line ${i}: "${line}"`);
     
     // Skip section headers during contact extraction
-    if (identifySectionHeader(line)) {
+    if (identifySection(line)) {
       break;
     }
     
     // Name detection (first non-contact-info line)
     if (!resume.contact.name && 
         !line.includes('@') && 
-        !/\d{3}/.test(line) &&
+        !line.match(/\d{3}/) &&
         !line.toLowerCase().includes('linkedin') &&
         !line.includes('|') &&
         !line.includes('📍') &&
@@ -84,7 +83,7 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
             resume.contact.email = emailMatch[0];
             console.log('Found email:', resume.contact.email);
           }
-        } else if (/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/.test(part) && !resume.contact.phone) {
+        } else if (part.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/) && !resume.contact.phone) {
           const phoneMatch = part.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/);
           if (phoneMatch) {
             resume.contact.phone = phoneMatch[0];
@@ -113,7 +112,7 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
           resume.contact.email = emailMatch[0];
           console.log('Found email:', resume.contact.email);
         }
-      } else if (/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/.test(cleanLine) && !resume.contact.phone) {
+      } else if (cleanLine.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/) && !resume.contact.phone) {
         const phoneMatch = cleanLine.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/);
         if (phoneMatch) {
           resume.contact.phone = phoneMatch[0];
@@ -140,22 +139,16 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
       continue;
     }
 
-    // Detect section headers with enhanced validation
-    const sectionType = identifySectionHeader(line);
+    // Detect section headers with enhanced cleaning
+    const sectionType = identifySection(line);
     
     if (sectionType) {
       console.log(`Found section: ${line} -> ${sectionType}`);
       
-      // Process previous section with validation
+      // Process previous section
       if (currentSection && sectionContent.length > 0) {
         console.log(`Processing previous section: ${currentSection} with ${sectionContent.length} lines`);
-        
-        // Check if we should include this section
-        if (shouldIncludeInSection(currentSection, sectionContent)) {
-          processSectionContent(resume, currentSection, sectionContent);
-        } else {
-          console.log(`Skipping section ${currentSection} due to validation failure`);
-        }
+        processSectionContent(resume, currentSection, sectionContent);
       }
       
       currentSection = sectionType;
@@ -170,15 +163,10 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
     }
   }
 
-  // Process final section with validation
+  // Process final section
   if (currentSection && sectionContent.length > 0) {
     console.log(`Processing final section: ${currentSection} with ${sectionContent.length} lines`);
-    
-    if (shouldIncludeInSection(currentSection, sectionContent)) {
-      processSectionContent(resume, currentSection, sectionContent);
-    } else {
-      console.log(`Skipping final section ${currentSection} due to validation failure`);
-    }
+    processSectionContent(resume, currentSection, sectionContent);
   }
 
   console.log('=== FINAL PARSED RESUME ===');
@@ -195,6 +183,104 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
 
   return resume;
 };
+
+function identifySection(line: string): string | null {
+  // Use the enhanced text cleaning for section identification
+  const normalizedLine = normalizeForSectionIdentification(line);
+  console.log(`Identifying section for: "${line}" -> normalized: "${normalizedLine}"`);
+  
+  // Enhanced section headers - comprehensive list with emoji support
+  const sections = {
+    'PROFESSIONAL SUMMARY': 'summary',
+    'SUMMARY': 'summary',
+    'EXECUTIVE SUMMARY': 'summary',
+    'OBJECTIVE': 'summary',
+    'CAREER OBJECTIVE': 'summary',
+    'CAREER SUMMARY': 'summary',
+    'PROFILE': 'summary',
+    'ABOUT': 'summary',
+    'ABOUT ME': 'summary',
+    'PROFESSIONAL PROFILE': 'summary',
+    'PROFESSIONAL EXPERIENCE': 'experience',
+    'WORK EXPERIENCE': 'experience',
+    'EXPERIENCE': 'experience',
+    'EMPLOYMENT HISTORY': 'experience',
+    'CAREER HISTORY': 'experience',
+    'EMPLOYMENT': 'experience',
+    'PROFESSIONAL HISTORY': 'experience',
+    'WORK HISTORY': 'experience',
+    'TECHNICAL SKILLS': 'skills',
+    'SKILLS': 'skills',
+    'CORE COMPETENCIES': 'skills',
+    'COMPETENCIES': 'skills',
+    'TECHNOLOGIES': 'skills',
+    'KEY SKILLS': 'skills',
+    'PROFESSIONAL SKILLS': 'skills',
+    'TECHNICAL COMPETENCIES': 'skills',
+    'CORE SKILLS': 'skills',
+    'SKILL SET': 'skills',
+    'EDUCATION': 'education',
+    'ACADEMIC BACKGROUND': 'education',
+    'QUALIFICATIONS': 'education',
+    'ACADEMIC QUALIFICATIONS': 'education',
+    'EDUCATIONAL BACKGROUND': 'education',
+    'ACADEMIC HISTORY': 'education',
+    'PROJECTS': 'projects',
+    'KEY PROJECTS': 'projects',
+    'NOTABLE PROJECTS': 'projects',
+    'SELECTED PROJECTS': 'projects',
+    'PROJECT EXPERIENCE': 'projects',
+    'RELEVANT PROJECTS': 'projects',
+    'CERTIFICATIONS': 'certifications',
+    'CERTIFICATES': 'certifications',
+    'LICENSES': 'certifications',
+    'PROFESSIONAL CERTIFICATIONS': 'certifications',
+    'CERTIFICATIONS AND LICENSES': 'certifications',
+    'LICENSES AND CERTIFICATIONS': 'certifications',
+    'ACHIEVEMENTS': 'achievements',
+    'ACCOMPLISHMENTS': 'achievements',
+    'AWARDS': 'achievements',
+    'HONORS': 'achievements',
+    'KEY ACHIEVEMENTS': 'achievements',
+    'RECOGNITION': 'achievements',
+    'AWARDS AND HONORS': 'achievements',
+    'LANGUAGES': 'languages',
+    'LANGUAGE SKILLS': 'languages',
+    'ADDITIONAL INFORMATION': 'additional',
+    'VOLUNTEER EXPERIENCE': 'volunteer',
+    'VOLUNTEER WORK': 'volunteer',  
+    'VOLUNTEER ACTIVITIES': 'volunteer',
+    'VOLUNTEERING': 'volunteer',
+    'PUBLICATIONS': 'publications',
+    'RESEARCH': 'publications',
+    'REFERENCES': 'references',
+    'PROFESSIONAL REFERENCES': 'references',
+    'INTERESTS': 'interests',
+    'HOBBIES': 'interests',
+    'PERSONAL INTERESTS': 'interests',
+    'HOBBIES AND INTERESTS': 'interests',
+    'TRAINING': 'training',
+    'PROFESSIONAL DEVELOPMENT': 'training',
+    'WORKSHOPS': 'training',
+    'COURSES': 'training',
+    'CONTINUING EDUCATION': 'training',
+    'ADDITIONAL TRAINING': 'training'
+  };
+
+  // Exact match first
+  if (sections[normalizedLine]) {
+    return sections[normalizedLine];
+  }
+
+  // Partial matches for flexibility
+  for (const [key, value] of Object.entries(sections)) {
+    if (normalizedLine.includes(key) || key.includes(normalizedLine)) {
+      return value;
+    }
+  }
+
+  return null;
+}
 
 function processSectionContent(resume: ParsedResume, sectionType: string, content: string[]): void {
   console.log(`Processing section content for: ${sectionType}`);
@@ -260,14 +346,8 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
       break;
       
     default:
-      // Store unknown sections in additionalSections with proper validation
-      const cleanedContent = content.map(line => cleanBulletPoint(line)).filter(item => item && item.length > 0);
-      if (cleanedContent.length > 0) {
-        // Sanitize section name for display
-        const displayName = sectionType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        resume.additionalSections[displayName] = cleanedContent;
-        console.log(`Added to additional section ${displayName}: ${cleanedContent.length} entries`);
-      }
+      // Store unknown sections in additionalSections
+      resume.additionalSections[sectionType] = content.map(line => cleanBulletPoint(line)).filter(item => item);
       break;
   }
 }
