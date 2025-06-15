@@ -1,4 +1,3 @@
-
 import { ParsedResume } from '@/types/resumeStructure';
 
 export const parseOptimizedResumeContent = (content: string): ParsedResume => {
@@ -181,6 +180,8 @@ function identifySection(line: string): string | null {
     'CAREER SUMMARY': 'summary',
     'PROFILE': 'summary',
     'ABOUT': 'summary',
+    'ABOUT ME': 'summary',
+    'PROFESSIONAL PROFILE': 'summary',
     'PROFESSIONAL EXPERIENCE': 'experience',
     'WORK EXPERIENCE': 'experience',
     'EXPERIENCE': 'experience',
@@ -188,6 +189,7 @@ function identifySection(line: string): string | null {
     'CAREER HISTORY': 'experience',
     'EMPLOYMENT': 'experience',
     'PROFESSIONAL HISTORY': 'experience',
+    'WORK HISTORY': 'experience',
     'TECHNICAL SKILLS': 'skills',
     'SKILLS': 'skills',
     'CORE COMPETENCIES': 'skills',
@@ -196,33 +198,40 @@ function identifySection(line: string): string | null {
     'KEY SKILLS': 'skills',
     'PROFESSIONAL SKILLS': 'skills',
     'TECHNICAL COMPETENCIES': 'skills',
+    'CORE SKILLS': 'skills',
+    'SKILL SET': 'skills',
     'EDUCATION': 'education',
     'ACADEMIC BACKGROUND': 'education',
     'QUALIFICATIONS': 'education',
     'ACADEMIC QUALIFICATIONS': 'education',
     'EDUCATIONAL BACKGROUND': 'education',
+    'ACADEMIC HISTORY': 'education',
     'PROJECTS': 'projects',
     'KEY PROJECTS': 'projects',
     'NOTABLE PROJECTS': 'projects',
     'SELECTED PROJECTS': 'projects',
     'PROJECT EXPERIENCE': 'projects',
+    'RELEVANT PROJECTS': 'projects',
     'CERTIFICATIONS': 'certifications',
     'CERTIFICATES': 'certifications',
     'LICENSES': 'certifications',
     'PROFESSIONAL CERTIFICATIONS': 'certifications',
     'CERTIFICATIONS AND LICENSES': 'certifications',
+    'LICENSES AND CERTIFICATIONS': 'certifications',
     'ACHIEVEMENTS': 'achievements',
     'ACCOMPLISHMENTS': 'achievements',
     'AWARDS': 'achievements',
     'HONORS': 'achievements',
     'KEY ACHIEVEMENTS': 'achievements',
     'RECOGNITION': 'achievements',
+    'AWARDS AND HONORS': 'achievements',
     'LANGUAGES': 'languages',
     'LANGUAGE SKILLS': 'languages',
     'ADDITIONAL INFORMATION': 'additional',
     'VOLUNTEER EXPERIENCE': 'volunteer',
-    'VOLUNTEER WORK': 'volunteer',
+    'VOLUNTEER WORK': 'volunteer',  
     'VOLUNTEER ACTIVITIES': 'volunteer',
+    'VOLUNTEERING': 'volunteer',
     'PUBLICATIONS': 'publications',
     'RESEARCH': 'publications',
     'REFERENCES': 'references',
@@ -235,7 +244,8 @@ function identifySection(line: string): string | null {
     'PROFESSIONAL DEVELOPMENT': 'training',
     'WORKSHOPS': 'training',
     'COURSES': 'training',
-    'CONTINUING EDUCATION': 'training'
+    'CONTINUING EDUCATION': 'training',
+    'ADDITIONAL TRAINING': 'training'
   };
 
   // Exact match first

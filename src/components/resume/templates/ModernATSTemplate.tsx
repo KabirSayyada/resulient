@@ -183,7 +183,7 @@ export const ModernATSTemplate = ({ resume, className = '' }: ModernATSTemplateP
         </div>
       )}
 
-      {/* Additional Sections */}
+      {/* Additional Sections - Enhanced to show all sections */}
       {resume.additionalSections && Object.keys(resume.additionalSections).length > 0 && (
         <>
           {Object.entries(resume.additionalSections).map(([sectionName, sectionContent]) => {
