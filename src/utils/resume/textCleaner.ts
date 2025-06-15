@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for cleaning and normalizing text in resume parsing
  */
@@ -128,7 +129,7 @@ export function cleanResumeContent(content: string): string {
 function isContactLine(line: string): boolean {
   return (
     line.includes('@') || 
-    line.match(/\d{3}/) || 
+    /\d{3}/.test(line) || 
     line.toLowerCase().includes('linkedin') ||
     line.includes('📞') ||
     line.includes('📧') ||
@@ -147,7 +148,7 @@ function isPotentialSectionHeader(line: string): boolean {
     cleanLine.length > 2 &&
     /^[A-Z\s]+$/.test(cleanLine) &&
     !line.includes('@') &&
-    !line.match(/\d{3}/)
+    !/\d{3}/.test(line)
   );
 }
 
@@ -165,8 +166,8 @@ export function isBulletPoint(line: string): boolean {
     trimmed.startsWith('▫') ||
     trimmed.startsWith('◦') ||
     trimmed.startsWith('‣') ||
-    trimmed.match(/^\d+\./) !== null ||
-    trimmed.match(/^[a-zA-Z]\)/) !== null
+    /^\d+\./.test(trimmed) ||
+    /^[a-zA-Z]\)/.test(trimmed)
   );
 }
 
