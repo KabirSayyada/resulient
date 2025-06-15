@@ -1,4 +1,3 @@
-
 import { ParsedResume } from '@/types/resumeStructure';
 
 export const parseOptimizedResumeContent = (content: string): ParsedResume => {
@@ -277,6 +276,7 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
       
     case 'experience':
       resume.workExperience = parseWorkExperience(content);
+      console.log(`Parsed ${resume.workExperience.length} work experiences:`, resume.workExperience);
       break;
       
     case 'skills':
@@ -337,29 +337,50 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
 function parseWorkExperience(content: string[]) {
   const experiences = [];
   let currentExp = null;
+  let i = 0;
 
-  for (const line of content) {
+  console.log('=== PARSING WORK EXPERIENCE ===');
+  console.log('Content lines:', content);
+
+  while (i < content.length) {
+    const line = content[i];
+    console.log(`Processing experience line ${i}: "${line}"`);
+
+    // Check if this is a bullet point (responsibility)
     if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
-      // This is a responsibility/bullet point
       if (currentExp) {
-        currentExp.responsibilities.push(line.replace(/^[•\-*]\s*/, '').trim());
+        const responsibility = line.replace(/^[•\-*]\s*/, '').trim();
+        currentExp.responsibilities.push(responsibility);
+        console.log(`Added responsibility: "${responsibility}"`);
       }
-    } else if (line.includes('|') || line.includes('–') || line.includes(' - ')) {
-      // This looks like a job title/company/date line
+      i++;
+      continue;
+    }
+
+    // Check if this looks like dates only (e.g., "March 2020 – Present")
+    if (line.match(/^\w+\s+\d{4}\s*[–-]\s*(\w+\s+\d{4}|Present)$/i)) {
+      if (currentExp) {
+        const dateParts = line.split(/\s*[–-]\s*/);
+        currentExp.startDate = dateParts[0]?.trim() || '';
+        currentExp.endDate = dateParts[1]?.trim() || '';
+        console.log(`Added dates: ${currentExp.startDate} - ${currentExp.endDate}`);
+      }
+      i++;
+      continue;
+    }
+
+    // Check if this could be a job title (not a bullet point and not just dates)
+    if (line.length > 2 && !line.match(/^\d{4}/) && 
+        !line.toLowerCase().includes('responsibilities') &&
+        !line.toLowerCase().includes('duties')) {
+      
+      // If we have a current experience, save it
       if (currentExp) {
         experiences.push(currentExp);
+        console.log(`Saved experience:`, currentExp);
       }
-      
-      const parts = line.split(/[|–-]/).map(p => p.trim());
-      currentExp = {
-        position: parts[0] || '',
-        company: parts[1] || '',
-        startDate: parts[2] || '',
-        endDate: parts[3] || parts[2] || '',
-        responsibilities: []
-      };
-    } else if (line.trim() && !currentExp) {
-      // First line might be just the position
+
+      // Start new experience
       currentExp = {
         position: line.trim(),
         company: '',
@@ -367,22 +388,52 @@ function parseWorkExperience(content: string[]) {
         endDate: '',
         responsibilities: []
       };
-    } else if (currentExp && !currentExp.company && line.trim()) {
-      // This might be the company name
-      currentExp.company = line.trim();
-    } else if (currentExp && line.trim() && line.match(/\d{4}/)) {
-      // This might be date information
-      const dateParts = line.split(/[-–]/).map(d => d.trim());
-      if (dateParts.length >= 2) {
-        currentExp.startDate = dateParts[0];
-        currentExp.endDate = dateParts[1];
+      console.log(`Started new experience with position: "${line}"`);
+
+      // Look ahead for company name and dates
+      if (i + 1 < content.length) {
+        const nextLine = content[i + 1];
+        console.log(`Next line: "${nextLine}"`);
+        
+        // If next line contains a dash/separator and looks like company info
+        if (nextLine.includes('–') || nextLine.includes('-') || nextLine.includes('|')) {
+          const parts = nextLine.split(/[–\-|]/).map(p => p.trim());
+          if (parts.length >= 1) {
+            currentExp.company = parts[0] || '';
+            // Check if there are dates in the same line
+            if (parts.length >= 2 && parts[1].match(/\d{4}/)) {
+              const datePart = parts.slice(1).join(' ').trim();
+              const dateMatch = datePart.match(/(\w+\s+\d{4})\s*[–-]\s*(\w+\s+\d{4}|Present)/i);
+              if (dateMatch) {
+                currentExp.startDate = dateMatch[1];
+                currentExp.endDate = dateMatch[2];
+              }
+            }
+            console.log(`Set company: "${currentExp.company}"`);
+            i++; // Skip the next line since we processed it
+          }
+        } else if (!nextLine.startsWith('•') && !nextLine.startsWith('-') && !nextLine.startsWith('*')) {
+          // Next line might be just the company name
+          currentExp.company = nextLine.trim();
+          console.log(`Set company from next line: "${currentExp.company}"`);
+          i++; // Skip the next line
+        }
       }
     }
+
+    i++;
   }
 
+  // Add the last experience
   if (currentExp) {
     experiences.push(currentExp);
+    console.log(`Saved final experience:`, currentExp);
   }
+
+  console.log(`=== FINAL WORK EXPERIENCES (${experiences.length}) ===`);
+  experiences.forEach((exp, idx) => {
+    console.log(`Experience ${idx}:`, exp);
+  });
 
   return experiences;
 }
