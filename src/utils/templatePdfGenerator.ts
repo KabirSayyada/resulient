@@ -52,7 +52,7 @@ class TemplatePDFGenerator {
 
     const effectiveWidth = this.contentWidth - indent;
     const lines = this.pdf.splitTextToSize(text, effectiveWidth);
-    const lineHeight = fontSize * 1.4; // Reduced from 1.5 for better spacing
+    const lineHeight = fontSize * 1.4;
 
     this.checkPageBreak(lines.length * lineHeight);
 
@@ -70,14 +70,84 @@ class TemplatePDFGenerator {
   }
 
   private addLine(color: string = '#cccccc', width: number = 0.5): void {
-    this.addSpace(6); // Increased space before line
+    this.addSpace(6);
     this.pdf.setDrawColor(color);
     this.pdf.setLineWidth(width);
     this.pdf.line(this.margin, this.currentY, this.pageWidth - this.margin, this.currentY);
-    this.addSpace(12); // Increased space after line to prevent text overlap
+    this.addSpace(12);
   }
 
-  // Classic template formatting - Fixed spacing issues
+  // Helper method to add additional sections
+  private addAdditionalSections(resume: ParsedResume, headerColor: string = '#333333', contentColor: string = '#000000'): void {
+    // Handle certifications
+    if (resume.certifications && resume.certifications.length > 0) {
+      this.addText('CERTIFICATIONS', 12, 'bold', headerColor);
+      this.addLine();
+      
+      resume.certifications.forEach(cert => {
+        const certLine = cert.issuer && cert.issuer !== 'Unknown' 
+          ? `${cert.name} | ${cert.issuer}${cert.date ? ` | ${cert.date}` : ''}`
+          : cert.name;
+        this.addText(certLine, 10, 'normal', contentColor);
+        this.addSpace(8);
+      });
+      this.addSpace(12);
+    }
+
+    // Handle achievements
+    if (resume.achievements && resume.achievements.length > 0) {
+      this.addText('ACHIEVEMENTS', 12, 'bold', headerColor);
+      this.addLine();
+      
+      resume.achievements.forEach(achievement => {
+        this.addText(`• ${achievement}`, 10, 'normal', contentColor, 'left', 15);
+        this.addSpace(4);
+      });
+      this.addSpace(16);
+    }
+
+    // Handle projects
+    if (resume.projects && resume.projects.length > 0) {
+      this.addText('PROJECTS', 12, 'bold', headerColor);
+      this.addLine();
+      
+      resume.projects.forEach(project => {
+        this.addText(project.name, 11, 'bold', contentColor);
+        this.addSpace(4);
+        if (project.description) {
+          this.addText(project.description, 10, 'normal', contentColor);
+          this.addSpace(4);
+        }
+        if (project.technologies && project.technologies.length > 0) {
+          this.addText(`Technologies: ${project.technologies.join(', ')}`, 9, 'normal', '#666666');
+        }
+        this.addSpace(12);
+      });
+    }
+
+    // Handle additional sections (references, languages, etc.)
+    if (resume.additionalSections) {
+      Object.entries(resume.additionalSections).forEach(([sectionName, sectionContent]) => {
+        if (Array.isArray(sectionContent) && sectionContent.length > 0) {
+          this.addText(sectionName.toUpperCase(), 12, 'bold', headerColor);
+          this.addLine();
+          
+          sectionContent.forEach(item => {
+            if (typeof item === 'string') {
+              const displayText = item.startsWith('•') || item.startsWith('-') || item.startsWith('*') 
+                ? item 
+                : `• ${item}`;
+              this.addText(displayText, 10, 'normal', contentColor, 'left', item.startsWith('•') ? 0 : 15);
+              this.addSpace(4);
+            }
+          });
+          this.addSpace(16);
+        }
+      });
+    }
+  }
+
+  // Classic template formatting - Enhanced with additional sections
   private generateClassicTemplate(resume: ParsedResume): void {
     // Header
     this.addText(resume.contact.name || '', 18, 'bold', '#000000', 'center');
@@ -115,7 +185,7 @@ class TemplatePDFGenerator {
         if (exp.responsibilities) {
           exp.responsibilities.forEach(resp => {
             this.addText(`• ${resp}`, 10, 'normal', '#000000', 'left', 15);
-            this.addSpace(3); // Reduced from excessive spacing
+            this.addSpace(3);
           });
         }
         
@@ -144,10 +214,14 @@ class TemplatePDFGenerator {
         this.addText(`${edu.institution || ''} | ${edu.graduationDate || ''}`, 10, 'normal', '#666666');
         this.addSpace(12);
       });
+      this.addSpace(16);
     }
+
+    // Add all additional sections
+    this.addAdditionalSections(resume, '#333333', '#000000');
   }
 
-  // Modern template formatting
+  // Modern template formatting - Enhanced with additional sections
   private generateModernTemplate(resume: ParsedResume): void {
     // Header with blue accent
     this.addText(resume.contact.name || '', 20, 'bold', '#1e40af');
@@ -229,7 +303,11 @@ class TemplatePDFGenerator {
         }
         this.addSpace(12);
       });
+      this.addSpace(16);
     }
+
+    // Add all additional sections with modern colors
+    this.addAdditionalSections(resume, '#1e40af', '#374151');
   }
 
   // Minimal template formatting
@@ -250,7 +328,6 @@ class TemplatePDFGenerator {
       this.addSpace(2);
     });
     
-    // Small decorative line
     this.addSpace(12);
     this.pdf.setDrawColor('#d1d5db');
     this.pdf.setLineWidth(0.5);
@@ -318,7 +395,11 @@ class TemplatePDFGenerator {
         }
         this.addSpace(12);
       });
+      this.addSpace(16);
     }
+
+    // Add all additional sections with minimal colors
+    this.addAdditionalSections(resume, '#374151', '#4b5563');
   }
 
   // Executive template formatting - Fixed bullet points and spacing
@@ -382,9 +463,8 @@ class TemplatePDFGenerator {
         
         if (exp.responsibilities) {
           exp.responsibilities.slice(0, 4).forEach(resp => {
-            // Fixed bullet point rendering - using standard bullet character
             this.addText(`• ${resp}`, 10, 'normal', '#374151', 'left', 10);
-            this.addSpace(4); // Reduced spacing after bullet points
+            this.addSpace(4);
           });
         }
         
@@ -409,7 +489,11 @@ class TemplatePDFGenerator {
         }
         this.addSpace(12);
       });
+      this.addSpace(16);
     }
+
+    // Add all additional sections with executive styling
+    this.addAdditionalSections(resume, '#111827', '#374151');
   }
 
   // Creative template formatting
@@ -487,7 +571,11 @@ class TemplatePDFGenerator {
         }
         this.addSpace(10);
       });
+      this.addSpace(16);
     }
+
+    // Add all additional sections with creative styling
+    this.addAdditionalSections(resume, '#7c3aed', '#374151');
   }
 
   // Tech template formatting
@@ -578,7 +666,11 @@ class TemplatePDFGenerator {
         }
         this.addSpace(10);
       });
+      this.addSpace(16);
     }
+
+    // Add all additional sections with tech styling
+    this.addAdditionalSections(resume, '#111827', '#374151');
   }
 
   // Professional template formatting
@@ -664,7 +756,11 @@ class TemplatePDFGenerator {
         }
         this.addSpace(10);
       });
+      this.addSpace(16);
     }
+
+    // Add all additional sections with professional styling
+    this.addAdditionalSections(resume, '#111827', '#374151');
   }
 
   // Compact template formatting
@@ -738,7 +834,11 @@ class TemplatePDFGenerator {
         }
         this.addSpace(6);
       });
+      this.addSpace(12);
     }
+
+    // Add all additional sections with compact styling
+    this.addAdditionalSections(resume, '#111827', '#374151');
   }
 
   // Clean template formatting
@@ -824,7 +924,11 @@ class TemplatePDFGenerator {
         }
         this.addSpace(10);
       });
+      this.addSpace(16);
     }
+
+    // Add all additional sections with clean styling
+    this.addAdditionalSections(resume, '#111827', '#374151');
   }
 
   // Border template formatting
@@ -914,7 +1018,11 @@ class TemplatePDFGenerator {
         }
         this.addSpace(10);
       });
+      this.addSpace(16);
     }
+
+    // Add all additional sections with border styling
+    this.addAdditionalSections(resume, '#111827', '#374151');
   }
 
   public generate(resume: ParsedResume, templateType: TemplateType): void {

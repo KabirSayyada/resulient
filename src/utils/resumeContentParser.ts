@@ -1,4 +1,3 @@
-
 import { ParsedResume } from '@/types/resumeStructure';
 
 export const parseOptimizedResumeContent = (content: string): ParsedResume => {
@@ -36,7 +35,7 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
     const line = lines[i];
     console.log(`Contact extraction line ${i}: "${line}"`);
     
-    // Email detection
+    // Email detection - improved regex
     if (line.includes('@') && !resume.contact.email) {
       const emailMatch = line.match(/[\w\.-]+@[\w\.-]+\.\w+/);
       if (emailMatch) {
@@ -45,26 +44,45 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
       }
     }
     
-    // Phone detection
-    if (line.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/) && !resume.contact.phone) {
-      resume.contact.phone = line.trim();
+    // Phone detection - improved to handle various formats and emojis
+    const phoneMatch = line.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/);
+    if (phoneMatch && !resume.contact.phone) {
+      resume.contact.phone = phoneMatch[0];
       console.log('Found phone:', resume.contact.phone);
     }
     
-    // LinkedIn detection
+    // LinkedIn detection - improved
     if ((line.toLowerCase().includes('linkedin') || line.includes('linkedin.com')) && !resume.contact.linkedin) {
-      resume.contact.linkedin = line.trim();
+      const linkedinMatch = line.match(/linkedin\.com\/in\/[\w-]+/) || line.match(/linkedin\.com\/[\w-]+/);
+      if (linkedinMatch) {
+        resume.contact.linkedin = linkedinMatch[0];
+      } else if (line.toLowerCase().includes('linkedin')) {
+        resume.contact.linkedin = line.trim();
+      }
       console.log('Found LinkedIn:', resume.contact.linkedin);
     }
     
-    // Name detection (first non-contact line that looks like a name)
+    // Address detection - look for location indicators
+    if ((line.includes('📍') || line.match(/^[A-Za-z\s]+,\s*[A-Z]{2}$/)) && !resume.contact.address) {
+      resume.contact.address = line.replace('📍', '').trim();
+      console.log('Found address:', resume.contact.address);
+    }
+    
+    // Name detection (first clean line that looks like a name)
     if (!resume.contact.name && 
         !line.includes('@') && 
-        !line.match(/\d{3}/) && 
+        !phoneMatch &&
         !line.toLowerCase().includes('linkedin') &&
         !line.match(/^[A-Z\s]{8,}$/) && // Not section headers
         !line.includes('|') &&
-        line.length > 2 && line.length < 60) {
+        !line.includes('📍') &&
+        !line.includes('📞') &&
+        !line.includes('✉️') &&
+        !line.includes('🔗') &&
+        !line.includes('💼') &&
+        !line.match(/^[=\-_]{3,}$/) && // Not divider lines
+        line.length > 2 && line.length < 60 &&
+        line.match(/^[A-Za-z\s]+$/)) { // Only letters and spaces
       resume.contact.name = line;
       console.log('Found name:', resume.contact.name);
     }
@@ -135,39 +153,56 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
 function identifySection(line: string): string | null {
   const upperLine = line.toUpperCase().trim();
   
-  // Common section headers
+  // Common section headers - expanded list
   const sections = {
     'PROFESSIONAL SUMMARY': 'summary',
     'SUMMARY': 'summary',
     'EXECUTIVE SUMMARY': 'summary',
     'OBJECTIVE': 'summary',
+    'CAREER OBJECTIVE': 'summary',
     'PROFESSIONAL EXPERIENCE': 'experience',
     'WORK EXPERIENCE': 'experience',
     'EXPERIENCE': 'experience',
     'EMPLOYMENT HISTORY': 'experience',
     'CAREER HISTORY': 'experience',
+    'EMPLOYMENT': 'experience',
     'TECHNICAL SKILLS': 'skills',
     'SKILLS': 'skills',
     'CORE COMPETENCIES': 'skills',
     'COMPETENCIES': 'skills',
     'TECHNOLOGIES': 'skills',
+    'KEY SKILLS': 'skills',
+    'PROFESSIONAL SKILLS': 'skills',
     'EDUCATION': 'education',
     'ACADEMIC BACKGROUND': 'education',
     'QUALIFICATIONS': 'education',
+    'ACADEMIC QUALIFICATIONS': 'education',
     'PROJECTS': 'projects',
     'KEY PROJECTS': 'projects',
     'NOTABLE PROJECTS': 'projects',
+    'SELECTED PROJECTS': 'projects',
     'CERTIFICATIONS': 'certifications',
     'CERTIFICATES': 'certifications',
     'LICENSES': 'certifications',
+    'PROFESSIONAL CERTIFICATIONS': 'certifications',
     'ACHIEVEMENTS': 'achievements',
     'ACCOMPLISHMENTS': 'achievements',
     'AWARDS': 'achievements',
     'HONORS': 'achievements',
+    'KEY ACHIEVEMENTS': 'achievements',
     'LANGUAGES': 'languages',
     'ADDITIONAL INFORMATION': 'additional',
     'VOLUNTEER EXPERIENCE': 'volunteer',
-    'PUBLICATIONS': 'publications'
+    'VOLUNTEER WORK': 'volunteer',
+    'PUBLICATIONS': 'publications',
+    'REFERENCES': 'references',
+    'PROFESSIONAL REFERENCES': 'references',
+    'INTERESTS': 'interests',
+    'HOBBIES': 'interests',
+    'PERSONAL INTERESTS': 'interests',
+    'TRAINING': 'training',
+    'PROFESSIONAL DEVELOPMENT': 'training',
+    'WORKSHOPS': 'training'
   };
 
   // Exact match first
@@ -216,6 +251,30 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
       
     case 'achievements':
       resume.achievements = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
+      break;
+      
+    case 'references':
+      resume.additionalSections.references = content;
+      break;
+      
+    case 'languages':
+      resume.additionalSections.languages = content;
+      break;
+      
+    case 'volunteer':
+      resume.additionalSections.volunteer = content;
+      break;
+      
+    case 'publications':
+      resume.additionalSections.publications = content;
+      break;
+      
+    case 'interests':
+      resume.additionalSections.interests = content;
+      break;
+      
+    case 'training':
+      resume.additionalSections.training = content;
       break;
       
     default:
@@ -367,7 +426,7 @@ function parseCertifications(content: string[]) {
       });
     } else if (line.trim()) {
       certifications.push({
-        name: line.trim(),
+        name: line.replace(/^[•\-*]\s*/, '').trim(),
         issuer: 'Unknown',
         date: ''
       });
