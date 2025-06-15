@@ -1,3 +1,4 @@
+
 import { ParsedResume } from '@/types/resumeStructure';
 
 export const parseOptimizedResumeContent = (content: string): ParsedResume => {
@@ -28,67 +29,91 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
 
   let currentSection = '';
   let sectionContent: string[] = [];
-  let isInContactArea = true;
+  let contactProcessed = false;
 
-  // First pass: extract contact info from the beginning
-  for (let i = 0; i < Math.min(15, lines.length); i++) {
+  // Enhanced contact extraction from the first few lines
+  for (let i = 0; i < Math.min(10, lines.length); i++) {
     const line = lines[i];
     console.log(`Contact extraction line ${i}: "${line}"`);
     
-    // Email detection - improved regex
-    if (line.includes('@') && !resume.contact.email) {
-      const emailMatch = line.match(/[\w\.-]+@[\w\.-]+\.\w+/);
-      if (emailMatch) {
-        resume.contact.email = emailMatch[0];
-        console.log('Found email:', resume.contact.email);
-      }
+    // Skip section headers during contact extraction
+    if (identifySection(line)) {
+      break;
     }
     
-    // Phone detection - improved to handle various formats and emojis
-    const phoneMatch = line.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/);
-    if (phoneMatch && !resume.contact.phone) {
-      resume.contact.phone = phoneMatch[0];
-      console.log('Found phone:', resume.contact.phone);
-    }
-    
-    // LinkedIn detection - improved
-    if ((line.toLowerCase().includes('linkedin') || line.includes('linkedin.com')) && !resume.contact.linkedin) {
-      const linkedinMatch = line.match(/linkedin\.com\/in\/[\w-]+/) || line.match(/linkedin\.com\/[\w-]+/);
-      if (linkedinMatch) {
-        resume.contact.linkedin = linkedinMatch[0];
-      } else if (line.toLowerCase().includes('linkedin')) {
-        resume.contact.linkedin = line.trim();
-      }
-      console.log('Found LinkedIn:', resume.contact.linkedin);
-    }
-    
-    // Address detection - look for location indicators
-    if ((line.includes('📍') || line.match(/^[A-Za-z\s]+,\s*[A-Z]{2}$/)) && !resume.contact.address) {
-      resume.contact.address = line.replace('📍', '').trim();
-      console.log('Found address:', resume.contact.address);
-    }
-    
-    // Name detection (first clean line that looks like a name)
+    // Name detection (first non-contact-info line)
     if (!resume.contact.name && 
         !line.includes('@') && 
-        !phoneMatch &&
+        !line.match(/\d{3}/) &&
         !line.toLowerCase().includes('linkedin') &&
-        !line.match(/^[A-Z\s]{8,}$/) && // Not section headers
         !line.includes('|') &&
         !line.includes('📍') &&
         !line.includes('📞') &&
         !line.includes('✉️') &&
         !line.includes('🔗') &&
-        !line.includes('💼') &&
-        !line.match(/^[=\-_]{3,}$/) && // Not divider lines
+        !line.match(/^[=\-_]{3,}$/) &&
         line.length > 2 && line.length < 60 &&
-        line.match(/^[A-Za-z\s]+$/)) { // Only letters and spaces
+        line.match(/^[A-Za-z\s\-'\.]+$/)) {
       resume.contact.name = line;
       console.log('Found name:', resume.contact.name);
+      continue;
+    }
+    
+    // Contact line with multiple pieces of info
+    if (line.includes('|')) {
+      const parts = line.split('|').map(p => p.trim());
+      parts.forEach(part => {
+        if (part.includes('@') && !resume.contact.email) {
+          const emailMatch = part.match(/[\w\.-]+@[\w\.-]+\.\w+/);
+          if (emailMatch) {
+            resume.contact.email = emailMatch[0];
+            console.log('Found email:', resume.contact.email);
+          }
+        } else if (part.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/) && !resume.contact.phone) {
+          const phoneMatch = part.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/);
+          if (phoneMatch) {
+            resume.contact.phone = phoneMatch[0];
+            console.log('Found phone:', resume.contact.phone);
+          }
+        } else if ((part.toLowerCase().includes('linkedin') || part.includes('linkedin.com')) && !resume.contact.linkedin) {
+          resume.contact.linkedin = part.replace(/^linkedin:?\s*/i, '').trim();
+          console.log('Found LinkedIn:', resume.contact.linkedin);
+        } else if ((part.includes('.com') || part.includes('http')) && !part.includes('@') && !resume.contact.linkedin) {
+          resume.contact.linkedin = part;
+          console.log('Found website/LinkedIn:', resume.contact.linkedin);
+        } else if (!resume.contact.address && (part.includes(',') || part.match(/[A-Z]{2}\s*\d{5}/))) {
+          resume.contact.address = part.replace('📍', '').trim();
+          console.log('Found address:', resume.contact.address);
+        }
+      });
+      contactProcessed = true;
+    }
+    
+    // Individual contact info lines
+    if (!contactProcessed) {
+      if (line.includes('@') && !resume.contact.email) {
+        const emailMatch = line.match(/[\w\.-]+@[\w\.-]+\.\w+/);
+        if (emailMatch) {
+          resume.contact.email = emailMatch[0];
+          console.log('Found email:', resume.contact.email);
+        }
+      } else if (line.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/) && !resume.contact.phone) {
+        const phoneMatch = line.match(/(\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/);
+        if (phoneMatch) {
+          resume.contact.phone = phoneMatch[0];
+          console.log('Found phone:', resume.contact.phone);
+        }
+      } else if ((line.toLowerCase().includes('linkedin') || line.includes('linkedin.com')) && !resume.contact.linkedin) {
+        resume.contact.linkedin = line.replace(/^linkedin:?\s*/i, '').trim();
+        console.log('Found LinkedIn:', resume.contact.linkedin);
+      } else if ((line.includes(',') || line.match(/[A-Z]{2}\s*\d{5}/)) && !resume.contact.address) {
+        resume.contact.address = line.replace('📍', '').trim();
+        console.log('Found address:', resume.contact.address);
+      }
     }
   }
 
-  // Second pass: process sections
+  // Process all lines for sections
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     console.log(`Processing line ${i}: "${line}"`);
@@ -99,7 +124,7 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
       continue;
     }
 
-    // Detect section headers (all caps, common section names)
+    // Detect section headers
     const sectionType = identifySection(line);
     
     if (sectionType) {
@@ -113,20 +138,13 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
       
       currentSection = sectionType;
       sectionContent = [];
-      isInContactArea = false;
       continue;
     }
 
-    // Add content to current section if we have one
-    if (currentSection && !isInContactArea) {
+    // Add content to current section
+    if (currentSection) {
       sectionContent.push(line);
       console.log(`Added to ${currentSection}: "${line}"`);
-    } else if (isInContactArea && i > 15) {
-      // If we're still in contact area after 15 lines, this might be summary content
-      if (line.length > 20 && !line.includes('@') && !line.match(/\d{3}/)) {
-        resume.professionalSummary += (resume.professionalSummary ? ' ' : '') + line;
-        console.log('Added to professional summary:', line);
-      }
     }
   }
 
@@ -153,19 +171,23 @@ export const parseOptimizedResumeContent = (content: string): ParsedResume => {
 function identifySection(line: string): string | null {
   const upperLine = line.toUpperCase().trim();
   
-  // Common section headers - expanded list
+  // Common section headers - comprehensive list
   const sections = {
     'PROFESSIONAL SUMMARY': 'summary',
     'SUMMARY': 'summary',
     'EXECUTIVE SUMMARY': 'summary',
     'OBJECTIVE': 'summary',
     'CAREER OBJECTIVE': 'summary',
+    'CAREER SUMMARY': 'summary',
+    'PROFILE': 'summary',
+    'ABOUT': 'summary',
     'PROFESSIONAL EXPERIENCE': 'experience',
     'WORK EXPERIENCE': 'experience',
     'EXPERIENCE': 'experience',
     'EMPLOYMENT HISTORY': 'experience',
     'CAREER HISTORY': 'experience',
     'EMPLOYMENT': 'experience',
+    'PROFESSIONAL HISTORY': 'experience',
     'TECHNICAL SKILLS': 'skills',
     'SKILLS': 'skills',
     'CORE COMPETENCIES': 'skills',
@@ -173,36 +195,47 @@ function identifySection(line: string): string | null {
     'TECHNOLOGIES': 'skills',
     'KEY SKILLS': 'skills',
     'PROFESSIONAL SKILLS': 'skills',
+    'TECHNICAL COMPETENCIES': 'skills',
     'EDUCATION': 'education',
     'ACADEMIC BACKGROUND': 'education',
     'QUALIFICATIONS': 'education',
     'ACADEMIC QUALIFICATIONS': 'education',
+    'EDUCATIONAL BACKGROUND': 'education',
     'PROJECTS': 'projects',
     'KEY PROJECTS': 'projects',
     'NOTABLE PROJECTS': 'projects',
     'SELECTED PROJECTS': 'projects',
+    'PROJECT EXPERIENCE': 'projects',
     'CERTIFICATIONS': 'certifications',
     'CERTIFICATES': 'certifications',
     'LICENSES': 'certifications',
     'PROFESSIONAL CERTIFICATIONS': 'certifications',
+    'CERTIFICATIONS AND LICENSES': 'certifications',
     'ACHIEVEMENTS': 'achievements',
     'ACCOMPLISHMENTS': 'achievements',
     'AWARDS': 'achievements',
     'HONORS': 'achievements',
     'KEY ACHIEVEMENTS': 'achievements',
+    'RECOGNITION': 'achievements',
     'LANGUAGES': 'languages',
+    'LANGUAGE SKILLS': 'languages',
     'ADDITIONAL INFORMATION': 'additional',
     'VOLUNTEER EXPERIENCE': 'volunteer',
     'VOLUNTEER WORK': 'volunteer',
+    'VOLUNTEER ACTIVITIES': 'volunteer',
     'PUBLICATIONS': 'publications',
+    'RESEARCH': 'publications',
     'REFERENCES': 'references',
     'PROFESSIONAL REFERENCES': 'references',
     'INTERESTS': 'interests',
     'HOBBIES': 'interests',
     'PERSONAL INTERESTS': 'interests',
+    'HOBBIES AND INTERESTS': 'interests',
     'TRAINING': 'training',
     'PROFESSIONAL DEVELOPMENT': 'training',
-    'WORKSHOPS': 'training'
+    'WORKSHOPS': 'training',
+    'COURSES': 'training',
+    'CONTINUING EDUCATION': 'training'
   };
 
   // Exact match first
@@ -212,7 +245,7 @@ function identifySection(line: string): string | null {
 
   // Partial matches for flexibility
   for (const [key, value] of Object.entries(sections)) {
-    if (upperLine.includes(key)) {
+    if (upperLine.includes(key) || key.includes(upperLine)) {
       return value;
     }
   }
@@ -250,36 +283,40 @@ function processSectionContent(resume: ParsedResume, sectionType: string, conten
       break;
       
     case 'achievements':
-      resume.achievements = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
-      break;
-      
-    case 'references':
-      resume.additionalSections.references = content;
+      resume.achievements = parseAchievements(content);
       break;
       
     case 'languages':
-      resume.additionalSections.languages = content;
+      resume.additionalSections.languages = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
+      break;
+      
+    case 'references':
+      resume.additionalSections.references = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
       break;
       
     case 'volunteer':
-      resume.additionalSections.volunteer = content;
+      resume.additionalSections.volunteer = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
       break;
       
     case 'publications':
-      resume.additionalSections.publications = content;
+      resume.additionalSections.publications = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
       break;
       
     case 'interests':
-      resume.additionalSections.interests = content;
+      resume.additionalSections.interests = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
       break;
       
     case 'training':
-      resume.additionalSections.training = content;
+      resume.additionalSections.training = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
+      break;
+      
+    case 'additional':
+      resume.additionalSections.additional = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
       break;
       
     default:
       // Store unknown sections in additionalSections
-      resume.additionalSections[sectionType] = content;
+      resume.additionalSections[sectionType] = content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item);
       break;
   }
 }
@@ -320,6 +357,13 @@ function parseWorkExperience(content: string[]) {
     } else if (currentExp && !currentExp.company && line.trim()) {
       // This might be the company name
       currentExp.company = line.trim();
+    } else if (currentExp && line.trim() && line.match(/\d{4}/)) {
+      // This might be date information
+      const dateParts = line.split(/[-–]/).map(d => d.trim());
+      if (dateParts.length >= 2) {
+        currentExp.startDate = dateParts[0];
+        currentExp.endDate = dateParts[1];
+      }
     }
   }
 
@@ -371,8 +415,10 @@ function parseEducation(content: string[]) {
         institution: '',
         graduationDate: ''
       };
-    } else if (currentEdu && !currentEdu.institution && line.trim()) {
+    } else if (currentEdu && !currentEdu.institution && line.trim() && !line.match(/\d{4}/)) {
       currentEdu.institution = line.trim();
+    } else if (currentEdu && line.trim() && line.match(/\d{4}/)) {
+      currentEdu.graduationDate = line.trim();
     }
   }
 
@@ -393,7 +439,7 @@ function parseProjects(content: string[]) {
         currentProject.description += (currentProject.description ? ' ' : '') + 
           line.replace(/^[•\-*]\s*/, '').trim();
       }
-    } else if (line.trim()) {
+    } else if (line.trim() && !line.toLowerCase().startsWith('tech')) {
       if (currentProject) {
         projects.push(currentProject);
       }
@@ -403,6 +449,11 @@ function parseProjects(content: string[]) {
         description: '',
         technologies: []
       };
+    } else if (currentProject && line.toLowerCase().includes('tech')) {
+      const techPart = line.split(':')[1];
+      if (techPart) {
+        currentProject.technologies = techPart.split(',').map(t => t.trim());
+      }
     }
   }
 
@@ -425,13 +476,28 @@ function parseCertifications(content: string[]) {
         date: parts[2] || ''
       });
     } else if (line.trim()) {
-      certifications.push({
-        name: line.replace(/^[•\-*]\s*/, '').trim(),
-        issuer: 'Unknown',
-        date: ''
-      });
+      const cleanLine = line.replace(/^[•\-*]\s*/, '').trim();
+      // Check if line has date in parentheses
+      const dateMatch = cleanLine.match(/^(.+?)\s*\((.+?)\)$/);
+      if (dateMatch) {
+        certifications.push({
+          name: dateMatch[1].trim(),
+          issuer: 'Unknown',
+          date: dateMatch[2].trim()
+        });
+      } else {
+        certifications.push({
+          name: cleanLine,
+          issuer: 'Unknown',
+          date: ''
+        });
+      }
     }
   }
 
   return certifications;
+}
+
+function parseAchievements(content: string[]) {
+  return content.map(line => line.replace(/^[•\-*]\s*/, '').trim()).filter(item => item && item.length > 0);
 }

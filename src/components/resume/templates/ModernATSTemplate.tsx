@@ -19,72 +19,74 @@ export const ModernATSTemplate = ({ resume, className = '' }: ModernATSTemplateP
           </h1>
         )}
         
-        <div className="flex flex-wrap text-sm text-gray-700 gap-4">
-          {resume.contact.email && <span className="bg-gray-100 px-3 py-1 rounded">{resume.contact.email}</span>}
-          {resume.contact.phone && <span className="bg-gray-100 px-3 py-1 rounded">{resume.contact.phone}</span>}
-          {resume.contact.linkedin && <span className="bg-gray-100 px-3 py-1 rounded">{resume.contact.linkedin}</span>}
-          {resume.contact.address && <span className="bg-gray-100 px-3 py-1 rounded">{resume.contact.address}</span>}
+        <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+          <div className="space-y-1">
+            {resume.contact.email && <div>📧 {resume.contact.email}</div>}
+            {resume.contact.phone && <div>📱 {resume.contact.phone}</div>}
+          </div>
+          <div className="space-y-1">
+            {resume.contact.linkedin && <div>🔗 {resume.contact.linkedin}</div>}
+            {resume.contact.address && <div>📍 {resume.contact.address}</div>}
+          </div>
         </div>
       </div>
 
       {/* Professional Summary */}
       {resume.professionalSummary && (
         <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4 text-blue-700 uppercase">
-            Professional Summary
+          <h2 className="text-xl font-bold mb-4 text-blue-800 border-l-4 border-blue-600 pl-3">
+            PROFESSIONAL SUMMARY
           </h2>
-          <p className="text-gray-800 bg-blue-50 p-4 rounded leading-relaxed">
+          <p className="text-gray-700 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-200">
             {resume.professionalSummary}
           </p>
-        </div>
-      )}
-
-      {/* Work Experience */}
-      {resume.workExperience.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-bold mb-6 text-blue-700 uppercase">
-            Professional Experience
-          </h2>
-          
-          {resume.workExperience.map((exp, index) => (
-            <div key={index} className="mb-6 pl-6 border-l-4 border-blue-200">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg text-gray-900">{exp.position}</h3>
-                  <p className="text-blue-600 font-semibold text-lg">{exp.company}</p>
-                </div>
-                {(exp.startDate || exp.endDate) && (
-                  <div className="text-gray-600 bg-gray-100 px-3 py-1 rounded font-medium">
-                    {exp.startDate} {exp.endDate && `- ${exp.endDate}`}
-                  </div>
-                )}
-              </div>
-              
-              {exp.responsibilities && exp.responsibilities.length > 0 && (
-                <ul className="list-disc list-inside ml-4 text-gray-800 space-y-2">
-                  {exp.responsibilities.map((responsibility, respIndex) => (
-                    <li key={respIndex} className="leading-relaxed">
-                      {responsibility}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
         </div>
       )}
 
       {/* Skills */}
       {resume.skills.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4 text-blue-700 uppercase">
-            Technical Skills
+          <h2 className="text-xl font-bold mb-4 text-blue-800 border-l-4 border-blue-600 pl-3">
+            TECHNICAL SKILLS
           </h2>
-          <div className="flex flex-wrap gap-2">
-            {resume.skills.map((skill, index) => (
-              <span key={index} className="bg-blue-100 text-blue-800 px-3 py-2 rounded-full font-medium">
-                {skill}
-              </span>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="flex flex-wrap gap-2">
+              {resume.skills.map((skill, index) => (
+                <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Professional Experience */}
+      {resume.workExperience.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 text-blue-800 border-l-4 border-blue-600 pl-3">
+            PROFESSIONAL EXPERIENCE
+          </h2>
+          <div className="space-y-6">
+            {resume.workExperience.map((exp, index) => (
+              <div key={index} className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="font-bold text-gray-900">{exp.position}</h3>
+                    <p className="text-blue-600 font-semibold">{exp.company}</p>
+                  </div>
+                  <div className="text-gray-500 text-sm bg-white px-2 py-1 rounded">
+                    {exp.startDate} - {exp.endDate || 'Present'}
+                  </div>
+                </div>
+                {exp.responsibilities && exp.responsibilities.length > 0 && (
+                  <ul className="list-disc list-inside text-gray-700 space-y-1 mt-3">
+                    {exp.responsibilities.map((resp, idx) => (
+                      <li key={idx}>{resp}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             ))}
           </div>
         </div>
@@ -93,72 +95,117 @@ export const ModernATSTemplate = ({ resume, className = '' }: ModernATSTemplateP
       {/* Education */}
       {resume.education.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-xl font-bold mb-6 text-blue-700 uppercase">
-            Education
+          <h2 className="text-xl font-bold mb-4 text-blue-800 border-l-4 border-blue-600 pl-3">
+            EDUCATION
           </h2>
-          
-          {resume.education.map((edu, index) => (
-            <div key={index} className="mb-4 flex justify-between items-start bg-gray-50 p-4 rounded">
-              <div className="flex-1">
-                <h3 className="font-bold text-lg text-gray-900">
+          <div className="space-y-4">
+            {resume.education.map((edu, index) => (
+              <div key={index} className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200">
+                <h3 className="font-bold text-gray-900">
                   {edu.degree} {edu.field && `in ${edu.field}`}
                 </h3>
-                <p className="text-gray-700 text-lg">{edu.institution}</p>
+                <p className="text-blue-600 font-semibold">{edu.institution}</p>
+                {edu.graduationDate && (
+                  <p className="text-gray-500 text-sm">{edu.graduationDate}</p>
+                )}
               </div>
-              {edu.graduationDate && (
-                <div className="text-gray-600 font-medium">
-                  {edu.graduationDate}
-                </div>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
       {/* Projects */}
       {resume.projects.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-xl font-bold mb-6 text-blue-700 uppercase">
-            Projects
+          <h2 className="text-xl font-bold mb-4 text-blue-800 border-l-4 border-blue-600 pl-3">
+            PROJECTS
           </h2>
-          
-          {resume.projects.map((project, index) => (
-            <div key={index} className="mb-4 bg-blue-50 p-4 rounded">
-              <h3 className="font-bold text-lg text-gray-900 mb-2">{project.name}</h3>
-              {project.description && (
-                <p className="text-gray-800 mb-2 leading-relaxed">{project.description}</p>
-              )}
-              {project.technologies && project.technologies.length > 0 && (
-                <p className="text-blue-600 font-medium">
-                  Technologies: {project.technologies.join(', ')}
-                </p>
-              )}
-            </div>
-          ))}
+          <div className="space-y-4">
+            {resume.projects.map((project, index) => (
+              <div key={index} className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200">
+                <h3 className="font-bold text-gray-900">{project.name}</h3>
+                {project.description && (
+                  <p className="text-gray-700 mt-2">{project.description}</p>
+                )}
+                {project.technologies && project.technologies.length > 0 && (
+                  <div className="mt-2">
+                    <span className="text-sm text-gray-600">Technologies: </span>
+                    <span className="text-sm text-blue-600 font-medium">
+                      {project.technologies.join(', ')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {/* Certifications */}
       {resume.certifications.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-xl font-bold mb-6 text-blue-700 uppercase">
-            Certifications
+          <h2 className="text-xl font-bold mb-4 text-blue-800 border-l-4 border-blue-600 pl-3">
+            CERTIFICATIONS
           </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {resume.certifications.map((cert, index) => (
-              <div key={index} className="bg-gray-50 p-4 rounded">
-                <h3 className="font-semibold text-gray-900 mb-1">{cert.name}</h3>
-                {cert.issuer !== 'Unknown' && (
-                  <p className="text-gray-600 mb-1">{cert.issuer}</p>
-                )}
-                {cert.date && (
-                  <p className="text-gray-500 text-sm">{cert.date}</p>
-                )}
-              </div>
-            ))}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="space-y-2">
+              {resume.certifications.map((cert, index) => (
+                <div key={index} className="flex justify-between items-center">
+                  <div>
+                    <span className="font-semibold text-gray-900">{cert.name}</span>
+                    {cert.issuer && cert.issuer !== 'Unknown' && (
+                      <span className="text-blue-600 ml-2">- {cert.issuer}</span>
+                    )}
+                  </div>
+                  {cert.date && (
+                    <span className="text-gray-500 text-sm">{cert.date}</span>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+      )}
+
+      {/* Achievements */}
+      {resume.achievements.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 text-blue-800 border-l-4 border-blue-600 pl-3">
+            ACHIEVEMENTS
+          </h2>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <ul className="list-disc list-inside text-gray-700 space-y-1">
+              {resume.achievements.map((achievement, index) => (
+                <li key={index}>{achievement}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Additional Sections */}
+      {resume.additionalSections && Object.keys(resume.additionalSections).length > 0 && (
+        <>
+          {Object.entries(resume.additionalSections).map(([sectionName, sectionContent]) => {
+            if (Array.isArray(sectionContent) && sectionContent.length > 0) {
+              return (
+                <div key={sectionName} className="mb-8">
+                  <h2 className="text-xl font-bold mb-4 text-blue-800 border-l-4 border-blue-600 pl-3">
+                    {sectionName.toUpperCase()}
+                  </h2>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <ul className="list-disc list-inside text-gray-700 space-y-1">
+                      {sectionContent.map((item, index) => (
+                        <li key={index}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          })}
+        </>
       )}
     </div>
   );
