@@ -1,10 +1,9 @@
-
 import jsPDF from 'jspdf';
 import { ParsedResume } from '@/types/resumeStructure';
 
 type TemplateType = 'classic' | 'modern' | 'minimal' | 'executive' | 'creative' | 'tech' | 'professional' | 'compact' | 'clean' | 'border';
 
-// Enhanced PDF generator that creates text-based PDFs with proper formatting
+// Enhanced PDF generator that creates text-based PDFs with proper formatting and graphics
 class TemplatePDFGenerator {
   private pdf: jsPDF;
   private currentY: number;
@@ -76,6 +75,39 @@ class TemplatePDFGenerator {
     this.pdf.setLineWidth(width);
     this.pdf.line(this.margin, this.currentY, this.pageWidth - this.margin, this.currentY);
     this.addSpace(8); // Reduced spacing
+  }
+
+  // Add colored rectangle for visual elements
+  private addColoredRect(x: number, y: number, width: number, height: number, color: string): void {
+    this.pdf.setFillColor(color);
+    this.pdf.rect(x, y, width, height, 'F');
+  }
+
+  // Add gradient simulation using multiple rectangles
+  private addGradientRect(x: number, y: number, width: number, height: number, startColor: string, endColor: string): void {
+    const steps = 20;
+    const stepHeight = height / steps;
+    
+    // Parse hex colors
+    const parseHex = (hex: string) => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return { r, g, b };
+    };
+
+    const start = parseHex(startColor);
+    const end = parseHex(endColor);
+
+    for (let i = 0; i < steps; i++) {
+      const ratio = i / (steps - 1);
+      const r = Math.round(start.r + (end.r - start.r) * ratio);
+      const g = Math.round(start.g + (end.g - start.g) * ratio);
+      const b = Math.round(start.b + (end.b - start.b) * ratio);
+      
+      this.pdf.setFillColor(r, g, b);
+      this.pdf.rect(x, y + i * stepHeight, width, stepHeight, 'F');
+    }
   }
 
   // Helper method to add additional sections
@@ -497,10 +529,13 @@ class TemplatePDFGenerator {
     this.addAdditionalSections(resume, '#111827', '#374151');
   }
 
-  // Creative template formatting
+  // Creative template formatting with graphics
   private generateCreativeTemplate(resume: ParsedResume): void {
-    // Header with gradient effect (simulated)
-    this.addText(resume.contact.name || '', 22, 'normal', '#333333', 'center');
+    // Add gradient header background
+    this.addGradientRect(0, 0, this.pageWidth, 80, '#7c3aed', '#a855f7');
+    
+    // Header with gradient effect
+    this.addText(resume.contact.name || '', 22, 'normal', '#ffffff', 'center');
     this.addSpace(8);
     
     const contactInfo = [
@@ -510,43 +545,71 @@ class TemplatePDFGenerator {
       resume.contact.address
     ].filter(Boolean).join(' • ');
     
-    this.addText(contactInfo, 10, 'normal', '#666666', 'center');
+    this.addText(contactInfo, 10, 'normal', '#ffffff', 'center');
     this.addSpace(20);
 
-    // Professional Summary
+    // Professional Summary with accent
     if (resume.professionalSummary) {
-      this.addText('Professional Summary', 14, 'normal', '#7c3aed');
+      // Add colored circle accent
+      this.addColoredRect(this.margin - 5, this.currentY - 2, 4, 16, '#7c3aed');
+      this.addText('Professional Summary', 14, 'normal', '#7c3aed', 'left', 15);
       this.addSpace(8);
-      this.addText(resume.professionalSummary, 10, 'normal', '#374151');
+      this.addText(resume.professionalSummary, 10, 'normal', '#374151', 'left', 15);
       this.addSpace(16);
     }
 
-    // Core Competencies as tags
+    // Core Competencies with visual tags
     if (resume.skills.length > 0) {
-      this.addText('Core Competencies', 14, 'normal', '#7c3aed');
+      this.addColoredRect(this.margin - 5, this.currentY - 2, 4, 16, '#7c3aed');
+      this.addText('Core Competencies', 14, 'normal', '#7c3aed', 'left', 15);
       this.addSpace(8);
-      this.addText(resume.skills.slice(0, 15).join(' • '), 10, 'normal', '#4b5563');
+      
+      // Add skills with background rectangles to simulate tags
+      let currentX = this.margin + 15;
+      let lineY = this.currentY;
+      const skillsPerLine = 4;
+      let skillCount = 0;
+      
+      resume.skills.slice(0, 15).forEach((skill, index) => {
+        if (skillCount === skillsPerLine) {
+          currentX = this.margin + 15;
+          lineY += 20;
+          skillCount = 0;
+        }
+        
+        const skillWidth = skill.length * 4 + 10;
+        this.addColoredRect(currentX, lineY - 12, skillWidth, 16, '#f3f4f6');
+        this.pdf.setFontSize(9);
+        this.pdf.setTextColor('#374151');
+        this.pdf.text(skill, currentX + 5, lineY - 2);
+        
+        currentX += skillWidth + 10;
+        skillCount++;
+      });
+      
+      this.currentY = lineY + 20;
       this.addSpace(16);
     }
 
     // Professional Experience
     if (resume.workExperience.length > 0) {
-      this.addText('Professional Experience', 14, 'normal', '#7c3aed');
+      this.addColoredRect(this.margin - 5, this.currentY - 2, 4, 16, '#7c3aed');
+      this.addText('Professional Experience', 14, 'normal', '#7c3aed', 'left', 15);
       this.addSpace(8);
       
       resume.workExperience.forEach((exp, index) => {
-        this.addText(exp.position || '', 12, 'bold', '#111827');
+        this.addText(exp.position || '', 12, 'bold', '#111827', 'left', 15);
         this.addSpace(3);
-        this.addText(exp.company || '', 11, 'bold', '#7c3aed');
+        this.addText(exp.company || '', 11, 'bold', '#7c3aed', 'left', 15);
         this.addSpace(3);
         if (exp.startDate || exp.endDate) {
-          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'normal', '#6b7280');
+          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'normal', '#6b7280', 'left', 15);
         }
         this.addSpace(6);
         
         if (exp.responsibilities) {
           exp.responsibilities.forEach(resp => {
-            this.addText(`• ${resp}`, 10, 'normal', '#374151', 'left', 15);
+            this.addText(`• ${resp}`, 10, 'normal', '#374151', 'left', 30);
             this.addSpace(3);
           });
         }
@@ -558,17 +621,18 @@ class TemplatePDFGenerator {
 
     // Education
     if (resume.education.length > 0) {
-      this.addText('Education', 14, 'normal', '#7c3aed');
+      this.addColoredRect(this.margin - 5, this.currentY - 2, 4, 16, '#7c3aed');
+      this.addText('Education', 14, 'normal', '#7c3aed', 'left', 15);
       this.addSpace(8);
       
       resume.education.forEach(edu => {
         const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
-        this.addText(degreeLine, 11, 'bold', '#111827');
+        this.addText(degreeLine, 11, 'bold', '#111827', 'left', 15);
         this.addSpace(3);
-        this.addText(edu.institution || '', 10, 'normal', '#7c3aed');
+        this.addText(edu.institution || '', 10, 'normal', '#7c3aed', 'left', 15);
         this.addSpace(3);
         if (edu.graduationDate) {
-          this.addText(edu.graduationDate, 10, 'normal', '#6b7280');
+          this.addText(edu.graduationDate, 10, 'normal', '#6b7280', 'left', 15);
         }
         this.addSpace(10);
       });
@@ -579,69 +643,84 @@ class TemplatePDFGenerator {
     this.addAdditionalSections(resume, '#7c3aed', '#374151');
   }
 
-  // Tech template formatting
+  // Tech template formatting with graphics
   private generateTechTemplate(resume: ParsedResume): void {
+    // Add left border accent
+    this.addColoredRect(0, 0, 6, this.pageHeight, '#16a34a');
+    
     // Header
-    this.addText(resume.contact.name || '', 18, 'bold', '#111827');
+    this.addText(resume.contact.name || '', 18, 'bold', '#111827', 'left', 20);
     this.addSpace(8);
     
+    // Add terminal-style contact info with icons (simulated with text)
     if (resume.contact.email) {
-      this.addText(`📧 ${resume.contact.email}`, 10, 'normal', '#16a34a');
+      this.addText(`[email] ${resume.contact.email}`, 10, 'normal', '#16a34a', 'left', 20);
       this.addSpace(2);
     }
     if (resume.contact.phone) {
-      this.addText(`📱 ${resume.contact.phone}`, 10, 'normal', '#16a34a');
+      this.addText(`[phone] ${resume.contact.phone}`, 10, 'normal', '#16a34a', 'left', 20);
       this.addSpace(2);
     }
     if (resume.contact.linkedin) {
-      this.addText(`🔗 ${resume.contact.linkedin}`, 10, 'normal', '#16a34a');
+      this.addText(`[linkedin] ${resume.contact.linkedin}`, 10, 'normal', '#16a34a', 'left', 20);
       this.addSpace(2);
     }
     this.addSpace(16);
 
-    // About section
+    // About section with code-style header
     if (resume.professionalSummary) {
-      this.addText('// ABOUT', 12, 'bold', '#111827');
+      this.addText('// ABOUT', 12, 'bold', '#111827', 'left', 20);
       this.addLine('#16a34a', 1);
-      this.addText(resume.professionalSummary, 10, 'normal', '#374151');
+      
+      // Add background for summary
+      this.addColoredRect(this.margin + 20, this.currentY - 5, this.contentWidth - 40, 50, '#f9fafb');
+      this.addText(resume.professionalSummary, 10, 'normal', '#374151', 'left', 30);
       this.addSpace(16);
     }
 
-    // Tech Stack
+    // Tech Stack with code formatting
     if (resume.skills.length > 0) {
-      this.addText('// TECH_STACK', 12, 'bold', '#111827');
+      this.addText('// TECH_STACK', 12, 'bold', '#111827', 'left', 20);
       this.addLine('#16a34a', 1);
-      this.addText('const skills = [', 10, 'normal', '#16a34a');
+      
+      // Add dark background for code block
+      this.addColoredRect(this.margin + 20, this.currentY - 5, this.contentWidth - 40, 60, '#111827');
+      this.currentY += 5;
+      this.addText('const skills = [', 10, 'normal', '#16a34a', 'left', 30);
       this.addSpace(4);
       
       resume.skills.slice(0, 12).forEach((skill, index) => {
         const isLast = index === resume.skills.slice(0, 12).length - 1;
-        this.addText(`  "${skill}"${isLast ? '' : ','}`, 10, 'normal', '#eab308', 'left', 20);
+        this.addText(`  "${skill}"${isLast ? '' : ','}`, 10, 'normal', '#eab308', 'left', 50);
         this.addSpace(2);
       });
       
-      this.addText('];', 10, 'normal', '#16a34a');
+      this.addText('];', 10, 'normal', '#16a34a', 'left', 30);
       this.addSpace(16);
     }
 
-    // Experience
+    // Experience with terminal styling
     if (resume.workExperience.length > 0) {
-      this.addText('// EXPERIENCE', 12, 'bold', '#111827');
+      this.addText('// EXPERIENCE', 12, 'bold', '#111827', 'left', 20);
       this.addLine('#16a34a', 1);
       
       resume.workExperience.forEach((exp, index) => {
-        this.addText(exp.position || '', 11, 'bold', '#111827');
+        // Add border for each experience
+        this.addColoredRect(this.margin + 20, this.currentY - 5, this.contentWidth - 40, 3, '#e5e7eb');
+        this.addSpace(8);
+        
+        this.addText(exp.position || '', 11, 'bold', '#111827', 'left', 30);
         this.addSpace(3);
-        this.addText(exp.company || '', 11, 'bold', '#16a34a');
+        this.addText(exp.company || '', 11, 'bold', '#16a34a', 'left', 30);
         this.addSpace(3);
         if (exp.startDate || exp.endDate) {
-          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'bold', '#6b7280');
+          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'bold', '#6b7280', 'left', 30);
         }
         this.addSpace(6);
         
         if (exp.responsibilities) {
           exp.responsibilities.forEach(resp => {
-            this.addText(`> ${resp}`, 10, 'normal', '#374151', 'left', 15);
+            this.addText(`> ${resp}`, 10, 'normal', '#374151', 'left', 45);
             this.addSpace(3);
           });
         }
@@ -653,17 +732,17 @@ class TemplatePDFGenerator {
 
     // Education
     if (resume.education.length > 0) {
-      this.addText('// EDUCATION', 12, 'bold', '#111827');
+      this.addText('// EDUCATION', 12, 'bold', '#111827', 'left', 20);
       this.addLine('#16a34a', 1);
       
       resume.education.forEach(edu => {
         const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
-        this.addText(degreeLine, 11, 'bold', '#111827');
+        this.addText(degreeLine, 11, 'bold', '#111827', 'left', 30);
         this.addSpace(3);
-        this.addText(edu.institution || '', 10, 'normal', '#16a34a');
+        this.addText(edu.institution || '', 10, 'normal', '#16a34a', 'left', 30);
         this.addSpace(3);
         if (edu.graduationDate) {
-          this.addText(edu.graduationDate, 10, 'normal', '#6b7280');
+          this.addText(edu.graduationDate, 10, 'normal', '#6b7280', 'left', 30);
         }
         this.addSpace(10);
       });
@@ -932,8 +1011,22 @@ class TemplatePDFGenerator {
     this.addAdditionalSections(resume, '#111827', '#374151');
   }
 
-  // Border template formatting
+  // Border template formatting with graphics
   private generateBorderTemplate(resume: ParsedResume): void {
+    // Add full page border
+    this.pdf.setDrawColor('#111827');
+    this.pdf.setLineWidth(2);
+    this.pdf.rect(20, 20, this.pageWidth - 40, this.pageHeight - 40);
+    
+    // Add inner border
+    this.pdf.setDrawColor('#6b7280');
+    this.pdf.setLineWidth(1);
+    this.pdf.rect(30, 30, this.pageWidth - 60, this.pageHeight - 60);
+    
+    // Adjust margins for border
+    this.margin = 50;
+    this.contentWidth = this.pageWidth - (this.margin * 2);
+    
     // Header with border styling
     this.addText(resume.contact.name?.toUpperCase() || '', 20, 'bold', '#111827');
     this.addSpace(6);
@@ -953,69 +1046,80 @@ class TemplatePDFGenerator {
     });
     this.addSpace(16);
 
-    // Professional Summary with border
+    // Professional Summary with border accent
     if (resume.professionalSummary) {
-      this.addText('PROFESSIONAL SUMMARY', 12, 'bold', '#ffffff', 'left', 0);
-      this.addSpace(8);
+      // Add section background
+      this.addColoredRect(this.margin, this.currentY - 5, this.contentWidth, 20, '#111827');
+      this.addText('PROFESSIONAL SUMMARY', 12, 'bold', '#ffffff', 'left', 10);
+      this.addSpace(15);
       this.addText(resume.professionalSummary, 10, 'normal', '#374151');
       this.addSpace(16);
     }
 
-    // Experience with borders
+    // Experience with bordered sections
     if (resume.workExperience.length > 0) {
-      this.addText('PROFESSIONAL EXPERIENCE', 12, 'bold', '#ffffff', 'left', 0);
-      this.addSpace(8);
+      this.addColoredRect(this.margin, this.currentY - 5, this.contentWidth, 20, '#111827');
+      this.addText('PROFESSIONAL EXPERIENCE', 12, 'bold', '#ffffff', 'left', 10);
+      this.addSpace(15);
       
       resume.workExperience.forEach((exp, index) => {
-        this.addText(exp.position || '', 11, 'bold', '#111827');
+        // Add border for each experience
+        this.pdf.setDrawColor('#e5e7eb');
+        this.pdf.setLineWidth(1);
+        this.pdf.rect(this.margin, this.currentY - 5, this.contentWidth, 80);
+        
+        this.addText(exp.position || '', 11, 'bold', '#111827', 'left', 10);
         this.addSpace(3);
-        this.addText(exp.company || '', 10, 'bold', '#6b7280');
+        this.addText(exp.company || '', 10, 'bold', '#6b7280', 'left', 10);
         this.addSpace(3);
         if (exp.startDate || exp.endDate) {
-          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'normal', '#6b7280');
+          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'normal', '#6b7280', 'left', 10);
         }
         this.addSpace(6);
         
         if (exp.responsibilities) {
           exp.responsibilities.forEach(resp => {
-            this.addText(`• ${resp}`, 10, 'normal', '#374151', 'left', 15);
+            this.addText(`• ${resp}`, 10, 'normal', '#374151', 'left', 25);
             this.addSpace(3);
           });
         }
         
+        this.addSpace(15);
         if (index < resume.workExperience.length - 1) this.addSpace(12);
       });
       this.addSpace(16);
     }
 
-    // Skills with border
+    // Skills with border styling
     if (resume.skills.length > 0) {
-      this.addText('CORE SKILLS', 12, 'bold', '#ffffff', 'left', 0);
-      this.addSpace(8);
+      this.addColoredRect(this.margin, this.currentY - 5, this.contentWidth, 20, '#111827');
+      this.addText('CORE SKILLS', 12, 'bold', '#ffffff', 'left', 10);
+      this.addSpace(15);
       
-      // Display skills in a grid format
+      // Display skills in a bordered grid format
       const skillsPerRow = 3;
       for (let i = 0; i < resume.skills.slice(0, 18).length; i += skillsPerRow) {
         const rowSkills = resume.skills.slice(i, i + skillsPerRow);
-        this.addText(rowSkills.join('   |   '), 10, 'normal', '#4b5563');
+        this.addText(rowSkills.join('   |   '), 10, 'normal', '#4b5563', 'left', 10);
         this.addSpace(4);
       }
       this.addSpace(12);
     }
 
-    // Education with border
+    // Education with border styling
     if (resume.education.length > 0) {
-      this.addText('EDUCATION', 12, 'bold', '#ffffff', 'left', 0);
-      this.addSpace(8);
+      this.addColoredRect(this.margin, this.currentY - 5, this.contentWidth, 20, '#111827');
+      this.addText('EDUCATION', 12, 'bold', '#ffffff', 'left', 10);
+      this.addSpace(15);
       
       resume.education.forEach(edu => {
         const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
-        this.addText(degreeLine, 11, 'bold', '#111827');
+        this.addText(degreeLine, 11, 'bold', '#111827', 'left', 10);
         this.addSpace(3);
-        this.addText(edu.institution || '', 10, 'bold', '#6b7280');
+        this.addText(edu.institution || '', 10, 'bold', '#6b7280', 'left', 10);
         this.addSpace(3);
         if (edu.graduationDate) {
-          this.addText(edu.graduationDate, 10, 'normal', '#6b7280');
+          this.addText(edu.graduationDate, 10, 'normal', '#6b7280', 'left', 10);
         }
         this.addSpace(10);
       });
@@ -1076,16 +1180,16 @@ export const generateTemplatePDF = async (
   filename: string
 ): Promise<boolean> => {
   try {
-    console.log('Generating text-based PDF for template:', templateType);
+    console.log('Generating enhanced PDF with graphics for template:', templateType);
     
     const generator = new TemplatePDFGenerator();
     generator.generate(resume, templateType);
     generator.save(filename);
     
-    console.log('Text-based PDF generated successfully');
+    console.log('Enhanced PDF with graphics generated successfully');
     return true;
   } catch (error) {
-    console.error('Error generating text-based template PDF:', error);
+    console.error('Error generating enhanced template PDF:', error);
     return false;
   }
 };
