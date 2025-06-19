@@ -405,9 +405,9 @@ class EnhancedResumePDFGenerator {
         
         this.checkPageBreak(60); // Reduced from 80
         
-        // Job title and company on same line, cleanly formatted
+        // Job title and company on same line, using normal weight instead of bold
         const titleLine = `${exp.position || 'Position'} - ${exp.company || 'Company'}`;
-        this.addText(titleLine, 11, 'bold', '#1f2937', 0, undefined, 2);
+        this.addText(titleLine, 11, 'normal', '#1f2937', 0, undefined, 1); // Changed from 'bold' to 'normal' and reduced spacing from 2 to 1
         
         // Dates and location on next line, cleanly formatted
         if (exp.dates || exp.location) {
@@ -415,7 +415,7 @@ class EnhancedResumePDFGenerator {
           if (exp.dates) dateLocationParts.push(exp.dates);
           if (exp.location) dateLocationParts.push(exp.location);
           const dateLocation = dateLocationParts.join(' | ');
-          this.addText(dateLocation, 9, 'normal', '#6b7280', 0, undefined, 4);
+          this.addText(dateLocation, 9, 'normal', '#6b7280', 0, undefined, 3); // Reduced spacing from 4 to 3
         }
         
         // Responsibilities with proper spacing
@@ -428,7 +428,7 @@ class EnhancedResumePDFGenerator {
         
         // Space between different experiences
         if (index < section.items.length - 1) {
-          this.currentY += 8; // Reduced from 12
+          this.currentY += 6; // Reduced from 8
         }
       } catch (error) {
         console.error('Error parsing experience item:', error);
@@ -454,9 +454,9 @@ class EnhancedResumePDFGenerator {
     
     if (section.items && section.items.length > 0) {
       section.items.forEach((item, index) => {
-        this.addText(item, 10, 'normal', '#374151', 0, undefined, 2);
+        this.addText(item, 10, 'normal', '#374151', 0, undefined, 1); // Reduced spacing from 2 to 1
         if (index < section.items.length - 1) {
-          this.currentY += 4;
+          this.currentY += 3; // Reduced from 4
         }
       });
     } else if (section.content) {
@@ -492,12 +492,12 @@ class EnhancedResumePDFGenerator {
 
   private renderEducationItem(edu: EducationItem): void {
     this.checkPageBreak(25); // Reduced from 30
-    this.addText(edu.degree, 11, 'bold', '#1f2937', 0, undefined, 1);
+    this.addText(edu.degree, 11, 'normal', '#1f2937', 0, undefined, 1); // Changed from 'bold' to 'normal'
     if (edu.institution) {
       this.addText(edu.institution, 10, 'normal', '#6b7280', 0, undefined, 1);
     }
     if (edu.date) {
-      this.addText(edu.date, 9, 'normal', '#6b7280', 0, undefined, 6);
+      this.addText(edu.date, 9, 'normal', '#6b7280', 0, undefined, 4); // Reduced from 6 to 4
     }
   }
 
@@ -559,7 +559,7 @@ class EnhancedResumePDFGenerator {
         
         // Consistent spacing between sections (reduced from 12)
         if (index < sections.length - 1) {
-          this.currentY += 8;
+          this.currentY += 6; // Reduced from 8
         }
       });
 
