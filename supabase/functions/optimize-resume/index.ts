@@ -132,8 +132,26 @@ serve(async (req) => {
     console.log('Successfully generated conservative resume optimization')
     console.log(`Found ${response.qualificationGaps.length} genuine qualification gaps`)
 
+    // Ensure optimizedResume is always a clean string
+    let cleanOptimizedResume = response.optimizedResume;
+    
+    // If optimizedResume is somehow an object, convert it to string
+    if (typeof cleanOptimizedResume === 'object') {
+      cleanOptimizedResume = JSON.stringify(cleanOptimizedResume);
+    }
+    
+    // Clean up any potential JSON formatting artifacts
+    cleanOptimizedResume = String(cleanOptimizedResume)
+      .replace(/^["']|["']$/g, '') // Remove leading/trailing quotes
+      .replace(/\\n/g, '\n') // Convert escaped newlines to actual newlines
+      .replace(/\\"/g, '"') // Convert escaped quotes to regular quotes
+      .trim();
+
     return new Response(
-      JSON.stringify(response),
+      JSON.stringify({
+        optimizedResume: cleanOptimizedResume,
+        qualificationGaps: response.qualificationGaps
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

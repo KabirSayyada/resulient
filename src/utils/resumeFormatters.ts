@@ -1,10 +1,13 @@
-
 import { QualificationGap } from "@/types/resume";
 
 export function formatResumeContent(content: string | any): string {
   // Handle case where content might be an object
   if (typeof content === 'object' && content !== null) {
-    // Convert object to string representation
+    // If it's an object with an optimizedResume property, extract that
+    if (content.optimizedResume) {
+      return String(content.optimizedResume);
+    }
+    // Otherwise convert object to string representation
     return JSON.stringify(content, null, 2);
   }
   
@@ -13,7 +16,13 @@ export function formatResumeContent(content: string | any): string {
     return String(content || '');
   }
   
-  return content;
+  // Clean up any JSON formatting artifacts that might have slipped through
+  return content
+    .replace(/^["']|["']$/g, '') // Remove leading/trailing quotes
+    .replace(/\\n/g, '\n') // Convert escaped newlines to actual newlines
+    .replace(/\\"/g, '"') // Convert escaped quotes to regular quotes
+    .replace(/^\{|\}$/g, '') // Remove leading/trailing braces if they exist
+    .trim();
 }
 
 export function calculateKeywordScore(resume: string | any, jobDescription: string): number {
