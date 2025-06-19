@@ -109,13 +109,11 @@ const Index = () => {
               
               <ResumeScoringForm
                 resumeContent={resumeContent}
-                selectedResume={selectedResume}
               />
               
               {scoreData && (
                 <ScoreResultSection 
-                  scoreData={scoreData} 
-                  setScoreHistory={setScoreHistory}
+                  scoreData={scoreData}
                   userId={user?.id}
                 />
               )}

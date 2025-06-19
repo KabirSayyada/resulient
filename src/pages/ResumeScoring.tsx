@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -127,6 +126,7 @@ const ResumeScoring = () => {
               
               <ResumeScoringForm
                 resumeContent={resumeContent}
+                setResumeContent={setResumeContent}
                 onScore={onScoreSubmit}
                 isScoring={isScoring}
                 hasReachedLimit={hasReachedLimit}
