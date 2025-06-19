@@ -18,7 +18,9 @@ export function formatResumeContent(content: string | any): string {
 
 export function calculateKeywordScore(resume: string | any, jobDescription: string): number {
   // Ensure resume is a string before processing
-  const resumeText = typeof resume === 'string' ? resume : String(resume || '');
+  const resumeText = typeof resume === 'string' ? resume : 
+                     typeof resume === 'object' && resume !== null ? JSON.stringify(resume) : 
+                     String(resume || '');
   const jobDesc = typeof jobDescription === 'string' ? jobDescription : String(jobDescription || '');
   
   if (!resumeText.trim() || !jobDesc.trim()) return 0;
@@ -38,7 +40,9 @@ export function calculateKeywordScore(resume: string | any, jobDescription: stri
 
 export function calculateStructureScore(resume: string | any): number {
   // Ensure resume is a string before processing
-  const resumeText = typeof resume === 'string' ? resume : String(resume || '');
+  const resumeText = typeof resume === 'string' ? resume : 
+                     typeof resume === 'object' && resume !== null ? JSON.stringify(resume) : 
+                     String(resume || '');
   
   if (!resumeText.trim()) return 0;
   
@@ -74,7 +78,9 @@ export function calculateStructureScore(resume: string | any): number {
 
 export function calculateATSScore(resume: string | any): number {
   // Ensure resume is a string before processing
-  const resumeText = typeof resume === 'string' ? resume : String(resume || '');
+  const resumeText = typeof resume === 'string' ? resume : 
+                     typeof resume === 'object' && resume !== null ? JSON.stringify(resume) : 
+                     String(resume || '');
   
   if (!resumeText.trim()) return 0;
   
@@ -113,7 +119,9 @@ export function generateSuggestions(
   const suggestions: string[] = [];
   
   // Ensure resume is a string before processing
-  const resumeText = typeof resume === 'string' ? resume : String(resume || '');
+  const resumeText = typeof resume === 'string' ? resume : 
+                     typeof resume === 'object' && resume !== null ? JSON.stringify(resume) : 
+                     String(resume || '');
   const content = resumeText.toLowerCase();
   
   if (keywordScore < 60) {
@@ -158,7 +166,9 @@ function extractKeywords(text: string): string[] {
 
 export function findQualificationGaps(resume: string | any, jobDescription: string): QualificationGap[] {
   // Ensure inputs are strings before processing
-  const resumeText = typeof resume === 'string' ? resume : String(resume || '');
+  const resumeText = typeof resume === 'string' ? resume : 
+                     typeof resume === 'object' && resume !== null ? JSON.stringify(resume) : 
+                     String(resume || '');
   const jobDesc = typeof jobDescription === 'string' ? jobDescription : String(jobDescription || '');
   
   const gaps: QualificationGap[] = [];
@@ -178,10 +188,9 @@ export function findQualificationGaps(resume: string | any, jobDescription: stri
   
   criticalSkills.slice(0, 3).forEach(skill => {
     gaps.push({
-      type: 'skill',
-      description: `Missing key skill: ${skill}`,
-      severity: 'medium',
-      suggestion: `Consider adding "${skill}" to your skills section or highlighting relevant experience`
+      skill: skill,
+      importance: 'Important - This skill appears in the job description',
+      howToAcquire: `Consider adding "${skill}" to your skills section or highlighting relevant experience with this technology/skill`
     });
   });
   
