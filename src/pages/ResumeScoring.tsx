@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { useResumeScoring } from "@/hooks/useResumeScoring";
-import { useSubscription } from "@/hooks/useSubscription";
-import { useUsageTracking } from "@/hooks/useUsageTracking";
+import { useSubscriptionTracking } from "@/hooks/useSubscriptionTracking";
 import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, FileText, Diamond } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowLeft, FileText, Diamond, AlertCircle } from "lucide-react";
 import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { supabase } from "@/integrations/supabase/client";
 import { ScoreData, ResumeScoreRecord } from "@/types/resume";
@@ -17,7 +17,6 @@ import { MainNavigation } from "@/components/resume/MainNavigation";
 import { LegalFooter } from "@/components/layout/LegalFooter";
 import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
 import { GuidedTour } from "@/components/onboarding/GuidedTour";
-import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
 import { SubscriptionTierIndicator } from "@/components/subscription/SubscriptionTierIndicator";
 
 const ResumeScoring = () => {
@@ -26,17 +25,15 @@ const ResumeScoring = () => {
   const [resumeContent, setResumeContent] = useState("");
   const [activeTab, setActiveTab] = useState("current");
   const { scoreData, scoreHistory, setScoreHistory, isScoring, handleScoreResume } = useResumeScoring(user?.id);
-  const { subscription } = useSubscription();
-  const { canUseFeature, trackUsage, usageData, refreshUsage } = useUsageTracking();
+  const { subscriptionData, usageData, canUseFeature, trackUsage, getLimitMessage } = useSubscriptionTracking();
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
     } else if (user) {
       fetchScoreHistory();
-      refreshUsage(); // Refresh usage data when component mounts
     }
-  }, [user, authLoading, navigate, refreshUsage]);
+  }, [user, authLoading, navigate]);
 
   const fetchScoreHistory = async () => {
     try {
@@ -118,9 +115,7 @@ const ResumeScoring = () => {
     const tracked = await trackUsage('resume_scoring');
     if (tracked) {
       console.log('Usage tracked successfully, proceeding with scoring');
-      await handleScoreResume(resumeContent, -1); // -1 means unlimited for premium/platinum
-      // Refresh usage data after scoring
-      await refreshUsage();
+      await handleScoreResume(resumeContent, -1);
     } else {
       console.error('Failed to track usage');
     }
@@ -128,12 +123,12 @@ const ResumeScoring = () => {
 
   // Check if user has reached their limit
   const hasReachedLimit = !canUseFeature('resume_scoring');
-  const showUpgradeAlert = hasReachedLimit && subscription.tier === "free";
+  const showUpgradeAlert = hasReachedLimit && subscriptionData.tier === "free";
 
   console.log('Render state:', { 
     hasReachedLimit, 
     showUpgradeAlert, 
-    tier: subscription.tier,
+    tier: subscriptionData.tier,
     dailyUsage: usageData.dailyUsage.resume_scoring 
   });
 
@@ -171,14 +166,14 @@ const ResumeScoring = () => {
         </div>
 
         {/* Info block for Resume Scoring */}
-        <div className={`bg-gradient-to-br ${subscription.tier === "premium" ? "from-blue-50 via-indigo-50 to-blue-100 dark:from-blue-950 dark:via-indigo-950 dark:to-blue-900 border-blue-200 dark:border-blue-800" : subscription.tier === "platinum" ? "from-purple-50 via-indigo-50 to-fuchsia-100 dark:from-purple-950 dark:via-indigo-950 dark:to-fuchsia-900 border-purple-200 dark:border-purple-800" : "from-fuchsia-50 via-indigo-50 to-blue-50 dark:from-fuchsia-950 dark:via-indigo-950 dark:to-blue-950 border-indigo-100 dark:border-indigo-800"} rounded-xl border shadow-md px-4 py-5 mb-6 sm:px-7 max-w-2xl mx-auto text-center transition-all duration-300`}>
+        <div className={`bg-gradient-to-br ${subscriptionData.tier === "premium" ? "from-blue-50 via-indigo-50 to-blue-100 dark:from-blue-950 dark:via-indigo-950 dark:to-blue-900 border-blue-200 dark:border-blue-800" : subscriptionData.tier === "platinum" ? "from-purple-50 via-indigo-50 to-fuchsia-100 dark:from-purple-950 dark:via-indigo-950 dark:to-fuchsia-900 border-purple-200 dark:border-purple-800" : "from-fuchsia-50 via-indigo-50 to-blue-50 dark:from-fuchsia-950 dark:via-indigo-950 dark:to-blue-950 border-indigo-100 dark:border-indigo-800"} rounded-xl border shadow-md px-4 py-5 mb-6 sm:px-7 max-w-2xl mx-auto text-center transition-all duration-300`}>
           <div className="text-lg sm:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-0 flex flex-wrap items-center justify-center gap-2">
-            {subscription.tier !== "free" && (
+            {subscriptionData.tier !== "free" && (
               <SubscriptionTierIndicator variant="icon" size="lg" showTooltip={false} />
             )}
             <span className="text-fuchsia-700 dark:text-fuchsia-400 font-bold">
-              {subscription.tier !== "free" ? 
-                `${subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1)} Unlimited Access` : 
+              {subscriptionData.tier !== "free" ? 
+                `${subscriptionData.tier.charAt(0).toUpperCase() + subscriptionData.tier.slice(1)} Unlimited Access` : 
                 "New!"
               } 
             </span> 
@@ -188,15 +183,14 @@ const ResumeScoring = () => {
             Instantly compare your resume to <span className="font-bold text-indigo-700 dark:text-indigo-400">hundreds of thousands</span> of real career journeys. 
             Using Artificial Intelligence, Resulient shows you exactly where you stand among your competition—so you know how to outshine other applicants.
           </p>
-          {subscription.tier !== "free" && (
+          {subscriptionData.tier !== "free" && (
             <div className="mt-3 text-sm font-medium text-indigo-700 dark:text-indigo-400">
-              {subscription.tier === "premium" ? 
+              {subscriptionData.tier === "premium" ? 
                 "You have unlimited resume scoring with your Premium plan!" : 
                 "You have unlimited resume scoring with your Platinum plan!"}
             </div>
           )}
         </div>
-        {/* End info block */}
 
         <Button 
           variant="ghost" 
@@ -213,11 +207,17 @@ const ResumeScoring = () => {
         <MainNavigation />
 
         {showUpgradeAlert && (
-          <UseSubscriptionAlert 
-            subscriptionTier={subscription.tier} 
-            requiredTier="premium" 
-            message={`You've reached your daily limit for resume scoring (${usageData.dailyUsage.resume_scoring}/2). Free users can perform 2 resume scorings per day. Upgrade to Premium or Platinum for unlimited usage.`}
-          />
+          <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {getLimitMessage('resume_scoring')}
+              <div className="mt-2">
+                <Button asChild size="sm">
+                  <Link to="/pricing">View Pricing Plans</Link>
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
         )}
 
         <Tabs defaultValue="current" className="mb-8" onValueChange={setActiveTab}>
@@ -227,20 +227,20 @@ const ResumeScoring = () => {
           </TabsList>
 
           <TabsContent value="current" className="space-y-6 mt-6">
-            <Card className={`bg-gradient-to-br ${subscription.tier === "premium" ? "from-white via-blue-50 to-indigo-100 border-t-blue-500" : subscription.tier === "platinum" ? "from-white via-purple-50 to-indigo-100 border-t-purple-500" : "from-white via-blue-50 to-indigo-100 border-t-indigo-500"} shadow-md border-t-4 transition-all duration-300`}>
+            <Card className={`bg-gradient-to-br ${subscriptionData.tier === "premium" ? "from-white via-blue-50 to-indigo-100 border-t-blue-500" : subscriptionData.tier === "platinum" ? "from-white via-purple-50 to-indigo-100 border-t-purple-500" : "from-white via-blue-50 to-indigo-100 border-t-indigo-500"} shadow-md border-t-4 transition-all duration-300`}>
               <CardContent className="space-y-6 pt-6">
-                {subscription.tier !== "free" && (
+                {subscriptionData.tier !== "free" && (
                   <div className="flex items-center justify-center gap-1 text-sm text-indigo-700 dark:text-indigo-400 font-medium">
                     <Diamond className="h-4 w-4" />
                     <span>
-                      {subscription.tier === "premium" ? 
+                      {subscriptionData.tier === "premium" ? 
                         "Unlimited scoring with Premium" : 
                         "Unlimited scoring with Platinum"}
                     </span>
                   </div>
                 )}
                 
-                {subscription.tier === "free" && (
+                {subscriptionData.tier === "free" && (
                   <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded-lg p-3 text-center">
                     <p className="text-sm text-orange-700 dark:text-orange-300">
                       <span className="font-medium">Free Plan:</span> {usageData.dailyUsage.resume_scoring}/2 resume scorings used today
@@ -256,7 +256,7 @@ const ResumeScoring = () => {
                   setResumeContent={setResumeContent}
                   isScoring={isScoring}
                   onScore={onScore}
-                  disableButton={hasReachedLimit && subscription.tier === "free"}
+                  disableButton={hasReachedLimit && subscriptionData.tier === "free"}
                 />
               </CardContent>
             </Card>
