@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -17,7 +16,7 @@ const ATSResumeBuilder = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
-  const { resumeData, isGenerating, generateResume, downloadResume } = useATSResumeBuilder(user?.id);
+  const { resumeData, isGenerating, generateResume, downloadResume, downloadResumePDF } = useATSResumeBuilder(user?.id);
 
   if (!authLoading && !user) {
     navigate("/auth");
@@ -122,14 +121,25 @@ const ATSResumeBuilder = () => {
                     Preview
                   </div>
                   {resumeData && (
-                    <Button 
-                      onClick={downloadResume}
-                      size="sm"
-                      className="bg-emerald-600 hover:bg-emerald-700"
-                    >
-                      <Download className="h-4 w-4 mr-1" />
-                      Download
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={downloadResume}
+                        size="sm"
+                        variant="outline"
+                        className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                        TXT
+                      </Button>
+                      <Button 
+                        onClick={downloadResumePDF}
+                        size="sm"
+                        className="bg-emerald-600 hover:bg-emerald-700"
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                        PDF
+                      </Button>
+                    </div>
                   )}
                 </CardTitle>
               </CardHeader>

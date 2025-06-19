@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ATSResumeData } from "@/types/atsResume";
+import { generateTextFormattedPDF } from "@/utils/textFormattedPdfGenerator";
 
 export const useATSResumeBuilder = (userId?: string) => {
   const [resumeData, setResumeData] = useState<string>("");
@@ -65,10 +66,38 @@ export const useATSResumeBuilder = (userId?: string) => {
     });
   };
 
+  const downloadResumePDF = async () => {
+    if (!resumeData) return;
+
+    toast({
+      title: "Generating PDF...",
+      description: "Creating your PDF resume, please wait.",
+    });
+
+    const success = await generateTextFormattedPDF(
+      resumeData,
+      'ats-optimized-resume.pdf'
+    );
+
+    if (success) {
+      toast({
+        title: "PDF Downloaded!",
+        description: "Your PDF resume has been downloaded successfully.",
+      });
+    } else {
+      toast({
+        title: "PDF Generation Failed",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return {
     resumeData,
     isGenerating,
     generateResume,
-    downloadResume
+    downloadResume,
+    downloadResumePDF
   };
 };
