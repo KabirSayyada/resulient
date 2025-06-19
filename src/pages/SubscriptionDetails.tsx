@@ -1,11 +1,11 @@
-
 import { useEffect } from "react";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useUsageTracking } from "@/hooks/useUsageTracking";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
-import { Diamond, Crown, CheckCircle, ArrowUpRight, Calendar, ArrowLeft, Sparkles, Download, Clock, Lock } from "lucide-react";
+import { Diamond, Crown, CheckCircle, ArrowUpRight, Calendar, ArrowLeft, Sparkles, Download, Clock, Lock, RefreshCw } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { LegalFooter } from "@/components/layout/LegalFooter";
@@ -52,6 +52,7 @@ const SubscriptionDetails = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { subscription, refreshSubscription } = useSubscription();
+  const { usageData, refreshUsage } = useUsageTracking();
   
   useEffect(() => {
     if (!authLoading && !user) {
@@ -59,14 +60,24 @@ const SubscriptionDetails = () => {
       return;
     }
     
-    // Only refresh subscription once when the component mounts
-    // This prevents the infinite loop
-    if (!subscription.isLoading) {
+    if (user && !subscription.isLoading) {
       refreshSubscription();
+      refreshUsage();
     }
-  }, [user, authLoading, navigate]); // Remove refreshSubscription from dependency array
+  }, [user, authLoading, navigate, refreshSubscription, refreshUsage]);
   
-  if (authLoading || subscription.isLoading) {
+  // Refresh usage data every 30 seconds to keep it current
+  useEffect(() => {
+    if (user) {
+      const interval = setInterval(() => {
+        refreshUsage();
+      }, 30000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [user, refreshUsage]);
+  
+  if (authLoading || subscription.isLoading || usageData.isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-xl font-semibold text-gray-600 dark:text-gray-400">
@@ -76,7 +87,6 @@ const SubscriptionDetails = () => {
     );
   }
   
-  // Format expiration date
   const expirationDate = subscription.expiresAt 
     ? new Date(subscription.expiresAt).toLocaleDateString(undefined, { 
         year: 'numeric', 
@@ -85,7 +95,6 @@ const SubscriptionDetails = () => {
       })
     : null;
     
-  // Get appropriate tier color
   const getTierColors = () => {
     switch(subscription.tier) {
       case "platinum":
@@ -117,7 +126,6 @@ const SubscriptionDetails = () => {
   
   const tierColors = getTierColors();
   
-  // Get tier-specific content
   const getTierContent = () => {
     switch(subscription.tier) {
       case "platinum":
@@ -134,6 +142,12 @@ const SubscriptionDetails = () => {
             { 
               title: "Resume Optimizations", 
               description: "AI-powered resume enhancements tailored to specific job descriptions.", 
+              icon: <CheckCircle className="h-4 w-4" />,
+              value: "Unlimited" 
+            },
+            { 
+              title: "Resume Building", 
+              description: "Create professional ATS-optimized resumes from scratch with AI assistance.", 
               icon: <CheckCircle className="h-4 w-4" />,
               value: "Unlimited" 
             },
@@ -177,6 +191,12 @@ const SubscriptionDetails = () => {
               value: "Unlimited" 
             },
             { 
+              title: "Resume Building", 
+              description: "Create professional ATS-optimized resumes from scratch with AI assistance.", 
+              icon: <CheckCircle className="h-4 w-4" />,
+              value: "Unlimited" 
+            },
+            { 
               title: "Report Downloads", 
               description: "Download comprehensive resume analysis reports in PDF format.", 
               icon: <Download className="h-4 w-4" />,
@@ -201,14 +221,21 @@ const SubscriptionDetails = () => {
               title: "Resume Scorings", 
               description: "Benchmark your resume against industry standards with detailed analytics.", 
               icon: <Clock className="h-4 w-4" />,
-              value: 2,
+              value: usageData.dailyUsage.resume_scoring,
               maxValue: 2
             },
             { 
               title: "Resume Optimizations", 
               description: "AI-powered resume enhancements tailored to specific job descriptions.", 
               icon: <Clock className="h-4 w-4" />,
-              value: 1,
+              value: usageData.dailyUsage.resume_optimization,
+              maxValue: 1
+            },
+            { 
+              title: "Resume Building", 
+              description: "Create professional ATS-optimized resumes from scratch with AI assistance.", 
+              icon: <Clock className="h-4 w-4" />,
+              value: usageData.totalUsage.resume_building,
               maxValue: 1
             },
             { 
@@ -289,7 +316,18 @@ const SubscriptionDetails = () => {
               </div>
             </div>
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Your Plan Features</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Your Plan Features</h3>
+                <Button 
+                  onClick={refreshUsage} 
+                  variant="outline" 
+                  size="sm"
+                  className="text-xs"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Refresh Usage
+                </Button>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {tierContent.features.map((feature, index) => (
                   <FeatureItem 
@@ -308,7 +346,7 @@ const SubscriptionDetails = () => {
                 <div className="mt-8 text-center">
                   <div className="text-lg font-semibold mb-2">Ready to unlock unlimited potential?</div>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    Upgrade to Premium or Platinum for unlimited resume scorings and optimizations.
+                    Upgrade to Premium or Platinum for unlimited resume building, scoring, and optimizations.
                   </p>
                   <Button asChild className="bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600">
                     <Link to="/pricing">
