@@ -11,6 +11,7 @@ import { SubscriptionTierIndicator } from "@/components/subscription/Subscriptio
 import { ATSResumeForm } from "@/components/resume/ATSResumeForm";
 import { ATSResumePreview } from "@/components/resume/ATSResumePreview";
 import { useATSResumeBuilder } from "@/hooks/useATSResumeBuilder";
+import { UsageLimitGuard } from "@/components/subscription/UsageLimitGuard";
 
 const ATSResumeBuilder = () => {
   const { user, loading: authLoading } = useAuth();
@@ -92,63 +93,68 @@ const ATSResumeBuilder = () => {
 
         <MainNavigation />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          {/* Form Section */}
-          <div className="space-y-6">
-            <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-emerald-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-emerald-700">
-                  <FileText className="h-5 w-5" />
-                  Build Your Resume
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ATSResumeForm 
-                  onGenerate={generateResume}
-                  isGenerating={isGenerating}
-                />
-              </CardContent>
-            </Card>
-          </div>
+        <UsageLimitGuard 
+          feature="resumeBuilds"
+          fallbackMessage="You've already created your free resume. Upgrade to Premium for unlimited resume building."
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            {/* Form Section */}
+            <div className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-emerald-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-emerald-700">
+                    <FileText className="h-5 w-5" />
+                    Build Your Resume
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ATSResumeForm 
+                    onGenerate={generateResume}
+                    isGenerating={isGenerating}
+                  />
+                </CardContent>
+              </Card>
+            </div>
 
-          {/* Preview Section */}
-          <div className="space-y-6">
-            <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-indigo-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 justify-between text-indigo-700">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5" />
-                    Preview
-                  </div>
-                  {resumeData && (
-                    <div className="flex gap-2">
-                      <Button 
-                        onClick={downloadResume}
-                        size="sm"
-                        variant="outline"
-                        className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
-                      >
-                        <Download className="h-4 w-4 mr-1" />
-                        TXT
-                      </Button>
-                      <Button 
-                        onClick={downloadResumePDF}
-                        size="sm"
-                        className="bg-emerald-600 hover:bg-emerald-700"
-                      >
-                        <Download className="h-4 w-4 mr-1" />
-                        PDF
-                      </Button>
+            {/* Preview Section */}
+            <div className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-indigo-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 justify-between text-indigo-700">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5" />
+                      Preview
                     </div>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ATSResumePreview resumeData={resumeData} />
-              </CardContent>
-            </Card>
+                    {resumeData && (
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={downloadResume}
+                          size="sm"
+                          variant="outline"
+                          className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          TXT
+                        </Button>
+                        <Button 
+                          onClick={downloadResumePDF}
+                          size="sm"
+                          className="bg-emerald-600 hover:bg-emerald-700"
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          PDF
+                        </Button>
+                      </div>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ATSResumePreview resumeData={resumeData} />
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
+        </UsageLimitGuard>
       </div>
       
       <div className="mt-8">
