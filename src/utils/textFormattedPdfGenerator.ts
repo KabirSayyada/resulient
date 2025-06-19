@@ -45,10 +45,10 @@ export async function generateTextFormattedPDF(
         continue;
       }
 
-      // Check if line is a section header (has underline pattern)
-      const isHeader = line.match(/^=+$/) && i > 0;
+      // Check if line is a section header underline pattern
+      const isUnderline = line.match(/^=+$/);
       
-      if (isHeader) {
+      if (isUnderline) {
         // Draw underline for the previous section title
         const prevY = currentY - lineHeight;
         pdf.setDrawColor(150, 150, 150);
@@ -62,12 +62,14 @@ export async function generateTextFormattedPDF(
       const nextLineIsUnderline = i + 1 < lines.length && lines[i + 1].match(/^=+$/);
       
       if (nextLineIsUnderline) {
-        // This is a section header
+        // This is a section header - clean it from # symbols and bullet points
+        let cleanHeader = line.replace(/^#+\s*/, '').replace(/^[•\-*]\s*/, '').trim();
+        
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(12);
         pdf.setTextColor('#1f2937');
         
-        const wrappedLines = pdf.splitTextToSize(line, contentWidth);
+        const wrappedLines = pdf.splitTextToSize(cleanHeader, contentWidth);
         for (const wrappedLine of wrappedLines) {
           pdf.text(wrappedLine, margin, currentY);
           currentY += lineHeight * 1.2;
@@ -80,28 +82,53 @@ export async function generateTextFormattedPDF(
         continue;
       }
 
-      // Handle bullet points
+      // Handle bullet points (but not for job titles/company roles)
       if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
-        const indent = 15;
-        const bulletText = line.startsWith('•') ? line : `• ${line.substring(1).trim()}`;
+        // Check if this looks like a job title/company role (contains common separators)
+        const isJobTitle = line.includes(' - ') || line.includes(' at ') || line.includes(' | ');
         
-        // Set bullet points to black color instead of gray
-        pdf.setFontSize(fontSize);
-        pdf.setTextColor('#000000');
-        
-        const wrappedLines = pdf.splitTextToSize(bulletText, contentWidth - indent);
-        for (const wrappedLine of wrappedLines) {
-          pdf.text(wrappedLine, margin + indent, currentY);
-          currentY += lineHeight;
+        if (isJobTitle) {
+          // This is a job title, don't treat as bullet point
+          const cleanJobTitle = line.replace(/^[•\-*]\s*/, '').trim();
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(11);
+          pdf.setTextColor('#1f2937');
+          
+          const wrappedLines = pdf.splitTextToSize(cleanJobTitle, contentWidth);
+          for (const wrappedLine of wrappedLines) {
+            pdf.text(wrappedLine, margin, currentY);
+            currentY += lineHeight;
+          }
+          
+          // Reset font
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(fontSize);
+          pdf.setTextColor('#000000');
+          continue;
+        } else {
+          // This is a real bullet point
+          const indent = 15;
+          const bulletText = line.startsWith('•') ? line : `• ${line.substring(1).trim()}`;
+          
+          pdf.setFontSize(fontSize);
+          pdf.setTextColor('#000000');
+          
+          const wrappedLines = pdf.splitTextToSize(bulletText, contentWidth - indent);
+          for (const wrappedLine of wrappedLines) {
+            pdf.text(wrappedLine, margin + indent, currentY);
+            currentY += lineHeight;
+          }
+          continue;
         }
-        continue;
       }
 
-      // Handle regular text
-      const wrappedLines = pdf.splitTextToSize(line, contentWidth);
+      // Handle regular text - clean any # symbols from the beginning
+      let cleanLine = line.replace(/^#+\s*/, '').trim();
+      
+      const wrappedLines = pdf.splitTextToSize(cleanLine, contentWidth);
       for (const wrappedLine of wrappedLines) {
         // Check for contact info or dates (smaller, gray text)
-        if (line.includes('@') || line.includes('|') || line.match(/\d{4}/)) {
+        if (cleanLine.includes('@') || cleanLine.includes('|') || cleanLine.match(/\d{4}/)) {
           pdf.setFontSize(9);
           pdf.setTextColor('#666666');
         } else {
@@ -114,7 +141,7 @@ export async function generateTextFormattedPDF(
       }
 
       // Add extra spacing after certain content
-      if (line.includes('@') || line.match(/\d{4}/)) {
+      if (cleanLine.includes('@') || cleanLine.match(/\d{4}/)) {
         currentY += lineHeight * 0.3;
       }
     }
