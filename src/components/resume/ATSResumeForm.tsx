@@ -1,294 +1,192 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Briefcase, GraduationCap, Award, Code, Plus, Sparkles } from "lucide-react";
-import { ATSResumeData } from "@/types/atsResume";
+import { Loader2, FileText, Wand2, Info } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ATSResumeFormProps {
-  onGenerate: (data: ATSResumeData) => void;
+  onGenerate: (data: any) => Promise<void>;
   isGenerating: boolean;
+  disabled?: boolean;
 }
 
-export const ATSResumeForm = ({ onGenerate, isGenerating }: ATSResumeFormProps) => {
-  const [formData, setFormData] = useState<ATSResumeData>({
+export const ATSResumeForm = ({ onGenerate, isGenerating, disabled = false }: ATSResumeFormProps) => {
+  const [formData, setFormData] = useState({
     personalInfo: "",
-    workExperience: [],
-    education: [],
     skills: "",
-    achievements: "",
-    additionalSections: ""
+    experience: "",
+    education: "",
+    jobTarget: "",
+    certifications: "",
+    projects: "",
+    achievements: ""
   });
 
-  const [currentWorkExp, setCurrentWorkExp] = useState("");
-  const [currentEducation, setCurrentEducation] = useState("");
-
-  const addWorkExperience = () => {
-    if (currentWorkExp.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        workExperience: [...prev.workExperience, currentWorkExp.trim()]
-      }));
-      setCurrentWorkExp("");
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (disabled) return;
+    await onGenerate(formData);
   };
 
-  const addEducation = () => {
-    if (currentEducation.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        education: [...prev.education, currentEducation.trim()]
-      }));
-      setCurrentEducation("");
-    }
-  };
-
-  const removeWorkExperience = (index: number) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      workExperience: prev.workExperience.filter((_, i) => i !== index)
+      [field]: value
     }));
   };
 
-  const removeEducation = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      education: prev.education.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleGenerate = () => {
-    onGenerate(formData);
-  };
-
-  const isFormValid = formData.personalInfo && (formData.workExperience.length > 0 || formData.education.length > 0);
+  const isFormValid = formData.personalInfo.trim() && formData.experience.trim() && formData.skills.trim();
 
   return (
-    <div className="space-y-6">
-      <Tabs defaultValue="personal" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="personal" className="text-xs">Personal</TabsTrigger>
-          <TabsTrigger value="work" className="text-xs">Work</TabsTrigger>
-          <TabsTrigger value="education" className="text-xs">Education</TabsTrigger>
-          <TabsTrigger value="skills" className="text-xs">Skills</TabsTrigger>
-          <TabsTrigger value="other" className="text-xs">Other</TabsTrigger>
-        </TabsList>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          Describe yourself in natural sentences. Our AI will automatically organize your information into a professional resume format.
+        </AlertDescription>
+      </Alert>
 
-        <TabsContent value="personal" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <User className="h-5 w-5" />
-                Personal Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="personal-info">Tell us about yourself</Label>
-                <div className="text-sm text-gray-600 mb-2 p-3 bg-blue-50 rounded-lg">
-                  <strong>Template:</strong> "My name is [Your Name]. I live in [Your City, State]. 
-                  You can reach me at [your.email@example.com] or [your phone number]. 
-                  My LinkedIn profile is [linkedin.com/in/yourprofile] and my portfolio is [yourwebsite.com]."
-                </div>
-                <Textarea
-                  id="personal-info"
-                  placeholder="Example: My name is John Smith. I live in San Francisco, CA. You can reach me at john.smith@email.com or (555) 123-4567. My LinkedIn profile is linkedin.com/in/johnsmith."
-                  value={formData.personalInfo}
-                  onChange={(e) => setFormData(prev => ({ ...prev, personalInfo: e.target.value }))}
-                  rows={4}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="personalInfo" className="text-sm font-medium">
+            Personal Information *
+          </Label>
+          <Textarea
+            id="personalInfo"
+            placeholder="Tell us about yourself: your name, contact information, professional summary..."
+            value={formData.personalInfo}
+            onChange={(e) => handleInputChange("personalInfo", e.target.value)}
+            className="mt-1 min-h-[100px]"
+            disabled={disabled}
+          />
+        </div>
 
-        <TabsContent value="work" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Briefcase className="h-5 w-5" />
-                Work Experience
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="work-exp">Add work experience (one at a time)</Label>
-                <div className="text-sm text-gray-600 mb-2 p-3 bg-blue-50 rounded-lg">
-                  <strong>Template:</strong> "I worked as [Job Title] at [Company Name] from [Start Date] to [End Date]. 
-                  I was responsible for [key responsibilities]. I achieved [specific accomplishments with numbers if possible]."
-                </div>
-                <Textarea
-                  id="work-exp"
-                  placeholder="Example: I worked as Senior Software Engineer at Google from January 2020 to Present. I was responsible for developing scalable web applications and leading a team of 5 developers. I achieved a 40% improvement in application performance and reduced bug reports by 60%."
-                  value={currentWorkExp}
-                  onChange={(e) => setCurrentWorkExp(e.target.value)}
-                  rows={4}
-                />
-                <Button onClick={addWorkExperience} className="mt-2" disabled={!currentWorkExp.trim()}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Experience
-                </Button>
-              </div>
-              
-              {formData.workExperience.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Added Experiences:</Label>
-                  {formData.workExperience.map((exp, index) => (
-                    <Badge 
-                      key={index} 
-                      variant="secondary" 
-                      className="p-2 text-left block cursor-pointer hover:bg-red-100"
-                      onClick={() => removeWorkExperience(index)}
-                    >
-                      {exp.substring(0, 100)}...
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <div>
+          <Label htmlFor="jobTarget" className="text-sm font-medium">
+            Target Job/Career Goal
+          </Label>
+          <Input
+            id="jobTarget"
+            placeholder="What position or career are you targeting?"
+            value={formData.jobTarget}
+            onChange={(e) => handleInputChange("jobTarget", e.target.value)}
+            className="mt-1"
+            disabled={disabled}
+          />
+        </div>
 
-        <TabsContent value="education" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <GraduationCap className="h-5 w-5" />
-                Education
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="education">Add education (one at a time)</Label>
-                <div className="text-sm text-gray-600 mb-2 p-3 bg-blue-50 rounded-lg">
-                  <strong>Template:</strong> "I studied [Degree] in [Field of Study] at [University Name] from [Start Year] to [End Year]. 
-                  My GPA was [GPA] and I was involved in [relevant activities or honors]."
-                </div>
-                <Textarea
-                  id="education"
-                  placeholder="Example: I studied Bachelor of Science in Computer Science at Stanford University from 2016 to 2020. My GPA was 3.8 and I was involved in the Computer Science Club and received Dean's List honors for 3 semesters."
-                  value={currentEducation}
-                  onChange={(e) => setCurrentEducation(e.target.value)}
-                  rows={4}
-                />
-                <Button onClick={addEducation} className="mt-2" disabled={!currentEducation.trim()}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Education
-                </Button>
-              </div>
-              
-              {formData.education.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Added Education:</Label>
-                  {formData.education.map((edu, index) => (
-                    <Badge 
-                      key={index} 
-                      variant="secondary" 
-                      className="p-2 text-left block cursor-pointer hover:bg-red-100"
-                      onClick={() => removeEducation(index)}
-                    >
-                      {edu.substring(0, 100)}...
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <div>
+          <Label htmlFor="experience" className="text-sm font-medium">
+            Work Experience *
+          </Label>
+          <Textarea
+            id="experience"
+            placeholder="Describe your work experience, including company names, roles, dates, and key achievements..."
+            value={formData.experience}
+            onChange={(e) => handleInputChange("experience", e.target.value)}
+            className="mt-1 min-h-[120px]"
+            disabled={disabled}
+          />
+        </div>
 
-        <TabsContent value="skills" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Code className="h-5 w-5" />
-                Skills & Achievements
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="skills">Technical and soft skills</Label>
-                <div className="text-sm text-gray-600 mb-2 p-3 bg-blue-50 rounded-lg">
-                  <strong>Template:</strong> "My technical skills include [list technologies, programming languages, tools]. 
-                  My soft skills include [communication, leadership, etc.]. I am proficient in [specific tools or certifications]."
-                </div>
-                <Textarea
-                  id="skills"
-                  placeholder="Example: My technical skills include JavaScript, Python, React, Node.js, AWS, and Docker. My soft skills include team leadership, project management, and cross-functional collaboration. I am proficient in Agile methodologies and have AWS Solutions Architect certification."
-                  value={formData.skills}
-                  onChange={(e) => setFormData(prev => ({ ...prev, skills: e.target.value }))}
-                  rows={4}
-                />
-              </div>
+        <div>
+          <Label htmlFor="skills" className="text-sm font-medium">
+            Skills *
+          </Label>
+          <Textarea
+            id="skills"
+            placeholder="List your technical skills, soft skills, programming languages, tools, etc..."
+            value={formData.skills}
+            onChange={(e) => handleInputChange("skills", e.target.value)}
+            className="mt-1 min-h-[100px]"
+            disabled={disabled}
+          />
+        </div>
 
-              <div>
-                <Label htmlFor="achievements">Notable achievements and awards</Label>
-                <div className="text-sm text-gray-600 mb-2 p-3 bg-blue-50 rounded-lg">
-                  <strong>Template:</strong> "Some of my key achievements include [specific accomplishments with metrics]. 
-                  I have received [awards, recognitions, or certifications]. I have also [published work, speaking engagements, etc.]."
-                </div>
-                <Textarea
-                  id="achievements"
-                  placeholder="Example: Some of my key achievements include increasing team productivity by 50% and reducing system downtime by 30%. I received the Employee of the Year award in 2022 and have AWS Solutions Architect certification. I have also published 3 technical articles and spoken at 2 industry conferences."
-                  value={formData.achievements}
-                  onChange={(e) => setFormData(prev => ({ ...prev, achievements: e.target.value }))}
-                  rows={4}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <div>
+          <Label htmlFor="education" className="text-sm font-medium">
+            Education
+          </Label>
+          <Textarea
+            id="education"
+            placeholder="Describe your educational background: degrees, institutions, graduation dates, relevant coursework..."
+            value={formData.education}
+            onChange={(e) => handleInputChange("education", e.target.value)}
+            className="mt-1 min-h-[80px]"
+            disabled={disabled}
+          />
+        </div>
 
-        <TabsContent value="other" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Award className="h-5 w-5" />
-                Additional Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="additional">Projects, certifications, languages, volunteer work</Label>
-                <div className="text-sm text-gray-600 mb-2 p-3 bg-blue-50 rounded-lg">
-                  <strong>Template:</strong> "I have worked on projects including [project descriptions]. 
-                  I hold certifications in [certifications]. I speak [languages]. 
-                  I have volunteered for [organizations or causes]."
-                </div>
-                <Textarea
-                  id="additional"
-                  placeholder="Example: I have worked on projects including a mobile app with 10,000+ downloads and an open-source library used by 50+ companies. I hold certifications in AWS and Google Cloud. I speak English and Spanish fluently. I have volunteered for local coding bootcamps teaching web development to underrepresented communities."
-                  value={formData.additionalSections}
-                  onChange={(e) => setFormData(prev => ({ ...prev, additionalSections: e.target.value }))}
-                  rows={4}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        <div>
+          <Label htmlFor="certifications" className="text-sm font-medium">
+            Certifications & Licenses
+          </Label>
+          <Textarea
+            id="certifications"
+            placeholder="List any professional certifications, licenses, or credentials you hold..."
+            value={formData.certifications}
+            onChange={(e) => handleInputChange("certifications", e.target.value)}
+            className="mt-1 min-h-[80px]"
+            disabled={disabled}
+          />
+        </div>
 
-      <Button 
-        onClick={handleGenerate} 
-        disabled={!isFormValid || isGenerating}
-        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3"
-        size="lg"
+        <div>
+          <Label htmlFor="projects" className="text-sm font-medium">
+            Projects & Portfolio
+          </Label>
+          <Textarea
+            id="projects"
+            placeholder="Describe significant projects, portfolio pieces, or personal work that showcases your abilities..."
+            value={formData.projects}
+            onChange={(e) => handleInputChange("projects", e.target.value)}
+            className="mt-1 min-h-[100px]"
+            disabled={disabled}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="achievements" className="text-sm font-medium">
+            Achievements & Awards
+          </Label>
+          <Textarea
+            id="achievements"
+            placeholder="Mention any awards, recognitions, publications, or notable achievements..."
+            value={formData.achievements}
+            onChange={(e) => handleInputChange("achievements", e.target.value)}
+            className="mt-1 min-h-[80px]"
+            disabled={disabled}
+          />
+        </div>
+      </div>
+
+      <Button
+        type="submit"
+        className="w-full bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-all duration-200"
+        disabled={!isFormValid || isGenerating || disabled}
       >
         {isGenerating ? (
           <>
-            <Sparkles className="h-5 w-5 mr-2 animate-spin" />
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             Generating Your Resume...
           </>
         ) : (
           <>
-            <Sparkles className="h-5 w-5 mr-2" />
-            Generate ATS-Optimized Resume
+            <Wand2 className="mr-2 h-5 w-5" />
+            Generate Professional Resume
           </>
         )}
       </Button>
-    </div>
+
+      {!isFormValid && (
+        <p className="text-sm text-orange-600 dark:text-orange-400 text-center">
+          Please fill in the required fields marked with *
+        </p>
+      )}
+    </form>
   );
 };

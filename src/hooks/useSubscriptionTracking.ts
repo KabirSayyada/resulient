@@ -27,7 +27,7 @@ interface UsageData {
 }
 
 export function useSubscriptionTracking() {
-  const { user, onUserLogin } = useAuth();
+  const { user, setOnUserLogin } = useAuth();
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData>({
     tier: 'free',
     status: 'inactive',
@@ -161,13 +161,13 @@ export function useSubscriptionTracking() {
 
   // Set up login callback to check data immediately when user logs in
   useEffect(() => {
-    if (onUserLogin) {
-      onUserLogin(async (loggedInUser) => {
+    if (setOnUserLogin) {
+      setOnUserLogin(async (loggedInUser) => {
         console.log('User logged in, checking subscription and usage');
         await refreshData();
       });
     }
-  }, [onUserLogin, refreshData]);
+  }, [setOnUserLogin, refreshData]);
 
   // Check data when user changes
   useEffect(() => {

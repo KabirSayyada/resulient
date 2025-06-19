@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
@@ -8,7 +9,7 @@ type AuthContextValue = {
   loading: boolean;
   signOut: () => Promise<void>;
   isAdmin: () => boolean;
-  onUserLogin?: (user: User) => void;
+  setOnUserLogin?: (callback: (user: User) => void) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -24,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [onUserLogin, setOnUserLogin] = useState<((user: User) => void) | undefined>();
+  const [onUserLoginCallback, setOnUserLoginCallback] = useState<((user: User) => void) | undefined>();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -34,9 +35,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(newUser);
       
       // Trigger login callback when user logs in
-      if (event === 'SIGNED_IN' && newUser && onUserLogin) {
+      if (event === 'SIGNED_IN' && newUser && onUserLoginCallback) {
         console.log('User signed in, triggering login callback');
-        onUserLogin(newUser);
+        onUserLoginCallback(newUser);
       }
       
       // Handle referral tracking when user signs in/up
@@ -62,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [onUserLogin]);
+  }, [onUserLoginCallback]);
 
   const processReferralTracking = async (user: User) => {
     try {
@@ -160,6 +161,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return ADMIN_EMAILS.includes(user.email);
   };
 
+  const setOnUserLogin = (callback: (user: User) => void) => {
+    setOnUserLoginCallback(() => callback);
+  };
+
   return (
     <AuthContext.Provider value={{ 
       session, 
@@ -167,7 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading, 
       signOut, 
       isAdmin,
-      onUserLogin: setOnUserLogin 
+      setOnUserLogin 
     }}>
       {children}
     </AuthContext.Provider>
