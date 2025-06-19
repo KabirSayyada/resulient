@@ -45,29 +45,33 @@ serve(async (req) => {
 
     CRITICAL FORMATTING REQUIREMENTS:
     1. ONLY include sections that the user has actually provided information for
-    2. Use ONLY these standardized ATS-friendly section headers (exactly as written):
+    2. CONSOLIDATE related sections together - do NOT create separate sections for similar content:
+       - Combine ALL skills (technical skills, soft skills, general skills) into ONE "SKILLS" section
+       - Combine ALL achievements, awards, honors into ONE "ACHIEVEMENTS" section
+       - Do NOT create separate "TECHNICAL SKILLS" and "SKILLS" sections
+       - Do NOT create separate "ACHIEVEMENTS" and "AWARDS" sections
+    
+    3. Use ONLY these standardized ATS-friendly section headers (exactly as written):
        - [FULL NAME] (as the document title - extract from personal info)
        - CONTACT INFORMATION
        - PROFESSIONAL SUMMARY (brief 2-3 sentence overview if you can extract meaningful career info)
        - PROFESSIONAL EXPERIENCE (only if work experience provided)
        - EDUCATION (only if education provided)
-       - TECHNICAL SKILLS (only if technical skills mentioned)
-       - SKILLS (for general skills, only if provided)
+       - SKILLS (combine ALL types of skills here - technical, soft, general)
        - PROJECTS (only if projects mentioned in additional sections)
-       - ACHIEVEMENTS (only if achievements provided)
-       - AWARDS (only if awards mentioned in achievements or additional sections)
+       - ACHIEVEMENTS (combine awards, honors, achievements here)
        - CERTIFICATIONS (only if certifications mentioned)
        - LANGUAGES (only if languages mentioned)
        - VOLUNTEER EXPERIENCE (only if volunteer work mentioned)
        - HOBBIES AND INTERESTS (only if hobbies mentioned in additional sections)
 
-    3. Section header formatting:
+    4. Section header formatting:
        - Each section header in ALL CAPS
        - Under each header, add a line of equal signs (=) matching header length
        - Use bullet points (•) for all items under sections
        - Consistent spacing between sections
 
-    4. Content enhancement rules:
+    5. Content enhancement rules:
        - Extract dates, company names, institutions, and organize chronologically (most recent first)
        - Quantify achievements with numbers/percentages where logical
        - Use strong action verbs for responsibilities
@@ -75,11 +79,14 @@ serve(async (req) => {
        - Make all content professional and polished
        - Keep bullet points concise but impactful
 
-    5. SECTION INCLUSION RULES:
+    6. SECTION CONSOLIDATION RULES:
+       - NEVER create both "SKILLS" and "TECHNICAL SKILLS" sections
+       - NEVER create both "ACHIEVEMENTS" and "AWARDS" sections
+       - Combine ALL skill types into ONE unified "SKILLS" section
+       - Combine ALL achievements, awards, honors into ONE "ACHIEVEMENTS" section
        - DO NOT create empty sections
        - DO NOT add placeholder text for missing sections
        - ONLY include sections where the user provided actual content
-       - If no relevant information is provided for a section, completely omit it
 
     USER INPUT ANALYSIS:
     ${hasPersonalInfo ? `Personal Info: "${formData.personalInfo}"` : ''}
@@ -93,15 +100,15 @@ serve(async (req) => {
     1. Personal Information: Extract name, contact details, location, email, phone, LinkedIn, website
     2. Work Experience: Parse company, role, dates, location, responsibilities and achievements (ONLY if provided)
     3. Education: Extract institution, degree, field, graduation dates, GPA if mentioned (ONLY if provided)
-    4. Skills: Categorize into technical skills and general skills (ONLY if provided)
+    4. Skills: Combine ALL skills (technical, soft, general) into ONE unified section (ONLY if provided)
     5. Projects: Extract project names, descriptions, technologies used from additional sections (ONLY if mentioned)
     6. Certifications: Parse certification names, issuers, dates from additional sections (ONLY if mentioned)
-    7. Achievements/Awards: Extract accomplishments, awards, recognitions (ONLY if provided)
+    7. Achievements: Combine ALL awards, honors, achievements, accomplishments into ONE section (ONLY if provided)
     8. Languages: Parse languages from additional sections (ONLY if mentioned)
     9. Volunteer: Parse volunteer work from additional sections (ONLY if mentioned)
     10. Hobbies: Parse hobbies and interests from additional sections (ONLY if mentioned)
 
-    Please create a professional, ATS-optimized resume with proper formatting and organization. Include ONLY the sections where the user provided actual information. Do not add empty sections or placeholder content.
+    Please create a professional, ATS-optimized resume with proper formatting and organization. Include ONLY the sections where the user provided actual information. Consolidate related sections together - do not create separate sections for similar content types.
     `
 
     const completion = await openai.chat.completions.create({
@@ -109,7 +116,7 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: "You are an expert resume writer and ATS optimization specialist. Create professional, well-formatted resumes from user input. Always use proper ATS formatting with clear sections and bullet points. ONLY include sections where users provided actual content."
+          content: "You are an expert resume writer and ATS optimization specialist. Create professional, well-formatted resumes from user input. Always use proper ATS formatting with clear sections and bullet points. ONLY include sections where users provided actual content. CONSOLIDATE related sections together - never create separate sections for similar content."
         },
         {
           role: "user",
