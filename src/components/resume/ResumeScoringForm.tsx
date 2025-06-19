@@ -4,41 +4,31 @@ import { Button } from "@/components/ui/button";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 
 interface ResumeScoringFormProps {
+  scoringMode: "resumeOnly";
+  setScoringMode: (mode: "resumeOnly") => void;
   resumeContent: string;
-  setResumeContent?: (content: string) => void;
-  isScoring?: boolean;
-  onScore?: () => void;
-  selectedResume?: any;
-  hasReachedLimit?: boolean;
+  setResumeContent: (content: string) => void;
+  isScoring: boolean;
+  onScore: () => void;
   disableButton?: boolean;
 }
 
 export const ResumeScoringForm = ({
   resumeContent,
   setResumeContent,
-  isScoring = false,
+  isScoring,
   onScore,
-  selectedResume,
-  hasReachedLimit = false,
-  disableButton = false
+  disableButton
 }: ResumeScoringFormProps) => {
   const wordCount = resumeContent.trim().split(/\s+/).length;
   const isResumeTooLong = wordCount > 800;
 
-  const handleScore = () => {
-    if (onScore) {
-      onScore();
-    }
-  };
-
   return (
     <div className="space-y-8">
-      {setResumeContent && (
-        <FileUploadSection
-          resumeContent={resumeContent}
-          setResumeContent={setResumeContent}
-        />
-      )}
+      <FileUploadSection
+        resumeContent={resumeContent}
+        setResumeContent={setResumeContent}
+      />
       
       {isResumeTooLong && (
         <div className="text-red-600 dark:text-red-400 mt-2 font-medium border-l-4 border-red-400 dark:border-red-500 pl-2 bg-red-50 dark:bg-red-900/20 p-2 rounded">
@@ -46,16 +36,10 @@ export const ResumeScoringForm = ({
         </div>
       )}
       
-      {hasReachedLimit && (
-        <div className="text-orange-600 dark:text-orange-400 mt-2 font-medium border-l-4 border-orange-400 dark:border-orange-500 pl-2 bg-orange-50 dark:bg-orange-900/20 p-2 rounded">
-          You've reached your daily limit for resume scoring. Upgrade to Premium for unlimited access.
-        </div>
-      )}
-      
       <div className="flex justify-center">
         <Button
-          onClick={handleScore}
-          disabled={isScoring || !resumeContent || isResumeTooLong || disableButton || hasReachedLimit}
+          onClick={onScore}
+          disabled={isScoring || !resumeContent || isResumeTooLong || disableButton}
           className="px-10 py-3 text-lg font-bold rounded-full shadow transition-all bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500"
         >
           {isScoring ? "Analyzing..." : "🕹️ Benchmark Resume"}

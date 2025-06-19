@@ -12,17 +12,9 @@ import { DownloadReportSection } from './components/DownloadReportSection';
 
 interface ScoreResultSectionProps {
   scoreData: ScoreData;
-  isScoring?: boolean;
-  setScoreHistory?: (history: ScoreData[]) => void;
-  userId?: string;
 }
 
-export const ScoreResultSection = ({ 
-  scoreData, 
-  isScoring = false, 
-  setScoreHistory, 
-  userId 
-}: ScoreResultSectionProps) => {
+export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
   const scoreCardRef = useRef<HTMLDivElement | null>(null);
   const completeReportRef = useRef<HTMLDivElement | null>(null);
 
