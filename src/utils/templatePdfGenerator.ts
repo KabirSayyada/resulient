@@ -211,9 +211,9 @@ class TemplatePDFGenerator {
       
       resume.workExperience.forEach((exp, index) => {
         this.addText(exp.position || '', 9, 'bold'); // Reduced from 11 to 9
-        this.addSpace(2);
+        this.addSpace(1); // Reduced from 2 to 1
         this.addText(`${exp.company || ''} | ${exp.startDate || ''} - ${exp.endDate || ''}`, 9, 'normal', '#666666'); // Reduced from 10 to 9
-        this.addSpace(6); // Reduced spacing
+        this.addSpace(4); // Reduced from 6 to 4
         
         if (exp.responsibilities) {
           exp.responsibilities.forEach(resp => {
@@ -243,9 +243,9 @@ class TemplatePDFGenerator {
       resume.education.forEach(edu => {
         const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
         this.addText(degreeLine, 9, 'bold'); // Reduced from 11 to 9
-        this.addSpace(2);
+        this.addSpace(1); // Reduced from 2 to 1
         this.addText(`${edu.institution || ''} | ${edu.graduationDate || ''}`, 9, 'normal', '#666666'); // Reduced from 10 to 9
-        this.addSpace(10); // Reduced from 12 to 10
+        this.addSpace(6); // Reduced from 10 to 6
       });
       this.addSpace(12); // Reduced spacing
     }
@@ -286,13 +286,13 @@ class TemplatePDFGenerator {
       
       resume.workExperience.forEach((exp, index) => {
         this.addText(exp.position || '', 9, 'bold', '#111827'); // Reduced from 11 to 9
-        this.addSpace(2);
+        this.addSpace(1); // Reduced from 2 to 1
         this.addText(exp.company || '', 9, 'bold', '#3b82f6'); // Reduced from 10 to 9
-        this.addSpace(2);
+        this.addSpace(1); // Reduced from 2 to 1
         if (exp.startDate || exp.endDate) {
           this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 9, 'normal', '#6b7280'); // Reduced from 10 to 9
         }
-        this.addSpace(6); // Reduced spacing
+        this.addSpace(4); // Reduced from 6 to 4
         
         if (exp.responsibilities) {
           exp.responsibilities.slice(0, 4).forEach(resp => {
@@ -328,13 +328,13 @@ class TemplatePDFGenerator {
       resume.education.forEach(edu => {
         const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
         this.addText(degreeLine, 9, 'bold', '#111827'); // Reduced from 11 to 9
-        this.addSpace(2);
+        this.addSpace(1); // Reduced from 2 to 1
         this.addText(edu.institution || '', 9, 'normal', '#374151'); // Reduced from 10 to 9
-        this.addSpace(2);
+        this.addSpace(1); // Reduced from 2 to 1
         if (edu.graduationDate) {
           this.addText(edu.graduationDate, 9, 'normal', '#6b7280'); // Reduced from 10 to 9
         }
-        this.addSpace(10); // Reduced spacing
+        this.addSpace(6); // Reduced from 10 to 6
       });
       this.addSpace(12); // Reduced spacing
     }
