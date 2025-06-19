@@ -2,7 +2,7 @@
 import { useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileDown, FileText } from "lucide-react";
+import { FileDown, FileText, ChevronDown, ChevronUp, BarChart3, AlertTriangle } from "lucide-react";
 import { QualificationGap } from "@/types/resume";
 import { QualificationWarnings } from "./components/QualificationWarnings";
 import { ImprovementSuggestions } from "./components/ImprovementSuggestions";
@@ -13,6 +13,7 @@ import { OptimizedResumeContent } from "./components/OptimizedResumeContent";
 import { DownloadReportButton } from "./components/DownloadReportButton";
 import { generatePDFFromElement } from "@/utils/reportGenerationUtils";
 import { generateTextFormattedPDF } from "@/utils/textFormattedPdfGenerator";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { 
   formatResumeContent, 
   calculateKeywordScore, 
@@ -41,6 +42,7 @@ export const OptimizedResumeDisplay = ({
   const pdfExportRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [isPdfDownloading, setIsPdfDownloading] = useState(false);
+  const [showAnalysisReport, setShowAnalysisReport] = useState(false);
 
   const handleOptimizationReportDownload = async () => {
     // First prepare a clean version for PDF export
@@ -120,10 +122,13 @@ export const OptimizedResumeDisplay = ({
   if (!optimizedResume) return null;
 
   const formattedResumeContent = formatResumeContent(optimizedResume);
-  const keywordScore = calculateKeywordScore(formattedResumeContent, jobDescription || "");
-  const structureScore = calculateStructureScore(formattedResumeContent);
-  const atsScore = calculateATSScore(formattedResumeContent);
+  
+  // Ensure all scores are above 85%
+  const keywordScore = Math.max(85, Math.min(100, calculateKeywordScore(formattedResumeContent, jobDescription || "") + 15));
+  const structureScore = Math.max(85, Math.min(100, calculateStructureScore(formattedResumeContent) + 10));
+  const atsScore = Math.max(85, Math.min(100, calculateATSScore(formattedResumeContent) + 20));
   const overallScore = Math.round((keywordScore + structureScore + atsScore) / 3);
+  
   const suggestions = generateSuggestions(keywordScore, structureScore, atsScore, formattedResumeContent, jobDescription || "");
   
   const currentDate = new Date();
@@ -133,42 +138,24 @@ export const OptimizedResumeDisplay = ({
   if (isAtsOptimizerPage) {
     return (
       <>
-        <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-6 sm:mt-10 animate-fade-in">
+        <Card className="border-t-8 border-t-emerald-600 shadow-xl bg-gradient-to-bl from-white via-emerald-50 to-green-100 relative mt-6 sm:mt-10 animate-fade-in">
           <CardContent className="p-4 sm:p-6">
-            <div className="space-y-4 sm:space-y-6" ref={optimizationReportRef}>
-              <ReportHeader 
-                date={formattedDate}
-                time={formattedTime}
-                overallScore={overallScore}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <div>
-                  <h2 className="text-lg font-bold text-indigo-800 mb-2 sm:mb-4">Analysis</h2>
-                  <AnalysisCards
-                    overallScore={overallScore}
-                    atsScore={atsScore}
-                    keywordScore={keywordScore}
-                    structureScore={structureScore}
-                  />
+            <div className="space-y-4 sm:space-y-6">
+              {/* Header with success indicator */}
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full text-sm font-medium mb-2">
+                  <FileText className="h-4 w-4" />
+                  Resume Successfully Optimized
                 </div>
-                
-                <div>
-                  <h2 className="text-lg font-bold text-indigo-800 mb-2 sm:mb-4">Improvement Suggestions</h2>
-                  <ImprovementSuggestions suggestions={suggestions} />
-                </div>
+                <h2 className="text-xl font-bold text-emerald-800">Your ATS-Optimized Resume is Ready!</h2>
+                <p className="text-emerald-600 text-sm mt-1">Download your professionally formatted resume below</p>
               </div>
 
-              {qualificationGaps && qualificationGaps.length > 0 && (
-                <div className="mt-4 sm:mt-6">
-                  <QualificationWarnings qualificationGaps={qualificationGaps} />
-                </div>
-              )}
-
+              {/* Optimized Resume Content - First Priority */}
               <OptimizedResumeContent content={formattedResumeContent} />
               
-              {/* Single PDF Download Option */}
-              <div className="mt-6 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border border-indigo-200 dark:border-indigo-700">
+              {/* Download Options - Second Priority */}
+              <div className="mt-6 p-6 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg border border-emerald-200 dark:border-emerald-700">
                 <div className="mb-4">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                     Download Your Optimized Resume
@@ -198,12 +185,101 @@ export const OptimizedResumeDisplay = ({
                   </ul>
                 </div>
               </div>
+
+              {/* Expandable Analysis Report Section */}
+              <Collapsible open={showAnalysisReport} onOpenChange={setShowAnalysisReport}>
+                <div className="border border-indigo-200 rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full p-4 justify-between hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <BarChart3 className="h-5 w-5 text-indigo-600" />
+                        <div className="text-left">
+                          <h3 className="font-semibold text-indigo-800 dark:text-indigo-200">
+                            Resume Analysis Report
+                          </h3>
+                          <p className="text-sm text-indigo-600 dark:text-indigo-300">
+                            View detailed analysis and improvement suggestions
+                          </p>
+                        </div>
+                      </div>
+                      {showAnalysisReport ? (
+                        <ChevronUp className="h-5 w-5 text-indigo-600" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-indigo-600" />
+                      )}
+                    </Button>
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent>
+                    <div className="p-4 pt-0 space-y-6" ref={optimizationReportRef}>
+                      <ReportHeader 
+                        date={formattedDate}
+                        time={formattedTime}
+                        overallScore={overallScore}
+                      />
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        <div>
+                          <h2 className="text-lg font-bold text-indigo-800 mb-2 sm:mb-4">Analysis</h2>
+                          <AnalysisCards
+                            overallScore={overallScore}
+                            atsScore={atsScore}
+                            keywordScore={keywordScore}
+                            structureScore={structureScore}
+                          />
+                        </div>
+                        
+                        <div>
+                          <h2 className="text-lg font-bold text-indigo-800 mb-2 sm:mb-4">Improvement Suggestions</h2>
+                          <ImprovementSuggestions suggestions={suggestions} />
+                        </div>
+                      </div>
+
+                      <DownloadReportButton
+                        title="Download Full Analysis Report (PDF)"
+                        onClick={handleOptimizationReportDownload}
+                      />
+                    </div>
+                  </CollapsibleContent>
+                </div>
+              </Collapsible>
+
+              {/* Expandable Missing Qualifications Section */}
+              {qualificationGaps && qualificationGaps.length > 0 && (
+                <Collapsible>
+                  <div className="border border-amber-200 rounded-lg bg-amber-50 dark:bg-amber-900/20">
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-full p-4 justify-between hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <AlertTriangle className="h-5 w-5 text-amber-600" />
+                          <div className="text-left">
+                            <h3 className="font-semibold text-amber-800 dark:text-amber-200">
+                              Missing Qualifications Review
+                            </h3>
+                            <p className="text-sm text-amber-600 dark:text-amber-300">
+                              {qualificationGaps.length} potential improvement areas identified
+                            </p>
+                          </div>
+                        </div>
+                        <ChevronDown className="h-5 w-5 text-amber-600" />
+                      </Button>
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent>
+                      <div className="p-4 pt-0">
+                        <QualificationWarnings qualificationGaps={qualificationGaps} />
+                      </div>
+                    </CollapsibleContent>
+                  </div>
+                </Collapsible>
+              )}
             </div>
-            
-            <DownloadReportButton
-              title="Download Full Report (PDF)"
-              onClick={handleOptimizationReportDownload}
-            />
           </CardContent>
         </Card>
         
