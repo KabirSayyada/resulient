@@ -198,9 +198,12 @@ class EnhancedResumePDFGenerator {
   }
 
   private processExperienceContent(line: string, section: ResumeSection, currentItem: any, insideItem: boolean): void {
+    // Clean the line of unwanted separators
+    let cleanLine = line.replace(/\s*\|\s*-\s*/g, ' ').replace(/\s+/g, ' ').trim();
+    
     // Check if this is a job title/company line (contains " - " or similar patterns)
-    if (this.isJobTitleLine(line)) {
-      console.log('Found job title line:', line);
+    if (this.isJobTitleLine(cleanLine)) {
+      console.log('Found job title line:', cleanLine);
       
       // Save previous item if exists
       if (currentItem) {
@@ -209,29 +212,35 @@ class EnhancedResumePDFGenerator {
       }
       
       // Parse new job info
-      currentItem = this.parseJobTitleLine(line);
+      currentItem = this.parseJobTitleLine(cleanLine);
       insideItem = true;
       
-    } else if (line.match(/\d{4}/) && currentItem) {
+    } else if (cleanLine.match(/\d{4}/) && currentItem && !cleanLine.startsWith('•')) {
       // This looks like a date/location line
-      console.log('Found date/location line:', line);
-      const parts = line.split('|').map(p => p.trim());
-      currentItem.dates = parts[0] || line;
-      if (parts.length > 1) {
-        currentItem.location = parts[1];
+      console.log('Found date/location line:', cleanLine);
+      
+      // Clean up any pipe separators and extra spacing
+      const cleanedDateLine = cleanLine.replace(/\s*\|\s*/g, ' | ').replace(/\s+/g, ' ').trim();
+      const parts = cleanedDateLine.split('|').map(p => p.trim()).filter(p => p);
+      
+      if (parts.length > 0) {
+        currentItem.dates = parts[0];
+        if (parts.length > 1) {
+          currentItem.location = parts[1];
+        }
       }
       
-    } else if ((line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) && currentItem) {
+    } else if ((cleanLine.startsWith('•') || cleanLine.startsWith('-') || cleanLine.startsWith('*')) && currentItem) {
       // This is a responsibility bullet point
-      console.log('Found responsibility:', line);
+      console.log('Found responsibility:', cleanLine);
       if (!currentItem.responsibilities) currentItem.responsibilities = [];
-      currentItem.responsibilities.push(line.replace(/^[•\-*]\s*/, ''));
+      currentItem.responsibilities.push(cleanLine.replace(/^[•\-*]\s*/, ''));
       
-    } else if (currentItem && line.trim().length > 10 && !line.match(/^[A-Z\s]{3,}$/)) {
+    } else if (currentItem && cleanLine.trim().length > 10 && !cleanLine.match(/^[A-Z\s]{3,}$/)) {
       // This might be a responsibility without bullet or additional job info
-      console.log('Found additional content:', line);
+      console.log('Found additional content:', cleanLine);
       if (!currentItem.responsibilities) currentItem.responsibilities = [];
-      currentItem.responsibilities.push(line);
+      currentItem.responsibilities.push(cleanLine);
     }
   }
 
@@ -351,8 +360,9 @@ class EnhancedResumePDFGenerator {
     // Group contact info logically
     const contactInfo = [];
     contactLines.forEach(line => {
-      // Split line by common separators
-      const parts = line.split(/\s*\|\s*|\s*•\s*|\s{3,}/).filter(p => p.trim());
+      // Split line by common separators and clean pipe characters
+      const cleanLine = line.replace(/\s*\|\s*-\s*/g, ' | ').replace(/\s+/g, ' ').trim();
+      const parts = cleanLine.split(/\s*\|\s*|\s*•\s*|\s{3,}/).filter(p => p.trim());
       contactInfo.push(...parts);
     });
 
@@ -390,13 +400,16 @@ class EnhancedResumePDFGenerator {
         
         this.checkPageBreak(80); // Ensure space for experience block
         
-        // Job title and company
+        // Job title and company on same line, cleanly formatted
         const titleLine = `${exp.position || 'Position'} - ${exp.company || 'Company'}`;
         this.addText(titleLine, 11, 'bold', '#1f2937');
         
-        // Dates and location
+        // Dates and location on next line, cleanly formatted
         if (exp.dates || exp.location) {
-          const dateLocation = [exp.dates, exp.location].filter(Boolean).join(' | ');
+          const dateLocationParts = [];
+          if (exp.dates) dateLocationParts.push(exp.dates);
+          if (exp.location) dateLocationParts.push(exp.location);
+          const dateLocation = dateLocationParts.join(' | ');
           this.addText(dateLocation, 9, 'normal', '#6b7280');
         }
         
