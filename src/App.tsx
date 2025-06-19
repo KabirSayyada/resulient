@@ -7,9 +7,9 @@ import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
 import ResumeScoring from "@/pages/ResumeScoring";
+import ATSResumeBuilder from "@/pages/ATSResumeBuilder";
 import ProfileSetup from "@/pages/ProfileSetup";
 import ProfileEdit from "@/pages/ProfileEdit";
-import IndustryLeaderboard from "@/pages/IndustryLeaderboard";
 import TermsOfService from "@/pages/TermsOfService";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import RefundPolicy from "@/pages/RefundPolicy";
@@ -34,7 +34,7 @@ function App() {
         <Route path="/profile-setup" element={<ProfileSetup />} />
         <Route path="/profile-edit" element={<ProfileEdit />} />
         <Route path="/resume-scoring" element={<ResumeScoring />} />
-        <Route path="/industry-leaderboard" element={<IndustryLeaderboard />} />
+        <Route path="/ats-resume-builder" element={<ATSResumeBuilder />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />

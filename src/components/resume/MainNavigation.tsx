@@ -64,11 +64,11 @@ export function MainNavigation() {
                   Resume Score
                 </Link>
                 <Link
-                  to="/industry-leaderboard"
+                  to="/ats-resume-builder"
                   className="py-2 hover:text-primary"
                   onClick={() => setMenuOpen(false)}
                 >
-                  Leaderboard
+                  Resume Builder
                 </Link>
                 <Link
                   to="/subscription"
@@ -138,10 +138,10 @@ export function MainNavigation() {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
-                    to="/industry-leaderboard"
+                    to="/ats-resume-builder"
                     className={navigationMenuTriggerStyle()}
                   >
-                    Leaderboard
+                    Resume Builder
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
