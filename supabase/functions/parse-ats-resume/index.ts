@@ -57,7 +57,7 @@ serve(async (req) => {
        - PROFESSIONAL SUMMARY (brief 2-3 sentence overview if you can extract meaningful career info)
        - PROFESSIONAL EXPERIENCE (only if work experience provided)
        - EDUCATION (only if education provided)
-       - SKILLS (combine ALL types of skills here - technical, soft, general - ALWAYS use bullet points for each skill)
+       - SKILLS (combine ALL types of skills here - technical, soft, general - group similar skills with comma separation)
        - PROJECTS (only if projects mentioned in additional sections)
        - ACHIEVEMENTS (combine awards, honors, achievements here)
        - CERTIFICATIONS (only if certifications mentioned)
@@ -69,7 +69,7 @@ serve(async (req) => {
        - Each section header in ALL CAPS
        - Under each header, add a line of equal signs (=) matching header length
        - Use bullet points (•) for all items under sections
-       - SKILLS section MUST use bullet points (•) for each individual skill item
+       - SKILLS section MUST group related skills with bullet points and comma-separated items within each bullet
        - Consistent spacing between sections
 
     5. Content enhancement rules:
@@ -83,23 +83,22 @@ serve(async (req) => {
     6. SECTION CONSOLIDATION RULES:
        - NEVER create both "SKILLS" and "TECHNICAL SKILLS" sections
        - NEVER create both "ACHIEVEMENTS" and "AWARDS" sections
-       - Combine ALL skill types into ONE unified "SKILLS" section with bullet points
+       - Combine ALL skill types into ONE unified "SKILLS" section with grouped bullet points
        - Combine ALL achievements, awards, honors into ONE "ACHIEVEMENTS" section
        - DO NOT create empty sections
        - DO NOT add placeholder text for missing sections
        - ONLY include sections where the user provided actual content
 
     7. SKILLS SECTION SPECIFIC REQUIREMENTS:
-       - ALWAYS format skills as individual bullet points (•)
-       - Each skill should be on its own line with a bullet point
-       - Do NOT use comma-separated lists for skills
+       - Group similar skills together in bullet points with comma separation
+       - Each bullet should contain related skills separated by commas
+       - Do NOT use individual bullet points for each skill
        - Example format:
          SKILLS
          =====
-         • JavaScript
-         • Python
-         • Project Management
-         • Team Leadership
+         • Programming Languages: JavaScript, Python, Java, C++
+         • Web Technologies: React, Node.js, HTML5, CSS3, REST APIs
+         • Project Management: Agile, Scrum, Team Leadership, Strategic Planning
 
     USER INPUT ANALYSIS:
     ${hasPersonalInfo ? `Personal Info: "${formData.personalInfo}"` : ''}
@@ -113,7 +112,7 @@ serve(async (req) => {
     1. Personal Information: Extract name, contact details, location, email, phone, LinkedIn, website
     2. Work Experience: Parse company, role, dates, location, responsibilities and achievements (ONLY if provided)
     3. Education: Extract institution, degree, field, graduation dates, GPA if mentioned (ONLY if provided)
-    4. Skills: Combine ALL skills (technical, soft, general) into ONE unified section with bullet points (ONLY if provided)
+    4. Skills: Group ALL skills (technical, soft, general) into categories with comma-separated items per bullet (ONLY if provided)
     5. Projects: Extract project names, descriptions, technologies used from additional sections (ONLY if mentioned)
     6. Certifications: Parse certification names, issuers, dates from additional sections (ONLY if mentioned)
     7. Achievements: Combine ALL awards, honors, achievements, accomplishments into ONE section (ONLY if provided)
@@ -121,7 +120,7 @@ serve(async (req) => {
     9. Volunteer: Parse volunteer work from additional sections (ONLY if mentioned)
     10. Hobbies: Parse hobbies and interests from additional sections (ONLY if mentioned)
 
-    Please create a professional, ATS-optimized resume with proper formatting and organization. Include ONLY the sections where the user provided actual information. Consolidate related sections together - do not create separate sections for similar content types. ENSURE that the SKILLS section uses bullet points for each individual skill.
+    Please create a professional, ATS-optimized resume with proper formatting and organization. Include ONLY the sections where the user provided actual information. Consolidate related sections together - do not create separate sections for similar content types. ENSURE that the SKILLS section groups similar skills with comma separation within bullet points.
     `
 
     const completion = await openai.chat.completions.create({
@@ -129,7 +128,7 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: "You are an expert resume writer and ATS optimization specialist. Create professional, well-formatted resumes from user input. Always use proper ATS formatting with clear sections and bullet points. ONLY include sections where users provided actual content. CONSOLIDATE related sections together - never create separate sections for similar content. ALWAYS format skills as individual bullet points."
+          content: "You are an expert resume writer and ATS optimization specialist. Create professional, well-formatted resumes from user input. Always use proper ATS formatting with clear sections and bullet points. ONLY include sections where users provided actual content. CONSOLIDATE related sections together - never create separate sections for similar content. Group skills by category with comma-separated items within each bullet point."
         },
         {
           role: "user",
