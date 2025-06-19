@@ -111,7 +111,7 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: "You are an expert ATS optimization specialist. You MUST be conservative and never add sensitive information, placeholders, or sections that don't exist in the original resume. Focus on enhancing existing content only. Always respond with valid JSON format."
+          content: "You are an expert ATS optimization specialist. You MUST be conservative and never add sensitive information, placeholders, or sections that don't exist in the original resume. Focus on enhancing existing content only. Always respond with valid JSON format. ENSURE the optimizedResume field contains the complete, full resume content without any truncation."
         },
         {
           role: "user",
@@ -119,33 +119,78 @@ serve(async (req) => {
         }
       ],
       temperature: 0.3, // Lower temperature for more conservative responses
-      max_tokens: 2500,
+      max_tokens: 3500, // Increased to ensure complete resume content
       response_format: { type: "json_object" }
     })
 
-    const response = JSON.parse(completion.choices[0].message.content);
+    const responseContent = completion.choices[0].message.content;
     
-    if (!response.optimizedResume || !response.qualificationGaps) {
-      throw new Error('Failed to generate complete analysis')
+    if (!responseContent) {
+      throw new Error('No response content from OpenAI');
     }
 
-    console.log('Successfully generated conservative resume optimization')
-    console.log(`Found ${response.qualificationGaps.length} genuine qualification gaps`)
+    let response;
+    try {
+      response = JSON.parse(responseContent);
+    } catch (parseError) {
+      console.error('Failed to parse OpenAI response:', parseError);
+      console.error('Response content:', responseContent);
+      throw new Error('Failed to parse AI response as JSON');
+    }
+    
+    if (!response.optimizedResume || !response.qualificationGaps) {
+      console.error('Invalid response structure:', response);
+      throw new Error('Failed to generate complete analysis - missing required fields');
+    }
 
-    // Ensure optimizedResume is always a clean string
+    console.log('Successfully generated conservative resume optimization');
+    console.log(`Found ${response.qualificationGaps.length} genuine qualification gaps`);
+
+    // Enhanced cleaning to ensure complete content preservation
     let cleanOptimizedResume = response.optimizedResume;
+    
+    // Validate that we have substantial content
+    if (!cleanOptimizedResume || cleanOptimizedResume.length < 50) {
+      console.error('Optimized resume content is too short or empty:', cleanOptimizedResume);
+      throw new Error('Generated resume content appears incomplete');
+    }
     
     // If optimizedResume is somehow an object, convert it to string
     if (typeof cleanOptimizedResume === 'object') {
-      cleanOptimizedResume = JSON.stringify(cleanOptimizedResume);
+      try {
+        cleanOptimizedResume = JSON.stringify(cleanOptimizedResume);
+      } catch (stringifyError) {
+        console.error('Error stringifying optimized resume:', stringifyError);
+        throw new Error('Failed to process optimized resume content');
+      }
     }
     
-    // Clean up any potential JSON formatting artifacts
-    cleanOptimizedResume = String(cleanOptimizedResume)
-      .replace(/^["']|["']$/g, '') // Remove leading/trailing quotes
-      .replace(/\\n/g, '\n') // Convert escaped newlines to actual newlines
-      .replace(/\\"/g, '"') // Convert escaped quotes to regular quotes
-      .trim();
+    // Minimal cleaning - only remove obvious JSON artifacts
+    cleanOptimizedResume = String(cleanOptimizedResume);
+    
+    // Only remove quotes if they wrap the entire content
+    if ((cleanOptimizedResume.startsWith('"') && cleanOptimizedResume.endsWith('"')) ||
+        (cleanOptimizedResume.startsWith("'") && cleanOptimizedResume.endsWith("'"))) {
+      cleanOptimizedResume = cleanOptimizedResume.slice(1, -1);
+    }
+    
+    // Handle escaped characters
+    cleanOptimizedResume = cleanOptimizedResume
+      .replace(/\\n/g, '\n')
+      .replace(/\\r/g, '\r') 
+      .replace(/\\"/g, '"')
+      .replace(/\\'/g, "'")
+      .replace(/\\\\/g, '\\');
+    
+    // Final validation
+    cleanOptimizedResume = cleanOptimizedResume.trim();
+    
+    if (cleanOptimizedResume.length < 50) {
+      console.error('Final cleaned resume content is too short:', cleanOptimizedResume.length);
+      throw new Error('Resume optimization resulted in incomplete content');
+    }
+
+    console.log(`Final optimized resume length: ${cleanOptimizedResume.length} characters`);
 
     return new Response(
       JSON.stringify({

@@ -4,22 +4,61 @@ interface OptimizedResumeContentProps {
 }
 
 export const OptimizedResumeContent = ({ content }: OptimizedResumeContentProps) => {
-  // Format content for better display
+  // Enhanced content formatting to ensure complete display
   const formatContentForDisplay = (text: string): string => {
-    return text
+    if (!text || typeof text !== 'string') {
+      return '';
+    }
+
+    // Clean up any potential JSON artifacts or malformed content
+    let cleanedContent = text;
+    
+    // Remove any surrounding quotes or braces that might have been added
+    cleanedContent = cleanedContent.replace(/^["'\{]+|["'\}]+$/g, '');
+    
+    // Handle escaped characters properly
+    cleanedContent = cleanedContent
+      .replace(/\\n/g, '\n')
+      .replace(/\\r/g, '\r')
+      .replace(/\\"/g, '"')
+      .replace(/\\'/g, "'")
+      .replace(/\\\\/g, '\\');
+    
+    // Normalize line endings
+    cleanedContent = cleanedContent
       .replace(/\r\n/g, '\n')
-      .replace(/\r/g, '\n')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+      .replace(/\r/g, '\n');
+    
+    // Remove excessive blank lines but preserve intentional spacing
+    cleanedContent = cleanedContent.replace(/\n{4,}/g, '\n\n\n');
+    
+    // Ensure proper section separation
+    cleanedContent = cleanedContent.replace(/([A-Z\s]{3,})\n([A-Z\s]{3,})/g, '$1\n\n$2');
+    
+    return cleanedContent.trim();
   };
 
   const formattedContent = formatContentForDisplay(content);
+
+  // Add safety check for empty content
+  if (!formattedContent) {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-inner mt-6">
+        <h2 className="text-xl font-bold text-indigo-700 dark:text-indigo-300 mb-6">Optimized Resume</h2>
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-md border border-yellow-200 dark:border-yellow-700">
+          <p className="text-yellow-800 dark:text-yellow-200">
+            There was an issue displaying the optimized resume content. Please try optimizing again.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-inner mt-6">
       <h2 className="text-xl font-bold text-indigo-700 dark:text-indigo-300 mb-6">Optimized Resume</h2>
       <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-md border border-gray-200 dark:border-gray-700 overflow-x-auto">
-        <pre className="whitespace-pre-wrap font-mono text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+        <pre className="whitespace-pre-wrap font-mono text-sm text-gray-800 dark:text-gray-200 leading-relaxed break-words">
           {formattedContent}
         </pre>
       </div>

@@ -1,14 +1,29 @@
 import { QualificationGap } from "@/types/resume";
 
 export function formatResumeContent(content: string | any): string {
+  // Enhanced content processing to prevent truncation
+  if (!content) {
+    console.warn('Empty or null content provided to formatResumeContent');
+    return '';
+  }
+
   // Handle case where content might be an object
   if (typeof content === 'object' && content !== null) {
     // If it's an object with an optimizedResume property, extract that
     if (content.optimizedResume) {
-      return String(content.optimizedResume);
+      return formatResumeContent(content.optimizedResume);
+    }
+    // If it's an array, join with newlines
+    if (Array.isArray(content)) {
+      return content.join('\n');
     }
     // Otherwise convert object to string representation
-    return JSON.stringify(content, null, 2);
+    try {
+      return JSON.stringify(content, null, 2);
+    } catch (error) {
+      console.error('Error stringifying content:', error);
+      return String(content);
+    }
   }
   
   // Ensure content is a string
@@ -16,13 +31,46 @@ export function formatResumeContent(content: string | any): string {
     return String(content || '');
   }
   
-  // Clean up any JSON formatting artifacts that might have slipped through
-  return content
-    .replace(/^["']|["']$/g, '') // Remove leading/trailing quotes
-    .replace(/\\n/g, '\n') // Convert escaped newlines to actual newlines
-    .replace(/\\"/g, '"') // Convert escaped quotes to regular quotes
-    .replace(/^\{|\}$/g, '') // Remove leading/trailing braces if they exist
-    .trim();
+  // Enhanced cleaning to preserve all content
+  let cleanedContent = content;
+  
+  // Remove only leading/trailing quotes if they wrap the entire content
+  if ((cleanedContent.startsWith('"') && cleanedContent.endsWith('"')) ||
+      (cleanedContent.startsWith("'") && cleanedContent.endsWith("'"))) {
+    cleanedContent = cleanedContent.slice(1, -1);
+  }
+  
+  // Remove only leading/trailing braces if they wrap the entire content
+  if (cleanedContent.startsWith('{') && cleanedContent.endsWith('}')) {
+    // Only remove if it looks like JSON wrapping, not content braces
+    const trimmed = cleanedContent.slice(1, -1).trim();
+    if (trimmed.startsWith('"') || trimmed.includes('":"')) {
+      cleanedContent = trimmed;
+    }
+  }
+  
+  // Handle escaped characters properly
+  cleanedContent = cleanedContent
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '\r')
+    .replace(/\\"/g, '"')
+    .replace(/\\'/g, "'")
+    .replace(/\\\\/g, '\\');
+  
+  // Normalize line endings without losing content
+  cleanedContent = cleanedContent
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n');
+  
+  // Only trim excessive whitespace, don't remove content
+  cleanedContent = cleanedContent.trim();
+  
+  // Log for debugging if content seems short
+  if (cleanedContent.length < 100) {
+    console.warn('Formatted resume content seems unusually short:', cleanedContent.length, 'characters');
+  }
+  
+  return cleanedContent;
 }
 
 export function calculateKeywordScore(resume: string | any, jobDescription: string): number {
