@@ -43,7 +43,7 @@ class EnhancedResumePDFGenerator {
     this.margin = 50;
     this.contentWidth = this.pageWidth - (this.margin * 2);
     this.currentY = this.margin;
-    this.lineHeight = 12; // Reduced from 14 for tighter spacing
+    this.lineHeight = 10; // Reduced from 12 for tighter spacing
   }
 
   private checkPageBreak(neededHeight: number): void {
@@ -55,7 +55,7 @@ class EnhancedResumePDFGenerator {
 
   private addText(
     text: string,
-    fontSize: number = 10,
+    fontSize: number = 9, // Reduced from 10
     fontWeight: 'normal' | 'bold' = 'normal',
     color: string = '#000000',
     indent: number = 0,
@@ -86,21 +86,21 @@ class EnhancedResumePDFGenerator {
   }
 
   private addSection(title: string): void {
-    this.currentY += 6; // Reduced spacing before section
+    this.currentY += 4; // Reduced from 6
     this.checkPageBreak(20);
     
     // Section title
-    this.pdf.setFontSize(12);
+    this.pdf.setFontSize(11); // Reduced from 12
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.setTextColor('#1f2937');
     this.pdf.text(title.toUpperCase(), this.margin, this.currentY);
-    this.currentY += 14; // Reduced from 16
+    this.currentY += 12; // Reduced from 14
     
     // Underline
     this.pdf.setDrawColor(200, 200, 200);
     this.pdf.setLineWidth(0.5);
     this.pdf.line(this.margin, this.currentY - 2, this.pageWidth - this.margin, this.currentY - 2);
-    this.currentY += 6; // Reduced from 8
+    this.currentY += 4; // Reduced from 6
   }
 
   private parseResumeContent(content: string): ResumeSection[] {
@@ -351,11 +351,11 @@ class EnhancedResumePDFGenerator {
     
     // Name (first line, larger font)
     if (lines[0]) {
-      this.pdf.setFontSize(18);
+      this.pdf.setFontSize(16); // Reduced from 18
       this.pdf.setFont('helvetica', 'bold');
       this.pdf.setTextColor('#1f2937');
       this.pdf.text(lines[0], this.margin, this.currentY);
-      this.currentY += 22; // Reduced from 24
+      this.currentY += 18; // Reduced from 22
     }
 
     // Process all remaining lines as contact information
@@ -373,17 +373,17 @@ class EnhancedResumePDFGenerator {
 
     // Display contact info in a clean format
     if (contactInfo.length > 0) {
-      this.pdf.setFontSize(10);
+      this.pdf.setFontSize(9); // Reduced from 10
       this.pdf.setFont('helvetica', 'normal');
       this.pdf.setTextColor('#4b5563');
       
       // Join with separators for better readability
       const formattedContact = contactInfo.join(' | ');
       this.pdf.text(formattedContact, this.margin, this.currentY);
-      this.currentY += 14; // Reduced from 16
+      this.currentY += 12; // Reduced from 14
     }
 
-    this.currentY += 8; // Reduced extra space after header
+    this.currentY += 6; // Reduced from 8
   }
 
   private renderExperience(section: ResumeSection): void {
@@ -393,7 +393,7 @@ class EnhancedResumePDFGenerator {
     if (!section.items || section.items.length === 0) {
       console.log('No experience items found, using content directly');
       if (section.content) {
-        this.addText(section.content, 10, 'normal', '#374151');
+        this.addText(section.content, 9, 'normal', '#374151'); // Reduced font size
       }
       return;
     }
@@ -403,11 +403,11 @@ class EnhancedResumePDFGenerator {
         const exp = JSON.parse(itemStr);
         console.log('Rendering experience item:', exp);
         
-        this.checkPageBreak(60); // Reduced from 80
+        this.checkPageBreak(50); // Reduced from 60
         
         // Job title and company on same line, using normal weight instead of bold
         const titleLine = `${exp.position || 'Position'} - ${exp.company || 'Company'}`;
-        this.addText(titleLine, 11, 'normal', '#1f2937', 0, undefined, 1); // Changed from 'bold' to 'normal' and reduced spacing from 2 to 1
+        this.addText(titleLine, 10, 'normal', '#1f2937', 0, undefined, 0); // Reduced font size and spacing
         
         // Dates and location on next line, cleanly formatted
         if (exp.dates || exp.location) {
@@ -415,25 +415,25 @@ class EnhancedResumePDFGenerator {
           if (exp.dates) dateLocationParts.push(exp.dates);
           if (exp.location) dateLocationParts.push(exp.location);
           const dateLocation = dateLocationParts.join(' | ');
-          this.addText(dateLocation, 9, 'normal', '#6b7280', 0, undefined, 3); // Reduced spacing from 4 to 3
+          this.addText(dateLocation, 8, 'normal', '#6b7280', 0, undefined, 2); // Reduced font size and spacing
         }
         
         // Responsibilities with proper spacing
         if (exp.responsibilities && exp.responsibilities.length > 0) {
           exp.responsibilities.forEach((resp: string, respIndex: number) => {
-            const spacingAfter = respIndex < exp.responsibilities.length - 1 ? 1 : 0;
-            this.addText(`• ${resp}`, 10, 'normal', '#374151', 15, undefined, spacingAfter);
+            const spacingAfter = respIndex < exp.responsibilities.length - 1 ? 0 : 0; // Removed spacing between bullets
+            this.addText(`• ${resp}`, 9, 'normal', '#374151', 15, undefined, spacingAfter); // Reduced font size
           });
         }
         
         // Space between different experiences
         if (index < section.items.length - 1) {
-          this.currentY += 6; // Reduced from 8
+          this.currentY += 4; // Reduced from 6
         }
       } catch (error) {
         console.error('Error parsing experience item:', error);
         // Fallback: treat as plain text
-        this.addText(`• ${itemStr}`, 10, 'normal', '#374151', 15);
+        this.addText(`• ${itemStr}`, 9, 'normal', '#374151', 15); // Reduced font size
       }
     });
   }
@@ -443,9 +443,9 @@ class EnhancedResumePDFGenerator {
     
     if (section.items && section.items.length > 0) {
       const skillsText = section.items.join(', ');
-      this.addText(skillsText, 10, 'normal', '#374151');
+      this.addText(skillsText, 9, 'normal', '#374151'); // Reduced font size
     } else if (section.content) {
-      this.addText(section.content, 10, 'normal', '#374151');
+      this.addText(section.content, 9, 'normal', '#374151'); // Reduced font size
     }
   }
 
@@ -454,9 +454,9 @@ class EnhancedResumePDFGenerator {
     
     if (section.items && section.items.length > 0) {
       section.items.forEach((item, index) => {
-        this.addText(item, 10, 'normal', '#374151', 0, undefined, 1); // Reduced spacing from 2 to 1
+        this.addText(item, 9, 'normal', '#374151', 0, undefined, 0); // Reduced font size and spacing
         if (index < section.items.length - 1) {
-          this.currentY += 3; // Reduced from 4
+          this.currentY += 2; // Reduced from 3
         }
       });
     } else if (section.content) {
@@ -485,19 +485,19 @@ class EnhancedResumePDFGenerator {
         this.renderEducationItem(currentEdu);
       } else {
         // Fallback to simple text rendering
-        this.addText(section.content, 10, 'normal', '#374151');
+        this.addText(section.content, 9, 'normal', '#374151'); // Reduced font size
       }
     }
   }
 
   private renderEducationItem(edu: EducationItem): void {
-    this.checkPageBreak(25); // Reduced from 30
-    this.addText(edu.degree, 11, 'normal', '#1f2937', 0, undefined, 1); // Changed from 'bold' to 'normal'
+    this.checkPageBreak(20); // Reduced from 25
+    this.addText(edu.degree, 10, 'normal', '#1f2937', 0, undefined, 0); // Reduced font size and spacing
     if (edu.institution) {
-      this.addText(edu.institution, 10, 'normal', '#6b7280', 0, undefined, 1);
+      this.addText(edu.institution, 9, 'normal', '#6b7280', 0, undefined, 0); // Reduced font size and spacing
     }
     if (edu.date) {
-      this.addText(edu.date, 9, 'normal', '#6b7280', 0, undefined, 4); // Reduced from 6 to 4
+      this.addText(edu.date, 8, 'normal', '#6b7280', 0, undefined, 2); // Reduced font size and spacing
     }
   }
 
@@ -512,17 +512,17 @@ class EnhancedResumePDFGenerator {
     
     if (section.items && section.items.length > 0) {
       section.items.forEach((item, index) => {
-        const spacingAfter = index < section.items.length - 1 ? 1 : 0;
-        this.addText(`• ${item}`, 10, 'normal', '#374151', 0, undefined, spacingAfter);
+        const spacingAfter = index < section.items.length - 1 ? 0 : 0; // Removed spacing between items
+        this.addText(`• ${item}`, 9, 'normal', '#374151', 0, undefined, spacingAfter); // Reduced font size
       });
     } else if (section.content) {
-      this.addText(section.content, 10, 'normal', '#374151');
+      this.addText(section.content, 9, 'normal', '#374151'); // Reduced font size
     }
   }
 
   public generatePDF(content: string, filename: string): boolean {
     try {
-      console.log('Starting enhanced PDF generation with improved spacing...');
+      console.log('Starting enhanced PDF generation with reduced spacing and font sizes...');
       
       const sections = this.parseResumeContent(content);
       console.log('Final parsed sections:', sections.map(s => ({ 
@@ -541,7 +541,7 @@ class EnhancedResumePDFGenerator {
             break;
           case 'summary':
             this.addSection('Professional Summary');
-            this.addText(section.content, 10, 'normal', '#374151');
+            this.addText(section.content, 9, 'normal', '#374151'); // Reduced font size
             break;
           case 'experience':
             this.renderExperience(section);
@@ -557,9 +557,9 @@ class EnhancedResumePDFGenerator {
             break;
         }
         
-        // Consistent spacing between sections (reduced from 12)
+        // Reduced spacing between sections
         if (index < sections.length - 1) {
-          this.currentY += 6; // Reduced from 8
+          this.currentY += 3; // Reduced from 6
         }
       });
 
