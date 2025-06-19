@@ -32,31 +32,42 @@ serve(async (req) => {
 
     console.log('Parsing ATS resume from user input...')
 
+    // Check which sections have content
+    const hasPersonalInfo = formData.personalInfo && formData.personalInfo.trim()
+    const hasWorkExperience = formData.workExperience && formData.workExperience.length > 0
+    const hasEducation = formData.education && formData.education.length > 0
+    const hasSkills = formData.skills && formData.skills.trim()
+    const hasAchievements = formData.achievements && formData.achievements.trim()
+    const hasAdditional = formData.additionalSections && formData.additionalSections.trim()
+
     const parsePrompt = `
     You are an expert resume writer and ATS optimization specialist. Your task is to take the user's natural language input about themselves and create a professional, ATS-optimized resume.
 
     CRITICAL FORMATTING REQUIREMENTS:
-    1. Use ONLY these standardized section headers (exactly as written):
-       - [FULL NAME] (as the document title)
+    1. ONLY include sections that the user has actually provided information for
+    2. Use ONLY these standardized ATS-friendly section headers (exactly as written):
+       - [FULL NAME] (as the document title - extract from personal info)
        - CONTACT INFORMATION
-       - PROFESSIONAL SUMMARY (brief 2-3 sentence overview)
-       - PROFESSIONAL EXPERIENCE (for work history)
-       - EDUCATION
-       - TECHNICAL SKILLS (if technical skills mentioned)
-       - SKILLS (for general skills)
-       - PROJECTS (if projects mentioned)
-       - CERTIFICATIONS (if certifications mentioned)
-       - ACHIEVEMENTS (for accomplishments and awards)
-       - VOLUNTEER EXPERIENCE (if volunteer work mentioned)
-       - LANGUAGES (if languages mentioned)
+       - PROFESSIONAL SUMMARY (brief 2-3 sentence overview if you can extract meaningful career info)
+       - PROFESSIONAL EXPERIENCE (only if work experience provided)
+       - EDUCATION (only if education provided)
+       - TECHNICAL SKILLS (only if technical skills mentioned)
+       - SKILLS (for general skills, only if provided)
+       - PROJECTS (only if projects mentioned in additional sections)
+       - ACHIEVEMENTS (only if achievements provided)
+       - AWARDS (only if awards mentioned in achievements or additional sections)
+       - CERTIFICATIONS (only if certifications mentioned)
+       - LANGUAGES (only if languages mentioned)
+       - VOLUNTEER EXPERIENCE (only if volunteer work mentioned)
+       - HOBBIES AND INTERESTS (only if hobbies mentioned in additional sections)
 
-    2. Section header formatting:
+    3. Section header formatting:
        - Each section header in ALL CAPS
        - Under each header, add a line of equal signs (=) matching header length
        - Use bullet points (•) for all items under sections
        - Consistent spacing between sections
 
-    3. Content enhancement rules:
+    4. Content enhancement rules:
        - Extract dates, company names, institutions, and organize chronologically (most recent first)
        - Quantify achievements with numbers/percentages where logical
        - Use strong action verbs for responsibilities
@@ -64,25 +75,33 @@ serve(async (req) => {
        - Make all content professional and polished
        - Keep bullet points concise but impactful
 
+    5. SECTION INCLUSION RULES:
+       - DO NOT create empty sections
+       - DO NOT add placeholder text for missing sections
+       - ONLY include sections where the user provided actual content
+       - If no relevant information is provided for a section, completely omit it
+
+    USER INPUT ANALYSIS:
+    ${hasPersonalInfo ? `Personal Info: "${formData.personalInfo}"` : ''}
+    ${hasWorkExperience ? `Work Experience: ${formData.workExperience.map((exp: string, i: number) => `\n${i + 1}. ${exp}`).join('')}` : ''}
+    ${hasEducation ? `Education: ${formData.education.map((edu: string, i: number) => `\n${i + 1}. ${edu}`).join('')}` : ''}
+    ${hasSkills ? `Skills: "${formData.skills}"` : ''}
+    ${hasAchievements ? `Achievements: "${formData.achievements}"` : ''}
+    ${hasAdditional ? `Additional Information: "${formData.additionalSections}"` : ''}
+
     PARSING INSTRUCTIONS:
     1. Personal Information: Extract name, contact details, location, email, phone, LinkedIn, website
-    2. Work Experience: Parse company, role, dates, location, responsibilities and achievements
-    3. Education: Extract institution, degree, field, graduation dates, GPA if mentioned
-    4. Skills: Categorize into technical skills and general skills
-    5. Projects: Extract project names, descriptions, technologies used
-    6. Certifications: Parse certification names, issuers, dates
-    7. Achievements: Extract accomplishments, awards, recognitions
-    8. Additional: Parse volunteer work, languages, other relevant information
+    2. Work Experience: Parse company, role, dates, location, responsibilities and achievements (ONLY if provided)
+    3. Education: Extract institution, degree, field, graduation dates, GPA if mentioned (ONLY if provided)
+    4. Skills: Categorize into technical skills and general skills (ONLY if provided)
+    5. Projects: Extract project names, descriptions, technologies used from additional sections (ONLY if mentioned)
+    6. Certifications: Parse certification names, issuers, dates from additional sections (ONLY if mentioned)
+    7. Achievements/Awards: Extract accomplishments, awards, recognitions (ONLY if provided)
+    8. Languages: Parse languages from additional sections (ONLY if mentioned)
+    9. Volunteer: Parse volunteer work from additional sections (ONLY if mentioned)
+    10. Hobbies: Parse hobbies and interests from additional sections (ONLY if mentioned)
 
-    User Input:
-    Personal Info: "${formData.personalInfo}"
-    Work Experience: ${formData.workExperience.map((exp: string, i: number) => `\n${i + 1}. ${exp}`).join('')}
-    Education: ${formData.education.map((edu: string, i: number) => `\n${i + 1}. ${edu}`).join('')}
-    Skills: "${formData.skills}"
-    Achievements: "${formData.achievements}"
-    Additional: "${formData.additionalSections}"
-
-    Please create a professional, ATS-optimized resume with proper formatting and organization. Make sure all information is accurately extracted and professionally presented.
+    Please create a professional, ATS-optimized resume with proper formatting and organization. Include ONLY the sections where the user provided actual information. Do not add empty sections or placeholder content.
     `
 
     const completion = await openai.chat.completions.create({
@@ -90,7 +109,7 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: "You are an expert resume writer and ATS optimization specialist. Create professional, well-formatted resumes from user input. Always use proper ATS formatting with clear sections and bullet points."
+          content: "You are an expert resume writer and ATS optimization specialist. Create professional, well-formatted resumes from user input. Always use proper ATS formatting with clear sections and bullet points. ONLY include sections where users provided actual content."
         },
         {
           role: "user",
