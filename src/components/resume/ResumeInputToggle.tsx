@@ -38,12 +38,6 @@ export const ResumeInputToggle = ({
     }
   };
 
-  const handleUseCurrentResume = () => {
-    if (resumeContent && onResumeSelected) {
-      onResumeSelected();
-    }
-  };
-
   return (
     <div className="space-y-4">
       <Card className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
@@ -75,17 +69,6 @@ export const ResumeInputToggle = ({
               resumeContent={resumeContent} 
               setResumeContent={setResumeContent} 
             />
-            
-            {resumeContent && (
-              <div className="mt-4 flex justify-center">
-                <Button
-                  onClick={handleUseCurrentResume}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2"
-                >
-                  Use This Resume
-                </Button>
-              </div>
-            )}
 
             {resumeData && (
               <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
