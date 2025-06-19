@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import { ParsedResume } from '@/types/resumeStructure';
 
@@ -20,7 +21,7 @@ class TemplatePDFGenerator {
     });
     this.pageWidth = 595.28;
     this.pageHeight = 841.89;
-    this.margin = 40;
+    this.margin = 45; // Reduced from 40 to 45pt
     this.contentWidth = this.pageWidth - (this.margin * 2);
     this.currentY = this.margin;
   }
@@ -52,7 +53,7 @@ class TemplatePDFGenerator {
 
     const effectiveWidth = this.contentWidth - indent;
     const lines = this.pdf.splitTextToSize(text, effectiveWidth);
-    const lineHeight = fontSize * 1.4;
+    const lineHeight = fontSize * 1.15; // Reduced from 1.4 to achieve 11pt line height from previous 12pt
 
     this.checkPageBreak(lines.length * lineHeight);
 
@@ -70,58 +71,58 @@ class TemplatePDFGenerator {
   }
 
   private addLine(color: string = '#cccccc', width: number = 0.5): void {
-    this.addSpace(6);
+    this.addSpace(4); // Reduced spacing
     this.pdf.setDrawColor(color);
     this.pdf.setLineWidth(width);
     this.pdf.line(this.margin, this.currentY, this.pageWidth - this.margin, this.currentY);
-    this.addSpace(12);
+    this.addSpace(8); // Reduced spacing
   }
 
   // Helper method to add additional sections
   private addAdditionalSections(resume: ParsedResume, headerColor: string = '#333333', contentColor: string = '#000000'): void {
     // Handle certifications
     if (resume.certifications && resume.certifications.length > 0) {
-      this.addText('CERTIFICATIONS', 12, 'bold', headerColor);
+      this.addText('CERTIFICATIONS', 10, 'bold', headerColor); // Reduced from 12 to 10
       this.addLine();
       
       resume.certifications.forEach(cert => {
         const certLine = cert.issuer && cert.issuer !== 'Unknown' 
           ? `${cert.name} | ${cert.issuer}${cert.date ? ` | ${cert.date}` : ''}`
           : cert.name;
-        this.addText(certLine, 10, 'normal', contentColor);
-        this.addSpace(8);
+        this.addText(certLine, 9, 'normal', contentColor); // Reduced from 10 to 9
+        this.addSpace(6); // Reduced spacing
       });
-      this.addSpace(12);
+      this.addSpace(10); // Reduced from 12 to 10
     }
 
     // Handle achievements
     if (resume.achievements && resume.achievements.length > 0) {
-      this.addText('ACHIEVEMENTS', 12, 'bold', headerColor);
+      this.addText('ACHIEVEMENTS', 10, 'bold', headerColor); // Reduced from 12 to 10
       this.addLine();
       
       resume.achievements.forEach(achievement => {
-        this.addText(`• ${achievement}`, 10, 'normal', contentColor, 'left', 15);
-        this.addSpace(4);
+        this.addText(`• ${achievement}`, 9, 'normal', contentColor, 'left', 15); // Reduced from 10 to 9
+        this.addSpace(3); // Reduced spacing
       });
-      this.addSpace(16);
+      this.addSpace(10); // Reduced from 16 to 10
     }
 
     // Handle projects
     if (resume.projects && resume.projects.length > 0) {
-      this.addText('PROJECTS', 12, 'bold', headerColor);
+      this.addText('PROJECTS', 10, 'bold', headerColor); // Reduced from 12 to 10
       this.addLine();
       
       resume.projects.forEach(project => {
-        this.addText(project.name, 11, 'bold', contentColor);
-        this.addSpace(4);
+        this.addText(project.name, 9, 'bold', contentColor); // Reduced from 11 to 9
+        this.addSpace(3);
         if (project.description) {
-          this.addText(project.description, 10, 'normal', contentColor);
-          this.addSpace(4);
+          this.addText(project.description, 9, 'normal', contentColor); // Reduced from 10 to 9
+          this.addSpace(3);
         }
         if (project.technologies && project.technologies.length > 0) {
-          this.addText(`Technologies: ${project.technologies.join(', ')}`, 9, 'normal', '#666666');
+          this.addText(`Technologies: ${project.technologies.join(', ')}`, 8, 'normal', '#666666'); // Reduced from 9 to 8
         }
-        this.addSpace(12);
+        this.addSpace(10); // Reduced from 12 to 10
       });
     }
 
@@ -129,7 +130,7 @@ class TemplatePDFGenerator {
     if (resume.additionalSections) {
       Object.entries(resume.additionalSections).forEach(([sectionName, sectionContent]) => {
         if (Array.isArray(sectionContent) && sectionContent.length > 0) {
-          this.addText(sectionName.toUpperCase(), 12, 'bold', headerColor);
+          this.addText(sectionName.toUpperCase(), 10, 'bold', headerColor); // Reduced from 12 to 10
           this.addLine();
           
           sectionContent.forEach(item => {
@@ -137,11 +138,11 @@ class TemplatePDFGenerator {
               const displayText = item.startsWith('•') || item.startsWith('-') || item.startsWith('*') 
                 ? item 
                 : `• ${item}`;
-              this.addText(displayText, 10, 'normal', contentColor, 'left', item.startsWith('•') ? 0 : 15);
-              this.addSpace(4);
+              this.addText(displayText, 9, 'normal', contentColor, 'left', item.startsWith('•') ? 0 : 15); // Reduced from 10 to 9
+              this.addSpace(3); // Reduced spacing
             }
           });
-          this.addSpace(16);
+          this.addSpace(10); // Reduced from 16 to 10
         }
       });
     }
@@ -150,8 +151,8 @@ class TemplatePDFGenerator {
   // Classic template formatting - Enhanced with additional sections
   private generateClassicTemplate(resume: ParsedResume): void {
     // Header
-    this.addText(resume.contact.name || '', 18, 'bold', '#000000', 'center');
-    this.addSpace(12);
+    this.addText(resume.contact.name || '', 16, 'bold', '#000000', 'center'); // Reduced from 18 to 16
+    this.addSpace(10); // Reduced spacing
     
     const contactInfo = [
       resume.contact.email,
@@ -160,61 +161,61 @@ class TemplatePDFGenerator {
       resume.contact.address
     ].filter(Boolean).join(' | ');
     
-    this.addText(contactInfo, 10, 'normal', '#666666', 'center');
-    this.addSpace(24);
+    this.addText(contactInfo, 9, 'normal', '#666666', 'center'); // Reduced from 10 to 9
+    this.addSpace(20); // Reduced spacing
 
     // Professional Summary
     if (resume.professionalSummary) {
-      this.addText('PROFESSIONAL SUMMARY', 12, 'bold', '#333333');
+      this.addText('PROFESSIONAL SUMMARY', 10, 'bold', '#333333'); // Reduced from 12 to 10
       this.addLine();
-      this.addText(resume.professionalSummary, 10);
-      this.addSpace(20);
+      this.addText(resume.professionalSummary, 9); // Reduced from 10 to 9
+      this.addSpace(16); // Reduced spacing
     }
 
     // Work Experience
     if (resume.workExperience.length > 0) {
-      this.addText('PROFESSIONAL EXPERIENCE', 12, 'bold', '#333333');
+      this.addText('PROFESSIONAL EXPERIENCE', 10, 'bold', '#333333'); // Reduced from 12 to 10
       this.addLine();
       
       resume.workExperience.forEach((exp, index) => {
-        this.addText(exp.position || '', 11, 'bold');
-        this.addSpace(3);
-        this.addText(`${exp.company || ''} | ${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'normal', '#666666');
-        this.addSpace(8);
+        this.addText(exp.position || '', 9, 'bold'); // Reduced from 11 to 9
+        this.addSpace(2);
+        this.addText(`${exp.company || ''} | ${exp.startDate || ''} - ${exp.endDate || ''}`, 9, 'normal', '#666666'); // Reduced from 10 to 9
+        this.addSpace(6); // Reduced spacing
         
         if (exp.responsibilities) {
           exp.responsibilities.forEach(resp => {
-            this.addText(`• ${resp}`, 10, 'normal', '#000000', 'left', 15);
-            this.addSpace(3);
+            this.addText(`• ${resp}`, 9, 'normal', '#000000', 'left', 15); // Reduced from 10 to 9
+            this.addSpace(2); // Reduced spacing
           });
         }
         
-        if (index < resume.workExperience.length - 1) this.addSpace(16);
+        if (index < resume.workExperience.length - 1) this.addSpace(12); // Reduced spacing
       });
-      this.addSpace(20);
+      this.addSpace(16); // Reduced spacing
     }
 
     // Skills
     if (resume.skills.length > 0) {
-      this.addText('TECHNICAL SKILLS', 12, 'bold', '#333333');
+      this.addText('TECHNICAL SKILLS', 10, 'bold', '#333333'); // Reduced from 12 to 10
       this.addLine();
-      this.addText(resume.skills.join(' • '), 10);
-      this.addSpace(20);
+      this.addText(resume.skills.join(' • '), 9); // Reduced from 10 to 9
+      this.addSpace(16); // Reduced spacing
     }
 
     // Education
     if (resume.education.length > 0) {
-      this.addText('EDUCATION', 12, 'bold', '#333333');
+      this.addText('EDUCATION', 10, 'bold', '#333333'); // Reduced from 12 to 10
       this.addLine();
       
       resume.education.forEach(edu => {
         const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
-        this.addText(degreeLine, 11, 'bold');
-        this.addSpace(3);
-        this.addText(`${edu.institution || ''} | ${edu.graduationDate || ''}`, 10, 'normal', '#666666');
-        this.addSpace(12);
+        this.addText(degreeLine, 9, 'bold'); // Reduced from 11 to 9
+        this.addSpace(2);
+        this.addText(`${edu.institution || ''} | ${edu.graduationDate || ''}`, 9, 'normal', '#666666'); // Reduced from 10 to 9
+        this.addSpace(10); // Reduced from 12 to 10
       });
-      this.addSpace(16);
+      this.addSpace(12); // Reduced spacing
     }
 
     // Add all additional sections
@@ -224,8 +225,8 @@ class TemplatePDFGenerator {
   // Modern template formatting - Enhanced with additional sections
   private generateModernTemplate(resume: ParsedResume): void {
     // Header with blue accent
-    this.addText(resume.contact.name || '', 20, 'bold', '#1e40af');
-    this.addSpace(12);
+    this.addText(resume.contact.name || '', 16, 'bold', '#1e40af'); // Reduced from 20 to 16
+    this.addSpace(10); // Reduced spacing
     
     const contactInfo = [
       resume.contact.email,
@@ -234,76 +235,76 @@ class TemplatePDFGenerator {
       resume.contact.address
     ].filter(Boolean).join(' | ');
     
-    this.addText(contactInfo, 10, 'normal', '#374151');
+    this.addText(contactInfo, 9, 'normal', '#374151'); // Reduced from 10 to 9
     this.addLine('#3b82f6', 2);
-    this.addSpace(20);
+    this.addSpace(16); // Reduced spacing
 
     // Professional Summary with background effect (simulated with spacing)
     if (resume.professionalSummary) {
-      this.addText('PROFESSIONAL SUMMARY', 12, 'bold', '#1e40af');
-      this.addSpace(12);
-      this.addText(resume.professionalSummary, 10, 'normal', '#111827');
-      this.addSpace(20);
+      this.addText('PROFESSIONAL SUMMARY', 10, 'bold', '#1e40af'); // Reduced from 12 to 10
+      this.addSpace(10); // Reduced spacing
+      this.addText(resume.professionalSummary, 9, 'normal', '#111827'); // Reduced from 10 to 9
+      this.addSpace(16); // Reduced spacing
     }
 
     // Work Experience with left border effect
     if (resume.workExperience.length > 0) {
-      this.addText('PROFESSIONAL EXPERIENCE', 12, 'bold', '#1e40af');
-      this.addSpace(12);
+      this.addText('PROFESSIONAL EXPERIENCE', 10, 'bold', '#1e40af'); // Reduced from 12 to 10
+      this.addSpace(10); // Reduced spacing
       
       resume.workExperience.forEach((exp, index) => {
-        this.addText(exp.position || '', 11, 'bold', '#111827');
-        this.addSpace(3);
-        this.addText(exp.company || '', 10, 'bold', '#3b82f6');
-        this.addSpace(3);
+        this.addText(exp.position || '', 9, 'bold', '#111827'); // Reduced from 11 to 9
+        this.addSpace(2);
+        this.addText(exp.company || '', 9, 'bold', '#3b82f6'); // Reduced from 10 to 9
+        this.addSpace(2);
         if (exp.startDate || exp.endDate) {
-          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 10, 'normal', '#6b7280');
+          this.addText(`${exp.startDate || ''} - ${exp.endDate || ''}`, 9, 'normal', '#6b7280'); // Reduced from 10 to 9
         }
-        this.addSpace(8);
+        this.addSpace(6); // Reduced spacing
         
         if (exp.responsibilities) {
           exp.responsibilities.slice(0, 4).forEach(resp => {
-            this.addText(`• ${resp}`, 10, 'normal', '#374151', 'left', 15);
-            this.addSpace(3);
+            this.addText(`• ${resp}`, 9, 'normal', '#374151', 'left', 15); // Reduced from 10 to 9
+            this.addSpace(2); // Reduced spacing
           });
         }
         
-        if (index < resume.workExperience.length - 1) this.addSpace(16);
+        if (index < resume.workExperience.length - 1) this.addSpace(12); // Reduced spacing
       });
-      this.addSpace(20);
+      this.addSpace(16); // Reduced spacing
     }
 
     // Skills in tag-like format
     if (resume.skills.length > 0) {
-      this.addText('TECHNICAL SKILLS', 12, 'bold', '#1e40af');
-      this.addSpace(12);
+      this.addText('TECHNICAL SKILLS', 10, 'bold', '#1e40af'); // Reduced from 12 to 10
+      this.addSpace(10); // Reduced spacing
       
       let skillsLine = '';
       resume.skills.slice(0, 15).forEach((skill, index) => {
         skillsLine += skill;
         if (index < resume.skills.slice(0, 15).length - 1) skillsLine += ' | ';
       });
-      this.addText(skillsLine, 10, 'normal', '#374151');
-      this.addSpace(20);
+      this.addText(skillsLine, 9, 'normal', '#374151'); // Reduced from 10 to 9
+      this.addSpace(16); // Reduced spacing
     }
 
     // Education
     if (resume.education.length > 0) {
-      this.addText('EDUCATION', 12, 'bold', '#1e40af');
-      this.addSpace(12);
+      this.addText('EDUCATION', 10, 'bold', '#1e40af'); // Reduced from 12 to 10
+      this.addSpace(10); // Reduced spacing
       
       resume.education.forEach(edu => {
         const degreeLine = `${edu.degree || ''} ${edu.field ? `in ${edu.field}` : ''}`;
-        this.addText(degreeLine, 11, 'bold', '#111827');
-        this.addSpace(3);
-        this.addText(edu.institution || '', 10, 'normal', '#374151');
-        this.addSpace(3);
+        this.addText(degreeLine, 9, 'bold', '#111827'); // Reduced from 11 to 9
+        this.addSpace(2);
+        this.addText(edu.institution || '', 9, 'normal', '#374151'); // Reduced from 10 to 9
+        this.addSpace(2);
         if (edu.graduationDate) {
-          this.addText(edu.graduationDate, 10, 'normal', '#6b7280');
+          this.addText(edu.graduationDate, 9, 'normal', '#6b7280'); // Reduced from 10 to 9
         }
-        this.addSpace(12);
+        this.addSpace(10); // Reduced spacing
       });
-      this.addSpace(16);
+      this.addSpace(12); // Reduced spacing
     }
 
     // Add all additional sections with modern colors
