@@ -1,8 +1,7 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, CheckCircle, Loader2, Star } from "lucide-react";
+import { Check, CheckCircle, Loader2, Star, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { LegalFooter } from "@/components/layout/LegalFooter";
@@ -41,12 +40,12 @@ const pricingTiers: PricingTier[] = [
     features: [
       { text: "2 Resume Scorings Daily", included: true },
       { text: "1 Resume Optimization Daily", included: true },
+      { text: "1 Resume Build (Lifetime)", included: true },
       { text: "Detailed Reports (View Only)", included: true },
       { text: "Daily Reset of Credits", included: true },
       { text: "Basic Support", included: true },
       { text: "Report Downloads", included: false },
-      { text: "Resume Comparison", included: false },
-      { text: "Unlimited Optimizations", included: false },
+      { text: "Unlimited Resume Building", included: false },
     ],
     badge: "Free Forever",
     productId: {
@@ -62,12 +61,12 @@ const pricingTiers: PricingTier[] = [
     features: [
       { text: "Unlimited Resume Scorings", included: true },
       { text: "Unlimited Resume Optimizations", included: true },
+      { text: "Unlimited Resume Building", included: true },
       { text: "10 Report Downloads Daily", included: true },
       { text: "Priority Support", included: true },
       { text: "All Free Features", included: true },
       { text: "Advanced Analytics", included: true },
       { text: "Resume Comparison", included: false },
-      { text: "Unlimited Downloads", included: false },
     ],
     badge: "Most Popular",
     popular: true,
@@ -84,6 +83,7 @@ const pricingTiers: PricingTier[] = [
     features: [
       { text: "Unlimited Resume Scorings", included: true },
       { text: "Unlimited Resume Optimizations", included: true },
+      { text: "Unlimited Resume Building", included: true },
       { text: "Unlimited Report Downloads", included: true },
       { text: "Resume Comparison Tool", included: true },
       { text: "Priority Support", included: true },
@@ -103,7 +103,7 @@ const PricingPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { subscription, checkout } = useSubscription();
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly'); // Changed default to 'monthly'
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
 
   const handlePurchase = async (tier: PricingTier) => {
@@ -134,7 +134,6 @@ const PricingPage = () => {
       const checkoutData = await checkout(productId);
       
       if (checkoutData?.checkoutUrl) {
-        // Success - redirect to Gumroad
         window.location.href = checkoutData.checkoutUrl;
       } else {
         toast({
@@ -155,7 +154,6 @@ const PricingPage = () => {
     }
   };
 
-  // Determine if user is already on a paid plan
   const isCurrentSubscriber = subscription.tier !== "free" && !subscription.isLoading;
   const currentTierName = subscription.tier === "premium" ? "Premium" : subscription.tier === "platinum" ? "Platinum" : "Free";
 
@@ -203,6 +201,29 @@ const PricingPage = () => {
                 </TabsTrigger>
               </TabsList>
             </Tabs>
+          </div>
+        </div>
+
+        {/* Feature comparison highlight */}
+        <div className="mb-12 bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-900/20 dark:to-red-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-6">
+          <div className="text-center space-y-3">
+            <h3 className="text-lg font-bold text-orange-800 dark:text-orange-200">
+              🚨 Resume Building Limits
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="flex items-center justify-center gap-2 p-3 bg-white/50 dark:bg-gray-800/50 rounded-md">
+                <X className="h-4 w-4 text-red-500" />
+                <span className="text-gray-700 dark:text-gray-300">Free: <span className="font-bold">1 Resume Ever</span></span>
+              </div>
+              <div className="flex items-center justify-center gap-2 p-3 bg-white/50 dark:bg-gray-800/50 rounded-md">
+                <Check className="h-4 w-4 text-green-500" />
+                <span className="text-gray-700 dark:text-gray-300">Premium: <span className="font-bold">Unlimited</span></span>
+              </div>
+              <div className="flex items-center justify-center gap-2 p-3 bg-white/50 dark:bg-gray-800/50 rounded-md">
+                <Check className="h-4 w-4 text-green-500" />
+                <span className="text-gray-700 dark:text-gray-300">Platinum: <span className="font-bold">Unlimited</span></span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -265,9 +286,11 @@ const PricingPage = () => {
                 <ul className="space-y-3">
                   {tier.features.map((feature, index) => (
                     <li key={index} className="flex items-center gap-3">
-                      <Check className={`h-5 w-5 ${
-                        feature.included ? 'text-green-500' : 'text-gray-300 dark:text-gray-600'
-                      }`} />
+                      {feature.included ? (
+                        <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      ) : (
+                        <X className="h-5 w-5 text-gray-300 dark:text-gray-600 flex-shrink-0" />
+                      )}
                       <span className={feature.included ? 'text-gray-700 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500'}>
                         {feature.text}
                       </span>
@@ -309,67 +332,74 @@ const PricingPage = () => {
             <AccordionItem value="item-1">
               <AccordionTrigger>What happens when I reach my daily limit on the free tier?</AccordionTrigger>
               <AccordionContent>
-                Your daily limits reset at midnight UTC. Until then, you can continue viewing your previous results and reports, but you'll need to wait for the reset to perform new scans or optimizations.
+                Your daily limits reset at midnight UTC. Until then, you can continue viewing your previous results and reports, but you'll need to wait for the reset to perform new scans or optimizations. Resume building has a lifetime limit of 1 on the free tier.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-2">
+              <AccordionTrigger>Why is resume building limited to 1 lifetime on the free tier?</AccordionTrigger>
+              <AccordionContent>
+                Resume building is our most resource-intensive feature, requiring significant AI processing power. The free tier allows you to experience the full quality of our resume builder once, while our Premium and Platinum plans offer unlimited access for ongoing career development.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-3">
               <AccordionTrigger>Can I switch between monthly and yearly billing?</AccordionTrigger>
               <AccordionContent>
                 Yes! You can switch between monthly and yearly billing at any time. If you switch to yearly, you'll immediately benefit from the discounted rate. If you switch to monthly, the change will take effect at your next billing cycle.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-3">
+            <AccordionItem value="item-4">
               <AccordionTrigger>What payment methods do you accept?</AccordionTrigger>
               <AccordionContent>
                 We accept all major credit cards (Visa, MasterCard, American Express) and PayPal. All payments are processed securely through our payment processor.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-4">
+            <AccordionItem value="item-5">
               <AccordionTrigger>Is there a difference in features between monthly and yearly subscriptions?</AccordionTrigger>
               <AccordionContent>
                 No, you get exactly the same features whether you choose monthly or yearly billing. The only difference is that yearly subscribers enjoy significant savings on their subscription cost.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-5">
+            <AccordionItem value="item-6">
               <AccordionTrigger>Can I cancel my subscription at any time?</AccordionTrigger>
               <AccordionContent>
                 Yes, you can cancel your subscription at any time. Your access will continue until the end of your current billing period. We don't offer refunds for partial months, but you can check our refund policy for more details.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-6">
+            <AccordionItem value="item-7">
               <AccordionTrigger>What happens to my saved reports if I downgrade to the free tier?</AccordionTrigger>
               <AccordionContent>
                 Your previously generated reports remain accessible, but download capabilities will be limited to free tier restrictions. We recommend downloading any important reports before downgrading.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-7">
+            <AccordionItem value="item-8">
               <AccordionTrigger>Do you offer refunds if I'm not satisfied?</AccordionTrigger>
               <AccordionContent>
                 Yes, we offer a satisfaction guarantee. If you're not happy with our service, you can request a refund within 14 days of your subscription purchase. Please refer to our refund policy for detailed information.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-8">
+            <AccordionItem value="item-9">
               <AccordionTrigger>Can I share my account with others?</AccordionTrigger>
               <AccordionContent>
                 No, accounts are for individual use only. Each user should have their own account to maintain the quality of service and ensure proper tracking of usage limits.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-9">
+            <AccordionItem value="item-10">
               <AccordionTrigger>How do I get started with the free tier?</AccordionTrigger>
               <AccordionContent>
-                Simply sign up for an account - no credit card required! You'll immediately have access to all free tier features, including daily resume scorings and optimizations.
+                Simply sign up for an account - no credit card required! You'll immediately have access to all free tier features, including daily resume scorings and optimizations, plus one resume build.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-10">
+            <AccordionItem value="item-11">
               <AccordionTrigger>What support options are available?</AccordionTrigger>
               <AccordionContent>
                 Free tier users receive basic email support. Premium and Platinum subscribers enjoy priority support with faster response times and access to advanced troubleshooting assistance.

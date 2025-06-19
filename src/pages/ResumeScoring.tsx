@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { useResumeScoring } from "@/hooks/useResumeScoring";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useUsageTracking } from "@/hooks/useUsageTracking";
 import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,8 +26,9 @@ const ResumeScoring = () => {
   const navigate = useNavigate();
   const [resumeContent, setResumeContent] = useState("");
   const [activeTab, setActiveTab] = useState("current");
-  const { scoreData, scoreHistory, setScoreHistory, isScoring, hasReachedLimit, handleScoreResume } = useResumeScoring(user?.id);
+  const { scoreData, scoreHistory, setScoreHistory, isScoring, handleScoreResume } = useResumeScoring(user?.id);
   const { subscription } = useSubscription();
+  const { canUseFeature, trackUsage } = useUsageTracking();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -48,7 +50,6 @@ const ResumeScoring = () => {
 
       if (data) {
         const formattedHistory: ScoreData[] = data.map((item: ResumeScoreRecord) => {
-          // Convert numeric percentile to text representation
           const percentileString = (() => {
             const percentile = item.percentile || 50;
             if (percentile >= 99) return "Top 1%";
@@ -63,12 +64,10 @@ const ResumeScoring = () => {
 
           console.log("Raw item data:", item);
           
-          // Create a properly structured ScoreData object with all fields, handling missing fields
           return {
             overallScore: item.overall_score,
             skillsAlignment: item.skills_breadth || 0,
             WorkExperience: item.experience_duration || 0,
-            // Map directly to the dedicated fields, now that we've added them to the database
             Achievements: item.achievements_score || 0,
             EducationQuality: item.education_score || 0,
             Certifications: item.certifications_score || 0,
@@ -104,13 +103,18 @@ const ResumeScoring = () => {
     );
   }
 
-  const onScore = () => {
-    // Get daily limit based on subscription tier
-    const dailyLimit = subscription.limits.resumeScorings;
-    handleScoreResume(resumeContent, dailyLimit);
+  const onScore = async () => {
+    // Check if user can use the feature and track usage
+    if (canUseFeature('resume_scoring')) {
+      const tracked = await trackUsage('resume_scoring');
+      if (tracked) {
+        handleScoreResume(resumeContent, -1); // -1 means unlimited for premium/platinum
+      }
+    }
   };
 
-  // Feature requires premium or platinum for unlimited usage
+  // Check if user has reached their limit
+  const hasReachedLimit = !canUseFeature('resume_scoring');
   const showUpgradeAlert = hasReachedLimit && subscription.tier === "free";
 
   return (
@@ -192,7 +196,7 @@ const ResumeScoring = () => {
           <UseSubscriptionAlert 
             subscriptionTier={subscription.tier} 
             requiredTier="premium" 
-            message="You've reached your daily limit for resume scoring. Free users can perform 3 resume scorings per day. Upgrade to Premium or Platinum for unlimited usage."
+            message="You've reached your daily limit for resume scoring. Free users can perform 2 resume scorings per day. Upgrade to Premium or Platinum for unlimited usage."
           />
         )}
 
