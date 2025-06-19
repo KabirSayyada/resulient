@@ -36,6 +36,8 @@ export function useUsageTracking() {
     }
 
     try {
+      console.log('Fetching usage data for user:', user.id);
+      
       // Get daily usage for all features
       const dailyPromises = (['resume_scoring', 'resume_optimization', 'resume_building'] as FeatureType[]).map(
         async (feature) => {
@@ -43,7 +45,11 @@ export function useUsageTracking() {
             p_user_id: user.id,
             p_feature_type: feature,
           });
-          if (error) throw error;
+          if (error) {
+            console.error(`Error getting daily usage for ${feature}:`, error);
+            throw error;
+          }
+          console.log(`Daily usage for ${feature}:`, data);
           return { feature, count: data || 0 };
         }
       );
@@ -55,7 +61,11 @@ export function useUsageTracking() {
             p_user_id: user.id,
             p_feature_type: feature,
           });
-          if (error) throw error;
+          if (error) {
+            console.error(`Error getting total usage for ${feature}:`, error);
+            throw error;
+          }
+          console.log(`Total usage for ${feature}:`, data);
           return { feature, count: data || 0 };
         }
       );
@@ -75,6 +85,8 @@ export function useUsageTracking() {
         return acc;
       }, {} as Record<FeatureType, number>);
 
+      console.log('Final usage data:', { dailyUsage, totalUsage });
+
       setUsageData({
         dailyUsage,
         totalUsage,
@@ -91,18 +103,28 @@ export function useUsageTracking() {
   }, [fetchUsageData]);
 
   const trackUsage = useCallback(async (featureType: FeatureType): Promise<boolean> => {
-    if (!user?.id) return false;
+    if (!user?.id) {
+      console.error('No user ID available for tracking usage');
+      return false;
+    }
 
     try {
+      console.log(`Tracking usage for ${featureType} for user ${user.id}`);
+      
       const { data, error } = await supabase.rpc('increment_user_usage', {
         p_user_id: user.id,
         p_feature_type: featureType,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error tracking usage:', error);
+        throw error;
+      }
+
+      console.log(`Usage tracked successfully. New count: ${data}`);
 
       // Refresh usage data after tracking
-      fetchUsageData();
+      await fetchUsageData();
       
       return true;
     } catch (error) {
@@ -112,21 +134,34 @@ export function useUsageTracking() {
   }, [user?.id, fetchUsageData]);
 
   const canUseFeature = useCallback((featureType: FeatureType): boolean => {
-    if (subscription.isLoading || usageData.isLoading) return false;
+    if (subscription.isLoading || usageData.isLoading) {
+      console.log('Still loading subscription or usage data');
+      return false;
+    }
+    
+    console.log(`Checking if user can use ${featureType}. Subscription tier: ${subscription.tier}`);
+    console.log('Current usage data:', usageData);
     
     // Premium and Platinum users have unlimited access
     if (subscription.tier === 'premium' || subscription.tier === 'platinum') {
+      console.log('User has premium/platinum access - unlimited');
       return true;
     }
 
     // Free tier limits
     switch (featureType) {
       case 'resume_scoring':
-        return usageData.dailyUsage.resume_scoring < 2;
+        const canScore = usageData.dailyUsage.resume_scoring < 2;
+        console.log(`Resume scoring: used ${usageData.dailyUsage.resume_scoring}/2, can use: ${canScore}`);
+        return canScore;
       case 'resume_optimization':
-        return usageData.dailyUsage.resume_optimization < 1;
+        const canOptimize = usageData.dailyUsage.resume_optimization < 1;
+        console.log(`Resume optimization: used ${usageData.dailyUsage.resume_optimization}/1, can use: ${canOptimize}`);
+        return canOptimize;
       case 'resume_building':
-        return usageData.totalUsage.resume_building < 1; // Lifetime limit
+        const canBuild = usageData.totalUsage.resume_building < 1; // Lifetime limit
+        console.log(`Resume building: used ${usageData.totalUsage.resume_building}/1 (lifetime), can use: ${canBuild}`);
+        return canBuild;
       default:
         return false;
     }

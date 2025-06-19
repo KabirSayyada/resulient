@@ -20,7 +20,7 @@ const ATSResumeBuilder = () => {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const { resumeData, isGenerating, generateResume, downloadResume, downloadResumePDF } = useATSResumeBuilder(user?.id);
-  const { trackUsage } = useUsageTracking();
+  const { trackUsage, canUseFeature, usageData, refreshUsage } = useUsageTracking();
 
   if (!authLoading && !user) {
     navigate("/auth");
@@ -36,10 +36,25 @@ const ATSResumeBuilder = () => {
   }
 
   const handleGenerateResume = async (data: any) => {
+    console.log('Generate resume button clicked');
+    
+    // Check if user can use the feature
+    if (!canUseFeature('resume_building')) {
+      console.log('User cannot use resume building feature - limit reached');
+      return;
+    }
+
+    console.log('User can use feature, tracking usage and generating...');
+    
     // Track usage before generating
     const tracked = await trackUsage('resume_building');
     if (tracked) {
+      console.log('Usage tracked successfully, proceeding with generation');
       await generateResume(data);
+      // Refresh usage data after generation
+      await refreshUsage();
+    } else {
+      console.error('Failed to track usage');
     }
   };
 
@@ -103,6 +118,14 @@ const ATSResumeBuilder = () => {
               Create a professional ATS-optimized resume in minutes. Simply describe yourself in natural sentences, 
               and our AI will automatically organize your information into the perfect resume format.
             </p>
+            {!canUseFeature('resume_building') && (
+              <div className="mt-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                <p className="text-sm text-red-700 dark:text-red-300 font-medium">
+                  <span className="font-bold">Free Plan Limit Reached:</span> You've used your 1 lifetime resume build. 
+                  Upgrade to Premium or Platinum for unlimited resume building.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
@@ -124,7 +147,6 @@ const ATSResumeBuilder = () => {
               </Card>
             </div>
 
-            {/* Preview Section */}
             <div className="space-y-6">
               <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-indigo-200">
                 <CardHeader>

@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useUsageTracking } from "@/hooks/useUsageTracking";
@@ -6,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
-import { Diamond, Crown, CheckCircle, ArrowUpRight, Calendar, ArrowLeft, Sparkles, Download, Clock, Lock } from "lucide-react";
+import { Diamond, Crown, CheckCircle, ArrowUpRight, Calendar, ArrowLeft, Sparkles, Download, Clock, Lock, RefreshCw } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { LegalFooter } from "@/components/layout/LegalFooter";
@@ -61,11 +60,22 @@ const SubscriptionDetails = () => {
       return;
     }
     
-    if (!subscription.isLoading) {
+    if (user && !subscription.isLoading) {
       refreshSubscription();
       refreshUsage();
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, refreshSubscription, refreshUsage]);
+  
+  // Refresh usage data every 30 seconds to keep it current
+  useEffect(() => {
+    if (user) {
+      const interval = setInterval(() => {
+        refreshUsage();
+      }, 30000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [user, refreshUsage]);
   
   if (authLoading || subscription.isLoading || usageData.isLoading) {
     return (
@@ -306,7 +316,18 @@ const SubscriptionDetails = () => {
               </div>
             </div>
             <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Your Plan Features</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Your Plan Features</h3>
+                <Button 
+                  onClick={refreshUsage} 
+                  variant="outline" 
+                  size="sm"
+                  className="text-xs"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Refresh Usage
+                </Button>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {tierContent.features.map((feature, index) => (
                   <FeatureItem 

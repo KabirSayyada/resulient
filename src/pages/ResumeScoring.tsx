@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -28,15 +27,16 @@ const ResumeScoring = () => {
   const [activeTab, setActiveTab] = useState("current");
   const { scoreData, scoreHistory, setScoreHistory, isScoring, handleScoreResume } = useResumeScoring(user?.id);
   const { subscription } = useSubscription();
-  const { canUseFeature, trackUsage } = useUsageTracking();
+  const { canUseFeature, trackUsage, usageData, refreshUsage } = useUsageTracking();
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
     } else if (user) {
       fetchScoreHistory();
+      refreshUsage(); // Refresh usage data when component mounts
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, refreshUsage]);
 
   const fetchScoreHistory = async () => {
     try {
@@ -104,18 +104,38 @@ const ResumeScoring = () => {
   }
 
   const onScore = async () => {
-    // Check if user can use the feature and track usage
-    if (canUseFeature('resume_scoring')) {
-      const tracked = await trackUsage('resume_scoring');
-      if (tracked) {
-        handleScoreResume(resumeContent, -1); // -1 means unlimited for premium/platinum
-      }
+    console.log('Score button clicked');
+    
+    // Check if user can use the feature
+    if (!canUseFeature('resume_scoring')) {
+      console.log('User cannot use resume scoring feature - limit reached');
+      return;
+    }
+
+    console.log('User can use feature, tracking usage and scoring...');
+    
+    // Track usage before scoring
+    const tracked = await trackUsage('resume_scoring');
+    if (tracked) {
+      console.log('Usage tracked successfully, proceeding with scoring');
+      await handleScoreResume(resumeContent, -1); // -1 means unlimited for premium/platinum
+      // Refresh usage data after scoring
+      await refreshUsage();
+    } else {
+      console.error('Failed to track usage');
     }
   };
 
   // Check if user has reached their limit
   const hasReachedLimit = !canUseFeature('resume_scoring');
   const showUpgradeAlert = hasReachedLimit && subscription.tier === "free";
+
+  console.log('Render state:', { 
+    hasReachedLimit, 
+    showUpgradeAlert, 
+    tier: subscription.tier,
+    dailyUsage: usageData.dailyUsage.resume_scoring 
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950 dark:text-white py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
@@ -196,7 +216,7 @@ const ResumeScoring = () => {
           <UseSubscriptionAlert 
             subscriptionTier={subscription.tier} 
             requiredTier="premium" 
-            message="You've reached your daily limit for resume scoring. Free users can perform 2 resume scorings per day. Upgrade to Premium or Platinum for unlimited usage."
+            message={`You've reached your daily limit for resume scoring (${usageData.dailyUsage.resume_scoring}/2). Free users can perform 2 resume scorings per day. Upgrade to Premium or Platinum for unlimited usage.`}
           />
         )}
 
@@ -219,6 +239,16 @@ const ResumeScoring = () => {
                     </span>
                   </div>
                 )}
+                
+                {subscription.tier === "free" && (
+                  <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded-lg p-3 text-center">
+                    <p className="text-sm text-orange-700 dark:text-orange-300">
+                      <span className="font-medium">Free Plan:</span> {usageData.dailyUsage.resume_scoring}/2 resume scorings used today
+                      {hasReachedLimit && <span className="block mt-1 font-semibold text-red-600 dark:text-red-400">Daily limit reached!</span>}
+                    </p>
+                  </div>
+                )}
+                
                 <ResumeScoringForm
                   scoringMode="resumeOnly"
                   setScoringMode={() => {}}
