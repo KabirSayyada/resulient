@@ -1,4 +1,3 @@
-
 import { ParsedResume } from '@/types/resumeStructure';
 
 export function parseATSResumeText(resumeText: string): ParsedResume {
@@ -124,6 +123,7 @@ function saveCurrentSection(resume: ParsedResume, section: string, content: stri
       break;
       
     case 'LANGUAGES':
+      // Only parse as spoken languages if the content doesn't contain programming-related terms
       parseLanguages(resume, content);
       break;
       
@@ -228,9 +228,10 @@ function parseEducation(resume: ParsedResume, content: string[]) {
 function parseSkills(resume: ParsedResume, content: string[]) {
   for (const line of content) {
     if (line.startsWith('•')) {
+      // This is a skill category with comma-separated items
       resume.skills.push(line.replace(/^•\s*/, ''));
     } else {
-      // Handle comma-separated skills
+      // Handle comma-separated skills without bullets
       const skills = line.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0);
       resume.skills.push(...skills);
     }
@@ -306,9 +307,21 @@ function parseAchievements(resume: ParsedResume, content: string[]) {
 }
 
 function parseLanguages(resume: ParsedResume, content: string[]) {
+  // Check if this contains programming languages (which should be in skills instead)
+  const programmingTerms = ['javascript', 'python', 'java', 'c++', 'c#', 'php', 'ruby', 'swift', 'kotlin', 'react', 'angular', 'vue', 'node', 'framework', 'library', 'programming'];
+  const contentText = content.join(' ').toLowerCase();
+  
+  // If it contains programming terms, treat as skills instead of spoken languages
+  if (programmingTerms.some(term => contentText.includes(term))) {
+    parseSkills(resume, content);
+    return;
+  }
+  
+  // Otherwise, parse as spoken languages
   for (const line of content) {
     if (line.startsWith('•')) {
-      resume.languages?.push(line.replace(/^•\s*/, ''));
+      if (!resume.languages) resume.languages = [];
+      resume.languages.push(line.replace(/^•\s*/, ''));
     } else {
       // Handle comma-separated languages
       const languages = line.split(',').map(lang => lang.trim()).filter(lang => lang.length > 0);
