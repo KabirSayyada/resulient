@@ -31,12 +31,12 @@ export const useATSResumeBuilder = (userId?: string) => {
       if (data?.optimizedResume) {
         setResumeData(data.optimizedResume);
         
-        // Store the resume data to track usage
+        // Store the resume data to track usage - fix the type casting
         await supabase
           .from("user_resume_data")
           .upsert({
             user_id: userId,
-            resume_data: { content: data.optimizedResume, formData }
+            resume_data: { content: data.optimizedResume, formData: formData as any }
           });
 
         toast({

@@ -1,4 +1,3 @@
-
 export interface ATSResumeData {
   personalInfo: string;
   workExperience: string[];
@@ -6,6 +5,7 @@ export interface ATSResumeData {
   skills: string;
   achievements: string;
   additionalSections: string;
+  [key: string]: any; // Add index signature for JSON compatibility
 }
 
 export interface ParsedATSResume {
