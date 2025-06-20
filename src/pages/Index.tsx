@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -27,14 +28,16 @@ import { SubscriptionTierIndicator } from "@/components/subscription/Subscriptio
 import { Helmet } from "react-helmet-async";
 import { Card, CardContent } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowRight, BookOpen, CheckCircle, ChevronDown, FileText, Star, Clock, BarChart, Users, Shield, Award, PieChart } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle, ChevronDown, FileText, Star, Clock, BarChart, Users, Shield, Award, PieChart, Diamond } from "lucide-react";
 import { useReferralTracking } from "@/hooks/useReferralTracking";
+import { useUsageLimits } from "@/hooks/useUsageLimits";
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { subscription } = useSubscription();
+  const { usage, checkUsage, showLimitReachedMessage } = useUsageLimits();
   const isMobile = useIsMobile();
 
   // Initialize referral tracking
@@ -127,6 +130,12 @@ const Index = () => {
   }, [user, authLoading, navigate]);
 
   const handleOptimizeResume = async () => {
+    // Check if user has reached limit
+    if (usage.resumeOptimizations.hasReachedLimit) {
+      showLimitReachedMessage("resume optimization");
+      return;
+    }
+
     if (!resumeContent) {
       toast({
         title: "Missing Content",
@@ -177,6 +186,28 @@ const Index = () => {
         atsScore,
         suggestions
       });
+
+      // Store the optimization result
+      if (user) {
+        await supabase
+          .from("resume_optimizations")
+          .insert({
+            user_id: user.id,
+            original_resume: resumeContent,
+            optimized_resume: response.optimizedResume,
+            job_description: jobDescription,
+            qualification_gaps: response.qualificationGaps || []
+          });
+
+        // Increment usage count for resume optimization
+        await supabase.rpc('increment_user_usage', {
+          p_user_id: user.id,
+          p_feature_type: 'resume_optimizations'
+        });
+
+        // Refresh usage after optimization
+        await checkUsage();
+      }
 
       toast({
         title: "Resume Optimized",
@@ -297,7 +328,7 @@ const Index = () => {
               </div>
             )}
 
-            {/* About section, styled and responsive */}
+            {/* About section with usage information */}
             <div className="bg-gradient-to-br from-indigo-50 via-gray-50 to-blue-50 dark:from-indigo-950 dark:via-gray-900 dark:to-blue-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-md px-4 py-5 mb-5 sm:mb-8 sm:px-6 mx-auto max-w-2xl text-center">
               <p className="text-lg sm:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-2">
                 <span className="text-blue-600 dark:text-blue-400 font-bold">Resulient</span> increases your interview rate by up to 500%&nbsp;
@@ -309,8 +340,35 @@ const Index = () => {
               <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
                 Upload your resume and job description — we'll optimize your application to dramatically increase your chances of landing interviews at top companies.
               </p>
+              
+              {/* Usage indicator for free tier */}
+              {subscription.tier === "free" && (
+                <div className="mt-3 text-sm font-medium text-orange-700 dark:text-orange-400">
+                  Free tier: {usage.resumeOptimizations.used}/{usage.resumeOptimizations.limit} resume optimizations used today
+                </div>
+              )}
+              
+              {/* Premium/Platinum indicator */}
+              {subscription.tier !== "free" && (
+                <div className="flex items-center justify-center gap-1 text-sm text-indigo-700 dark:text-indigo-400 font-medium mt-3">
+                  <Diamond className="h-4 w-4" />
+                  <span>
+                    {subscription.tier === "premium" ? 
+                      "Unlimited optimization with Premium" : 
+                      "Unlimited optimization with Platinum"}
+                  </span>
+                </div>
+              )}
             </div>
-            {/* End About section */}
+
+            {/* Usage limit alert */}
+            {usage.resumeOptimizations.hasReachedLimit && subscription.tier === "free" && (
+              <UseSubscriptionAlert 
+                subscriptionTier={subscription.tier} 
+                requiredTier="premium" 
+                message="You've reached your daily limit for resume optimization. Free users can optimize 1 resume per day. Upgrade to Premium or Platinum for unlimited optimization."
+              />
+            )}
 
             {/* Main functional area */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
@@ -346,7 +404,7 @@ const Index = () => {
               <div className="flex justify-center">
                 <Button 
                   onClick={handleOptimizeResume} 
-                  disabled={isOptimizing || !resumeContent || !jobDescription || (hasReachedLimit && subscription.tier === "free")}
+                  disabled={isOptimizing || !resumeContent || !jobDescription || (usage.resumeOptimizations.hasReachedLimit && subscription.tier === "free")}
                   className={`px-7 py-3 text-lg font-bold rounded-full shadow transition-all ${
                     subscription.tier === "premium" 
                       ? "bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600" 
