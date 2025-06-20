@@ -21,7 +21,7 @@ const ATSResumeBuilder = () => {
   const [activeStep, setActiveStep] = useState(0);
   const { resumeData, isGenerating, generateResume, downloadResume, downloadResumePDF } = useATSResumeBuilder(user?.id);
   const { subscription } = useSubscription();
-  const { usage, showLimitReachedMessage } = useUsageLimits();
+  const { usage, checkUsage, showLimitReachedMessage } = useUsageLimits();
 
   if (!authLoading && !user) {
     navigate("/auth");
@@ -36,14 +36,16 @@ const ATSResumeBuilder = () => {
     );
   }
 
-  const handleGenerate = (formData: any) => {
+  const handleGenerate = async (formData: any) => {
     // Check if user has reached limit
     if (usage.resumeBuilding.hasReachedLimit) {
       showLimitReachedMessage("resume building");
       return;
     }
 
-    generateResume(formData);
+    await generateResume(formData);
+    // Refresh usage after generating resume
+    await checkUsage();
   };
 
   return (

@@ -46,11 +46,11 @@ export const useUsageLimits = () => {
         .eq("user_id", user.id)
         .gte("created_at", today.toISOString());
 
-      // Get lifetime resume building count (check user_resume_data table)
-      const { count: buildingCount } = await supabase
-        .from("user_resume_data")
-        .select("id", { count: 'exact', head: true })
-        .eq("user_id", user.id);
+      // Get lifetime resume building count using the usage tracking table
+      const { data: buildingData } = await supabase.rpc('get_user_total_usage_count', {
+        p_user_id: user.id,
+        p_feature_type: 'resume_building'
+      });
 
       // Set limits based on subscription tier
       const limits = {
@@ -71,9 +71,9 @@ export const useUsageLimits = () => {
           hasReachedLimit: limits.resumeOptimizations !== -1 && (optimizationCount || 0) >= limits.resumeOptimizations
         },
         resumeBuilding: {
-          used: buildingCount || 0,
+          used: buildingData || 0,
           limit: limits.resumeBuilding,
-          hasReachedLimit: limits.resumeBuilding !== -1 && (buildingCount || 0) >= limits.resumeBuilding
+          hasReachedLimit: limits.resumeBuilding !== -1 && (buildingData || 0) >= limits.resumeBuilding
         }
       });
     } catch (error) {

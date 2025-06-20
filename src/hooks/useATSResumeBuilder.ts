@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,13 +30,19 @@ export const useATSResumeBuilder = (userId?: string) => {
       if (data?.optimizedResume) {
         setResumeData(data.optimizedResume);
         
-        // Store the resume data to track usage - fix the type casting
+        // Store the resume data to track usage
         await supabase
           .from("user_resume_data")
           .upsert({
             user_id: userId,
             resume_data: { content: data.optimizedResume, formData: formData as any }
           });
+
+        // Increment usage count for resume building
+        await supabase.rpc('increment_user_usage', {
+          p_user_id: userId,
+          p_feature_type: 'resume_building'
+        });
 
         toast({
           title: "Resume Generated!",
