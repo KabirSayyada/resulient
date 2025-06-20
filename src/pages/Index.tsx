@@ -337,8 +337,8 @@ const Index = () => {
                   Our users land 3x more interviews and get hired faster than traditional job seekers.
                 </span>
               </p>
-              <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
-                Upload your resume and job description — we'll optimize your application to dramatically increase your chances of landing interviews at top companies.
+              <p className="text-orange-700 dark:text-orange-400 text-sm mt-2">
+                Upload your resume and job description — we'll optimize your application to significantly increase your chances of landing interviews at top companies.
               </p>
               
               {/* Usage indicator for free tier */}
@@ -373,10 +373,10 @@ const Index = () => {
             {/* Main functional area */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-orange-700 dark:text-orange-400 mb-2">
                   ATS Resume Optimizer
                 </h1>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-orange-700 dark:text-orange-400">
                   Optimize your resume to beat Applicant Tracking Systems (ATS)
                 </p>
               </div>
