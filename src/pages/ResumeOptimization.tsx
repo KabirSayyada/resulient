@@ -1,9 +1,10 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Target, Download, Diamond } from "lucide-react";
 import { MainNavigation } from "@/components/resume/MainNavigation";
 import { LegalFooter } from "@/components/layout/LegalFooter";
@@ -11,13 +12,19 @@ import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
 import { SubscriptionTierIndicator } from "@/components/subscription/SubscriptionTierIndicator";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
+import { useResumeOptimization } from "@/hooks/useResumeOptimization";
 import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
+import { ResumeInputToggle } from "@/components/resume/ResumeInputToggle";
 
 const ResumeOptimization = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { subscription } = useSubscription();
-  const { usage, showLimitReachedMessage } = useUsageLimits();
+  const { usage, checkUsage, showLimitReachedMessage } = useUsageLimits();
+  const { optimizedResume, qualificationGaps, isOptimizing, optimizeResume, downloadOptimizedResume } = useResumeOptimization(user?.id);
+  
+  const [resumeContent, setResumeContent] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
 
   if (!authLoading && !user) {
     navigate("/auth");
@@ -32,16 +39,30 @@ const ResumeOptimization = () => {
     );
   }
 
-  const handleOptimize = () => {
+  const handleOptimize = async () => {
     // Check if user has reached limit
     if (usage.resumeOptimizations.hasReachedLimit) {
       showLimitReachedMessage("resume optimization");
       return;
     }
 
-    // Add optimization logic here
-    console.log("Starting resume optimization...");
+    if (!resumeContent.trim()) {
+      return;
+    }
+
+    if (!jobDescription.trim()) {
+      return;
+    }
+
+    const success = await optimizeResume(resumeContent, jobDescription);
+    if (success) {
+      // Refresh usage after optimization
+      await checkUsage();
+    }
   };
+
+  const canOptimize = resumeContent.trim() && jobDescription.trim() && !isOptimizing;
+  const isDisabled = !canOptimize || (usage.resumeOptimizations.hasReachedLimit && subscription.tier === "free");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950 dark:text-white py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
@@ -117,47 +138,119 @@ const ResumeOptimization = () => {
 
         <MainNavigation />
 
-        <div className="mt-6">
-          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-orange-200">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-orange-700">
-                <Target className="h-5 w-5" />
-                Resume Optimization
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {subscription.tier !== "free" && (
-                <div className="flex items-center justify-center gap-1 text-sm text-indigo-700 dark:text-indigo-400 font-medium mb-4">
-                  <Diamond className="h-4 w-4" />
-                  <span>
-                    {subscription.tier === "premium" ? 
-                      "Unlimited optimization with Premium" : 
-                      "Unlimited optimization with Platinum"}
-                  </span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          {/* Input Section */}
+          <div className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-orange-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-orange-700">
+                  <Target className="h-5 w-5" />
+                  Resume & Job Description
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {subscription.tier !== "free" && (
+                  <div className="flex items-center justify-center gap-1 text-sm text-indigo-700 dark:text-indigo-400 font-medium mb-4">
+                    <Diamond className="h-4 w-4" />
+                    <span>
+                      {subscription.tier === "premium" ? 
+                        "Unlimited optimization with Premium" : 
+                        "Unlimited optimization with Platinum"}
+                    </span>
+                  </div>
+                )}
+                {subscription.tier === "free" && (
+                  <div className="flex items-center justify-center gap-1 text-sm text-gray-600 dark:text-gray-400 font-medium mb-4">
+                    <span>
+                      Daily limit: {usage.resumeOptimizations.used}/{usage.resumeOptimizations.limit} resume optimizations used
+                    </span>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Resume</label>
+                    <ResumeInputToggle 
+                      resumeContent={resumeContent}
+                      setResumeContent={setResumeContent}
+                      userId={user?.id}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Job Description</label>
+                    <Textarea
+                      value={jobDescription}
+                      onChange={(e) => setJobDescription(e.target.value)}
+                      placeholder="Paste the job description here..."
+                      className="min-h-[200px]"
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={handleOptimize}
+                    disabled={isDisabled}
+                    className="w-full bg-orange-600 hover:bg-orange-700"
+                  >
+                    <Target className="h-4 w-4 mr-2" />
+                    {isOptimizing ? "Optimizing..." : "Optimize Resume"}
+                  </Button>
                 </div>
-              )}
-              {subscription.tier === "free" && (
-                <div className="flex items-center justify-center gap-1 text-sm text-gray-600 dark:text-gray-400 font-medium mb-4">
-                  <span>
-                    Daily limit: {usage.resumeOptimizations.used}/{usage.resumeOptimizations.limit} resume optimizations used
-                  </span>
-                </div>
-              )}
-              
-              <p className="text-center text-gray-600 mb-4">
-                Resume optimization functionality will be implemented here.
-              </p>
-              
-              <Button 
-                onClick={handleOptimize}
-                disabled={usage.resumeOptimizations.hasReachedLimit && subscription.tier === "free"}
-                className="w-full bg-orange-600 hover:bg-orange-700"
-              >
-                <Target className="h-4 w-4 mr-2" />
-                Optimize Resume
-              </Button>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Results Section */}
+          <div className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-indigo-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 justify-between text-indigo-700">
+                  <div className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    Optimized Resume
+                  </div>
+                  {optimizedResume && (
+                    <Button 
+                      onClick={downloadOptimizedResume}
+                      size="sm"
+                      className="bg-orange-600 hover:bg-orange-700"
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      Download
+                    </Button>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {optimizedResume ? (
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg max-h-96 overflow-y-auto">
+                      <pre className="whitespace-pre-wrap text-sm">{optimizedResume}</pre>
+                    </div>
+                    
+                    {qualificationGaps && qualificationGaps.length > 0 && (
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg">
+                        <h4 className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+                          Qualification Gaps
+                        </h4>
+                        <ul className="space-y-2 text-sm">
+                          {qualificationGaps.map((gap, index) => (
+                            <li key={index} className="text-yellow-700 dark:text-yellow-300">
+                              <strong>{gap.skill}</strong> - {gap.howToAcquire}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-center text-gray-500 py-8">
+                    Upload your resume and add a job description to get started with optimization.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
       
