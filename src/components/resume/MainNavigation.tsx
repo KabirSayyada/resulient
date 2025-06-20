@@ -50,7 +50,7 @@ export function MainNavigation() {
             <div className="absolute top-full left-0 right-0 bg-background z-50 shadow-lg py-2 px-4 border-b">
               <nav className="flex flex-col space-y-2">
                 <Link
-                  to="/"
+                  to="/resume-builder"
                   className="py-2 hover:text-primary"
                   onClick={() => setMenuOpen(false)}
                 >
@@ -118,7 +118,7 @@ export function MainNavigation() {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
-                    to="/"
+                    to="/resume-builder"
                     className={navigationMenuTriggerStyle()}
                   >
                     Resume Builder
