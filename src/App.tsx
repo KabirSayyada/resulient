@@ -29,7 +29,8 @@ function App() {
   return (
     <ThemeProvider>
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<ATSResumeBuilder />} />
+        <Route path="/resume-optimization" element={<Index />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/profile-setup" element={<ProfileSetup />} />
         <Route path="/profile-edit" element={<ProfileEdit />} />

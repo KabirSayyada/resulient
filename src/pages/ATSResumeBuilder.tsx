@@ -63,17 +63,6 @@ const ATSResumeBuilder = () => {
             </span>
           </div>
           <div className="flex justify-between items-center w-full sm:w-auto mt-2 sm:mt-0">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="flex items-center gap-1 sm:hidden"
-              asChild
-            >
-              <Link to="/">
-                <ArrowLeft className="h-4 w-4" />
-                Back
-              </Link>
-            </Button>
             <div className="flex items-center gap-2 sm:gap-3">
               <SubscriptionTierIndicator variant="badge" size="sm" />
               <UserMenuWithTheme />
@@ -99,18 +88,6 @@ const ATSResumeBuilder = () => {
             </div>
           )}
         </div>
-
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="mb-4 hidden sm:flex items-center gap-1"
-          asChild
-        >
-          <Link to="/">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
 
         {usage.resumeBuilding.hasReachedLimit && subscription.tier === "free" && (
           <UseSubscriptionAlert 

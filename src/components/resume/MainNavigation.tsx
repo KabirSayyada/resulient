@@ -54,7 +54,7 @@ export function MainNavigation() {
                   className="py-2 hover:text-primary"
                   onClick={() => setMenuOpen(false)}
                 >
-                  Home
+                  Resume Builder
                 </Link>
                 <Link
                   to="/resume-scoring"
@@ -64,11 +64,11 @@ export function MainNavigation() {
                   Resume Score
                 </Link>
                 <Link
-                  to="/ats-resume-builder"
+                  to="/resume-optimization"
                   className="py-2 hover:text-primary"
                   onClick={() => setMenuOpen(false)}
                 >
-                  Resume Builder
+                  Resume Optimization
                 </Link>
                 <Link
                   to="/subscription"
@@ -121,7 +121,7 @@ export function MainNavigation() {
                     to="/"
                     className={navigationMenuTriggerStyle()}
                   >
-                    Home
+                    Resume Builder
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
@@ -138,10 +138,10 @@ export function MainNavigation() {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
-                    to="/ats-resume-builder"
+                    to="/resume-optimization"
                     className={navigationMenuTriggerStyle()}
                   >
-                    Resume Builder
+                    Resume Optimization
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
