@@ -28,88 +28,90 @@ export function MainNavigation() {
   };
 
   return (
-    <div className="w-full relative py-4">
+    <div className="w-full relative mb-6">
       {isMobile ? (
-        <div className="px-4">
-          <div className="flex justify-between items-center">
-            <Link to="/" className="font-bold text-xl text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text">Resulient</Link>
-            <div className="flex items-center space-x-2">
-              {user && <ReferralStatusIndicator />}
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={toggleMenu}
-                className="p-1"
-              >
-                {menuOpen ? <X size={24} /> : <Menu size={24} />}
-              </Button>
+        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg">
+          <div className="px-4 py-3">
+            <div className="flex justify-between items-center">
+              <div className="text-lg font-semibold text-gray-800 dark:text-gray-200">Navigation</div>
+              <div className="flex items-center space-x-2">
+                {user && <ReferralStatusIndicator />}
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={toggleMenu}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                >
+                  {menuOpen ? <X size={20} /> : <Menu size={20} />}
+                </Button>
+              </div>
             </div>
-          </div>
-          
-          {menuOpen && (
-            <div className="absolute top-full left-0 right-0 bg-background z-50 shadow-lg py-2 px-4 border-b">
-              <nav className="flex flex-col space-y-2">
-                <Link
-                  to="/resume-builder"
-                  className="py-2 hover:text-primary"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Resume Builder
-                </Link>
-                <Link
-                  to="/resume-scoring"
-                  className="py-2 hover:text-primary"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Resume Score
-                </Link>
-                <Link
-                  to="/resume-optimization"
-                  className="py-2 hover:text-primary"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Resume Optimization
-                </Link>
-                <Link
-                  to="/subscription"
-                  className="py-2 hover:text-primary"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Subscription
-                </Link>
+            
+            {menuOpen && (
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                <nav className="grid grid-cols-2 gap-3">
+                  <Link
+                    to="/resume-builder"
+                    className="text-center py-3 px-4 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors font-medium"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Resume Builder
+                  </Link>
+                  <Link
+                    to="/resume-scoring"
+                    className="text-center py-3 px-4 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors font-medium"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Resume Score
+                  </Link>
+                  <Link
+                    to="/"
+                    className="text-center py-3 px-4 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors font-medium"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Resume Optimization
+                  </Link>
+                  <Link
+                    to="/subscription"
+                    className="text-center py-3 px-4 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors font-medium"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Subscription
+                  </Link>
+                  {user && (
+                    <Link
+                      to="/referrals"
+                      className="text-center py-3 px-4 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors font-medium"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Referrals
+                    </Link>
+                  )}
+                  <Link
+                    to="/blog"
+                    className="text-center py-3 px-4 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors font-medium"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Blog
+                  </Link>
+                  {!user && (
+                    <Link
+                      to="/auth"
+                      className="text-center py-3 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium col-span-2"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Sign In
+                    </Link>
+                  )}
+                </nav>
                 {user && (
-                  <Link
-                    to="/referrals"
-                    className="py-2 hover:text-primary"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Referrals
-                  </Link>
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                    <UserMenu />
+                  </div>
                 )}
-                <Link
-                  to="/blog"
-                  className="py-2 font-medium text-primary hover:text-primary/90"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Blog
-                </Link>
-                {!user && (
-                  <Link
-                    to="/auth"
-                    className="py-2 hover:text-primary"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Sign In
-                  </Link>
-                )}
-              </nav>
-              {user && (
-                <div className="mt-4 pt-4 border-t">
-                  <UserMenu />
-                </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <div className="flex items-center justify-between w-full">
@@ -138,7 +140,7 @@ export function MainNavigation() {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
-                    to="/resume-optimization"
+                    to="/"
                     className={navigationMenuTriggerStyle()}
                   >
                     Resume Optimization

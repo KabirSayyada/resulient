@@ -82,7 +82,6 @@ const Index = () => {
     "softwareVersion": "2.0"
   };
 
-  // Prepare FAQ schema
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -114,7 +113,6 @@ const Index = () => {
     ]
   };
 
-  // Stats for the landing page
   const atsStats = [
     { stat: "2%", description: "Average interview rate for unoptimized resumes" },
     { stat: "12%", description: "Interview rate for Resulient-optimized resumes" },
@@ -293,47 +291,48 @@ const Index = () => {
           </script>
         </Helmet>
 
-        <div className={`min-h-screen py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${
+        <div className={`min-h-screen px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${
           subscription.tier === "premium" 
             ? "bg-gradient-to-br from-blue-50 via-gray-50 to-indigo-50 dark:from-blue-950 dark:via-gray-900 dark:to-indigo-950" 
             : subscription.tier === "platinum" 
               ? "bg-gradient-to-br from-purple-50 via-gray-50 to-indigo-50 dark:from-purple-950 dark:via-gray-900 dark:to-indigo-950" 
               : "bg-gray-50 dark:bg-gray-900"
         }`}>
-          <div className="max-w-4xl mx-auto">
-            {/* Brand Header with simplified color scheme */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
-              <div className="flex items-center gap-4">
-                <span className="font-brand text-4xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
-                  Resulient
-                </span>
-                <span className="rounded-full px-3 py-1 text-xs sm:text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 shadow border border-indigo-200 dark:border-indigo-700 animate-fade-in">
-                  ATS Resume Optimization
-                </span>
+          <div className="max-w-7xl mx-auto py-4 sm:py-8">
+            {/* Mobile-first brand header */}
+            <div className="flex flex-col space-y-4 mb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <span className="font-brand text-2xl sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
+                    Resulient
+                  </span>
+                  <span className="rounded-full px-2 py-1 text-xs sm:text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 shadow border border-indigo-200 dark:border-indigo-700 animate-fade-in whitespace-nowrap">
+                    ATS Resume Optimization
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <SubscriptionTierIndicator variant="badge" size="sm" className="animate-fade-in" />
+                  <UserMenuWithTheme />
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <SubscriptionTierIndicator variant="badge" size="md" className="animate-fade-in" />
-                <UserMenuWithTheme />
-              </div>
+
+              {/* Subscription Tier Banner */}
+              {subscription.tier !== "free" && (
+                <div className={`py-2 px-4 rounded-lg shadow-md border animate-fade-in text-center ${
+                  subscription.tier === "premium" 
+                    ? "bg-blue-100 border-blue-300 text-blue-800 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-200" 
+                    : "bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-900 dark:border-purple-700 dark:text-purple-200"
+                }`}>
+                  <SubscriptionTierIndicator variant="full" size="lg" showTooltip={false} className="justify-center" />
+                </div>
+              )}
             </div>
 
-            {/* Subscription Tier Banner - highly visible */}
-            {subscription.tier !== "free" && (
-              <div className={`mb-6 py-2 px-4 rounded-lg shadow-md border animate-fade-in text-center ${
-                subscription.tier === "premium" 
-                  ? "bg-blue-100 border-blue-300 text-blue-800 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-200" 
-                  : "bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-900 dark:border-purple-700 dark:text-purple-200"
-              }`}>
-                <SubscriptionTierIndicator variant="full" size="lg" showTooltip={false} className="justify-center" />
-              </div>
-            )}
-
-            {/* About section with usage information */}
-            <div className="bg-gradient-to-br from-indigo-50 via-gray-50 to-blue-50 dark:from-indigo-950 dark:via-gray-900 dark:to-blue-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-md px-4 py-5 mb-5 sm:mb-8 sm:px-6 mx-auto max-w-2xl text-center">
-              <p className="text-lg sm:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-2">
-                <span className="text-blue-600 dark:text-blue-400 font-bold">Resulient</span> increases your interview rate by up to 500%&nbsp;
-                <span className="hidden sm:inline">—</span>
-                <span className="block sm:inline text-base sm:text-lg font-normal text-indigo-700 dark:text-indigo-300">
+            {/* About section with mobile-first design */}
+            <div className="bg-gradient-to-br from-indigo-50 via-gray-50 to-blue-50 dark:from-indigo-950 dark:via-gray-900 dark:to-blue-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-md px-4 py-5 mb-6 text-center">
+              <p className="text-base sm:text-lg lg:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-2">
+                <span className="text-blue-600 dark:text-blue-400 font-bold">Resulient</span> increases your interview rate by up to 500%
+                <span className="block text-sm sm:text-base lg:text-lg font-normal text-indigo-700 dark:text-indigo-300 mt-1">
                   Our users land 3x more interviews and get hired faster than traditional job seekers.
                 </span>
               </p>
@@ -363,68 +362,72 @@ const Index = () => {
 
             {/* Usage limit alert */}
             {usage.resumeOptimizations.hasReachedLimit && subscription.tier === "free" && (
-              <UseSubscriptionAlert 
-                subscriptionTier={subscription.tier} 
-                requiredTier="premium" 
-                message="You've reached your daily limit for resume optimization. Free users can optimize 1 resume per day. Upgrade to Premium or Platinum for unlimited optimization."
-              />
+              <div className="mb-6">
+                <UseSubscriptionAlert 
+                  subscriptionTier={subscription.tier} 
+                  requiredTier="premium" 
+                  message="You've reached your daily limit for resume optimization. Free users can optimize 1 resume per day. Upgrade to Premium or Platinum for unlimited optimization."
+                />
+              </div>
             )}
-
-            {/* Main functional area */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-orange-700 dark:text-orange-400 mb-2">
-                  ATS Resume Optimizer
-                </h1>
-                <p className="text-orange-700 dark:text-orange-400">
-                  Optimize your resume to beat Applicant Tracking Systems (ATS)
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <OptimizationHistory userId={user?.id} />
-              </div>
-            </div>
 
             <MainNavigation />
 
-            <div className="gap-6 space-y-8 animate-fade-in">
-              <div className="grid md:grid-cols-2 gap-8">
-                <JobDescriptionInput 
-                  jobDescription={jobDescription} 
-                  setJobDescription={setJobDescription} 
-                />
-                <ResumeInputToggle 
-                  resumeContent={resumeContent} 
-                  setResumeContent={setResumeContent} 
-                  userId={user?.id}
-                  onResumeSelected={handleResumeSelected}
-                />
+            {/* Main functional area with mobile-first layout */}
+            <div className="mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <div>
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-orange-700 dark:text-orange-400 mb-2">
+                    ATS Resume Optimizer
+                  </h1>
+                  <p className="text-sm sm:text-base text-orange-700 dark:text-orange-400">
+                    Optimize your resume to beat Applicant Tracking Systems (ATS)
+                  </p>
+                </div>
+                <div className="flex justify-center sm:justify-end">
+                  <OptimizationHistory userId={user?.id} />
+                </div>
               </div>
-              
-              <div className="flex justify-center">
-                <Button 
-                  onClick={handleOptimizeResume} 
-                  disabled={isOptimizing || !resumeContent || !jobDescription || (usage.resumeOptimizations.hasReachedLimit && subscription.tier === "free")}
-                  className={`px-7 py-3 text-lg font-bold rounded-full shadow transition-all ${
-                    subscription.tier === "premium" 
-                      ? "bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600" 
-                      : subscription.tier === "platinum" 
-                        ? "bg-gradient-to-r from-purple-500 to-indigo-400 hover:from-purple-600 hover:to-indigo-500" 
-                        : "bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500"
-                  }`}
-                >
-                  {isOptimizing ? "Optimizing..." : "🚀 Optimize Resume"}
-                </Button>
+
+              <div className="space-y-6 animate-fade-in">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <JobDescriptionInput 
+                    jobDescription={jobDescription} 
+                    setJobDescription={setJobDescription} 
+                  />
+                  <ResumeInputToggle 
+                    resumeContent={resumeContent} 
+                    setResumeContent={setResumeContent} 
+                    userId={user?.id}
+                    onResumeSelected={handleResumeSelected}
+                  />
+                </div>
+                
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={handleOptimizeResume} 
+                    disabled={isOptimizing || !resumeContent || !jobDescription || (usage.resumeOptimizations.hasReachedLimit && subscription.tier === "free")}
+                    className={`w-full sm:w-auto px-6 sm:px-7 py-3 text-base sm:text-lg font-bold rounded-full shadow transition-all ${
+                      subscription.tier === "premium" 
+                        ? "bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600" 
+                        : subscription.tier === "platinum" 
+                          ? "bg-gradient-to-r from-purple-500 to-indigo-400 hover:from-purple-600 hover:to-indigo-500" 
+                          : "bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500"
+                    }`}
+                  >
+                    {isOptimizing ? "Optimizing..." : "🚀 Optimize Resume"}
+                  </Button>
+                </div>
+                
+                {optimizedResume && (
+                  <OptimizedResumeDisplay 
+                    optimizedResume={optimizedResume}
+                    jobDescription={jobDescription}
+                    originalResume={resumeContent}
+                    qualificationGaps={qualificationGaps}
+                  />
+                )}
               </div>
-              
-              {optimizedResume && (
-                <OptimizedResumeDisplay 
-                  optimizedResume={optimizedResume}
-                  jobDescription={jobDescription}
-                  originalResume={resumeContent}
-                  qualificationGaps={qualificationGaps}
-                />
-              )}
             </div>
           </div>
           <div className="mt-8">
