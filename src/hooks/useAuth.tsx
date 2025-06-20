@@ -9,7 +9,6 @@ type AuthContextValue = {
   loading: boolean;
   signOut: () => Promise<void>;
   isAdmin: () => boolean;
-  setOnUserLogin?: (callback: (user: User) => void) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -25,25 +24,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [onUserLoginCallback, setOnUserLoginCallback] = useState<((user: User) => void) | undefined>();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change:', event, session?.user?.id);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setSession(session);
-      const newUser = session?.user ?? null;
-      setUser(newUser);
-      
-      // Trigger login callback when user logs in
-      if (event === 'SIGNED_IN' && newUser && onUserLoginCallback) {
-        console.log('User signed in, triggering login callback');
-        onUserLoginCallback(newUser);
-      }
+      setUser(session?.user ?? null);
       
       // Handle referral tracking when user signs in/up
-      if (newUser) {
+      if (session?.user) {
         setTimeout(() => {
-          processReferralTracking(newUser);
+          processReferralTracking(session.user);
         }, 0);
       }
     });
@@ -63,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [onUserLoginCallback]);
+  }, []);
 
   const processReferralTracking = async (user: User) => {
     try {
@@ -161,19 +151,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return ADMIN_EMAILS.includes(user.email);
   };
 
-  const setOnUserLogin = (callback: (user: User) => void) => {
-    setOnUserLoginCallback(() => callback);
-  };
-
   return (
-    <AuthContext.Provider value={{ 
-      session, 
-      user, 
-      loading, 
-      signOut, 
-      isAdmin,
-      setOnUserLogin 
-    }}>
+    <AuthContext.Provider value={{ session, user, loading, signOut, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
