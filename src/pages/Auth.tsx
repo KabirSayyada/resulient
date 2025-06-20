@@ -12,7 +12,7 @@ const AuthPage = () => {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate("/");
+      navigate("/resume-builder");
     }
   }, [user, loading, navigate]);
 
