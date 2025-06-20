@@ -298,21 +298,28 @@ const Index = () => {
               : "bg-gray-50 dark:bg-gray-900"
         }`}>
           <div className="max-w-7xl mx-auto py-4 sm:py-8">
-            {/* Mobile-first brand header */}
-            <div className="flex flex-col space-y-4 mb-6">
+            {/* Mobile-first brand header - Fixed for mobile */}
+            <div className="flex flex-col space-y-3 sm:space-y-4 mb-6">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 sm:gap-4">
-                  <span className="font-brand text-2xl sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
+                <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                  <span className="font-brand text-xl sm:text-2xl md:text-4xl lg:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
                     Resulient
                   </span>
-                  <span className="rounded-full px-2 py-1 text-xs sm:text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 shadow border border-indigo-200 dark:border-indigo-700 animate-fade-in whitespace-nowrap">
+                  <span className="hidden sm:inline-block rounded-full px-2 py-1 text-xs sm:text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 shadow border border-indigo-200 dark:border-indigo-700 animate-fade-in whitespace-nowrap">
                     ATS Resume Optimization
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <SubscriptionTierIndicator variant="badge" size="sm" className="animate-fade-in" />
+                <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                  <SubscriptionTierIndicator variant="badge" size="sm" className="animate-fade-in hidden sm:block" />
                   <UserMenuWithTheme />
                 </div>
+              </div>
+
+              {/* Mobile badge - shown below on mobile */}
+              <div className="sm:hidden">
+                <span className="inline-block rounded-full px-2 py-1 text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 shadow border border-indigo-200 dark:border-indigo-700 animate-fade-in">
+                  ATS Resume Optimization
+                </span>
               </div>
 
               {/* Subscription Tier Banner */}
@@ -565,7 +572,7 @@ const Index = () => {
         </section>
 
         {/* ATS Statistics Section */}
-        <section className="py-16 bg-indigo-50 dark:bg-gray-800/50">
+        <section className="py-16 bg-indigo-50 dark:bg-gray-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white">The Interview Success Gap</h2>
