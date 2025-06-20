@@ -1,9 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { useResumeScoring } from "@/hooks/useResumeScoring";
 import { useSubscription } from "@/hooks/useSubscription";
-import { useUsageTracking } from "@/hooks/useUsageTracking";
 import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,18 +25,16 @@ const ResumeScoring = () => {
   const navigate = useNavigate();
   const [resumeContent, setResumeContent] = useState("");
   const [activeTab, setActiveTab] = useState("current");
-  const { scoreData, scoreHistory, setScoreHistory, isScoring, handleScoreResume } = useResumeScoring(user?.id);
+  const { scoreData, scoreHistory, setScoreHistory, isScoring, hasReachedLimit, handleScoreResume } = useResumeScoring(user?.id);
   const { subscription } = useSubscription();
-  const { canUseFeature, trackUsage, usageData, refreshUsage } = useUsageTracking();
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
     } else if (user) {
       fetchScoreHistory();
-      refreshUsage(); // Refresh usage data when component mounts
     }
-  }, [user, authLoading, navigate, refreshUsage]);
+  }, [user, authLoading, navigate]);
 
   const fetchScoreHistory = async () => {
     try {
@@ -50,6 +48,7 @@ const ResumeScoring = () => {
 
       if (data) {
         const formattedHistory: ScoreData[] = data.map((item: ResumeScoreRecord) => {
+          // Convert numeric percentile to text representation
           const percentileString = (() => {
             const percentile = item.percentile || 50;
             if (percentile >= 99) return "Top 1%";
@@ -64,10 +63,12 @@ const ResumeScoring = () => {
 
           console.log("Raw item data:", item);
           
+          // Create a properly structured ScoreData object with all fields, handling missing fields
           return {
             overallScore: item.overall_score,
             skillsAlignment: item.skills_breadth || 0,
             WorkExperience: item.experience_duration || 0,
+            // Map directly to the dedicated fields, now that we've added them to the database
             Achievements: item.achievements_score || 0,
             EducationQuality: item.education_score || 0,
             Certifications: item.certifications_score || 0,
@@ -103,39 +104,14 @@ const ResumeScoring = () => {
     );
   }
 
-  const onScore = async () => {
-    console.log('Score button clicked');
-    
-    // Check if user can use the feature
-    if (!canUseFeature('resume_scoring')) {
-      console.log('User cannot use resume scoring feature - limit reached');
-      return;
-    }
-
-    console.log('User can use feature, tracking usage and scoring...');
-    
-    // Track usage before scoring
-    const tracked = await trackUsage('resume_scoring');
-    if (tracked) {
-      console.log('Usage tracked successfully, proceeding with scoring');
-      await handleScoreResume(resumeContent, -1); // -1 means unlimited for premium/platinum
-      // Refresh usage data after scoring
-      await refreshUsage();
-    } else {
-      console.error('Failed to track usage');
-    }
+  const onScore = () => {
+    // Get daily limit based on subscription tier
+    const dailyLimit = subscription.limits.resumeScorings;
+    handleScoreResume(resumeContent, dailyLimit);
   };
 
-  // Check if user has reached their limit
-  const hasReachedLimit = !canUseFeature('resume_scoring');
+  // Feature requires premium or platinum for unlimited usage
   const showUpgradeAlert = hasReachedLimit && subscription.tier === "free";
-
-  console.log('Render state:', { 
-    hasReachedLimit, 
-    showUpgradeAlert, 
-    tier: subscription.tier,
-    dailyUsage: usageData.dailyUsage.resume_scoring 
-  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950 dark:text-white py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
@@ -216,7 +192,7 @@ const ResumeScoring = () => {
           <UseSubscriptionAlert 
             subscriptionTier={subscription.tier} 
             requiredTier="premium" 
-            message={`You've reached your daily limit for resume scoring (${usageData.dailyUsage.resume_scoring}/2). Free users can perform 2 resume scorings per day. Upgrade to Premium or Platinum for unlimited usage.`}
+            message="You've reached your daily limit for resume scoring. Free users can perform 3 resume scorings per day. Upgrade to Premium or Platinum for unlimited usage."
           />
         )}
 
@@ -239,16 +215,6 @@ const ResumeScoring = () => {
                     </span>
                   </div>
                 )}
-                
-                {subscription.tier === "free" && (
-                  <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded-lg p-3 text-center">
-                    <p className="text-sm text-orange-700 dark:text-orange-300">
-                      <span className="font-medium">Free Plan:</span> {usageData.dailyUsage.resume_scoring}/2 resume scorings used today
-                      {hasReachedLimit && <span className="block mt-1 font-semibold text-red-600 dark:text-red-400">Daily limit reached!</span>}
-                    </p>
-                  </div>
-                )}
-                
                 <ResumeScoringForm
                   scoringMode="resumeOnly"
                   setScoringMode={() => {}}

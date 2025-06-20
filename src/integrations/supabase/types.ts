@@ -592,36 +592,6 @@ export type Database = {
           },
         ]
       }
-      user_usage_tracking: {
-        Row: {
-          created_at: string
-          feature_type: string
-          id: string
-          updated_at: string
-          usage_count: number
-          usage_date: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          feature_type: string
-          id?: string
-          updated_at?: string
-          usage_count?: number
-          usage_date?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          feature_type?: string
-          id?: string
-          updated_at?: string
-          usage_count?: number
-          usage_date?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       published_blog_posts: {
@@ -661,18 +631,6 @@ export type Database = {
       check_referral_rewards: {
         Args: { referrer_id: string }
         Returns: undefined
-      }
-      get_user_total_usage_count: {
-        Args: { p_user_id: string; p_feature_type: string }
-        Returns: number
-      }
-      get_user_usage_count: {
-        Args: { p_user_id: string; p_feature_type: string; p_date?: string }
-        Returns: number
-      }
-      increment_user_usage: {
-        Args: { p_user_id: string; p_feature_type: string }
-        Returns: number
       }
       user_has_active_subscription: {
         Args: { user_uuid: string; tier?: string }
