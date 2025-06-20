@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -484,9 +483,6 @@ const Index = () => {
                 <span className="font-brand text-3xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
                   Resulient
                 </span>
-                <span className="ml-2 rounded-full px-3 py-1 text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 shadow border border-indigo-200 dark:border-indigo-700">
-                  ATS Optimizer
-                </span>
               </div>
               <div className="flex gap-2 items-center">
                 <Link to="/blog" className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium mx-3 hidden sm:block">
@@ -495,11 +491,11 @@ const Index = () => {
                 <Link to="/pricing" className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium mx-3 hidden sm:block">
                   Pricing
                 </Link>
-                <Link to="/auth" className="inline-flex items-center font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
+                <Link to="/auth" className="inline-flex items-center font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 px-3 py-2">
                   Login
                 </Link>
-                <Link to="/auth" className="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                  Sign up
+                <Link to="/auth" className="ml-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg shadow-sm text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105">
+                  Get Started
                 </Link>
                 <UserMenuWithTheme />
               </div>
@@ -706,7 +702,11 @@ const Index = () => {
                   </div>
                   <div className="md:pl-12 mt-6 md:mt-0">
                     <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-4 shadow-sm border border-indigo-100 dark:border-indigo-800">
-                      <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" alt="Uploading resume" className="rounded-lg shadow-md w-full object-cover h-48" />
+                      <img 
+                        src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" 
+                        alt="Uploading resume" 
+                        className="rounded-lg shadow-md w-full object-cover h-48"
+                      />
                     </div>
                   </div>
                 </div>
@@ -715,7 +715,11 @@ const Index = () => {
                 <div className="relative md:grid md:grid-cols-2 md:gap-8 mb-12 md:mb-24">
                   <div className="md:pl-12 order-2 md:order-1">
                     <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-4 shadow-sm border border-indigo-100 dark:border-indigo-800">
-                      <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f" alt="Deep Analysis" className="rounded-lg shadow-md w-full object-cover h-48" />
+                      <img 
+                        src="https://images.unsplash.com/photo-1460925895917-afdab827c52f" 
+                        alt="Deep Analysis" 
+                        className="rounded-lg shadow-md w-full object-cover h-48"
+                      />
                     </div>
                   </div>
                   <div className="md:text-left md:pl-12 order-1 md:order-2">
@@ -740,7 +744,11 @@ const Index = () => {
                   </div>
                   <div className="md:pl-12 mt-6 md:mt-0">
                     <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-4 shadow-sm border border-indigo-100 dark:border-indigo-800">
-                      <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085" alt="Optimized results" className="rounded-lg shadow-md w-full object-cover h-48" />
+                      <img 
+                        src="https://images.unsplash.com/photo-1498050108023-c5249f4df085" 
+                        alt="Optimized results" 
+                        className="rounded-lg shadow-md w-full object-cover h-48"
+                      />
                     </div>
                   </div>
                 </div>
