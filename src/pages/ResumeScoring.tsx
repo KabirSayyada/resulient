@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -19,6 +18,7 @@ import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
 import { GuidedTour } from "@/components/onboarding/GuidedTour";
 import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
 import { SubscriptionTierIndicator } from "@/components/subscription/SubscriptionTierIndicator";
+import { useUsageLimits } from "@/hooks/useUsageLimits";
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
@@ -27,6 +27,7 @@ const ResumeScoring = () => {
   const [activeTab, setActiveTab] = useState("current");
   const { scoreData, scoreHistory, setScoreHistory, isScoring, hasReachedLimit, handleScoreResume } = useResumeScoring(user?.id);
   const { subscription } = useSubscription();
+  const { usage, showLimitReachedMessage } = useUsageLimits();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -105,13 +106,18 @@ const ResumeScoring = () => {
   }
 
   const onScore = () => {
-    // Get daily limit based on subscription tier
+    // Check if user has reached limit
+    if (usage.resumeScorings.hasReachedLimit) {
+      showLimitReachedMessage("resume scoring");
+      return;
+    }
+
     const dailyLimit = subscription.limits.resumeScorings;
     handleScoreResume(resumeContent, dailyLimit);
   };
 
-  // Feature requires premium or platinum for unlimited usage
-  const showUpgradeAlert = hasReachedLimit && subscription.tier === "free";
+  // Show upgrade alert if reached limit and on free tier
+  const showUpgradeAlert = usage.resumeScorings.hasReachedLimit && subscription.tier === "free";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950 dark:text-white py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
@@ -192,7 +198,7 @@ const ResumeScoring = () => {
           <UseSubscriptionAlert 
             subscriptionTier={subscription.tier} 
             requiredTier="premium" 
-            message="You've reached your daily limit for resume scoring. Free users can perform 3 resume scorings per day. Upgrade to Premium or Platinum for unlimited usage."
+            message="You've reached your daily limit for resume scoring. Free users can perform 2 resume scorings per day. Upgrade to Premium or Platinum for unlimited usage."
           />
         )}
 
@@ -215,6 +221,13 @@ const ResumeScoring = () => {
                     </span>
                   </div>
                 )}
+                {subscription.tier === "free" && (
+                  <div className="flex items-center justify-center gap-1 text-sm text-gray-600 dark:text-gray-400 font-medium">
+                    <span>
+                      Daily limit: {usage.resumeScorings.used}/{usage.resumeScorings.limit} resume scorings used
+                    </span>
+                  </div>
+                )}
                 <ResumeScoringForm
                   scoringMode="resumeOnly"
                   setScoringMode={() => {}}
@@ -222,7 +235,7 @@ const ResumeScoring = () => {
                   setResumeContent={setResumeContent}
                   isScoring={isScoring}
                   onScore={onScore}
-                  disableButton={hasReachedLimit && subscription.tier === "free"}
+                  disableButton={usage.resumeScorings.hasReachedLimit && subscription.tier === "free"}
                 />
               </CardContent>
             </Card>

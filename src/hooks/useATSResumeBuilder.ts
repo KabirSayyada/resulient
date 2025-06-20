@@ -30,6 +30,15 @@ export const useATSResumeBuilder = (userId?: string) => {
 
       if (data?.optimizedResume) {
         setResumeData(data.optimizedResume);
+        
+        // Store the resume data to track usage
+        await supabase
+          .from("user_resume_data")
+          .upsert({
+            user_id: userId,
+            resume_data: { content: data.optimizedResume, formData }
+          });
+
         toast({
           title: "Resume Generated!",
           description: "Your ATS-optimized resume has been created successfully.",

@@ -11,12 +11,17 @@ import { SubscriptionTierIndicator } from "@/components/subscription/Subscriptio
 import { ATSResumeForm } from "@/components/resume/ATSResumeForm";
 import { ATSResumePreview } from "@/components/resume/ATSResumePreview";
 import { useATSResumeBuilder } from "@/hooks/useATSResumeBuilder";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useUsageLimits } from "@/hooks/useUsageLimits";
+import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
 
 const ATSResumeBuilder = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const { resumeData, isGenerating, generateResume, downloadResume, downloadResumePDF } = useATSResumeBuilder(user?.id);
+  const { subscription } = useSubscription();
+  const { usage, showLimitReachedMessage } = useUsageLimits();
 
   if (!authLoading && !user) {
     navigate("/auth");
@@ -30,6 +35,16 @@ const ATSResumeBuilder = () => {
       </div>
     );
   }
+
+  const handleGenerate = (formData: any) => {
+    // Check if user has reached limit
+    if (usage.resumeBuilding.hasReachedLimit) {
+      showLimitReachedMessage("resume building");
+      return;
+    }
+
+    generateResume(formData);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950 dark:text-white py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
@@ -76,6 +91,11 @@ const ATSResumeBuilder = () => {
             Create a professional ATS-optimized resume in minutes. Simply describe yourself in natural sentences, 
             and our AI will automatically organize your information into the perfect resume format.
           </p>
+          {subscription.tier === "free" && (
+            <div className="mt-3 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+              Free tier: {usage.resumeBuilding.used}/{usage.resumeBuilding.limit} resume builds used (lifetime limit)
+            </div>
+          )}
         </div>
 
         <Button 
@@ -89,6 +109,14 @@ const ATSResumeBuilder = () => {
             Back to Dashboard
           </Link>
         </Button>
+
+        {usage.resumeBuilding.hasReachedLimit && subscription.tier === "free" && (
+          <UseSubscriptionAlert 
+            subscriptionTier={subscription.tier} 
+            requiredTier="premium" 
+            message="You've reached your lifetime limit for resume building. Free users can build 1 resume. Upgrade to Premium or Platinum for unlimited resume building."
+          />
+        )}
 
         <MainNavigation />
 
@@ -104,8 +132,9 @@ const ATSResumeBuilder = () => {
               </CardHeader>
               <CardContent>
                 <ATSResumeForm 
-                  onGenerate={generateResume}
+                  onGenerate={handleGenerate}
                   isGenerating={isGenerating}
+                  disabled={usage.resumeBuilding.hasReachedLimit && subscription.tier === "free"}
                 />
               </CardContent>
             </Card>

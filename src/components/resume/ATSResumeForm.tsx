@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,9 +11,10 @@ import { ATSResumeData } from "@/types/atsResume";
 interface ATSResumeFormProps {
   onGenerate: (data: ATSResumeData) => void;
   isGenerating: boolean;
+  disabled?: boolean;
 }
 
-export const ATSResumeForm = ({ onGenerate, isGenerating }: ATSResumeFormProps) => {
+export const ATSResumeForm = ({ onGenerate, isGenerating, disabled = false }: ATSResumeFormProps) => {
   const [formData, setFormData] = useState<ATSResumeData>({
     personalInfo: "",
     workExperience: [],
@@ -62,6 +62,7 @@ export const ATSResumeForm = ({ onGenerate, isGenerating }: ATSResumeFormProps) 
   };
 
   const handleGenerate = () => {
+    if (disabled) return;
     onGenerate(formData);
   };
 
@@ -273,7 +274,7 @@ export const ATSResumeForm = ({ onGenerate, isGenerating }: ATSResumeFormProps) 
 
       <Button 
         onClick={handleGenerate} 
-        disabled={!isFormValid || isGenerating}
+        disabled={!isFormValid || isGenerating || disabled}
         className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3"
         size="lg"
       >
@@ -281,6 +282,11 @@ export const ATSResumeForm = ({ onGenerate, isGenerating }: ATSResumeFormProps) 
           <>
             <Sparkles className="h-5 w-5 mr-2 animate-spin" />
             Generating Your Resume...
+          </>
+        ) : disabled ? (
+          <>
+            <Sparkles className="h-5 w-5 mr-2" />
+            Upgrade to Build More Resumes
           </>
         ) : (
           <>
