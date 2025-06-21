@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -27,7 +28,7 @@ import { SubscriptionTierIndicator } from "@/components/subscription/Subscriptio
 import { Helmet } from "react-helmet-async";
 import { Card, CardContent } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowRight, BookOpen, CheckCircle, ChevronDown, FileText, Star, Clock, BarChart, Users, Shield, Award, PieChart, Diamond } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle, ChevronDown, FileText, Star, Clock, BarChart, Users, Shield, Award, PieChart, Diamond, Zap, Target, TrendingUp, Rocket, PlayCircle } from "lucide-react";
 import { useReferralTracking } from "@/hooks/useReferralTracking";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
 
@@ -241,15 +242,21 @@ const Index = () => {
   const testimonials = [
     {
       quote: "After optimizing my resume with Resulient, I went from 2% response rate to landing interviews at 3 different Fortune 500 companies. The difference was night and day - I got 5 interview invitations in just two weeks!",
-      author: "Michael T., Software Engineer"
+      author: "Michael T., Software Engineer",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=face&auto=format",
+      company: "Google"
     },
     {
       quote: "I was getting rejected immediately after submitting applications. After using Resulient, my interview rate increased by 400%. I got callbacks from companies that previously ignored me, and landed my dream job in 6 weeks.",
-      author: "Sarah K., Marketing Director"
+      author: "Sarah K., Marketing Director",
+      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face&auto=format",
+      company: "Meta"
     },
     {
       quote: "Changing careers seemed impossible until I used Resulient. The tool helped me get 8 interviews in my target industry within a month. I successfully transitioned to tech and increased my salary by 60%!",
-      author: "David L., Career Changer"
+      author: "David L., Career Changer",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face&auto=format",
+      company: "Apple"
     }
   ];
 
@@ -445,7 +452,7 @@ const Index = () => {
     );
   }
 
-  // If user is not logged in, show the landing page
+  // If user is not logged in, show the enhanced landing page
   return (
     <>
       <Helmet>
@@ -481,28 +488,31 @@ const Index = () => {
         </script>
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-950">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-800 dark:to-indigo-950">
         {/* Navigation */}
-        <header className="fixed w-full z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+        <header className="fixed w-full z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
-              <div className="flex items-center">
-                <span className="font-brand text-3xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Rocket className="h-6 w-6 text-white" />
+                </div>
+                <span className="font-brand text-3xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
                   Resulient
                 </span>
               </div>
               <div className="flex gap-2 items-center">
-                <Link to="/blog" className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium mx-3 hidden sm:block">
+                <Link to="/blog" className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium mx-3 hidden sm:block transition-colors">
                   Blog
                 </Link>
-                <Link to="/pricing" className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium mx-3 hidden sm:block">
+                <Link to="/pricing" className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium mx-3 hidden sm:block transition-colors">
                   Pricing
                 </Link>
-                <Link to="/auth" className="inline-flex items-center font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 px-3 py-2">
+                <Link to="/auth" className="inline-flex items-center font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 px-3 py-2 transition-colors">
                   Login
                 </Link>
-                <Link to="/auth" className="ml-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-lg shadow-sm text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105">
-                  Get Started
+                <Link to="/auth" className="ml-2 inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-full shadow-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+                  Start Free Trial
                 </Link>
                 <UserMenuWithTheme />
               </div>
@@ -510,60 +520,152 @@ const Index = () => {
           </div>
         </header>
 
-        {/* Hero Section */}
-        <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight">
-                  5x Your Interview Rate.
-                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
-                    Land Your Dream Job.
+        {/* Enhanced Hero Section */}
+        <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative overflow-hidden">
+          {/* Background decorative elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-600/20 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-indigo-600/20 rounded-full blur-3xl"></div>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-center relative">
+            <div className="space-y-8 animate-fade-in">
+              <div className="space-y-6">
+                <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 border border-indigo-200 dark:border-indigo-800 rounded-full">
+                  <Zap className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-2" />
+                  <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Used by 100,000+ professionals</span>
+                </div>
+                
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-gray-900 dark:text-white leading-tight">
+                  Land Your
+                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 animate-pulse">
+                    Dream Job
                   </span>
+                  <span className="block text-4xl sm:text-5xl lg:text-6xl mt-2">5x Faster</span>
                 </h1>
-                <p className="mt-6 text-xl text-gray-600 dark:text-gray-300 max-w-2xl">
-                  Resulient users get 5x more interviews than traditional job seekers. Our intelligent 
-                  AI optimization doesn't just beat ATS systems — it creates resumes that recruiters 
-                  can't ignore, leading to interview invitations within days, not months.
+                
+                <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-2xl leading-relaxed">
+                  Transform your job search from <span className="font-bold text-red-500">months of rejection</span> to 
+                  <span className="font-bold text-green-600"> multiple interview offers</span> in weeks. 
+                  Our AI doesn't just beat ATS systems—it creates resumes that make recruiters excited to meet you.
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-4">
-                <Link to="/auth" className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-fuchsia-600 to-indigo-600 hover:from-fuchsia-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform transition-all duration-300 hover:scale-105">
-                  Start Landing Interviews <ArrowRight className="ml-2 h-5 w-5" />
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link to="/auth" className="group inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-full shadow-2xl text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-700 hover:via-purple-700 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 transform transition-all duration-300 hover:scale-105 hover:shadow-indigo-500/25">
+                  Start Getting Interviews
+                  <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <Link to="/blog/how-ats-systems-reject-resumes" className="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-full shadow-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                  See Success Stories
-                </Link>
+                <button className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-full border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-500/20 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                  <PlayCircle className="mr-3 h-6 w-6" />
+                  Watch Demo
+                </button>
               </div>
 
-              <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                <span>Join 100,000+ professionals landing more interviews</span>
+              <div className="flex items-center space-x-8 pt-4">
+                <div className="flex items-center">
+                  <div className="flex -space-x-2">
+                    {[
+                      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face&auto=format",
+                      "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face&auto=format",
+                      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face&auto=format"
+                    ].map((src, i) => (
+                      <img key={i} src={src} alt={`User ${i + 1}`} className="w-10 h-10 rounded-full border-2 border-white shadow-lg" />
+                    ))}
+                  </div>
+                  <div className="ml-4">
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star key={star} className="h-4 w-4 text-yellow-400 fill-current" />
+                      ))}
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                      4.9/5 from 2,000+ reviews
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="h-8 w-px bg-gray-300 dark:bg-gray-600"></div>
+                
+                <div className="flex items-center">
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Free to start • No credit card required
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-fuchsia-500 to-indigo-500 rounded-lg blur-lg opacity-60 animate-pulse"></div>
-              <div className="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl overflow-hidden">
-                <img 
-                  src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d" 
-                  alt="Resume optimization" 
-                  className="w-full h-auto object-cover"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-6">
-                  <div className="flex items-center">
-                    <div className="flex -space-x-2">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className={`w-8 h-8 rounded-full flex items-center justify-center bg-indigo-${i * 100 + 300}`}>
-                          <CheckCircle className="h-4 w-4 text-white" />
+            <div className="relative animate-fade-in">
+              {/* Floating cards showcasing features */}
+              <div className="relative">
+                <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500/20 to-purple-600/20 rounded-3xl blur-2xl"></div>
+                <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl shadow-2xl overflow-hidden">
+                  <div className="p-8">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
+                          <Target className="h-6 w-6 text-white" />
                         </div>
-                      ))}
+                        <div>
+                          <h3 className="font-bold text-gray-900 dark:text-white">ATS Score</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Real-time analysis</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-3xl font-bold text-green-600">94%</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Optimized</div>
+                      </div>
                     </div>
-                    <div className="ml-4">
-                      <div className="font-medium">Real-time ATS Analysis</div>
-                      <div className="text-sm opacity-80">See why you're being rejected</div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
+                        <span className="text-sm font-medium text-green-800 dark:text-green-300">Keywords Match</span>
+                        <span className="text-sm font-bold text-green-600">92%</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <span className="text-sm font-medium text-blue-800 dark:text-blue-300">Format Score</span>
+                        <span className="text-sm font-bold text-blue-600">98%</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800">
+                        <span className="text-sm font-medium text-purple-800 dark:text-purple-300">Impact Score</span>
+                        <span className="text-sm font-bold text-purple-600">91%</span>
+                      </div>
                     </div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-4 text-white">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold">Interview Prediction</p>
+                        <p className="text-sm opacity-90">Based on current optimization</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold">87%</div>
+                        <div className="text-sm opacity-90">Success Rate</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Floating stats */}
+              <div className="absolute -top-6 -left-6 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 animate-pulse">
+                <div className="flex items-center space-x-3">
+                  <TrendingUp className="h-8 w-8 text-green-500" />
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">5x</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">More Interviews</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="absolute -bottom-6 -right-6 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 animate-pulse delay-300">
+                <div className="flex items-center space-x-3">
+                  <Clock className="h-8 w-8 text-blue-500" />
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600">2 weeks</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">To Interview</div>
                   </div>
                 </div>
               </div>
@@ -571,246 +673,158 @@ const Index = () => {
           </div>
         </section>
 
-        {/* ATS Statistics Section */}
-        <section className="py-16 bg-indigo-50 dark:bg-gray-900">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">The Interview Success Gap</h2>
-              <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                Why most job seekers struggle while Resulient users thrive
+        {/* Enhanced Statistics Section */}
+        <section className="py-20 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 relative overflow-hidden">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-6">
+                Why Job Seekers Choose Resulient
+              </h2>
+              <p className="text-xl text-indigo-100 max-w-3xl mx-auto">
+                Real results from real professionals who transformed their job search
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
-                { stat: "2%", description: "Average interview rate for unoptimized resumes" },
-                { stat: "12%", description: "Interview rate for Resulient-optimized resumes" },
-                { stat: "5x", description: "More likely to get interviews with our optimization" },
-                { stat: "3 weeks", description: "Average time to first interview for our users" }
+                { stat: "5x", description: "More interview invitations", icon: Target },
+                { stat: "87%", description: "Success rate for our users", icon: TrendingUp },
+                { stat: "2 weeks", description: "Average time to first interview", icon: Clock },
+                { stat: "100k+", description: "Professionals transformed", icon: Users }
               ].map((item, index) => (
-                <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transform transition-all duration-300 hover:scale-105 border border-indigo-100 dark:border-indigo-900">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="text-4xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-2">{item.stat}</div>
-                    <p className="text-gray-600 dark:text-gray-300">{item.description}</p>
+                <div key={index} className="text-center group">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <item.icon className="h-8 w-8 text-white" />
                   </div>
+                  <div className="text-4xl sm:text-5xl font-extrabold text-white mb-2">{item.stat}</div>
+                  <p className="text-indigo-100 font-medium">{item.description}</p>
                 </div>
               ))}
-            </div>
-            
-            <div className="mt-12 text-center">
-              <button 
-                onClick={() => setShowStats(!showStats)}
-                className="inline-flex items-center px-4 py-2 text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
-              >
-                {showStats ? "Hide Details" : "Show More ATS Facts"} 
-                <ChevronDown className={`ml-2 h-5 w-5 transition-transform duration-300 ${showStats ? 'rotate-180' : 'rotate-0'}`} />
-              </button>
-              
-              {showStats && (
-                <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-indigo-100 dark:border-indigo-900 animate-fade-in">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="flex items-start">
-                      <Clock className="h-6 w-6 text-indigo-500 mr-3 flex-shrink-0 mt-1" />
-                      <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">Average Resume Review Time</h3>
-                        <p className="text-gray-600 dark:text-gray-300">Recruiters spend an average of just 6-7 seconds reviewing a resume that makes it past the ATS.</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <BarChart className="h-6 w-6 text-indigo-500 mr-3 flex-shrink-0 mt-1" />
-                      <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">Keyword Match Rate</h3>
-                        <p className="text-gray-600 dark:text-gray-300">Resumes with at least 60% keyword match rate are more likely to pass ATS screening.</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <Shield className="h-6 w-6 text-indigo-500 mr-3 flex-shrink-0 mt-1" />
-                      <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">Formatting Matters</h3>
-                        <p className="text-gray-600 dark:text-gray-300">Complex formatting, tables, and graphics can confuse ATS systems and cause immediate rejection.</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <Award className="h-6 w-6 text-indigo-500 mr-3 flex-shrink-0 mt-1" />
-                      <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">Success Rate Increase</h3>
-                        <p className="text-gray-600 dark:text-gray-300">Job seekers who optimize their resumes for ATS see up to 3x more interview invitations.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="py-16 bg-white dark:bg-gray-800">
+        {/* Enhanced Features Section */}
+        <section className="py-20 bg-white dark:bg-gray-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
-                <span className="block">Why Our Users Get 5x More Interviews</span>
+              <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl mb-6">
+                The Complete Interview-Winning System
               </h2>
-              <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Our technology doesn't just pass ATS filters—it creates compelling narratives 
-                that make recruiters eager to interview you.
+              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                We don't just optimize resumes—we engineer interview opportunities through proven psychological and technical strategies.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-12">
               {[
                 {
-                  icon: <FileText className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />,
-                  title: "Interview-Winning Formatting",
-                  description: "We don't just make your resume ATS-friendly—we structure it to capture recruiter attention in the critical first 6 seconds, dramatically increasing interview callbacks."
+                  icon: <Zap className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />,
+                  title: "ATS Domination",
+                  description: "Our advanced algorithms ensure your resume not only passes every ATS filter but ranks at the top of recruiter searches, guaranteeing human eyes see your application.",
+                  features: ["98% ATS pass rate", "Keyword optimization", "Format perfection"]
                 },
                 {
-                  icon: <PieChart className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />,
-                  title: "Compelling Content Optimization",
-                  description: "Our AI transforms your experience into compelling stories that resonate with hiring managers, making them excited to meet you and learn more about your potential."
+                  icon: <Target className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />,
+                  title: "Psychological Impact",
+                  description: "We craft compelling narratives that trigger recruiter psychology, making them think 'I MUST interview this person' within the critical first 6 seconds of review.",
+                  features: ["Story-driven content", "Impact metrics", "Achievement highlighting"]
                 },
                 {
-                  icon: <Users className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />,
-                  title: "Interview-Ready Positioning",
-                  description: "We strategically position your skills and achievements to address exactly what employers need, making you the obvious choice for an interview invitation."
+                  icon: <Rocket className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />,
+                  title: "Interview Acceleration",
+                  description: "Strategic positioning that addresses employer pain points directly, making you the obvious solution they've been searching for, leading to faster interview invitations.",
+                  features: ["Need-based positioning", "Gap analysis", "Solution framing"]
                 }
               ].map((feature, i) => (
-                <Card key={i} className="border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg group hover:-translate-y-2">
-                  <CardContent className="p-6 flex flex-col items-center text-center">
-                    <div className="rounded-full bg-indigo-100 dark:bg-indigo-900 p-3 mb-4 group-hover:bg-indigo-200 dark:group-hover:bg-indigo-800 transition-colors">
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{feature.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
-                  </CardContent>
-                </Card>
+                <div key={i} className="group relative">
+                  <div className="absolute -inset-2 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <Card className="relative border-2 border-gray-200 dark:border-gray-700 transition-all duration-500 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-2xl group-hover:-translate-y-2">
+                    <CardContent className="p-8">
+                      <div className="rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 p-4 mb-6 w-fit group-hover:scale-110 transition-transform duration-300">
+                        {feature.icon}
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{feature.title}</h3>
+                      <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">{feature.description}</p>
+                      <ul className="space-y-2">
+                        {feature.features.map((item, idx) => (
+                          <li key={idx} className="flex items-center">
+                            <CheckCircle className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
               ))}
-            </div>
-
-            {/* How It Works Section */}
-            <div className="mt-24">
-              <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-                How Resulient Works
-              </h2>
-              
-              <div className="relative">
-                {/* Timeline Connector */}
-                <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-indigo-200 dark:bg-indigo-800 transform -translate-x-1/2"></div>
-                
-                {/* Step 1 */}
-                <div className="relative md:grid md:grid-cols-2 md:gap-8 mb-12 md:mb-24">
-                  <div className="md:text-right md:pr-12">
-                    <div className="hidden md:block absolute right-0 top-6 w-12 h-0.5 bg-indigo-200 dark:bg-indigo-800"></div>
-                    <div className="hidden md:flex absolute right-0 top-0 transform translate-x-1/2 -translate-y-1/3 items-center justify-center w-12 h-12 rounded-full border-4 border-indigo-100 dark:border-indigo-900 bg-indigo-500 text-white">
-                      <span className="text-xl font-bold">1</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Upload Your Resume</h3>
-                    <p className="text-gray-600 dark:text-gray-300">Simply upload your existing resume in any format. Our system will parse and analyze your document.</p>
-                  </div>
-                  <div className="md:pl-12 mt-6 md:mt-0">
-                    <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-4 shadow-sm border border-indigo-100 dark:border-indigo-800">
-                      <img 
-                        src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" 
-                        alt="Uploading resume" 
-                        className="rounded-lg shadow-md w-full object-cover h-48"
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Step 2 */}
-                <div className="relative md:grid md:grid-cols-2 md:gap-8 mb-12 md:mb-24">
-                  <div className="md:pl-12 order-2 md:order-1">
-                    <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-4 shadow-sm border border-indigo-100 dark:border-indigo-800">
-                      <img 
-                        src="https://images.unsplash.com/photo-1460925895917-afdab827c52f" 
-                        alt="Deep Analysis" 
-                        className="rounded-lg shadow-md w-full object-cover h-48"
-                      />
-                    </div>
-                  </div>
-                  <div className="md:text-left md:pl-12 order-1 md:order-2">
-                    <div className="hidden md:block absolute left-0 top-6 w-12 h-0.5 bg-indigo-200 dark:bg-indigo-800"></div>
-                    <div className="hidden md:flex absolute left-0 top-0 transform -translate-x-1/2 -translate-y-1/3 items-center justify-center w-12 h-12 rounded-full border-4 border-indigo-100 dark:border-indigo-900 bg-indigo-500 text-white">
-                      <span className="text-xl font-bold">2</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Deep Analysis</h3>
-                    <p className="text-gray-600 dark:text-gray-300">Our advanced system compares your resume against the job description, analyzing keywords, formatting, and qualification matches.</p>
-                  </div>
-                </div>
-                
-                {/* Step 3 */}
-                <div className="relative md:grid md:grid-cols-2 md:gap-8">
-                  <div className="md:text-right md:pr-12">
-                    <div className="hidden md:block absolute right-0 top-6 w-12 h-0.5 bg-indigo-200 dark:bg-indigo-800"></div>
-                    <div className="hidden md:flex absolute right-0 top-0 transform translate-x-1/2 -translate-y-1/3 items-center justify-center w-12 h-12 rounded-full border-4 border-indigo-100 dark:border-indigo-900 bg-indigo-500 text-white">
-                      <span className="text-xl font-bold">3</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Get Optimized Results</h3>
-                    <p className="text-gray-600 dark:text-gray-300">Receive your ATS-optimized resume, complete with scores, improvement suggestions, and qualification gap analysis.</p>
-                  </div>
-                  <div className="md:pl-12 mt-6 md:mt-0">
-                    <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-4 shadow-sm border border-indigo-100 dark:border-indigo-800">
-                      <img 
-                        src="https://images.unsplash.com/photo-1498050108023-c5249f4df085" 
-                        alt="Optimized results" 
-                        className="rounded-lg shadow-md w-full object-cover h-48"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </section>
 
-        {/* Testimonials */}
-        <section className="py-16 bg-indigo-50 dark:bg-gray-900">
+        {/* Enhanced Testimonials Section */}
+        <section className="py-20 bg-gradient-to-br from-gray-50 to-indigo-50 dark:from-gray-900 dark:to-indigo-950">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-                Real Results from Real Professionals
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-6">
+                Success Stories That Inspire
               </h2>
-              <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                See how Resulient transformed their job search from months of rejection to multiple interview offers.
+              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                From rejection to multiple offers—see how professionals transformed their careers with Resulient
               </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
               {testimonials.map((testimonial, i) => (
-                <Card key={i} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md">
-                  <CardContent className="p-6">
-                    <div className="flex mb-4">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star key={star} className="h-5 w-5 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300 italic mb-4">"{testimonial.quote}"</p>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{testimonial.author}</p>
-                  </CardContent>
-                </Card>
+                <div key={i} className="group relative">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <Card className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-xl group-hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2">
+                    <CardContent className="p-8">
+                      <div className="flex mb-6">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star key={star} className="h-5 w-5 text-yellow-400 fill-current" />
+                        ))}
+                      </div>
+                      <blockquote className="text-gray-700 dark:text-gray-300 italic mb-6 leading-relaxed">
+                        "{testimonial.quote}"
+                      </blockquote>
+                      <div className="flex items-center">
+                        <img 
+                          src={testimonial.avatar} 
+                          alt={testimonial.author}
+                          className="w-12 h-12 rounded-full border-2 border-indigo-200 dark:border-indigo-700 mr-4"
+                        />
+                        <div>
+                          <p className="font-bold text-gray-900 dark:text-white">{testimonial.author}</p>
+                          <p className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">Now at {testimonial.company}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* FAQ Section */}
-        <section className="py-16 bg-white dark:bg-gray-800">
+        {/* Enhanced FAQ Section */}
+        <section className="py-20 bg-white dark:bg-gray-900">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-                Frequently Asked Questions
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-6">
+                Everything You Need to Know
               </h2>
-              <p className="mt-4 text-gray-600 dark:text-gray-300">
-                Everything you need to know about landing more interviews with Resulient
+              <p className="text-xl text-gray-600 dark:text-gray-300">
+                Get answers to the most common questions about transforming your job search
               </p>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-6">
               {[
                 {
                   question: "How does Resulient increase my interview rate by 5x?",
-                  answer: "Resulient combines ATS optimization with human psychology. While other tools only focus on getting past automated filters, we optimize your resume to capture recruiter attention and create compelling narratives that make hiring managers excited to interview you. Our users typically see interview rates jump from 2% to 10-15%."
+                  answer: "Resulient combines advanced ATS optimization with psychological persuasion techniques. While other tools only focus on getting past automated filters, we optimize your resume to capture recruiter attention and create compelling narratives that make hiring managers excited to interview you. Our users typically see interview rates jump from 2% to 10-15%."
                 },
                 {
                   question: "What makes Resulient different from other resume tools?",
@@ -829,31 +843,62 @@ const Index = () => {
                   answer: "Career changers and people with employment gaps see some of our best results! We excel at reframing your background to highlight transferable skills and positioning any gaps as strategic career moves. Our optimization helps you compete confidently in new industries."
                 }
               ].map((faq, i) => (
-                <div key={i} className="bg-indigo-50 dark:bg-indigo-900/30 rounded-lg p-6 border border-indigo-100 dark:border-indigo-800">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{faq.question}</h3>
-                  <p className="text-gray-600 dark:text-gray-300">{faq.answer}</p>
+                <div key={i} className="group">
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 rounded-2xl p-8 border border-indigo-100 dark:border-indigo-800 transition-all duration-300 hover:shadow-lg group-hover:border-indigo-300 dark:group-hover:border-indigo-600">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center mr-4 text-white font-bold text-sm">
+                        {i + 1}
+                      </div>
+                      {faq.question}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-12">{faq.answer}</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-extrabold sm:text-4xl mb-6">
-              Ready to 5x Your Interview Rate?
-            </h2>
-            <p className="text-xl text-indigo-100 max-w-2xl mx-auto mb-8">
-              Join over 100,000 professionals who have transformed their job search from months of silence to multiple interview offers with Resulient's proven optimization system.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/auth" className="px-8 py-3 border-2 border-white text-white font-bold rounded-full hover:bg-white hover:text-indigo-600 transition-all duration-300 transform hover:scale-105">
-                Start Getting Interviews Today
-              </Link>
-              <Link to="/blog" className="px-8 py-3 bg-white text-indigo-600 font-bold rounded-full hover:bg-opacity-90 transition-all duration-300">
-                Read Success Stories <BookOpen className="inline-block ml-2 h-5 w-5" />
-              </Link>
+        {/* Enhanced CTA Section */}
+        <section className="py-24 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 relative overflow-hidden">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+          </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-5xl sm:text-6xl font-extrabold text-white mb-8">
+                Ready to Transform Your Career?
+              </h2>
+              <p className="text-2xl text-indigo-100 mb-12 leading-relaxed">
+                Join over 100,000 professionals who went from <span className="font-bold text-red-300">job search frustration</span> to 
+                <span className="font-bold text-green-300"> multiple interview offers</span> with Resulient's proven system.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-6 mb-12">
+                <Link to="/auth" className="group inline-flex items-center justify-center px-12 py-5 text-xl font-bold rounded-full bg-white text-indigo-600 hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-white/25">
+                  Start Your Transformation
+                  <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link to="/blog" className="inline-flex items-center justify-center px-12 py-5 text-xl font-bold rounded-full border-2 border-white text-white hover:bg-white hover:text-indigo-600 transition-all duration-300 transform hover:scale-105">
+                  Read Success Stories 
+                  <BookOpen className="ml-3 h-6 w-6" />
+                </Link>
+              </div>
+              <div className="flex items-center justify-center space-x-8 text-indigo-100">
+                <div className="flex items-center">
+                  <CheckCircle className="h-6 w-6 mr-2" />
+                  <span className="font-medium">Free to start</span>
+                </div>
+                <div className="flex items-center">
+                  <CheckCircle className="h-6 w-6 mr-2" />
+                  <span className="font-medium">No credit card required</span>
+                </div>
+                <div className="flex items-center">
+                  <CheckCircle className="h-6 w-6 mr-2" />
+                  <span className="font-medium">Results in 2 weeks</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
