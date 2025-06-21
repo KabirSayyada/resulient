@@ -251,7 +251,7 @@ const Index = () => {
     {
       quote: "I was getting rejected immediately after submitting applications. After using Resulient, my interview rate increased by 400%. I got callbacks from companies that previously ignored me, and landed my dream job in 6 weeks.",
       author: "Sarah K., Marketing Director",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face&auto=format",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&h=64&fit=crop&crop=face&auto=format",
       company: "Meta"
     },
     {
@@ -539,28 +539,28 @@ const Index = () => {
                 <div className="flex flex-col space-y-4">
                   <Link 
                     to="/blog" 
-                    className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium transition-colors"
+                    className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium transition-colors px-2 py-1"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Blog
                   </Link>
                   <Link 
                     to="/pricing" 
-                    className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium transition-colors"
+                    className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium transition-colors px-2 py-1"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Pricing
                   </Link>
                   <Link 
                     to="/auth" 
-                    className="inline-flex items-center justify-center font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 px-3 py-2 transition-colors"
+                    className="inline-flex items-center justify-center font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 px-3 py-2 transition-colors border border-indigo-200 dark:border-indigo-700 rounded-lg"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Login
                   </Link>
                   <Link 
                     to="/auth" 
-                    className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-bold rounded-full shadow-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300"
+                    className="inline-flex items-center justify-center px-4 py-3 border border-transparent text-sm font-bold rounded-full shadow-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 mx-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Start Free Trial
@@ -602,18 +602,14 @@ const Index = () => {
                   Start Getting Interviews
                   <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <button className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-full border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-500/20 transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                  <PlayCircle className="mr-3 h-6 w-6" />
-                  Watch Demo
-                </button>
               </div>
 
-              <div className="flex items-center space-x-8 pt-4">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-8 pt-4">
                 <div className="flex items-center">
                   <div className="flex -space-x-2">
                     {[
                       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face&auto=format",
-                      "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face&auto=format",
+                      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face&auto=format",
                       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face&auto=format"
                     ].map((src, i) => (
                       <img key={i} src={src} alt={`User ${i + 1}`} className="w-10 h-10 rounded-full border-2 border-white shadow-lg" />
@@ -631,7 +627,7 @@ const Index = () => {
                   </div>
                 </div>
                 
-                <div className="h-8 w-px bg-gray-300 dark:bg-gray-600"></div>
+                <div className="hidden sm:block h-8 w-px bg-gray-300 dark:bg-gray-600"></div>
                 
                 <div className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
