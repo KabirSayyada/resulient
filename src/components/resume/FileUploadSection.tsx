@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,7 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
   const [showUploadSuccess, setShowUploadSuccess] = useState(false);
   const [inputMode, setInputMode] = useState<"pasted" | "uploaded" | "idle">("idle");
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const extractTextFromPdf = async (file: File) => {
     try {
@@ -168,6 +169,10 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
     }
   };
 
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setResumeContent(e.target.value);
     setInputMode("pasted");
@@ -218,18 +223,20 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
                 Drag and drop or click to browse
               </p>
             </div>
-            <label className="cursor-pointer">
-              <Button className="bg-green-600 hover:bg-green-700 text-white">
-                <Upload className="h-4 w-4 mr-2" />
-                Choose File
-              </Button>
-              <input
-                type="file"
-                className="hidden"
-                accept=".pdf,.txt"
-                onChange={handleFileUpload}
-              />
-            </label>
+            <Button 
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={handleButtonClick}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Choose File
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept=".pdf,.txt"
+              onChange={handleFileUpload}
+            />
             <p className="text-xs text-green-500 dark:text-green-400">
               Supports PDF and TXT files
             </p>
