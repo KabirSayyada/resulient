@@ -134,8 +134,15 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("File upload triggered");
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log("No file selected");
+      return;
+    }
+    
+    console.log("File selected:", file.name, file.type);
+    
     try {
       setUploadStatus("Processing file...");
       let text = "";
@@ -167,10 +174,23 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
         variant: "destructive",
       });
     }
+    
+    // Reset the input value so the same file can be selected again
+    if (event.target) {
+      event.target.value = '';
+    }
   };
 
   const handleButtonClick = () => {
-    fileInputRef.current?.click();
+    console.log("Choose File button clicked");
+    console.log("File input ref:", fileInputRef.current);
+    
+    if (fileInputRef.current) {
+      console.log("Triggering file input click");
+      fileInputRef.current.click();
+    } else {
+      console.error("File input ref is null");
+    }
   };
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -224,6 +244,7 @@ export const FileUploadSection = ({ resumeContent, setResumeContent }: FileUploa
               </p>
             </div>
             <Button 
+              type="button"
               className="bg-green-600 hover:bg-green-700 text-white"
               onClick={handleButtonClick}
             >
