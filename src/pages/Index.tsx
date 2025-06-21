@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -28,7 +27,7 @@ import { SubscriptionTierIndicator } from "@/components/subscription/Subscriptio
 import { Helmet } from "react-helmet-async";
 import { Card, CardContent } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowRight, BookOpen, CheckCircle, ChevronDown, FileText, Star, Clock, BarChart, Users, Shield, Award, PieChart, Diamond, Zap, Target, TrendingUp, Rocket, PlayCircle } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle, ChevronDown, FileText, Star, Clock, BarChart, Users, Shield, Award, PieChart, Diamond, Zap, Target, TrendingUp, Rocket, PlayCircle, Menu, X } from "lucide-react";
 import { useReferralTracking } from "@/hooks/useReferralTracking";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
 
@@ -39,6 +38,9 @@ const Index = () => {
   const { subscription } = useSubscription();
   const { usage, checkUsage, showLimitReachedMessage } = useUsageLimits();
   const isMobile = useIsMobile();
+
+  // Mobile menu state for landing page
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Initialize referral tracking
   useReferralTracking();
@@ -501,11 +503,13 @@ const Index = () => {
                   Resulient
                 </span>
               </div>
-              <div className="flex gap-2 items-center">
-                <Link to="/blog" className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium mx-3 hidden sm:block transition-colors">
+              
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex gap-2 items-center">
+                <Link to="/blog" className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium mx-3 transition-colors">
                   Blog
                 </Link>
-                <Link to="/pricing" className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium mx-3 hidden sm:block transition-colors">
+                <Link to="/pricing" className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium mx-3 transition-colors">
                   Pricing
                 </Link>
                 <Link to="/auth" className="inline-flex items-center font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 px-3 py-2 transition-colors">
@@ -514,9 +518,56 @@ const Index = () => {
                 <Link to="/auth" className="ml-2 inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-full shadow-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
                   Start Free Trial
                 </Link>
-                <UserMenuWithTheme />
+              </div>
+
+              {/* Mobile Navigation */}
+              <div className="md:hidden flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="p-2"
+                >
+                  {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </Button>
               </div>
             </div>
+
+            {/* Mobile Menu */}
+            {mobileMenuOpen && (
+              <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex flex-col space-y-4">
+                  <Link 
+                    to="/blog" 
+                    className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Blog
+                  </Link>
+                  <Link 
+                    to="/pricing" 
+                    className="text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 font-medium transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Pricing
+                  </Link>
+                  <Link 
+                    to="/auth" 
+                    className="inline-flex items-center justify-center font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 px-3 py-2 transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Login
+                  </Link>
+                  <Link 
+                    to="/auth" 
+                    className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-bold rounded-full shadow-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Start Free Trial
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </header>
 
@@ -531,11 +582,6 @@ const Index = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center relative">
             <div className="space-y-8 animate-fade-in">
               <div className="space-y-6">
-                <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 border border-indigo-200 dark:border-indigo-800 rounded-full">
-                  <Zap className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-2" />
-                  <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Used by 100,000+ professionals</span>
-                </div>
-                
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-gray-900 dark:text-white leading-tight">
                   Land Your
                   <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 animate-pulse">
@@ -691,7 +737,7 @@ const Index = () => {
                 { stat: "5x", description: "More interview invitations", icon: Target },
                 { stat: "87%", description: "Success rate for our users", icon: TrendingUp },
                 { stat: "2 weeks", description: "Average time to first interview", icon: Clock },
-                { stat: "100k+", description: "Professionals transformed", icon: Users }
+                { stat: "50k+", description: "Professionals transformed", icon: Users }
               ].map((item, index) => (
                 <div key={index} className="text-center group">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -771,8 +817,8 @@ const Index = () => {
                 Success Stories That Inspire
               </h2>
               <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                From rejection to multiple offers—see how professionals transformed their careers with Resulient
-              </p>
+                  From rejection to multiple offers—see how professionals transformed their careers with Resulient
+                </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
@@ -872,17 +918,13 @@ const Index = () => {
                 Ready to Transform Your Career?
               </h2>
               <p className="text-2xl text-indigo-100 mb-12 leading-relaxed">
-                Join over 100,000 professionals who went from <span className="font-bold text-red-300">job search frustration</span> to 
+                Join thousands of professionals who went from <span className="font-bold text-red-300">job search frustration</span> to 
                 <span className="font-bold text-green-300"> multiple interview offers</span> with Resulient's proven system.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-6 mb-12">
                 <Link to="/auth" className="group inline-flex items-center justify-center px-12 py-5 text-xl font-bold rounded-full bg-white text-indigo-600 hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-white/25">
                   Start Your Transformation
                   <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link to="/blog" className="inline-flex items-center justify-center px-12 py-5 text-xl font-bold rounded-full border-2 border-white text-white hover:bg-white hover:text-indigo-600 transition-all duration-300 transform hover:scale-105">
-                  Read Success Stories 
-                  <BookOpen className="ml-3 h-6 w-6" />
                 </Link>
               </div>
               <div className="flex items-center justify-center space-x-8 text-indigo-100">
