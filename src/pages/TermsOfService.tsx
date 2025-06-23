@@ -19,7 +19,7 @@ const TermsOfService = () => {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">1. Introduction</h2>
           <p className="text-gray-800 dark:text-gray-300">Welcome to Resulient ("we," "our," "us," or the "Company"). These Terms of Service govern your access to and use of the Resulient website and services.</p>
           
-          <p className="text-gray-800 dark:text-gray-300">Resulient is owned and operated by Kabir Garba Ringim as a sole proprietorship.</p>
+          <p className="text-gray-800 dark:text-gray-300">Resulient is a corporation registered in the state of Delaware, with operations based in California. Our services are provided from California, and California state laws govern these terms where applicable.</p>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 mt-8">2. Service Description</h2>
           <p className="text-gray-800 dark:text-gray-300">Resulient is a Software as a Service (SaaS) platform that provides AI-powered resume optimization services. Our platform helps users improve their resumes for better performance with Applicant Tracking Systems (ATS).</p>
@@ -37,7 +37,7 @@ const TermsOfService = () => {
           <p className="text-gray-800 dark:text-gray-300">To access our services, you must create an account and agree to these terms. You are responsible for maintaining the confidentiality of your account credentials.</p>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 mt-8">5. Intellectual Property</h2>
-          <p className="text-gray-800 dark:text-gray-300">All content, features, and functionality of the Resulient service are owned by Kabir Garba Ringim and are protected by international copyright, trademark, and other intellectual property laws.</p>
+          <p className="text-gray-800 dark:text-gray-300">All content, features, and functionality of the Resulient service are owned by the Company and are protected by international copyright, trademark, and other intellectual property laws.</p>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 mt-8">6. Acceptable Use</h2>
           <p className="text-gray-800 dark:text-gray-300">You agree not to:</p>
@@ -48,14 +48,17 @@ const TermsOfService = () => {
             <li>Share your account credentials with others</li>
           </ul>
 
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 mt-8">7. Termination</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 mt-8">7. Governing Law</h2>
+          <p className="text-gray-800 dark:text-gray-300">These Terms of Service are governed by the laws of the State of California and the State of Delaware, where applicable. Any disputes arising from these terms will be resolved in accordance with California state law.</p>
+
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 mt-8">8. Termination</h2>
           <p className="text-gray-800 dark:text-gray-300">We reserve the right to terminate or suspend your account for violations of these terms or for any other reason at our sole discretion.</p>
 
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 mt-8">8. Changes to Terms</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 mt-8">9. Changes to Terms</h2>
           <p className="text-gray-800 dark:text-gray-300">We may modify these terms at any time. Continued use of our service constitutes acceptance of any modifications.</p>
 
           <div className="mt-8 space-x-4">
-            <Link to="/privacy-policy" className="text-primary hover:underline">Privacy Policy</Link>
+            <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
             <span className="text-gray-300 dark:text-gray-700">|</span>
             <Link to="/refund-policy" className="text-primary hover:underline">Refund Policy</Link>
           </div>

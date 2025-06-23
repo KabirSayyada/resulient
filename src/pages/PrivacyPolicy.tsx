@@ -67,7 +67,7 @@ const PrivacyPolicy = () => {
           <p className="text-gray-800 dark:text-gray-300">For privacy-related questions, please contact our Data Protection Officer at privacy@resulient.com</p>
 
           <div className="mt-8 space-x-4">
-            <Link to="/terms-of-service" className="text-primary hover:underline">Terms of Service</Link>
+            <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
             <span className="text-gray-300 dark:text-gray-700">|</span>
             <Link to="/refund-policy" className="text-primary hover:underline">Refund Policy</Link>
           </div>

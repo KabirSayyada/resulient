@@ -52,9 +52,9 @@ const RefundPolicy = () => {
           </ul>
 
           <div className="mt-8 space-x-4">
-            <Link to="/terms-of-service" className="text-primary hover:underline">Terms of Service</Link>
+            <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
             <span className="text-gray-300 dark:text-gray-700">|</span>
-            <Link to="/privacy-policy" className="text-primary hover:underline">Privacy Policy</Link>
+            <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
           </div>
         </section>
       </div>
