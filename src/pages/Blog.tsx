@@ -7,11 +7,13 @@ import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Helmet } from 'react-helmet-async';
-import { Search, FileText, ArrowLeft } from 'lucide-react';
+import { Search, FileText, ArrowLeft, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Blog() {
   const { posts, isLoading, error } = useBlogPosts();
+  const { isAdmin } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredPosts = posts.filter(post => {
@@ -40,13 +42,26 @@ export default function Blog() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header with back button */}
           <div className="mb-8">
-            <Link 
-              to="/" 
-              className="inline-flex items-center text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium mb-4 transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Link>
+            <div className="flex items-center justify-between mb-4">
+              <Link 
+                to="/" 
+                className="inline-flex items-center text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </Link>
+              
+              {/* Admin link - only visible to admin users */}
+              {isAdmin() && (
+                <Link 
+                  to="/blog/admin" 
+                  className="inline-flex items-center text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Blog Admin
+                </Link>
+              )}
+            </div>
             
             <div className="flex items-center justify-between">
               <div>
