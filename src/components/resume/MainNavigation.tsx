@@ -1,4 +1,3 @@
-
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -179,10 +178,16 @@ export function MainNavigation() {
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
-              {user && (
+              {!user && (
                 <NavigationMenuItem>
-                  <NavigationMenuContent>
-                  </NavigationMenuContent>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to="/auth"
+                      className={navigationMenuTriggerStyle()}
+                    >
+                      Sign In
+                    </Link>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
               )}
             </NavigationMenuList>
