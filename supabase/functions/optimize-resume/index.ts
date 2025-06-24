@@ -36,20 +36,31 @@ serve(async (req) => {
     As an expert ATS optimization specialist, optimize this resume against the job description with STRICT LIMITATIONS on what you can add or modify.
 
     CRITICAL RULES - DO NOT VIOLATE:
-    1. NEVER add sections that don't exist in the original resume (Education, Certifications, specific companies, degrees, etc.)
+    1. NEVER add sections that don't exist in the original resume (Certifications, specific companies, degrees, etc.)
     2. NEVER add placeholder text like "[Company Name]", "[Year]", "[Certification Name]", "TBD", etc.
     3. NEVER invent specific experiences, companies, schools, certifications, or achievements
     4. NEVER add sensitive information like specific workplace names, educational institutions, or credentials not mentioned
     5. ONLY enhance and rewrite existing content for better ATS compatibility
     6. ONLY add general, non-sensitive sections if they don't exist but are crucial (like TECHNICAL SKILLS)
 
+    VERY IMPORTANT - JOB DESCRIPTION ALIGNMENT:
+    - It is CRITICAL that you integrate skills, technologies, and requirements from the job description into the existing resume content
+    - Add relevant keywords from the job description naturally into existing work experiences and skills sections
+    - If the job description mentions specific tools, technologies, or methodologies that the candidate could reasonably have used, incorporate them into existing roles
+    - Enhance existing bullet points to reflect the language and requirements found in the job description
+    - Make sure the resume speaks the same "language" as the job posting
+    - Focus heavily on matching the job requirements through existing experience enhancement
+    - EXCEPTION: Do NOT add education requirements that are missing from the original resume - overlook educational gaps entirely
+
     WHAT YOU CAN DO:
     - Rewrite existing bullet points with stronger action verbs and quantified results
     - Reorganize existing content for better ATS readability
-    - Add relevant keywords from job description to existing experiences (naturally)
+    - Add relevant keywords from job description to existing experiences (naturally and extensively)
     - Improve formatting with standard ATS section headers
-    - Add a TECHNICAL SKILLS section if it doesn't exist (using only skills mentioned in existing content)
+    - Add a TECHNICAL SKILLS section if it doesn't exist (using skills mentioned in existing content AND from job description)
     - Enhance existing achievements with better formatting and stronger language
+    - Integrate job description requirements into existing work experience descriptions
+    - Add technologies, tools, and methodologies from job description to existing roles where logical
 
     MANDATORY ATS FORMATTING:
     1. Use ONLY these standardized section headers (exactly as written):
@@ -68,10 +79,11 @@ serve(async (req) => {
        - Consistent spacing between sections
 
     3. Content enhancement rules:
-       - Match keywords from job description naturally within existing experiences
+       - Match keywords from job description naturally within existing experiences (this is VERY important)
        - Quantify existing achievements with numbers/percentages where logical
        - Use strong action verbs for existing responsibilities
        - Ensure ATS-friendly formatting (no special characters, tables, or complex formatting)
+       - Heavily incorporate job description language and requirements into existing content
 
     EXAMPLE of what NOT to do:
     ❌ Adding "CERTIFICATIONS" section if none exist in original
@@ -80,11 +92,12 @@ serve(async (req) => {
     ❌ Adding placeholder companies like "[Previous Company] - Software Developer"
 
     EXAMPLE of what TO do:
-    ✅ Rewriting "Worked on software projects" to "Developed and maintained software applications, improving system performance by implementing efficient algorithms"
-    ✅ Adding TECHNICAL SKILLS section with "JavaScript, Python, SQL" if these are mentioned in existing experience
-    ✅ Improving "Managed team" to "Led cross-functional team of 5 developers, resulting in 25% faster project delivery"
+    ✅ Rewriting "Worked on software projects" to "Developed and maintained software applications using React and Node.js (from job description), improving system performance by implementing efficient algorithms"
+    ✅ Adding TECHNICAL SKILLS section with "JavaScript, Python, SQL, Docker, Kubernetes" if these are mentioned in job description and align with existing experience
+    ✅ Improving "Managed team" to "Led cross-functional team of 5 developers using Agile methodologies (from job description), resulting in 25% faster project delivery"
+    ✅ Adding job description technologies to existing roles: "Built web applications using React, TypeScript, and AWS services"
 
-    After optimizing, identify any missing qualifications from the job description that the candidate would need to genuinely acquire (don't suggest adding fake credentials).
+    After optimizing, identify any missing qualifications from the job description that the candidate would need to genuinely acquire (don't suggest adding fake credentials). IGNORE missing education requirements entirely.
 
     Job Description:
     ${jobDescription}
@@ -94,7 +107,7 @@ serve(async (req) => {
 
     Please respond with a JSON object containing the optimized resume and qualification gaps:
     {
-      "optimizedResume": "the conservatively optimized resume content with proper ATS formatting",
+      "optimizedResume": "the conservatively optimized resume content with proper ATS formatting and heavy integration of job description requirements",
       "qualificationGaps": [
         {
           "skill": "qualification name",
@@ -111,7 +124,7 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: "You are an expert ATS optimization specialist. You MUST be conservative and never add sensitive information, placeholders, or sections that don't exist in the original resume. Focus on enhancing existing content only. Always respond with valid JSON format. ENSURE the optimizedResume field contains the complete, full resume content without any truncation."
+          content: "You are an expert ATS optimization specialist. You MUST be conservative and never add sensitive information, placeholders, or sections that don't exist in the original resume. Focus on enhancing existing content only while heavily integrating job description requirements. Always respond with valid JSON format. ENSURE the optimizedResume field contains the complete, full resume content without any truncation. It is CRITICAL to integrate job description skills and requirements into existing resume content."
         },
         {
           role: "user",
@@ -143,7 +156,7 @@ serve(async (req) => {
       throw new Error('Failed to generate complete analysis - missing required fields');
     }
 
-    console.log('Successfully generated conservative resume optimization');
+    console.log('Successfully generated conservative resume optimization with job description integration');
     console.log(`Found ${response.qualificationGaps.length} genuine qualification gaps`);
 
     // Enhanced cleaning to ensure complete content preservation
