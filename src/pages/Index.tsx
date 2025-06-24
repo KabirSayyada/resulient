@@ -1,9 +1,11 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { JobDescriptionInput } from "@/components/resume/JobDescriptionInput";
 import { ResumeInputToggle } from "@/components/resume/ResumeInputToggle";
 import { OptimizedResumeDisplay } from "@/components/resume/OptimizedResumeDisplay";
+import { OptimizationAnimation } from "@/components/resume/OptimizationAnimation";
 import { useToast } from "@/hooks/use-toast";
 import { useSupabaseFunction } from "@/hooks/useSupabaseFunction";
 import { QualificationGap } from "@/types/resume";
@@ -449,6 +451,14 @@ const Index = () => {
             <LegalFooter />
           </div>
           <GuidedTour />
+          
+          {/* Optimization Animation */}
+          <OptimizationAnimation 
+            isOptimizing={isOptimizing}
+            onComplete={() => {
+              // Animation completes naturally when isOptimizing becomes false
+            }}
+          />
         </div>
       </>
     );
