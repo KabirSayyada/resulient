@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import OpenAI from "https://esm.sh/openai@4.20.1"
 
@@ -52,8 +51,17 @@ serve(async (req) => {
     - Focus heavily on matching the job requirements through existing experience enhancement
     - EXCEPTION: Do NOT add education requirements that are missing from the original resume - overlook educational gaps entirely
 
+    EXPERIENCE SECTION ENHANCEMENTS - IMPORTANT:
+    - You CAN add quantified achievements (numbers, percentages, metrics) to existing experience even if not in the original resume
+    - Add realistic performance metrics that would be typical for the role (e.g., "improved efficiency by 25%", "managed team of 5", "processed 100+ requests daily")
+    - Include impact measurements like cost savings, time reductions, accuracy improvements, or productivity gains
+    - Add project scale indicators (budget sizes, team sizes, timeframes, volume handled)
+    - These quantifications should be reasonable and industry-standard for the type of work described
+    - Focus on adding metrics that directly relate to the job description requirements
+
     WHAT YOU CAN DO:
     - Rewrite existing bullet points with stronger action verbs and quantified results
+    - Add realistic numbers, percentages, and metrics to existing experience descriptions
     - Reorganize existing content for better ATS readability
     - Add relevant keywords from job description to existing experiences (naturally and extensively)
     - Improve formatting with standard ATS section headers
@@ -61,6 +69,7 @@ serve(async (req) => {
     - Enhance existing achievements with better formatting and stronger language
     - Integrate job description requirements into existing work experience descriptions
     - Add technologies, tools, and methodologies from job description to existing roles where logical
+    - Include quantified impact metrics in experience sections to demonstrate value
 
     MANDATORY ATS FORMATTING:
     1. Use ONLY these standardized section headers (exactly as written):
@@ -81,6 +90,7 @@ serve(async (req) => {
     3. Content enhancement rules:
        - Match keywords from job description naturally within existing experiences (this is VERY important)
        - Quantify existing achievements with numbers/percentages where logical
+       - Add realistic metrics and performance indicators to experience sections
        - Use strong action verbs for existing responsibilities
        - Ensure ATS-friendly formatting (no special characters, tables, or complex formatting)
        - Heavily incorporate job description language and requirements into existing content
@@ -92,10 +102,11 @@ serve(async (req) => {
     ❌ Adding placeholder companies like "[Previous Company] - Software Developer"
 
     EXAMPLE of what TO do:
-    ✅ Rewriting "Worked on software projects" to "Developed and maintained software applications using React and Node.js (from job description), improving system performance by implementing efficient algorithms"
+    ✅ Rewriting "Worked on software projects" to "Developed and maintained 15+ software applications using React and Node.js (from job description), improving system performance by 40% through efficient algorithm implementation"
     ✅ Adding TECHNICAL SKILLS section with "JavaScript, Python, SQL, Docker, Kubernetes" if these are mentioned in job description and align with existing experience
-    ✅ Improving "Managed team" to "Led cross-functional team of 5 developers using Agile methodologies (from job description), resulting in 25% faster project delivery"
-    ✅ Adding job description technologies to existing roles: "Built web applications using React, TypeScript, and AWS services"
+    ✅ Improving "Managed team" to "Led cross-functional team of 8 developers using Agile methodologies (from job description), resulting in 25% faster project delivery and 95% on-time completion rate"
+    ✅ Adding job description technologies to existing roles: "Built 20+ web applications using React, TypeScript, and AWS services, serving 10,000+ daily active users"
+    ✅ Enhancing "Customer service experience" to "Delivered exceptional customer service to 150+ clients weekly, achieving 98% satisfaction rating and reducing response time by 30%"
 
     After optimizing, identify any missing qualifications from the job description that the candidate would need to genuinely acquire (don't suggest adding fake credentials). IGNORE missing education requirements entirely.
 
@@ -107,7 +118,7 @@ serve(async (req) => {
 
     Please respond with a JSON object containing the optimized resume and qualification gaps:
     {
-      "optimizedResume": "the conservatively optimized resume content with proper ATS formatting and heavy integration of job description requirements",
+      "optimizedResume": "the conservatively optimized resume content with proper ATS formatting and heavy integration of job description requirements with quantified achievements",
       "qualificationGaps": [
         {
           "skill": "qualification name",
@@ -124,7 +135,7 @@ serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: "You are an expert ATS optimization specialist. You MUST be conservative and never add sensitive information, placeholders, or sections that don't exist in the original resume. Focus on enhancing existing content only while heavily integrating job description requirements. Always respond with valid JSON format. ENSURE the optimizedResume field contains the complete, full resume content without any truncation. It is CRITICAL to integrate job description skills and requirements into existing resume content."
+          content: "You are an expert ATS optimization specialist. You MUST be conservative and never add sensitive information, placeholders, or sections that don't exist in the original resume. Focus on enhancing existing content only while heavily integrating job description requirements. You CAN add realistic quantified metrics to experience sections. Always respond with valid JSON format. ENSURE the optimizedResume field contains the complete, full resume content without any truncation. It is CRITICAL to integrate job description skills and requirements into existing resume content."
         },
         {
           role: "user",
