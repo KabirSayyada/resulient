@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Progress } from "@/components/ui/progress";
 import { 
@@ -30,36 +31,42 @@ const optimizationStages = [
     icon: FileText,
     title: "Analyzing Resume",
     description: "Parsing your experience and skills",
+    duration: 2000,
     color: "from-blue-500 to-cyan-500"
   },
   {
     icon: Search,
     title: "Processing Job Description",
     description: "Identifying key requirements and keywords",
+    duration: 1800,
     color: "from-purple-500 to-indigo-500"
   },
   {
     icon: Brain,
     title: "AI Optimization Engine",
     description: "Matching your profile to job requirements",
+    duration: 2200,
     color: "from-pink-500 to-rose-500"
   },
   {
     icon: Target,
     title: "ATS Compatibility Check",
     description: "Ensuring maximum ATS pass-through rate",
+    duration: 1500,
     color: "from-green-500 to-emerald-500"
   },
   {
     icon: BarChart3,
     title: "Performance Analysis",
     description: "Calculating optimization scores",
+    duration: 1200,
     color: "from-orange-500 to-amber-500"
   },
   {
     icon: Sparkles,
     title: "Final Polish",
     description: "Adding finishing touches",
+    duration: 1000,
     color: "from-violet-500 to-purple-500"
   }
 ];
@@ -69,36 +76,42 @@ const scoringStages = [
     icon: FileText,
     title: "Analyzing Resume Structure",
     description: "Evaluating format and content organization",
+    duration: 2000,
     color: "from-blue-500 to-cyan-500"
   },
   {
     icon: Users,
     title: "Industry Benchmarking",
     description: "Comparing against thousands of similar profiles",
+    duration: 2200,
     color: "from-purple-500 to-indigo-500"
   },
   {
     icon: Brain,
     title: "AI Skills Assessment",
     description: "Evaluating technical and soft skills depth",
+    duration: 1800,
     color: "from-pink-500 to-rose-500"
   },
   {
     icon: Award,
     title: "Achievement Analysis",
     description: "Scoring quantifiable accomplishments",
+    duration: 1500,
     color: "from-green-500 to-emerald-500"
   },
   {
     icon: Calculator,
     title: "Score Calculation",
     description: "Computing percentile rankings",
+    duration: 1200,
     color: "from-orange-500 to-amber-500"
   },
   {
     icon: TrendingUp,
     title: "Generating Insights",
     description: "Creating improvement recommendations",
+    duration: 1000,
     color: "from-violet-500 to-purple-500"
   }
 ];
@@ -108,36 +121,42 @@ const atsBuildingStages = [
     icon: Brain,
     title: "Processing Your Information",
     description: "Understanding your background and experience",
+    duration: 2000,
     color: "from-emerald-500 to-teal-500"
   },
   {
     icon: Settings,
     title: "Structuring Content",
     description: "Organizing information into professional sections",
+    duration: 1800,
     color: "from-blue-500 to-indigo-500"
   },
   {
     icon: Wand2,
     title: "AI Content Enhancement",
     description: "Crafting compelling descriptions and bullet points",
+    duration: 2200,
     color: "from-purple-500 to-pink-500"
   },
   {
     icon: Shield,
     title: "ATS Optimization",
     description: "Ensuring compatibility with applicant tracking systems",
+    duration: 1500,
     color: "from-green-500 to-emerald-500"
   },
   {
     icon: Target,
     title: "Keyword Integration",
     description: "Strategically placing industry-relevant keywords",
+    duration: 1200,
     color: "from-orange-500 to-red-500"
   },
   {
     icon: Rocket,
     title: "Final Assembly",
     description: "Creating your professional ATS-ready resume",
+    duration: 1000,
     color: "from-violet-500 to-purple-500"
   }
 ];
@@ -150,76 +169,61 @@ export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
   const [currentStage, setCurrentStage] = useState(0);
   const [progress, setProgress] = useState(0);
   const [stageProgress, setStageProgress] = useState(0);
-  const [animationStarted, setAnimationStarted] = useState(false);
 
   const stages = mode === "scoring" ? scoringStages : mode === "ats-building" ? atsBuildingStages : optimizationStages;
   const title = mode === "scoring" ? "Benchmarking Your Resume" : mode === "ats-building" ? "Building Your ATS Resume" : "Optimizing Your Resume";
   const subtitle = mode === "scoring" ? "Our AI is analyzing your competitive position..." : mode === "ats-building" ? "Our AI is crafting your professional resume..." : "Our AI is working its magic...";
 
-  const STAGE_DURATION = 4000; // 4 seconds per stage
-  const TOTAL_DURATION = stages.length * STAGE_DURATION; // 24 seconds total
-  const PROGRESS_UPDATE_INTERVAL = 50; // Update every 50ms for smooth animation
-
   useEffect(() => {
     if (!isOptimizing) {
-      // Reset all states when not optimizing
       setCurrentStage(0);
       setProgress(0);
       setStageProgress(0);
-      setAnimationStarted(false);
       return;
     }
 
-    // Only start animation once when optimization begins
-    if (!animationStarted) {
-      setAnimationStarted(true);
-      
-      let animationStartTime = Date.now();
-      let animationTimer: NodeJS.Timeout;
+    let stageTimer: NodeJS.Timeout;
+    let progressTimer: NodeJS.Timeout;
 
-      const updateAnimation = () => {
-        const elapsed = Date.now() - animationStartTime;
-        
-        // Calculate overall progress (0-100)
-        const overallProgress = Math.min((elapsed / TOTAL_DURATION) * 100, 100);
-        setProgress(overallProgress);
+    const runStage = (index: number) => {
+      if (index >= stages.length) {
+        setProgress(100);
+        setTimeout(() => {
+          onComplete?.();
+        }, 500);
+        return;
+      }
 
-        // Calculate current stage (0 to stages.length - 1)
-        const currentStageIndex = Math.min(Math.floor(elapsed / STAGE_DURATION), stages.length - 1);
-        setCurrentStage(currentStageIndex);
+      setCurrentStage(index);
+      setStageProgress(0);
 
-        // Calculate progress within current stage (0-100)
-        const stageElapsed = elapsed - (currentStageIndex * STAGE_DURATION);
-        const currentStageProgress = Math.min((stageElapsed / STAGE_DURATION) * 100, 100);
-        setStageProgress(currentStageProgress);
+      const stage = stages[index];
+      const progressIncrement = 100 / (stage.duration / 50);
 
-        // Check if animation is complete
-        if (elapsed >= TOTAL_DURATION) {
-          setProgress(100);
-          setStageProgress(100);
-          setCurrentStage(stages.length - 1);
-          
-          // Call onComplete after animation finishes
-          setTimeout(() => {
-            onComplete?.();
-          }, 500);
-          
-          return;
-        }
+      progressTimer = setInterval(() => {
+        setStageProgress(prev => {
+          const newProgress = prev + progressIncrement;
+          if (newProgress >= 100) {
+            clearInterval(progressTimer);
+            return 100;
+          }
+          return newProgress;
+        });
+      }, 50);
 
-        // Continue animation
-        animationTimer = setTimeout(updateAnimation, PROGRESS_UPDATE_INTERVAL);
-      };
+      stageTimer = setTimeout(() => {
+        setProgress(((index + 1) / stages.length) * 100);
+        runStage(index + 1);
+      }, stage.duration);
+    };
 
-      // Start the animation
-      updateAnimation();
+    runStage(0);
 
-      // Cleanup function
-      return () => {
-        clearTimeout(animationTimer);
-      };
-    }
-  }, [isOptimizing, animationStarted, onComplete, stages.length, TOTAL_DURATION]);
+    return () => {
+      clearTimeout(stageTimer);
+      clearInterval(progressTimer);
+    };
+  }, [isOptimizing, onComplete, stages.length]);
 
   if (!isOptimizing) return null;
 
