@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useState } from "react";
 import { GuidedTour } from "@/components/onboarding/GuidedTour";
-import { BookOpen } from "lucide-react";
+import { BookOpen, CreditCard, Gift, FileText } from "lucide-react";
 
 export const UserMenu = () => {
   const { user, signOut } = useAuth();
@@ -53,7 +53,28 @@ export const UserMenu = () => {
             <Link to="/profile-edit">Profile Settings</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link to="/pricing">Pricing</Link>
+            <Link to="/pricing">
+              <CreditCard className="h-4 w-4 mr-2" />
+              <span>Pricing</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/subscription">
+              <CreditCard className="h-4 w-4 mr-2" />
+              <span>Subscription</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/referrals">
+              <Gift className="h-4 w-4 mr-2" />
+              <span>Referrals</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/blog">
+              <FileText className="h-4 w-4 mr-2" />
+              <span>Blog</span>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowTutorial(true)}>
             <BookOpen className="h-4 w-4 mr-2" />

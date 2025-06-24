@@ -1,3 +1,4 @@
+
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -48,7 +49,7 @@ export function MainNavigation() {
             
             {menuOpen && (
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-                <nav className="grid grid-cols-2 gap-3">
+                <nav className="grid grid-cols-1 gap-3">
                   <Link
                     to="/resume-builder"
                     className="text-center py-3 px-4 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors font-medium"
@@ -70,33 +71,10 @@ export function MainNavigation() {
                   >
                     Resume Optimization
                   </Link>
-                  <Link
-                    to="/subscription"
-                    className="text-center py-3 px-4 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors font-medium"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Subscription
-                  </Link>
-                  {user && (
-                    <Link
-                      to="/referrals"
-                      className="text-center py-3 px-4 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors font-medium"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      Referrals
-                    </Link>
-                  )}
-                  <Link
-                    to="/blog"
-                    className="text-center py-3 px-4 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors font-medium"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Blog
-                  </Link>
                   {!user && (
                     <Link
                       to="/auth"
-                      className="text-center py-3 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium col-span-2"
+                      className="text-center py-3 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
                       onClick={() => setMenuOpen(false)}
                     >
                       Sign In
@@ -143,38 +121,6 @@ export function MainNavigation() {
                     className={navigationMenuTriggerStyle()}
                   >
                     Resume Optimization
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Link
-                    to="/subscription"
-                    className={navigationMenuTriggerStyle()}
-                  >
-                    Subscription
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              {user && (
-                <NavigationMenuItem>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      to="/referrals"
-                      className={navigationMenuTriggerStyle()}
-                    >
-                      Referrals
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              )}
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Link
-                    to="/blog"
-                    className={`${navigationMenuTriggerStyle()} font-medium text-primary hover:text-primary/90`}
-                  >
-                    Blog
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
