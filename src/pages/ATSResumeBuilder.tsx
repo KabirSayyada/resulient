@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -167,9 +168,10 @@ const ATSResumeBuilder = () => {
             </div>
           </div>
         </div>
-      
-      <div className="mt-8">
-        <LegalFooter />
+        
+        <div className="mt-8">
+          <LegalFooter />
+        </div>
       </div>
     </>
   );
