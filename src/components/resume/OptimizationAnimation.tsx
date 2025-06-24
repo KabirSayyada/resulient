@@ -14,13 +14,16 @@ import {
   TrendingUp,
   Award,
   Users,
-  Calculator
+  Calculator,
+  Settings,
+  Wand2,
+  Shield
 } from "lucide-react";
 
 interface OptimizationAnimationProps {
   isOptimizing: boolean;
   onComplete?: () => void;
-  mode?: "optimization" | "scoring";
+  mode?: "optimization" | "scoring" | "ats-building";
 }
 
 const optimizationStages = [
@@ -113,6 +116,51 @@ const scoringStages = [
   }
 ];
 
+const atsBuildingStages = [
+  {
+    icon: Brain,
+    title: "Processing Your Information",
+    description: "Understanding your background and experience",
+    duration: 2000,
+    color: "from-emerald-500 to-teal-500"
+  },
+  {
+    icon: Settings,
+    title: "Structuring Content",
+    description: "Organizing information into professional sections",
+    duration: 1800,
+    color: "from-blue-500 to-indigo-500"
+  },
+  {
+    icon: Wand2,
+    title: "AI Content Enhancement",
+    description: "Crafting compelling descriptions and bullet points",
+    duration: 2200,
+    color: "from-purple-500 to-pink-500"
+  },
+  {
+    icon: Shield,
+    title: "ATS Optimization",
+    description: "Ensuring compatibility with applicant tracking systems",
+    duration: 1500,
+    color: "from-green-500 to-emerald-500"
+  },
+  {
+    icon: Target,
+    title: "Keyword Integration",
+    description: "Strategically placing industry-relevant keywords",
+    duration: 1200,
+    color: "from-orange-500 to-red-500"
+  },
+  {
+    icon: Rocket,
+    title: "Final Assembly",
+    description: "Creating your professional ATS-ready resume",
+    duration: 1000,
+    color: "from-violet-500 to-purple-500"
+  }
+];
+
 export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
   isOptimizing,
   onComplete,
@@ -122,9 +170,9 @@ export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
   const [progress, setProgress] = useState(0);
   const [stageProgress, setStageProgress] = useState(0);
 
-  const stages = mode === "scoring" ? scoringStages : optimizationStages;
-  const title = mode === "scoring" ? "Benchmarking Your Resume" : "Optimizing Your Resume";
-  const subtitle = mode === "scoring" ? "Our AI is analyzing your competitive position..." : "Our AI is working its magic...";
+  const stages = mode === "scoring" ? scoringStages : mode === "ats-building" ? atsBuildingStages : optimizationStages;
+  const title = mode === "scoring" ? "Benchmarking Your Resume" : mode === "ats-building" ? "Building Your ATS Resume" : "Optimizing Your Resume";
+  const subtitle = mode === "scoring" ? "Our AI is analyzing your competitive position..." : mode === "ats-building" ? "Our AI is crafting your professional resume..." : "Our AI is working its magic...";
 
   useEffect(() => {
     if (!isOptimizing) {
@@ -186,6 +234,10 @@ export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
     early: "Our AI analyzes over 500 resume factors to ensure maximum ATS compatibility.",
     mid: "Benchmarked resumes show 3x higher interview callback rates.",
     late: "Your score will reflect how you compare to thousands of professionals in your field."
+  } : mode === "ats-building" ? {
+    early: "ATS-optimized resumes are 67% more likely to pass initial screening.",
+    mid: "Our AI uses proven resume formats preferred by 95% of Fortune 500 companies.",
+    late: "Your resume will be formatted for maximum readability by both ATS and human recruiters."
   } : {
     early: "Our AI analyzes over 500 resume factors to ensure maximum ATS compatibility.",
     mid: "Optimized resumes have a 5x higher interview callback rate.",
