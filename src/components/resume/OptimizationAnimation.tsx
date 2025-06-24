@@ -150,13 +150,14 @@ export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
   const [currentStage, setCurrentStage] = useState(0);
   const [progress, setProgress] = useState(0);
   const [stageProgress, setStageProgress] = useState(0);
-  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const [animationStarted, setAnimationStarted] = useState(false);
 
   const stages = mode === "scoring" ? scoringStages : mode === "ats-building" ? atsBuildingStages : optimizationStages;
   const title = mode === "scoring" ? "Benchmarking Your Resume" : mode === "ats-building" ? "Building Your ATS Resume" : "Optimizing Your Resume";
   const subtitle = mode === "scoring" ? "Our AI is analyzing your competitive position..." : mode === "ats-building" ? "Our AI is crafting your professional resume..." : "Our AI is working its magic...";
 
   const STAGE_DURATION = 4000; // 4 seconds per stage
+  const TOTAL_DURATION = stages.length * STAGE_DURATION; // 24 seconds total
   const PROGRESS_UPDATE_INTERVAL = 50; // Update every 50ms for smooth animation
 
   useEffect(() => {
@@ -165,72 +166,60 @@ export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
       setCurrentStage(0);
       setProgress(0);
       setStageProgress(0);
-      setIsAnimationComplete(false);
+      setAnimationStarted(false);
       return;
     }
 
-    if (isAnimationComplete) {
-      return; // Don't restart if animation is already complete
-    }
-
-    let stageTimer: NodeJS.Timeout;
-    let progressTimer: NodeJS.Timeout;
-    let currentStageIndex = 0;
-
-    const runStage = () => {
-      if (currentStageIndex >= stages.length) {
-        // Animation complete
-        setIsAnimationComplete(true);
-        setProgress(100);
-        setStageProgress(100);
-        
-        // Call onComplete after a brief delay
-        setTimeout(() => {
-          onComplete?.();
-        }, 500);
-        return;
-      }
-
-      // Set current stage
-      setCurrentStage(currentStageIndex);
-      setStageProgress(0);
+    // Only start animation once when optimization begins
+    if (!animationStarted) {
+      setAnimationStarted(true);
       
-      // Update overall progress based on current stage
-      const overallProgress = (currentStageIndex / stages.length) * 100;
-      setProgress(overallProgress);
+      let animationStartTime = Date.now();
+      let animationTimer: NodeJS.Timeout;
 
-      // Animate stage progress over 4 seconds
-      let stageProgressValue = 0;
-      const progressIncrement = 100 / (STAGE_DURATION / PROGRESS_UPDATE_INTERVAL);
-      
-      progressTimer = setInterval(() => {
-        stageProgressValue += progressIncrement;
+      const updateAnimation = () => {
+        const elapsed = Date.now() - animationStartTime;
         
-        if (stageProgressValue >= 100) {
-          stageProgressValue = 100;
+        // Calculate overall progress (0-100)
+        const overallProgress = Math.min((elapsed / TOTAL_DURATION) * 100, 100);
+        setProgress(overallProgress);
+
+        // Calculate current stage (0 to stages.length - 1)
+        const currentStageIndex = Math.min(Math.floor(elapsed / STAGE_DURATION), stages.length - 1);
+        setCurrentStage(currentStageIndex);
+
+        // Calculate progress within current stage (0-100)
+        const stageElapsed = elapsed - (currentStageIndex * STAGE_DURATION);
+        const currentStageProgress = Math.min((stageElapsed / STAGE_DURATION) * 100, 100);
+        setStageProgress(currentStageProgress);
+
+        // Check if animation is complete
+        if (elapsed >= TOTAL_DURATION) {
+          setProgress(100);
           setStageProgress(100);
-          clearInterval(progressTimer);
-        } else {
-          setStageProgress(stageProgressValue);
+          setCurrentStage(stages.length - 1);
+          
+          // Call onComplete after animation finishes
+          setTimeout(() => {
+            onComplete?.();
+          }, 500);
+          
+          return;
         }
-      }, PROGRESS_UPDATE_INTERVAL);
 
-      // Move to next stage after 4 seconds
-      stageTimer = setTimeout(() => {
-        currentStageIndex++;
-        runStage(); // Recursively run next stage
-      }, STAGE_DURATION);
-    };
+        // Continue animation
+        animationTimer = setTimeout(updateAnimation, PROGRESS_UPDATE_INTERVAL);
+      };
 
-    // Start the animation
-    runStage();
+      // Start the animation
+      updateAnimation();
 
-    // Cleanup function
-    return () => {
-      clearTimeout(stageTimer);
-      clearInterval(progressTimer);
-    };
-  }, [isOptimizing, isAnimationComplete, onComplete, stages.length]);
+      // Cleanup function
+      return () => {
+        clearTimeout(animationTimer);
+      };
+    }
+  }, [isOptimizing, animationStarted, onComplete, stages.length, TOTAL_DURATION]);
 
   if (!isOptimizing) return null;
 
