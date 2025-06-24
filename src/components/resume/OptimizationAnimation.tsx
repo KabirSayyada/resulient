@@ -11,12 +11,16 @@ import {
   FileText,
   BarChart3,
   Rocket,
-  TrendingUp
+  TrendingUp,
+  Award,
+  Users,
+  Calculator
 } from "lucide-react";
 
 interface OptimizationAnimationProps {
   isOptimizing: boolean;
   onComplete?: () => void;
+  mode?: "optimization" | "scoring";
 }
 
 const optimizationStages = [
@@ -64,13 +68,63 @@ const optimizationStages = [
   }
 ];
 
+const scoringStages = [
+  {
+    icon: FileText,
+    title: "Analyzing Resume Structure",
+    description: "Evaluating format and content organization",
+    duration: 2000,
+    color: "from-blue-500 to-cyan-500"
+  },
+  {
+    icon: Users,
+    title: "Industry Benchmarking",
+    description: "Comparing against thousands of similar profiles",
+    duration: 2200,
+    color: "from-purple-500 to-indigo-500"
+  },
+  {
+    icon: Brain,
+    title: "AI Skills Assessment",
+    description: "Evaluating technical and soft skills depth",
+    duration: 1800,
+    color: "from-pink-500 to-rose-500"
+  },
+  {
+    icon: Award,
+    title: "Achievement Analysis",
+    description: "Scoring quantifiable accomplishments",
+    duration: 1500,
+    color: "from-green-500 to-emerald-500"
+  },
+  {
+    icon: Calculator,
+    title: "Score Calculation",
+    description: "Computing percentile rankings",
+    duration: 1200,
+    color: "from-orange-500 to-amber-500"
+  },
+  {
+    icon: TrendingUp,
+    title: "Generating Insights",
+    description: "Creating improvement recommendations",
+    duration: 1000,
+    color: "from-violet-500 to-purple-500"
+  }
+];
+
 export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
   isOptimizing,
-  onComplete
+  onComplete,
+  mode = "optimization"
 }) => {
   const [currentStage, setCurrentStage] = useState(0);
   const [progress, setProgress] = useState(0);
   const [stageProgress, setStageProgress] = useState(0);
+
+  const stages = mode === "scoring" ? scoringStages : optimizationStages;
+  const title = mode === "scoring" ? "Benchmarking Your Resume" : "Optimizing Your Resume";
+  const subtitle = mode === "scoring" ? "Our AI is analyzing your competitive position..." : "Our AI is working its magic...";
 
   useEffect(() => {
     if (!isOptimizing) {
@@ -84,7 +138,7 @@ export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
     let progressTimer: NodeJS.Timeout;
 
     const runStage = (index: number) => {
-      if (index >= optimizationStages.length) {
+      if (index >= stages.length) {
         setProgress(100);
         setTimeout(() => {
           onComplete?.();
@@ -95,7 +149,7 @@ export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
       setCurrentStage(index);
       setStageProgress(0);
 
-      const stage = optimizationStages[index];
+      const stage = stages[index];
       const progressIncrement = 100 / (stage.duration / 50);
 
       progressTimer = setInterval(() => {
@@ -110,7 +164,7 @@ export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
       }, 50);
 
       stageTimer = setTimeout(() => {
-        setProgress(((index + 1) / optimizationStages.length) * 100);
+        setProgress(((index + 1) / stages.length) * 100);
         runStage(index + 1);
       }, stage.duration);
     };
@@ -121,12 +175,22 @@ export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
       clearTimeout(stageTimer);
       clearInterval(progressTimer);
     };
-  }, [isOptimizing, onComplete]);
+  }, [isOptimizing, onComplete, stages.length]);
 
   if (!isOptimizing) return null;
 
-  const currentStageData = optimizationStages[currentStage];
+  const currentStageData = stages[currentStage];
   const IconComponent = currentStageData?.icon || Zap;
+
+  const funFacts = mode === "scoring" ? {
+    early: "Our AI analyzes over 500 resume factors to ensure maximum ATS compatibility.",
+    mid: "Benchmarked resumes show 3x higher interview callback rates.",
+    late: "Your score will reflect how you compare to thousands of professionals in your field."
+  } : {
+    early: "Our AI analyzes over 500 resume factors to ensure maximum ATS compatibility.",
+    mid: "Optimized resumes have a 5x higher interview callback rate.",
+    late: "Your resume will be tailored to match the exact language used in the job description."
+  };
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -147,10 +211,10 @@ export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
               </div>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Optimizing Your Resume
+              {title}
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
-              Our AI is working its magic...
+              {subtitle}
             </p>
           </div>
 
@@ -197,7 +261,7 @@ export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
 
           {/* Stage Indicators */}
           <div className="flex justify-between items-center">
-            {optimizationStages.map((stage, index) => {
+            {stages.map((stage, index) => {
               const StageIcon = stage.icon;
               const isCompleted = index < currentStage;
               const isCurrent = index === currentStage;
@@ -234,9 +298,9 @@ export const OptimizationAnimation: React.FC<OptimizationAnimationProps> = ({
               </span>
             </div>
             <p className="text-sm text-indigo-700 dark:text-indigo-300">
-              {currentStage < 2 && "Our AI analyzes over 500 resume factors to ensure maximum ATS compatibility."}
-              {currentStage >= 2 && currentStage < 4 && "Optimized resumes have a 5x higher interview callback rate."}
-              {currentStage >= 4 && "Your resume will be tailored to match the exact language used in the job description."}
+              {currentStage < 2 && funFacts.early}
+              {currentStage >= 2 && currentStage < 4 && funFacts.mid}
+              {currentStage >= 4 && funFacts.late}
             </p>
           </div>
         </div>
