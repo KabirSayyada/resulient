@@ -18,6 +18,7 @@ import Pricing from "@/pages/Pricing";
 import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
 import SubscriptionDetails from "@/pages/SubscriptionDetails";
 import ReferralProgram from "@/pages/ReferralProgram";
+import Jobs from "@/pages/Jobs";
 // Blog imports
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
@@ -39,6 +40,7 @@ function App() {
           <Route path="/profile-edit" element={<ProfileEdit />} />
           <Route path="/resume-scoring" element={<ResumeScoring />} />
           <Route path="/ats-resume-builder" element={<ATSResumeBuilder />} />
+          <Route path="/jobs" element={<Jobs />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/refund-policy" element={<RefundPolicy />} />
