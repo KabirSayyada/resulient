@@ -22,9 +22,11 @@ interface JobFiltersProps {
 
 export function JobFilters({ filters, onFiltersChange, onClearFilters }: JobFiltersProps) {
   const updateFilter = (key: keyof JobFilters, value: string) => {
+    // Convert placeholder values back to empty strings
+    const actualValue = value === 'all' ? '' : value;
     onFiltersChange({
       ...filters,
-      [key]: value
+      [key]: actualValue
     });
   };
 
@@ -72,14 +74,14 @@ export function JobFilters({ filters, onFiltersChange, onClearFilters }: JobFilt
               Location
             </Label>
             <Select
-              value={filters.location}
+              value={filters.location || 'all'}
               onValueChange={(value) => updateFilter('location', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Any location" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any location</SelectItem>
+                <SelectItem value="all">Any location</SelectItem>
                 <SelectItem value="remote">Remote</SelectItem>
                 <SelectItem value="san-francisco">San Francisco, CA</SelectItem>
                 <SelectItem value="new-york">New York, NY</SelectItem>
@@ -99,14 +101,14 @@ export function JobFilters({ filters, onFiltersChange, onClearFilters }: JobFilt
               Job Type
             </Label>
             <Select
-              value={filters.jobType}
+              value={filters.jobType || 'all'}
               onValueChange={(value) => updateFilter('jobType', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Any type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any type</SelectItem>
+                <SelectItem value="all">Any type</SelectItem>
                 <SelectItem value="Full-time">Full-time</SelectItem>
                 <SelectItem value="Part-time">Part-time</SelectItem>
                 <SelectItem value="Contract">Contract</SelectItem>
@@ -123,14 +125,14 @@ export function JobFilters({ filters, onFiltersChange, onClearFilters }: JobFilt
               Salary Range
             </Label>
             <Select
-              value={filters.salaryRange}
+              value={filters.salaryRange || 'all'}
               onValueChange={(value) => updateFilter('salaryRange', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Any salary" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any salary</SelectItem>
+                <SelectItem value="all">Any salary</SelectItem>
                 <SelectItem value="0-50000">$0 - $50,000</SelectItem>
                 <SelectItem value="50000-80000">$50,000 - $80,000</SelectItem>
                 <SelectItem value="80000-120000">$80,000 - $120,000</SelectItem>
