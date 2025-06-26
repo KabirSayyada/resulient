@@ -3,9 +3,10 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, DollarSign, ExternalLink, Briefcase } from "lucide-react";
+import { MapPin, Clock, DollarSign, ExternalLink, Briefcase, RefreshCw } from "lucide-react";
 import { useJobs, type JobFilters } from "@/hooks/useJobs";
 import { JobSeeder } from "@/components/jobs/JobSeeder";
+import { JobScraper } from "@/components/jobs/JobScraper";
 import { JobFilters as JobFiltersComponent } from "@/components/jobs/JobFilters";
 import { format } from "date-fns";
 
@@ -32,6 +33,11 @@ export default function Jobs() {
     });
   };
 
+  const handleJobsScraped = () => {
+    // Refresh the jobs list after scraping
+    refetch();
+  };
+
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
@@ -54,14 +60,17 @@ export default function Jobs() {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Job Opportunities
+            Live Job Opportunities
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Discover your next career opportunity with our curated job listings
+            Discover your next career opportunity with our live job listings scraped from major job boards
           </p>
         </div>
 
         <div className="max-w-6xl mx-auto">
+          {/* Job Scraper */}
+          <JobScraper onJobsScraped={handleJobsScraped} />
+
           {/* Job Filters */}
           <JobFiltersComponent 
             filters={filters}
@@ -79,12 +88,13 @@ export default function Jobs() {
                 </span>
               </div>
               <Button variant="outline" size="sm" onClick={refetch}>
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
             </div>
           )}
 
-          {/* Temporary seeder component - can be removed once we have real data */}
+          {/* Fallback seeder for when no jobs exist */}
           {totalJobs === 0 && !loading && (
             <div className="mb-8">
               <JobSeeder />
@@ -98,7 +108,7 @@ export default function Jobs() {
           ) : jobs.length === 0 ? (
             <div className="text-center py-8">
               <div className="text-gray-600 dark:text-gray-400">
-                {totalJobs === 0 ? "No jobs available at the moment." : "No jobs match your current filters."}
+                {totalJobs === 0 ? "No jobs available. Try scraping some jobs using the tool above!" : "No jobs match your current filters."}
               </div>
               {totalJobs > 0 && (
                 <Button 
@@ -122,7 +132,14 @@ export default function Jobs() {
                           {job.company}
                         </CardDescription>
                       </div>
-                      <Badge variant="secondary">{job.type}</Badge>
+                      <div className="flex gap-2">
+                        <Badge variant="secondary">{job.type}</Badge>
+                        {job.source && job.source !== 'manual' && (
+                          <Badge variant="outline" className="text-xs">
+                            {job.source.replace('jsearch-', '').replace('-', ' ')}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
