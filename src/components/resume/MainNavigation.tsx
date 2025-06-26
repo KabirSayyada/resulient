@@ -71,6 +71,13 @@ export function MainNavigation() {
                   >
                     Resume Optimization
                   </Link>
+                  <Link
+                    to="/jobs"
+                    className="text-center py-3 px-4 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors font-medium"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Job Search
+                  </Link>
                   {!user && (
                     <Link
                       to="/auth"
@@ -121,6 +128,16 @@ export function MainNavigation() {
                     className={navigationMenuTriggerStyle()}
                   >
                     Resume Optimization
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
+                    to="/jobs"
+                    className={navigationMenuTriggerStyle()}
+                  >
+                    Job Search
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
