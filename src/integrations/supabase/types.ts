@@ -246,6 +246,63 @@ export type Database = {
           },
         ]
       }
+      jobs: {
+        Row: {
+          company: string
+          created_at: string
+          description: string
+          expires_at: string | null
+          external_url: string | null
+          id: string
+          is_active: boolean
+          location: string
+          posted_date: string
+          requirements: string | null
+          salary: string | null
+          source: string | null
+          tags: string[] | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          description: string
+          expires_at?: string | null
+          external_url?: string | null
+          id?: string
+          is_active?: boolean
+          location: string
+          posted_date?: string
+          requirements?: string | null
+          salary?: string | null
+          source?: string | null
+          tags?: string[] | null
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          description?: string
+          expires_at?: string | null
+          external_url?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string
+          posted_date?: string
+          requirements?: string | null
+          salary?: string | null
+          source?: string | null
+          tags?: string[] | null
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
