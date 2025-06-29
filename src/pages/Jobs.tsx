@@ -50,13 +50,13 @@ export default function Jobs() {
 
   const handleMassiveJobFetch = async () => {
     try {
-      // Single broad search strategy for all jobs in the last 24 hours
+      // Single broad search strategy for all jobs in the past 2 weeks
       await scrapeJobs({
         query: '', // No specific query - get all jobs
         location: '', // No specific location - get jobs from everywhere
         employment_types: 'FULLTIME',
         num_pages: 20, // Maximum pages to get as many jobs as possible
-        date_posted: 'today' // Only jobs from last 24 hours
+        date_posted: '2weeks' // Jobs from past 2 weeks
       });
       
       // Refresh jobs after fetch
@@ -266,10 +266,10 @@ export default function Jobs() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-300">
-                    Latest Jobs Collection
+                    Recent Jobs Collection
                   </h3>
                   <p className="text-sm text-purple-600 dark:text-purple-400">
-                    Fetch all jobs posted in the last 24 hours from all sources
+                    Fetch all jobs posted in the past 2 weeks from all sources
                   </p>
                 </div>
               </div>
@@ -282,12 +282,12 @@ export default function Jobs() {
                 {scrapingLoading ? (
                   <>
                     <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                    Fetching Latest Jobs...
+                    Fetching Recent Jobs...
                   </>
                 ) : (
                   <>
                     <Rocket className="h-5 w-5 mr-2" />
-                    Fetch Latest Jobs
+                    Fetch Recent Jobs
                   </>
                 )}
               </Button>
@@ -295,12 +295,12 @@ export default function Jobs() {
             <div className="mt-3 flex items-center gap-4 text-xs text-purple-600 dark:text-purple-400">
               <Badge variant="outline" className="border-purple-300 text-purple-700 dark:text-purple-300">
                 <Zap className="h-3 w-3 mr-1" />
-                Last 24 Hours Only
+                Past 2 Weeks
               </Badge>
               <span>•</span>
               <span>All Industries & Locations</span>
               <span>•</span>
-              <span className="font-medium">Up to 1000+ fresh jobs</span>
+              <span className="font-medium">Up to 1000+ recent jobs</span>
             </div>
           </div>
 
