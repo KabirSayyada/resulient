@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,12 +48,13 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
   };
 
   const handleOptimizeResume = () => {
-    // Store job description and resume content in sessionStorage for the optimizer page
+    // Store job description, resume content, and job application URL in sessionStorage
     const optimizerData = {
       jobDescription: `${job.title} at ${job.company}\n\nLocation: ${job.location}\n\nJob Description:\n${job.description}\n\nRequirements:\n${job.requirements || 'Not specified'}`,
       resumeContent: selectedResumeContent || '',
       jobTitle: job.title,
-      company: job.company
+      company: job.company,
+      externalUrl: job.external_url
     };
     
     sessionStorage.setItem('resumeOptimizerData', JSON.stringify(optimizerData));
@@ -135,7 +137,7 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
             <div>
               <h4 className="font-semibold text-orange-800 dark:text-orange-300">Boost Your Match Score</h4>
               <p className="text-sm text-orange-600 dark:text-orange-400">
-                Optimize your resume specifically for this job to increase your chances
+                Optimize your resume specifically for this job and apply directly after optimization
               </p>
             </div>
           </div>
@@ -144,7 +146,7 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
             className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold"
           >
             <Wand2 className="h-4 w-4 mr-2" />
-            Optimize Resume for This Job
+            Optimize & Apply for This Job
           </Button>
         </div>
 
@@ -304,7 +306,7 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
           </div>
         </div>
 
-        {/* Application tips instead of job tags */}
+        {/* Application tips */}
         <div>
           <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
             <Target className="h-4 w-4" />
@@ -365,3 +367,4 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
     </Card>
   );
 }
+

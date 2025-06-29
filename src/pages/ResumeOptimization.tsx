@@ -1,10 +1,11 @@
 
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileText, Sparkles, Target, Info, Wand2 } from "lucide-react";
+import { ArrowLeft, FileText, Sparkles, Target, Info, Wand2, ExternalLink } from "lucide-react";
 import { MainNavigation } from "@/components/resume/MainNavigation";
 import { LegalFooter } from "@/components/layout/LegalFooter";
 import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
@@ -19,6 +20,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
 import { OptimizationAnimation } from "@/components/resume/OptimizationAnimation";
+import { supabase } from "@/integrations/supabase/client";
 
 const ResumeOptimization = () => {
   const { user, loading: authLoading } = useAuth();
@@ -28,11 +30,39 @@ const ResumeOptimization = () => {
   const [inputMode, setInputMode] = useState<"upload" | "paste">("paste");
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizedResult, setOptimizedResult] = useState<string | null>(null);
-  const [jobFromJobsPage, setJobFromJobsPage] = useState<{jobTitle: string; company: string} | null>(null);
+  const [jobFromJobsPage, setJobFromJobsPage] = useState<{
+    jobTitle: string; 
+    company: string; 
+    externalUrl?: string;
+  } | null>(null);
   
   const { saveOptimization, fetchOptimizationHistory, optimizationHistory } = useResumeOptimizationHistory(user?.id);
   const { subscription } = useSubscription();
   const { usage, showLimitReachedMessage } = useUsageLimits();
+
+  // Fetch user's best scoring resume
+  const fetchBestScoringResume = async () => {
+    if (!user?.id) return null;
+    
+    try {
+      const { data, error } = await supabase
+        .from("resume_scores")
+        .select("resume_content, overall_score")
+        .eq("user_id", user.id)
+        .order("overall_score", { ascending: false })
+        .limit(1);
+      
+      if (error) {
+        console.error("Error fetching best resume:", error);
+        return null;
+      }
+      
+      return data?.[0]?.resume_content || null;
+    } catch (error) {
+      console.error("Error fetching best resume:", error);
+      return null;
+    }
+  };
 
   // Fetch optimization history on component mount
   useEffect(() => {
@@ -50,19 +80,34 @@ const ResumeOptimization = () => {
     // Check for pre-filled data from job matching
     const optimizerData = sessionStorage.getItem('resumeOptimizerData');
     if (optimizerData) {
-      try {
-        const data = JSON.parse(optimizerData);
-        setJobDescription(data.jobDescription || '');
-        setResumeText(data.resumeContent || '');
-        setJobFromJobsPage({
-          jobTitle: data.jobTitle || '',
-          company: data.company || ''
-        });
-        // Clear the session storage after using it
-        sessionStorage.removeItem('resumeOptimizerData');
-      } catch (error) {
-        console.error('Error parsing optimizer data:', error);
-      }
+      const loadPrefilledData = async () => {
+        try {
+          const data = JSON.parse(optimizerData);
+          setJobDescription(data.jobDescription || '');
+          setJobFromJobsPage({
+            jobTitle: data.jobTitle || '',
+            company: data.company || '',
+            externalUrl: data.externalUrl || ''
+          });
+
+          // Auto-fill resume with best scoring resume if no resume content provided
+          if (!data.resumeContent) {
+            const bestResume = await fetchBestScoringResume();
+            if (bestResume) {
+              setResumeText(bestResume);
+            }
+          } else {
+            setResumeText(data.resumeContent || '');
+          }
+
+          // Clear the session storage after using it
+          sessionStorage.removeItem('resumeOptimizerData');
+        } catch (error) {
+          console.error('Error parsing optimizer data:', error);
+        }
+      };
+
+      loadPrefilledData();
     }
   }, [user, authLoading, navigate]);
 
@@ -116,6 +161,17 @@ const ResumeOptimization = () => {
     setInputMode(mode);
   };
 
+  const handleApplyForJob = () => {
+    if (jobFromJobsPage?.externalUrl) {
+      window.open(jobFromJobsPage.externalUrl, '_blank');
+    } else {
+      // Fallback if no external URL is provided
+      const jobSearchQuery = `${jobFromJobsPage?.jobTitle} ${jobFromJobsPage?.company}`;
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(jobSearchQuery + ' jobs')}`;
+      window.open(searchUrl, '_blank');
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -160,14 +216,23 @@ const ResumeOptimization = () => {
                 <div className="p-2 bg-green-500 rounded-lg">
                   <Target className="h-5 w-5 text-white" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h3 className="text-lg font-semibold text-green-800 dark:text-green-300">
                     Optimizing for: {jobFromJobsPage.jobTitle}
                   </h3>
                   <p className="text-sm text-green-600 dark:text-green-400">
-                    at {jobFromJobsPage.company} - Job description and your resume have been pre-filled
+                    at {jobFromJobsPage.company} - Job description and your best resume have been pre-filled
                   </p>
                 </div>
+                {optimizedResult && (
+                  <Button
+                    onClick={handleApplyForJob}
+                    className="bg-green-600 hover:bg-green-700 text-white font-semibold"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Apply for Job
+                  </Button>
+                )}
               </div>
             </div>
           )}
@@ -211,7 +276,10 @@ const ResumeOptimization = () => {
                     Optimize Your Resume
                   </CardTitle>
                   <CardDescription>
-                    Paste your resume and the job description to get started.
+                    {jobFromJobsPage 
+                      ? "Your resume and job description have been pre-filled. Review and optimize!"
+                      : "Paste your resume and the job description to get started."
+                    }
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -261,7 +329,30 @@ const ResumeOptimization = () => {
             {/* Output Section */}
             <div className="space-y-6">
               {optimizedResult ? (
-                <OptimizedResumeDisplay optimizedResume={optimizedResult} />
+                <div className="space-y-4">
+                  <OptimizedResumeDisplay optimizedResume={optimizedResult} />
+                  {jobFromJobsPage && (
+                    <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800">
+                      <CardContent className="p-6">
+                        <div className="text-center">
+                          <h3 className="text-lg font-semibold text-green-800 dark:text-green-300 mb-2">
+                            Resume Optimized Successfully!
+                          </h3>
+                          <p className="text-sm text-green-600 dark:text-green-400 mb-4">
+                            Your resume has been tailored for the {jobFromJobsPage.jobTitle} position at {jobFromJobsPage.company}
+                          </p>
+                          <Button
+                            onClick={handleApplyForJob}
+                            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Apply for This Job Now
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               ) : (
                 <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-indigo-200">
                   <CardHeader>
@@ -291,3 +382,4 @@ const ResumeOptimization = () => {
 };
 
 export default ResumeOptimization;
+
