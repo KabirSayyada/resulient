@@ -49,21 +49,30 @@ export default function Jobs() {
   };
 
   const handleMassiveJobFetch = async () => {
+    if (!selectedResume) {
+      console.error('No resume selected for job fetching');
+      return;
+    }
+
     try {
-      // Single broad search strategy for all jobs in the past month
+      // Extract job title and location from selected resume
+      const jobTitle = selectedResume.industry || 'software engineer'; // Use industry as job title fallback
+      const location = 'United States'; // Default to US, could be enhanced to extract from resume data
+      
+      // Search for jobs relevant to the user's resume
       await scrapeJobs({
-        query: '', // No specific query - get all jobs
-        location: '', // No specific location - get jobs from everywhere
+        query: jobTitle, // Search based on resume's industry/job focus
+        location: location,
         employment_types: 'FULLTIME',
-        num_pages: 20, // Maximum pages to get as many jobs as possible
-        date_posted: 'month' // Jobs from past month
+        num_pages: 10, // Reasonable number of pages for targeted search
+        date_posted: 'week' // Jobs from past week only
       });
       
       // Refresh jobs after fetch
       await refetch();
       await reanalyzeJobs();
     } catch (error) {
-      console.error('Massive job fetch failed:', error);
+      console.error('Targeted job fetch failed:', error);
     }
   };
 
@@ -257,7 +266,7 @@ export default function Jobs() {
         </div>
 
         <div className="max-w-6xl mx-auto">
-          {/* Massive Job Fetch Button */}
+          {/* Targeted Job Fetch Button */}
           <div className="mb-6 p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -266,28 +275,31 @@ export default function Jobs() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-300">
-                    Recent Jobs Collection
+                    Targeted Job Search
                   </h3>
                   <p className="text-sm text-purple-600 dark:text-purple-400">
-                    Fetch all jobs posted in the past month from all sources
+                    {selectedResume 
+                      ? `Fetch jobs matching your ${selectedResume.industry} resume from the past week`
+                      : 'Select a resume first to fetch targeted job opportunities'
+                    }
                   </p>
                 </div>
               </div>
               <Button
                 onClick={handleMassiveJobFetch}
-                disabled={scrapingLoading}
+                disabled={scrapingLoading || !selectedResume}
                 size="lg"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-6"
               >
                 {scrapingLoading ? (
                   <>
                     <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                    Fetching Recent Jobs...
+                    Fetching Targeted Jobs...
                   </>
                 ) : (
                   <>
-                    <Rocket className="h-5 w-5 mr-2" />
-                    Fetch Recent Jobs
+                    <Target className="h-5 w-5 mr-2" />
+                    Fetch Relevant Jobs
                   </>
                 )}
               </Button>
@@ -295,12 +307,14 @@ export default function Jobs() {
             <div className="mt-3 flex items-center gap-4 text-xs text-purple-600 dark:text-purple-400">
               <Badge variant="outline" className="border-purple-300 text-purple-700 dark:text-purple-300">
                 <Zap className="h-3 w-3 mr-1" />
-                Past Month
+                Past Week
               </Badge>
               <span>•</span>
-              <span>All Industries & Locations</span>
+              <span>Targeted to Your Resume</span>
               <span>•</span>
-              <span className="font-medium">Up to 1000+ recent jobs</span>
+              <span className="font-medium">
+                {selectedResume ? `${selectedResume.industry} focused` : 'Select resume first'}
+              </span>
             </div>
           </div>
 
