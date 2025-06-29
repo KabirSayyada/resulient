@@ -252,6 +252,7 @@ export type Database = {
           created_at: string
           description: string
           expires_at: string | null
+          external_job_id: string | null
           external_url: string | null
           id: string
           is_active: boolean
@@ -270,6 +271,7 @@ export type Database = {
           created_at?: string
           description: string
           expires_at?: string | null
+          external_job_id?: string | null
           external_url?: string | null
           id?: string
           is_active?: boolean
@@ -288,6 +290,7 @@ export type Database = {
           created_at?: string
           description?: string
           expires_at?: string | null
+          external_job_id?: string | null
           external_url?: string | null
           id?: string
           is_active?: boolean
