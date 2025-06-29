@@ -42,9 +42,13 @@ const ResumeOptimization = () => {
 
   // Fetch user's best scoring resume
   const fetchBestScoringResume = async () => {
-    if (!user?.id) return null;
+    if (!user?.id) {
+      console.log('No user ID available for fetching best resume');
+      return null;
+    }
     
     try {
+      console.log('Fetching best scoring resume for user:', user.id);
       const { data, error } = await supabase
         .from("resume_scores")
         .select("resume_content, overall_score")
@@ -57,6 +61,7 @@ const ResumeOptimization = () => {
         return null;
       }
       
+      console.log('Best resume data:', data);
       return data?.[0]?.resume_content || null;
     } catch (error) {
       console.error("Error fetching best resume:", error);
@@ -67,53 +72,58 @@ const ResumeOptimization = () => {
   // Auto-load job description and resume content
   const autoLoadContent = async () => {
     console.log('autoLoadContent called');
-    const optimizerData = sessionStorage.getItem('resumeOptimizerData');
-    console.log('Session storage data:', optimizerData);
     
-    if (!optimizerData) {
-      console.log('No optimizer data found');
-      return false;
-    }
-
     try {
-      const data = JSON.parse(optimizerData);
-      console.log('Parsed data:', data);
+      const optimizerData = sessionStorage.getItem('resumeOptimizerData');
+      console.log('Raw session storage data:', optimizerData);
       
-      if (!data.needsAutoLoad) {
-        console.log('needsAutoLoad is false');
+      if (!optimizerData) {
+        console.log('No optimizer data found in session storage');
         return false;
       }
 
-      console.log('Starting auto-load process');
+      const data = JSON.parse(optimizerData);
+      console.log('Parsed optimizer data:', data);
+      
+      if (!data.needsAutoLoad) {
+        console.log('needsAutoLoad is false, skipping auto-load');
+        return false;
+      }
+
+      console.log('Starting auto-load process...');
       setIsAutoLoading(true);
       
       // Set job description immediately
       if (data.jobDescription) {
-        console.log('Setting job description:', data.jobDescription);
+        console.log('Setting job description:', data.jobDescription.substring(0, 100) + '...');
         setJobDescription(data.jobDescription);
       }
 
       // Set job context
-      setJobFromJobsPage({
-        jobTitle: data.jobTitle || '',
-        company: data.company || '',
-        externalUrl: data.externalUrl || ''
-      });
+      if (data.jobTitle || data.company) {
+        console.log('Setting job context:', { jobTitle: data.jobTitle, company: data.company });
+        setJobFromJobsPage({
+          jobTitle: data.jobTitle || '',
+          company: data.company || '',
+          externalUrl: data.externalUrl || ''
+        });
+      }
 
-      // Fetch and set best resume after a delay for better UX
-      console.log('Fetching best resume...');
+      // Fetch and set best resume
+      console.log('Fetching best scoring resume...');
       const bestResume = await fetchBestScoringResume();
-      console.log('Best resume fetched:', bestResume ? 'Found' : 'Not found');
+      console.log('Best resume result:', bestResume ? 'Found resume content' : 'No resume found');
       
       if (bestResume) {
+        console.log('Setting resume text...');
         setResumeText(bestResume);
       }
       
-      // Complete the auto-loading after another delay
+      // Complete the auto-loading process
       setTimeout(() => {
-        console.log('Auto-loading complete');
+        console.log('Auto-loading complete, stopping animation');
         setIsAutoLoading(false);
-        // Clear the session storage
+        // Clear the session storage to prevent re-triggering
         sessionStorage.removeItem('resumeOptimizerData');
       }, 2000);
 
@@ -133,15 +143,19 @@ const ResumeOptimization = () => {
   }, [user?.id, fetchOptimizationHistory]);
 
   useEffect(() => {
+    console.log('Auth loading:', authLoading, 'User:', user?.id);
+    
     if (!authLoading && !user) {
+      console.log('No user found, redirecting to auth');
       navigate("/auth");
       return;
     }
 
     if (user?.id) {
-      // Check if we need to auto-load content
       console.log('User authenticated, checking for auto-load');
-      autoLoadContent();
+      autoLoadContent().catch(error => {
+        console.error('Auto-load failed:', error);
+      });
     }
   }, [user, authLoading, navigate]);
 
@@ -218,7 +232,10 @@ const ResumeOptimization = () => {
     <>
       <AutoLoadAnimation 
         isLoading={isAutoLoading} 
-        onComplete={() => setIsAutoLoading(false)} 
+        onComplete={() => {
+          console.log('AutoLoadAnimation onComplete called');
+          setIsAutoLoading(false);
+        }} 
       />
       
       <OptimizationAnimation 

@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,19 +47,38 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
   };
 
   const handleOptimizeResume = () => {
-    // Store comprehensive job data for the resume optimizer
-    const optimizerData = {
-      jobDescription: job.description,
-      jobTitle: job.title,
-      company: job.company,
-      externalUrl: job.external_url,
-      needsAutoLoad: true,
-      requirements: job.requirements || ''
-    };
-    
-    console.log('Setting resume optimizer data:', optimizerData);
-    sessionStorage.setItem('resumeOptimizerData', JSON.stringify(optimizerData));
-    navigate('/resume-optimization');
+    try {
+      console.log('handleOptimizeResume called for job:', job.title);
+      
+      // Store comprehensive job data for the resume optimizer
+      const optimizerData = {
+        jobDescription: job.description || '',
+        jobTitle: job.title || '',
+        company: job.company || '',
+        externalUrl: job.external_url || '',
+        requirements: job.requirements || '',
+        needsAutoLoad: true
+      };
+      
+      console.log('Setting session storage with data:', optimizerData);
+      
+      // Use try-catch for session storage in case of quota issues
+      try {
+        sessionStorage.setItem('resumeOptimizerData', JSON.stringify(optimizerData));
+        console.log('Session storage set successfully');
+      } catch (storageError) {
+        console.error('Session storage error:', storageError);
+        // Continue with navigation even if storage fails
+      }
+      
+      console.log('Navigating to resume optimization...');
+      navigate('/resume-optimization');
+      
+    } catch (error) {
+      console.error('Error in handleOptimizeResume:', error);
+      // Fallback navigation without data
+      navigate('/resume-optimization');
+    }
   };
 
   return (
