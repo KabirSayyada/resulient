@@ -18,13 +18,29 @@ export interface EnhancedJobMatch {
   locationScore: number;
   industryScore: number;
   qualityBonus: number;
-}
-
-interface UserResumeData {
-  skills: string[];
-  industryExperience: string[];
-  yearsOfExperience: number;
-  location?: string;
+  detailedScoring: {
+    skillsAnalysis: {
+      matchingSkills: string[];
+      missingSkills: string[];
+      score: number;
+      maxScore: number;
+    };
+    experienceAnalysis: {
+      userExperience: number;
+      requiredExperience: number | null;
+      experienceGap: number;
+      score: number;
+      maxScore: number;
+    };
+    resumeQualityAnalysis: {
+      overallScore: number;
+      industryMatch: boolean;
+      strengthAreas: string[];
+      improvementAreas: string[];
+      score: number;
+      maxScore: number;
+    };
+  };
 }
 
 export function useEnhancedJobMatching() {
@@ -39,51 +55,129 @@ export function useEnhancedJobMatching() {
     const jobText = `${job.title} ${job.description} ${job.requirements || ''}`.toLowerCase();
     const resumeSkills = resumeData.suggested_skills || [];
     
-    // Calculate skills match
-    const skillMatches = resumeSkills.filter(skill => 
-      jobText.includes(skill.toLowerCase())
+    // Extract required skills from job description
+    const commonTechSkills = [
+      'javascript', 'python', 'react', 'node', 'sql', 'aws', 'docker', 'kubernetes', 
+      'typescript', 'java', 'c++', 'angular', 'vue', 'mongodb', 'postgresql', 'git',
+      'html', 'css', 'express', 'django', 'flask', 'spring', 'graphql', 'redis',
+      'elasticsearch', 'jenkins', 'terraform', 'linux', 'windows', 'azure', 'gcp'
+    ];
+    
+    const jobRequiredSkills = commonTechSkills.filter(skill => jobText.includes(skill));
+    const matchingSkills = resumeSkills.filter(skill => 
+      jobRequiredSkills.some(jobSkill => skill.toLowerCase().includes(jobSkill) || jobSkill.includes(skill.toLowerCase()))
     );
-    const skillsScore = Math.min(35, (skillMatches.length / Math.max(resumeSkills.length, 5)) * 35);
+    const missingSkills = jobRequiredSkills.filter(skill => 
+      !resumeSkills.some(resumeSkill => resumeSkill.toLowerCase().includes(skill) || skill.includes(resumeSkill.toLowerCase()))
+    );
+
+    // Skills scoring (max 35 points)
+    const skillsScore = Math.min(35, jobRequiredSkills.length > 0 ? 
+      (matchingSkills.length / jobRequiredSkills.length) * 35 : 20);
     
-    // Calculate experience match
-    const experienceScore = Math.min(25, (resumeData.experience_duration / 100) * 25);
+    // Experience analysis
+    const experienceMatch = jobText.match(/(\d+)\+?\s*years?\s*(of\s*)?experience/i);
+    const requiredExperience = experienceMatch ? parseInt(experienceMatch[1]) : null;
+    const userExperience = resumeData.experience_duration || 0;
+    const experienceGap = requiredExperience ? Math.max(0, requiredExperience - userExperience) : 0;
     
-    // Calculate industry match
-    const industryScore = jobText.includes(resumeData.industry.toLowerCase()) ? 20 : 5;
+    // Experience scoring (max 25 points)
+    let experienceScore = 15; // Base score
+    if (requiredExperience) {
+      if (userExperience >= requiredExperience) {
+        experienceScore = 25;
+      } else if (userExperience >= requiredExperience * 0.7) {
+        experienceScore = 20;
+      } else if (userExperience >= requiredExperience * 0.5) {
+        experienceScore = 15;
+      } else {
+        experienceScore = 10;
+      }
+    }
     
-    // Calculate location match (basic)
-    const locationScore = job.location.toLowerCase().includes('remote') ? 10 : 5;
+    // Industry matching (max 20 points)
+    const industryScore = jobText.includes(resumeData.industry.toLowerCase()) ? 20 : 8;
     
-    // Quality bonus based on overall resume score
+    // Location scoring (max 10 points)
+    const locationScore = job.location.toLowerCase().includes('remote') ? 10 : 6;
+    
+    // Resume quality bonus (max 10 points)
     const qualityBonus = Math.min(10, (resumeData.overall_score / 100) * 10);
     
     const totalScore = skillsScore + experienceScore + industryScore + locationScore + qualityBonus;
     
+    // Generate match reasons
     const matchReasons: string[] = [];
-    if (skillMatches.length > 0) {
-      matchReasons.push(`${skillMatches.length} matching skills found`);
+    if (matchingSkills.length > 0) {
+      matchReasons.push(`${matchingSkills.length} of ${jobRequiredSkills.length} required skills match`);
     }
-    if (resumeData.experience_duration >= 50) {
-      matchReasons.push('Strong experience background');
+    if (experienceGap === 0 && requiredExperience) {
+      matchReasons.push(`Meets ${requiredExperience}+ years experience requirement`);
+    } else if (experienceGap > 0) {
+      matchReasons.push(`${experienceGap} years short of experience requirement`);
     }
     if (industryScore > 10) {
-      matchReasons.push(`${resumeData.industry} industry experience`);
+      matchReasons.push(`${resumeData.industry} industry experience aligns`);
     }
     if (resumeData.overall_score >= 80) {
-      matchReasons.push('High-quality resume profile');
+      matchReasons.push('Strong resume quality score');
     }
+
+    // Detailed scoring breakdown
+    const detailedScoring = {
+      skillsAnalysis: {
+        matchingSkills,
+        missingSkills,
+        score: Math.round(skillsScore),
+        maxScore: 35
+      },
+      experienceAnalysis: {
+        userExperience,
+        requiredExperience,
+        experienceGap,
+        score: Math.round(experienceScore),
+        maxScore: 25
+      },
+      resumeQualityAnalysis: {
+        overallScore: resumeData.overall_score,
+        industryMatch: industryScore > 10,
+        strengthAreas: getStrengthAreas(resumeData),
+        improvementAreas: getImprovementAreas(resumeData),
+        score: Math.round(industryScore + locationScore + qualityBonus),
+        maxScore: 40
+      }
+    };
 
     return {
       job,
       matchScore: Math.round(totalScore),
       matchReasons,
-      keywordMatches: skillMatches,
-      skillsScore,
-      experienceScore,
-      locationScore,
-      industryScore,
-      qualityBonus
+      keywordMatches: matchingSkills,
+      skillsScore: Math.round(skillsScore),
+      experienceScore: Math.round(experienceScore),
+      locationScore: Math.round(locationScore),
+      industryScore: Math.round(industryScore),
+      qualityBonus: Math.round(qualityBonus),
+      detailedScoring
     };
+  };
+
+  const getStrengthAreas = (resumeData: ResumeScoreRecord): string[] => {
+    const strengths: string[] = [];
+    if (resumeData.overall_score >= 80) strengths.push('Strong overall profile');
+    if (resumeData.skills_breadth >= 75) strengths.push('Diverse skill set');
+    if (resumeData.experience_duration >= 60) strengths.push('Solid experience background');
+    if (resumeData.ats_readiness >= 80) strengths.push('ATS-optimized resume');
+    return strengths;
+  };
+
+  const getImprovementAreas = (resumeData: ResumeScoreRecord): string[] => {
+    const improvements: string[] = [];
+    if (resumeData.overall_score < 70) improvements.push('Overall resume quality');
+    if (resumeData.skills_breadth < 60) improvements.push('Technical skills breadth');
+    if (resumeData.experience_duration < 40) improvements.push('Professional experience');
+    if (resumeData.ats_readiness < 70) improvements.push('ATS compatibility');
+    return improvements;
   };
 
   const analyzeAllJobs = async (resumeScore: ResumeScoreRecord) => {
@@ -91,10 +185,11 @@ export function useEnhancedJobMatching() {
 
     setLoading(true);
     try {
-      // Fetch ALL jobs for comprehensive matching
+      // Fetch user's own jobs
       const { data: jobs, error } = await supabase
         .from('jobs')
         .select('*')
+        .eq('user_id', user.id)
         .eq('is_active', true)
         .order('posted_date', { ascending: false });
 
@@ -106,14 +201,11 @@ export function useEnhancedJobMatching() {
       jobsWithScores.sort((a, b) => b.matchScore - a.matchScore);
       
       setAllJobsWithScores(jobsWithScores);
-      
-      // Filter for strong matches (30+ score) for the "My Matches" tab
-      const strongMatches = jobsWithScores.filter(match => match.matchScore >= 30);
-      setMatchedJobs(strongMatches);
+      setMatchedJobs(jobsWithScores);
 
       toast({
         title: "Job Analysis Complete",
-        description: `Found ${strongMatches.length} strong matches out of ${jobs?.length || 0} total jobs.`,
+        description: `Analyzed ${jobs?.length || 0} of your personal job listings.`,
       });
     } catch (error) {
       console.error('Error analyzing jobs:', error);

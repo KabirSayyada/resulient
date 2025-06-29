@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,8 +6,8 @@ import { MapPin, Clock, DollarSign, ExternalLink, RefreshCw, Target, Info, Zap }
 import { useJobs, type JobFilters } from "@/hooks/useJobs";
 import { useEnhancedJobMatching } from "@/hooks/useEnhancedJobMatching";
 import { ResumeSelector } from "@/components/jobs/ResumeSelector";
-import { JobGapAnalysis } from "@/components/jobs/JobGapAnalysis";
 import { JobFilters as JobFiltersComponent } from "@/components/jobs/JobFilters";
+import { EnhancedJobMatchCard } from "@/components/jobs/EnhancedJobMatchCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useJobScraper } from "@/hooks/useJobScraper";
 import { format } from "date-fns";
@@ -56,17 +55,15 @@ export default function Jobs() {
       const jobTitle = selectedResume.industry || 'software engineer';
       const location = 'United States'; // Could be enhanced to extract from resume data
       
-      // Search for jobs relevant to the user's resume (last 3 days only)
       await scrapeJobs({
         query: jobTitle,
         location: location,
         employment_types: 'FULLTIME',
-        num_pages: 5, // Reasonable number for targeted search
-        date_posted: '3days', // Only jobs from last 3 days
-        user_id: user.id // Pass user ID to make jobs user-specific
+        num_pages: 5,
+        date_posted: '3days',
+        user_id: user.id
       });
       
-      // Refresh jobs after fetch
       await refetch();
       await reanalyzeJobs();
     } catch (error) {
@@ -157,96 +154,6 @@ export default function Jobs() {
             </Button>
           )}
         </div>
-
-        {showGapAnalysis && selectedResume && (
-          <JobGapAnalysis job={job} selectedResume={selectedResume} />
-        )}
-      </CardContent>
-    </Card>
-  );
-
-  const EnhancedJobCard = ({ jobMatch }: { jobMatch: any }) => (
-    <Card key={jobMatch.job.id} className="hover:shadow-lg transition-shadow border-l-4" 
-          style={{ borderLeftColor: jobMatch.matchScore >= 70 ? '#10b981' : jobMatch.matchScore >= 50 ? '#f59e0b' : '#3b82f6' }}>
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <CardTitle className="text-xl">{jobMatch.job.title}</CardTitle>
-              <Badge variant="secondary" className={`${jobMatch.matchScore >= 70 ? 'bg-green-500' : jobMatch.matchScore >= 50 ? 'bg-yellow-500' : 'bg-blue-500'} text-white`}>
-                {jobMatch.matchScore}% Match
-              </Badge>
-            </div>
-            <CardDescription className="text-base font-medium text-blue-600 dark:text-blue-400">
-              {jobMatch.job.company}
-            </CardDescription>
-          </div>
-          <Badge variant="secondary">{jobMatch.job.type}</Badge>
-        </div>
-
-        {jobMatch.matchReasons.length > 0 && (
-          <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-            <div className="text-sm font-medium text-green-800 dark:text-green-300 mb-1">
-              Why this matches:
-            </div>
-            <ul className="text-sm text-green-700 dark:text-green-400 space-y-1">
-              {jobMatch.matchReasons.map((reason, index) => (
-                <li key={index} className="flex items-start gap-1">
-                  <span>•</span>
-                  <span>{reason}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </CardHeader>
-
-      <CardContent>
-        <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
-          <div className="flex items-center gap-1">
-            <MapPin className="h-4 w-4" />
-            {jobMatch.job.location}
-          </div>
-          {jobMatch.job.salary && (
-            <div className="flex items-center gap-1">
-              <DollarSign className="h-4 w-4" />
-              {jobMatch.job.salary}
-            </div>
-          )}
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            {format(new Date(jobMatch.job.posted_date), 'MMM d, yyyy')}
-          </div>
-        </div>
-        
-        <p className="text-gray-700 dark:text-gray-300 mb-4">
-          {jobMatch.job.description}
-        </p>
-        
-        {jobMatch.job.tags && jobMatch.job.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {jobMatch.job.tags.map((tag) => (
-              <Badge key={tag} variant="outline">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
-        
-        <div className="flex gap-2">
-          {jobMatch.job.external_url ? (
-            <Button asChild className="flex-1 sm:flex-none">
-              <a href={jobMatch.job.external_url} target="_blank" rel="noopener noreferrer">
-                Apply Now
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
-          ) : (
-            <Button className="flex-1 sm:flex-none">
-              Apply Now
-            </Button>
-          )}
-        </div>
       </CardContent>
     </Card>
   );
@@ -259,7 +166,7 @@ export default function Jobs() {
             My Personal Job Matches
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Your personalized job opportunities fetched based on your resume. Only you can see these jobs!
+            Your personalized job opportunities with detailed match analysis and scoring breakdowns
           </p>
         </div>
 
@@ -362,11 +269,11 @@ export default function Jobs() {
                   <div className="text-gray-600 dark:text-gray-400">Loading your personal job matches...</div>
                 </div>
               ) : selectedResume ? (
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {matchedJobs.length > 0 ? (
-                    <div className="grid gap-6">
+                    <div className="grid gap-8">
                       {matchedJobs.map((jobMatch) => (
-                        <EnhancedJobCard key={jobMatch.job.id} jobMatch={jobMatch} />
+                        <EnhancedJobMatchCard key={jobMatch.job.id} jobMatch={jobMatch} />
                       ))}
                     </div>
                   ) : (
@@ -381,7 +288,56 @@ export default function Jobs() {
                 <div className="space-y-6">
                   <div className="grid gap-6">
                     {allJobs.map((job) => (
-                      <JobCard key={job.id} job={job} showGapAnalysis={false} />
+                      <Card key={job.id} className="hover:shadow-lg transition-shadow">
+                        <CardHeader>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <CardTitle className="text-xl mb-2">{job.title}</CardTitle>
+                              <CardDescription className="text-base font-medium text-blue-600 dark:text-blue-400">
+                                {job.company}
+                              </CardDescription>
+                            </div>
+                            <Badge variant="secondary">{job.type}</Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              {job.location}
+                            </div>
+                            {job.salary && (
+                              <div className="flex items-center gap-1">
+                                <DollarSign className="h-4 w-4" />
+                                {job.salary}
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {format(new Date(job.posted_date), 'MMM d, yyyy')}
+                            </div>
+                          </div>
+                          
+                          <p className="text-gray-700 dark:text-gray-300 mb-4">
+                            {job.description}
+                          </p>
+                          
+                          <div className="flex gap-2">
+                            {job.external_url ? (
+                              <Button asChild className="flex-1 sm:flex-none">
+                                <a href={job.external_url} target="_blank" rel="noopener noreferrer">
+                                  Apply Now
+                                  <ExternalLink className="ml-2 h-4 w-4" />
+                                </a>
+                              </Button>
+                            ) : (
+                              <Button className="flex-1 sm:flex-none">
+                                Apply Now
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
                 </div>
