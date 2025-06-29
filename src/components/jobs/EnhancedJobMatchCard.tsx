@@ -50,13 +50,15 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
   const handleOptimizeResume = () => {
     // Store comprehensive job data for the resume optimizer
     const optimizerData = {
-      jobDescription: `Job Title: ${job.title}\n\nCompany: ${job.company}\n\nLocation: ${job.location}\n\nSalary: ${job.salary || 'Not specified'}\n\nJob Type: ${job.type}\n\nJob Description:\n${job.description}\n\nRequirements:\n${job.requirements || 'Not specified'}`,
+      jobDescription: job.description,
       jobTitle: job.title,
       company: job.company,
       externalUrl: job.external_url,
-      needsAutoLoad: true // Flag to trigger auto-loading
+      needsAutoLoad: true,
+      requirements: job.requirements || ''
     };
     
+    console.log('Setting resume optimizer data:', optimizerData);
     sessionStorage.setItem('resumeOptimizerData', JSON.stringify(optimizerData));
     navigate('/resume-optimization');
   };

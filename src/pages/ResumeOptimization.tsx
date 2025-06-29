@@ -66,17 +66,30 @@ const ResumeOptimization = () => {
 
   // Auto-load job description and resume content
   const autoLoadContent = async () => {
+    console.log('autoLoadContent called');
     const optimizerData = sessionStorage.getItem('resumeOptimizerData');
-    if (!optimizerData) return false;
+    console.log('Session storage data:', optimizerData);
+    
+    if (!optimizerData) {
+      console.log('No optimizer data found');
+      return false;
+    }
 
     try {
       const data = JSON.parse(optimizerData);
-      if (!data.needsAutoLoad) return false;
+      console.log('Parsed data:', data);
+      
+      if (!data.needsAutoLoad) {
+        console.log('needsAutoLoad is false');
+        return false;
+      }
 
+      console.log('Starting auto-load process');
       setIsAutoLoading(true);
       
       // Set job description immediately
       if (data.jobDescription) {
+        console.log('Setting job description:', data.jobDescription);
         setJobDescription(data.jobDescription);
       }
 
@@ -87,19 +100,21 @@ const ResumeOptimization = () => {
         externalUrl: data.externalUrl || ''
       });
 
-      // Fetch and set best resume after a small delay for better UX
-      setTimeout(async () => {
-        const bestResume = await fetchBestScoringResume();
-        if (bestResume) {
-          setResumeText(bestResume);
-        }
-        
-        // Complete the auto-loading after another small delay
-        setTimeout(() => {
-          setIsAutoLoading(false);
-          // Clear the session storage
-          sessionStorage.removeItem('resumeOptimizerData');
-        }, 1000);
+      // Fetch and set best resume after a delay for better UX
+      console.log('Fetching best resume...');
+      const bestResume = await fetchBestScoringResume();
+      console.log('Best resume fetched:', bestResume ? 'Found' : 'Not found');
+      
+      if (bestResume) {
+        setResumeText(bestResume);
+      }
+      
+      // Complete the auto-loading after another delay
+      setTimeout(() => {
+        console.log('Auto-loading complete');
+        setIsAutoLoading(false);
+        // Clear the session storage
+        sessionStorage.removeItem('resumeOptimizerData');
       }, 2000);
 
       return true;
@@ -125,6 +140,7 @@ const ResumeOptimization = () => {
 
     if (user?.id) {
       // Check if we need to auto-load content
+      console.log('User authenticated, checking for auto-load');
       autoLoadContent();
     }
   }, [user, authLoading, navigate]);

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Progress } from "@/components/ui/progress";
 import { 
@@ -22,28 +21,28 @@ const loadingStages = [
     icon: Target,
     title: "Analyzing Job Requirements",
     description: "Processing the job description you selected",
-    duration: 1500,
+    duration: 1000,
     color: "from-blue-500 to-cyan-500"
   },
   {
     icon: Database,
     title: "Finding Your Best Resume",
     description: "Retrieving your highest-scoring resume from database",
-    duration: 2000,
+    duration: 1500,
     color: "from-purple-500 to-indigo-500"
   },
   {
     icon: Brain,
     title: "Preparing AI Optimization",
     description: "Setting up intelligent resume enhancement",
-    duration: 1200,
+    duration: 800,
     color: "from-green-500 to-emerald-500"
   },
   {
     icon: Sparkles,
     title: "Ready for Optimization",
     description: "Everything is set up for maximum job matching",
-    duration: 800,
+    duration: 500,
     color: "from-orange-500 to-amber-500"
   }
 ];
@@ -57,6 +56,8 @@ export const AutoLoadAnimation: React.FC<AutoLoadAnimationProps> = ({
   const [stageProgress, setStageProgress] = useState(0);
 
   useEffect(() => {
+    console.log('AutoLoadAnimation - isLoading changed:', isLoading);
+    
     if (!isLoading) {
       setCurrentStage(0);
       setProgress(0);
@@ -68,8 +69,11 @@ export const AutoLoadAnimation: React.FC<AutoLoadAnimationProps> = ({
     let progressTimer: NodeJS.Timeout;
 
     const runStage = (index: number) => {
+      console.log('Running stage:', index);
+      
       if (index >= loadingStages.length) {
         setProgress(100);
+        console.log('All stages complete, calling onComplete');
         setTimeout(() => {
           onComplete?.();
         }, 500);
@@ -107,7 +111,12 @@ export const AutoLoadAnimation: React.FC<AutoLoadAnimationProps> = ({
     };
   }, [isLoading, onComplete]);
 
-  if (!isLoading) return null;
+  if (!isLoading) {
+    console.log('AutoLoadAnimation not loading, returning null');
+    return null;
+  }
+
+  console.log('AutoLoadAnimation rendering, current stage:', currentStage);
 
   const currentStageData = loadingStages[currentStage];
   const IconComponent = currentStageData?.icon || Zap;
