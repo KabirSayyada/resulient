@@ -7,7 +7,7 @@ export interface JobScrapingParams {
   location?: string;
   employment_types?: 'FULLTIME' | 'PARTTIME' | 'CONTRACTOR' | 'INTERN';
   num_pages?: number;
-  date_posted?: 'today' | '3days' | 'week' | '2weeks' | 'month';
+  date_posted?: 'today' | '3days' | 'week' | 'month';
 }
 
 export function useJobScraper() {
