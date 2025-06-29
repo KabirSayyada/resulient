@@ -19,6 +19,7 @@ import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
 import SubscriptionDetails from "@/pages/SubscriptionDetails";
 import ReferralProgram from "@/pages/ReferralProgram";
 import Jobs from "@/pages/Jobs";
+import ResumeOptimization from "@/pages/ResumeOptimization";
 // Blog imports
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
@@ -34,7 +35,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/resume-builder" element={<ATSResumeBuilder />} />
-          <Route path="/resume-optimization" element={<Index />} />
+          <Route path="/resume-optimization" element={<ResumeOptimization />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile-setup" element={<ProfileSetup />} />
           <Route path="/profile-edit" element={<ProfileEdit />} />
