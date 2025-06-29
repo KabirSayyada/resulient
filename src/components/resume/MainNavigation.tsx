@@ -51,7 +51,7 @@ export function MainNavigation() {
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
                 <nav className="grid grid-cols-1 gap-3">
                   <Link
-                    to="/resume-builder"
+                    to="/"
                     className="text-center py-3 px-4 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors font-medium"
                     onClick={() => setMenuOpen(false)}
                   >
@@ -65,7 +65,7 @@ export function MainNavigation() {
                     Resume Score
                   </Link>
                   <Link
-                    to="/"
+                    to="/resume-optimization"
                     className="text-center py-3 px-4 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors font-medium"
                     onClick={() => setMenuOpen(false)}
                   >
@@ -104,7 +104,7 @@ export function MainNavigation() {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
-                    to="/resume-builder"
+                    to="/"
                     className={navigationMenuTriggerStyle()}
                   >
                     Resume Builder
@@ -124,7 +124,7 @@ export function MainNavigation() {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
-                    to="/"
+                    to="/resume-optimization"
                     className={navigationMenuTriggerStyle()}
                   >
                     Resume Optimization

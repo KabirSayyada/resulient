@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Progress } from "@/components/ui/progress";
 import { 
@@ -22,27 +21,27 @@ const loadingStages = [
     icon: Target,
     title: "Analyzing Job Requirements",
     description: "Processing the job description you selected",
-    duration: 1500,
+    duration: 1000,
     color: "from-blue-500 to-cyan-500"
   },
   {
-    icon: FileText,
-    title: "Loading Your Best Resume",
-    description: "Retrieving your highest-scoring resume",
-    duration: 1200,
+    icon: Database,
+    title: "Finding Your Best Resume",
+    description: "Retrieving your highest-scoring resume from database",
+    duration: 1500,
     color: "from-purple-500 to-indigo-500"
   },
   {
     icon: Brain,
     title: "Preparing AI Optimization",
     description: "Setting up intelligent resume enhancement",
-    duration: 1000,
+    duration: 800,
     color: "from-green-500 to-emerald-500"
   },
   {
     icon: Sparkles,
     title: "Ready for Optimization",
-    description: "Job description and resume loaded - ready to optimize",
+    description: "Everything is set up for maximum job matching",
     duration: 500,
     color: "from-orange-500 to-amber-500"
   }
@@ -144,7 +143,7 @@ export const AutoLoadAnimation: React.FC<AutoLoadAnimationProps> = ({
               Setting Up Your Optimization
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
-              Loading job description for perfect resume matching...
+              Preparing everything for the perfect resume match...
             </p>
           </div>
 
@@ -225,7 +224,7 @@ export const AutoLoadAnimation: React.FC<AutoLoadAnimationProps> = ({
               </span>
             </div>
             <p className="text-sm text-indigo-700 dark:text-indigo-300">
-              The job description is being loaded automatically. Once ready, simply add your resume and let our AI optimize it for maximum compatibility.
+              Our AI will analyze the job requirements and automatically tailor your resume for maximum compatibility.
             </p>
           </div>
         </div>
