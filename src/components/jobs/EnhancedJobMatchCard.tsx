@@ -72,12 +72,12 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
       }
       
       console.log('Navigating to resume optimization...');
-      navigate('/resume-optimization');
+      navigate('/');
       
     } catch (error) {
       console.error('Error in handleOptimizeResume:', error);
       // Fallback navigation without data
-      navigate('/resume-optimization');
+      navigate('/');
     }
   };
 
