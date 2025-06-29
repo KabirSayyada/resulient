@@ -37,7 +37,7 @@ export const OptimizedResumeDisplay = ({
   qualificationGaps
 }: OptimizedResumeDisplayProps) => {
   const location = useLocation();
-  const isAtsOptimizerPage = location.pathname === "/";
+  const isAtsOptimizerPage = location.pathname === "/" || location.pathname === "/resume-optimization";
   const optimizationReportRef = useRef<HTMLDivElement>(null);
   const pdfExportRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -45,13 +45,10 @@ export const OptimizedResumeDisplay = ({
   const [showAnalysisReport, setShowAnalysisReport] = useState(false);
 
   const handleOptimizationReportDownload = async () => {
-    // First prepare a clean version for PDF export
     if (!optimizationReportRef.current || !pdfExportRef.current) return;
     
-    // Copy content to the hidden PDF element for clean export
     pdfExportRef.current.innerHTML = optimizationReportRef.current.innerHTML;
     
-    // Generate the PDF from the hidden element
     await generatePDFFromElement(
       pdfExportRef.current,
       `resume-optimization-report-${new Date().toISOString().split("T")[0]}.pdf`, 
@@ -96,19 +93,16 @@ export const OptimizedResumeDisplay = ({
   };
 
   const formatResumeForTextDownload = (content: string): string => {
-    // Clean up and format the content for better text presentation
     let formatted = content
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n')
       .replace(/\n{3,}/g, '\n\n');
 
-    // Add proper spacing and formatting for text file
     const sections = formatted.split(/\n\n+/);
     const formattedSections = sections.map(section => {
       const lines = section.split('\n');
       if (lines.length === 0) return '';
       
-      // Check if this looks like a section header (all caps, short)
       if (lines[0] && lines[0] === lines[0].toUpperCase() && lines[0].length < 50 && !lines[0].startsWith('•')) {
         return lines[0] + '\n' + '='.repeat(lines[0].length) + '\n' + lines.slice(1).join('\n');
       }
@@ -123,7 +117,6 @@ export const OptimizedResumeDisplay = ({
 
   const formattedResumeContent = formatResumeContent(optimizedResume);
   
-  // Ensure all scores are above 85%
   const keywordScore = Math.max(85, Math.min(100, calculateKeywordScore(formattedResumeContent, jobDescription || "") + 15));
   const structureScore = Math.max(85, Math.min(100, calculateStructureScore(formattedResumeContent) + 10));
   const atsScore = Math.max(85, Math.min(100, calculateATSScore(formattedResumeContent) + 20));
@@ -138,17 +131,17 @@ export const OptimizedResumeDisplay = ({
   if (isAtsOptimizerPage) {
     return (
       <>
-        <Card className="border-t-8 border-t-emerald-600 shadow-xl bg-gradient-to-bl from-white via-emerald-50 to-green-100 relative mt-6 sm:mt-10 animate-fade-in">
+        <Card className="border-t-8 border-t-emerald-600 shadow-xl bg-gradient-to-bl from-white via-emerald-50 to-green-100 dark:from-gray-800 dark:via-emerald-900/50 dark:to-green-900/50 relative mt-6 sm:mt-10 animate-fade-in">
           <CardContent className="p-4 sm:p-6">
             <div className="space-y-4 sm:space-y-6">
               {/* Header with success indicator */}
               <div className="text-center mb-6">
-                <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full text-sm font-medium mb-2">
+                <div className="inline-flex items-center gap-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 px-4 py-2 rounded-full text-sm font-medium mb-2">
                   <FileText className="h-4 w-4" />
                   Resume Successfully Optimized
                 </div>
-                <h2 className="text-xl font-bold text-emerald-800">Your ATS-Optimized Resume is Ready!</h2>
-                <p className="text-emerald-600 text-sm mt-1">Download your professionally formatted resume below</p>
+                <h2 className="text-xl font-bold text-emerald-800 dark:text-emerald-200">Your ATS-Optimized Resume is Ready!</h2>
+                <p className="text-emerald-600 dark:text-emerald-300 text-sm mt-1">Download your professionally formatted resume below</p>
               </div>
 
               {/* Optimized Resume Content - First Priority */}
@@ -188,14 +181,14 @@ export const OptimizedResumeDisplay = ({
 
               {/* Expandable Analysis Report Section */}
               <Collapsible open={showAnalysisReport} onOpenChange={setShowAnalysisReport}>
-                <div className="border border-indigo-200 rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
+                <div className="border border-indigo-200 dark:border-indigo-700 rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
                   <CollapsibleTrigger asChild>
                     <Button
                       variant="ghost"
                       className="w-full p-4 justify-between hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-lg"
                     >
                       <div className="flex items-center gap-3">
-                        <BarChart3 className="h-5 w-5 text-indigo-600" />
+                        <BarChart3 className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                         <div className="text-left">
                           <h3 className="font-semibold text-indigo-800 dark:text-indigo-200">
                             Resume Analysis Report
@@ -206,9 +199,9 @@ export const OptimizedResumeDisplay = ({
                         </div>
                       </div>
                       {showAnalysisReport ? (
-                        <ChevronUp className="h-5 w-5 text-indigo-600" />
+                        <ChevronUp className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                       ) : (
-                        <ChevronDown className="h-5 w-5 text-indigo-600" />
+                        <ChevronDown className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                       )}
                     </Button>
                   </CollapsibleTrigger>
@@ -223,7 +216,7 @@ export const OptimizedResumeDisplay = ({
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         <div>
-                          <h2 className="text-lg font-bold text-indigo-800 mb-2 sm:mb-4">Analysis</h2>
+                          <h2 className="text-lg font-bold text-indigo-800 dark:text-indigo-200 mb-2 sm:mb-4">Analysis</h2>
                           <AnalysisCards
                             overallScore={overallScore}
                             atsScore={atsScore}
@@ -233,7 +226,7 @@ export const OptimizedResumeDisplay = ({
                         </div>
                         
                         <div>
-                          <h2 className="text-lg font-bold text-indigo-800 mb-2 sm:mb-4">Improvement Suggestions</h2>
+                          <h2 className="text-lg font-bold text-indigo-800 dark:text-indigo-200 mb-2 sm:mb-4">Improvement Suggestions</h2>
                           <ImprovementSuggestions suggestions={suggestions} />
                         </div>
                       </div>
@@ -250,14 +243,14 @@ export const OptimizedResumeDisplay = ({
               {/* Expandable Missing Qualifications Section */}
               {qualificationGaps && qualificationGaps.length > 0 && (
                 <Collapsible>
-                  <div className="border border-amber-200 rounded-lg bg-amber-50 dark:bg-amber-900/20">
+                  <div className="border border-amber-200 dark:border-amber-700 rounded-lg bg-amber-50 dark:bg-amber-900/20">
                     <CollapsibleTrigger asChild>
                       <Button
                         variant="ghost"
                         className="w-full p-4 justify-between hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded-lg"
                       >
                         <div className="flex items-center gap-3">
-                          <AlertTriangle className="h-5 w-5 text-amber-600" />
+                          <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                           <div className="text-left">
                             <h3 className="font-semibold text-amber-800 dark:text-amber-200">
                               Missing Qualifications Review
@@ -267,7 +260,7 @@ export const OptimizedResumeDisplay = ({
                             </p>
                           </div>
                         </div>
-                        <ChevronDown className="h-5 w-5 text-amber-600" />
+                        <ChevronDown className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                       </Button>
                     </CollapsibleTrigger>
                     
@@ -294,11 +287,11 @@ export const OptimizedResumeDisplay = ({
   }
 
   return (
-    <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 relative mt-6 sm:mt-10 animate-fade-in">
+    <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 dark:from-gray-800 dark:via-indigo-900/50 dark:to-blue-900/50 relative mt-6 sm:mt-10 animate-fade-in">
       <CardContent className="p-4 sm:p-6">
         <div className="text-center">
-          <h2 className="text-xl font-bold text-indigo-700 mb-2">Resume Score</h2>
-          <div className="font-bold text-2xl">{overallScore}/100</div>
+          <h2 className="text-xl font-bold text-indigo-700 dark:text-indigo-300 mb-2">Resume Score</h2>
+          <div className="font-bold text-2xl text-indigo-800 dark:text-indigo-200">{overallScore}/100</div>
         </div>
       </CardContent>
     </Card>
