@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -56,6 +55,32 @@ const Index = () => {
       return;
     }
   }, [user, authLoading, navigate]);
+
+  // Auto-load job data from session storage when component mounts
+  useEffect(() => {
+    try {
+      const storedData = sessionStorage.getItem('resumeOptimizerData');
+      if (storedData) {
+        const optimizerData = JSON.parse(storedData);
+        console.log('Loading stored optimizer data:', optimizerData);
+        
+        if (optimizerData.jobDescription) {
+          setJobDescription(optimizerData.jobDescription);
+          
+          // Show a toast to inform the user
+          toast({
+            title: "Job Description Loaded",
+            description: "Job description has been automatically loaded from your job selection.",
+          });
+        }
+        
+        // Clear the session storage after loading
+        sessionStorage.removeItem('resumeOptimizerData');
+      }
+    } catch (error) {
+      console.error('Error loading stored optimizer data:', error);
+    }
+  }, [toast]);
 
   const handleOptimizeResume = async () => {
     // Check if user has reached limit
