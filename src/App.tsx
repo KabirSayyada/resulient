@@ -32,7 +32,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<ATSResumeBuilder />} />
+          <Route path="/" element={<Index />} />
           <Route path="/resume-builder" element={<ATSResumeBuilder />} />
           <Route path="/resume-optimization" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
