@@ -34,6 +34,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/resume-builder" element={<ATSResumeBuilder />} />
+          <Route path="/resume-optimization" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile-setup" element={<ProfileSetup />} />
           <Route path="/profile-edit" element={<ProfileEdit />} />
