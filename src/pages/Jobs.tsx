@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Clock, DollarSign, ExternalLink, Briefcase, RefreshCw, Target, Users, Info } from "lucide-react";
+import { MapPin, Clock, DollarSign, ExternalLink, Briefcase, RefreshCw, Target, Users, Info, Download, Zap, Rocket } from "lucide-react";
 import { useJobs, type JobFilters } from "@/hooks/useJobs";
 import { useEnhancedJobMatching } from "@/hooks/useEnhancedJobMatching";
 import { ResumeSelector } from "@/components/jobs/ResumeSelector";
@@ -12,6 +13,7 @@ import { JobSeeder } from "@/components/jobs/JobSeeder";
 import { JobFilters as JobFiltersComponent } from "@/components/jobs/JobFilters";
 import { JobMatchCard } from "@/components/jobs/JobMatchCard";
 import { useAuth } from "@/hooks/useAuth";
+import { useJobScraper } from "@/hooks/useJobScraper";
 import { format } from "date-fns";
 
 export default function Jobs() {
@@ -24,6 +26,7 @@ export default function Jobs() {
 
   const { user } = useAuth();
   const { allJobs, loading, error, refetch, totalJobs } = useJobs(filters);
+  const { scrapeJobs, loading: scrapingLoading } = useJobScraper();
   const { 
     matchedJobs, 
     allJobsWithScores, 
@@ -44,6 +47,39 @@ export default function Jobs() {
       jobType: '',
       salaryRange: ''
     });
+  };
+
+  const handleMassiveJobFetch = async () => {
+    try {
+      // Fetch maximum jobs with multiple high-volume searches
+      const searchStrategies = [
+        { query: 'software OR developer OR engineer OR programmer OR tech OR IT OR data OR analyst', location: 'United States', pages: 20 },
+        { query: 'manager OR director OR lead OR supervisor OR coordinator OR executive', location: 'Remote', pages: 15 },
+        { query: 'sales OR marketing OR business OR account OR customer OR consultant', location: 'California', pages: 15 },
+        { query: 'nurse OR healthcare OR medical OR education OR teacher OR social', location: 'New York', pages: 10 },
+        { query: 'finance OR accounting OR banking OR investment OR insurance', location: 'Texas', pages: 10 },
+        { query: 'entry level OR junior OR intern OR graduate OR trainee OR associate', location: 'Florida', pages: 10 }
+      ];
+
+      for (const strategy of searchStrategies) {
+        await scrapeJobs({
+          query: strategy.query,
+          location: strategy.location,
+          employment_types: 'FULLTIME',
+          num_pages: strategy.pages,
+          date_posted: 'week'
+        });
+        
+        // Small delay between massive requests
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+      
+      // Refresh jobs after massive fetch
+      await refetch();
+      await reanalyzeJobs();
+    } catch (error) {
+      console.error('Massive job fetch failed:', error);
+    }
   };
 
   if (error) {
@@ -236,6 +272,53 @@ export default function Jobs() {
         </div>
 
         <div className="max-w-6xl mx-auto">
+          {/* Massive Job Fetch Button */}
+          <div className="mb-6 p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-500 rounded-lg">
+                  <Rocket className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-300">
+                    Massive Job Collection
+                  </h3>
+                  <p className="text-sm text-purple-600 dark:text-purple-400">
+                    Fetch up to 10,000 jobs from multiple sources in one operation
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={handleMassiveJobFetch}
+                disabled={scrapingLoading}
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-6"
+              >
+                {scrapingLoading ? (
+                  <>
+                    <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                    Fetching Maximum Jobs...
+                  </>
+                ) : (
+                  <>
+                    <Rocket className="h-5 w-5 mr-2" />
+                    Fetch 10K+ Jobs Now
+                  </>
+                )}
+              </Button>
+            </div>
+            <div className="mt-3 flex items-center gap-4 text-xs text-purple-600 dark:text-purple-400">
+              <Badge variant="outline" className="border-purple-300 text-purple-700 dark:text-purple-300">
+                <Zap className="h-3 w-3 mr-1" />
+                6 Search Strategies
+              </Badge>
+              <span>•</span>
+              <span>Multiple Industries & Locations</span>
+              <span>•</span>
+              <span className="font-medium">Up to 500+ jobs per search</span>
+            </div>
+          </div>
+
           {/* Auto-update info banner */}
           <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
             <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
