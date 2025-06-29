@@ -203,7 +203,7 @@ serve(async (req) => {
               job.job_employment_type === 'PARTTIME' ? 'Part-time' : 
               job.job_employment_type === 'CONTRACTOR' ? 'Contract' : 
               job.job_employment_type === 'INTERN' ? 'Internship' : 'Full-time',
-        description: job.job_description?.substring(0, 600) + (job.job_description?.length > 600 ? '...' : ''),
+        description: job.job_description || '', // Remove truncation entirely
         requirements: job.job_highlights?.Qualifications?.join('; ') || null,
         tags: [...new Set(tags)].slice(0, 10), // More tags for better matching
         posted_date: new Date(job.job_posted_at_datetime_utc).toISOString(),
