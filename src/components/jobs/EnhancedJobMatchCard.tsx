@@ -128,28 +128,6 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
           </p>
         </div>
 
-        {/* Resume Optimization CTA */}
-        <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-xl p-5 border border-orange-200/50 dark:border-orange-800/50">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-orange-500 rounded-lg">
-              <Wand2 className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h4 className="font-semibold text-orange-800 dark:text-orange-300">Boost Your Match Score</h4>
-              <p className="text-sm text-orange-600 dark:text-orange-400">
-                Optimize your resume specifically for this job and apply directly after optimization
-              </p>
-            </div>
-          </div>
-          <Button
-            onClick={handleOptimizeResume}
-            className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold"
-          >
-            <Wand2 className="h-4 w-4 mr-2" />
-            Optimize & Apply for This Job
-          </Button>
-        </div>
-
         {/* Detailed scoring breakdown */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-5 border border-blue-200/50 dark:border-blue-800/50">
           <div className="flex items-center gap-2 mb-4">
@@ -242,7 +220,6 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
               />
               
               <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                <div>Your Experience: <span className="font-medium">{detailedScoring.experienceAnalysis.userExperience} years</span></div>
                 {detailedScoring.experienceAnalysis.requiredExperience && (
                   <div>Required: <span className="font-medium">{detailedScoring.experienceAnalysis.requiredExperience}+ years</span></div>
                 )}
@@ -318,7 +295,7 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
                 <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-medium text-green-800 dark:text-green-300">Strong Match - Apply Now!</p>
-                  <p className="text-green-700 dark:text-green-400">Your profile aligns well with this role. Consider applying directly.</p>
+                  <p className="text-green-700 dark:text-green-400">Always optimize your resume first before applying.</p>
                 </div>
               </div>
             ) : matchScore >= 50 ? (
@@ -339,6 +316,28 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
               </div>
             )}
           </div>
+        </div>
+
+        {/* Resume Optimization CTA */}
+        <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-xl p-5 border border-orange-200/50 dark:border-orange-800/50">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 bg-orange-500 rounded-lg">
+              <Wand2 className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-orange-800 dark:text-orange-300">Boost Your Match Score</h4>
+              <p className="text-sm text-orange-600 dark:text-orange-400">
+                Optimize your resume specifically for this job and apply directly after optimization
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={handleOptimizeResume}
+            className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold"
+          >
+            <Wand2 className="h-4 w-4 mr-2" />
+            Optimize & Apply for This Job
+          </Button>
         </div>
 
         <Separator />
@@ -367,4 +366,3 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
     </Card>
   );
 }
-
