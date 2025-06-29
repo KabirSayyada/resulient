@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -71,34 +70,102 @@ interface JSearchResponse {
 }
 
 const JOB_QUERIES = [
+  // Tech roles
   'software engineer',
-  'data scientist',
+  'data scientist', 
   'product manager',
-  'marketing manager',
-  'sales representative',
+  'developer',
+  'devops engineer',
+  'ui ux designer',
+  'data analyst',
+  'cybersecurity analyst',
+  'cloud engineer',
+  'mobile developer',
+  
+  // Business roles
   'business analyst',
   'project manager',
-  'designer',
-  'developer',
-  'analyst',
+  'account manager',
+  'operations manager',
   'consultant',
-  'manager',
-  'engineer',
+  'business development',
+  'program manager',
+  'strategy analyst',
+  
+  // Marketing & Sales
+  'marketing manager',
+  'digital marketing',
+  'sales representative',
+  'content marketing',
+  'growth marketing',
+  'social media manager',
+  'sales manager',
+  'customer success',
+  
+  // Finance & Accounting
+  'financial analyst',
+  'accountant',
+  'finance manager',
+  'investment analyst',
+  'controller',
+  'treasury analyst',
+  
+  // HR & Operations
+  'human resources',
+  'recruiter',
+  'office manager',
+  'executive assistant',
+  'coordinator',
   'specialist',
-  'coordinator'
+  
+  // Healthcare & Education
+  'nurse',
+  'teacher',
+  'healthcare',
+  'medical assistant',
+  'therapist',
+  'counselor',
+  
+  // Creative & Design
+  'graphic designer',
+  'writer',
+  'editor',
+  'photographer',
+  'video editor',
+  'creative director',
+  
+  // General broad searches
+  'manager',
+  'analyst',
+  'assistant',
+  'engineer',
+  'associate',
+  'director',
+  'coordinator',
+  'representative'
 ];
 
 const LOCATIONS = [
   'United States',
   'Remote',
-  'New York',
-  'San Francisco',
-  'Los Angeles',
-  'Chicago',
-  'Seattle',
-  'Austin',
-  'Boston',
-  'Denver'
+  'New York, NY',
+  'San Francisco, CA',
+  'Los Angeles, CA',
+  'Chicago, IL',
+  'Seattle, WA',
+  'Austin, TX',
+  'Boston, MA',
+  'Denver, CO',
+  'Atlanta, GA',
+  'Dallas, TX',
+  'Phoenix, AZ',
+  'Philadelphia, PA',
+  'Houston, TX',
+  'Miami, FL',
+  'Washington, DC',
+  'Portland, OR',
+  'Minneapolis, MN',
+  'Detroit, MI'
 ];
 
 serve(async (req) => {
@@ -126,8 +193,9 @@ serve(async (req) => {
     const yesterday = new Date();
     yesterday.setHours(yesterday.getHours() - 24);
 
-    // Scrape jobs for different query/location combinations
-    for (let i = 0; i < Math.min(JOB_QUERIES.length, 10); i++) {
+    // Scrape jobs for different query/location combinations to get diverse results
+    const maxQueries = Math.min(JOB_QUERIES.length, 15); // Increase variety
+    for (let i = 0; i < maxQueries; i++) {
       const query = JOB_QUERIES[i];
       const location = LOCATIONS[i % LOCATIONS.length];
       
@@ -139,7 +207,7 @@ serve(async (req) => {
         
         url.searchParams.append('query', query);
         url.searchParams.append('location', location);
-        url.searchParams.append('employment_types', 'FULLTIME,PARTTIME,CONTRACTOR');
+        url.searchParams.append('employment_types', 'FULLTIME,PARTTIME,CONTRACTOR,INTERN');
         url.searchParams.append('date_posted', 'today');
         url.searchParams.append('num_pages', '1');
 
@@ -202,7 +270,8 @@ serve(async (req) => {
               salary: salary,
               type: job.job_employment_type === 'FULLTIME' ? 'Full-time' : 
                     job.job_employment_type === 'PARTTIME' ? 'Part-time' : 
-                    job.job_employment_type === 'CONTRACTOR' ? 'Contract' : 'Full-time',
+                    job.job_employment_type === 'CONTRACTOR' ? 'Contract' : 
+                    job.job_employment_type === 'INTERN' ? 'Internship' : 'Full-time',
               description: job.job_description?.substring(0, 500) + (job.job_description?.length > 500 ? '...' : ''),
               requirements: job.job_highlights?.Qualifications?.join('; ') || null,
               tags: [...new Set(tags)].slice(0, 8),

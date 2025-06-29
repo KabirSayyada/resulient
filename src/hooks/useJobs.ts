@@ -25,17 +25,13 @@ export function useJobs(filters?: JobFilters) {
       setLoading(true);
       setError(null);
       
-      // Get recent jobs (last 7 days) to show fresh opportunities
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      
+      // Fetch all active jobs, ordered by most recent first
       const { data, error: fetchError } = await supabase
         .from('jobs')
         .select('*')
         .eq('is_active', true)
-        .gte('posted_date', sevenDaysAgo.toISOString())
         .order('posted_date', { ascending: false })
-        .limit(200); // Limit to keep response manageable
+        .limit(500); // Fetch more jobs to have a good selection
 
       if (fetchError) {
         throw fetchError;
