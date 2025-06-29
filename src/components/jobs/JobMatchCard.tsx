@@ -26,7 +26,7 @@ export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow border-l-4" style={{ borderLeftColor: score >= 70 ? '#10b981' : score >= 50 ? '#f59e0b' : '#3b82f6' }}>
+    <Card className="hover:shadow-lg transition-shadow border-l-4" style={{ borderLeftColor: matchScore >= 70 ? '#10b981' : matchScore >= 50 ? '#f59e0b' : '#3b82f6' }}>
       <CardHeader>
         <div className="flex justify-between items-start">
           <div className="flex-1">
