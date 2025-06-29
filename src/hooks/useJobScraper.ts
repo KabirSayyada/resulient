@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -8,7 +7,7 @@ export interface JobScrapingParams {
   location?: string;
   employment_types?: 'FULLTIME' | 'PARTTIME' | 'CONTRACTOR' | 'INTERN';
   num_pages?: number;
-  date_posted?: 'today' | '3days' | 'week' | 'month';
+  date_posted?: 'today' | '3days' | 'week' | '2weeks' | 'month';
 }
 
 export function useJobScraper() {
