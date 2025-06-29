@@ -2,11 +2,10 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, DollarSign, ExternalLink, Briefcase, RefreshCw, Target, Sparkles } from "lucide-react";
+import { MapPin, Clock, DollarSign, ExternalLink, Briefcase, RefreshCw, Target, Sparkles, Info } from "lucide-react";
 import { useJobs, type JobFilters } from "@/hooks/useJobs";
 import { useJobMatching } from "@/hooks/useJobMatching";
 import { JobSeeder } from "@/components/jobs/JobSeeder";
-import { JobScraper } from "@/components/jobs/JobScraper";
 import { JobFilters as JobFiltersComponent } from "@/components/jobs/JobFilters";
 import { JobMatchCard } from "@/components/jobs/JobMatchCard";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,12 +36,6 @@ export default function Jobs() {
     });
   };
 
-  const handleJobsScraped = () => {
-    // Refresh both jobs list and matches after scraping
-    refetch();
-    refindMatches();
-  };
-
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
@@ -69,16 +62,24 @@ export default function Jobs() {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Live Job Opportunities
+            Smart Job Matching
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Discover your next career opportunity with our live job listings scraped from major job boards
+            Discover personalized job opportunities with our AI-powered matching system. Fresh jobs updated automatically throughout the day.
           </p>
         </div>
 
         <div className="max-w-6xl mx-auto">
-          {/* Job Scraper */}
-          <JobScraper onJobsScraped={handleJobsScraped} />
+          {/* Auto-update info banner */}
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+              <Info className="h-5 w-5" />
+              <span className="font-medium">Smart Job Updates:</span>
+              <span className="text-sm">
+                Fresh jobs are automatically scraped and matched to your profile 6 times daily. Only relevant opportunities are shown.
+              </span>
+            </div>
+          </div>
 
           {/* Job Filters */}
           <JobFiltersComponent 
@@ -93,11 +94,15 @@ export default function Jobs() {
               <div className="flex items-center gap-2">
                 <Briefcase className="h-4 w-4" />
                 <span>
-                  Showing {jobs.length} of {totalJobs} jobs
-                  {user && matchedJobs.length > 0 && (
-                    <span className="text-green-600 dark:text-green-400 font-medium">
-                      {' '}({matchedJobs.length} personalized matches)
-                    </span>
+                  {user && matchedJobs.length > 0 ? (
+                    <>
+                      Showing {matchedJobs.length} personalized matches
+                      {otherJobs.length > 0 && (
+                        <span> + {otherJobs.length} other jobs</span>
+                      )}
+                    </>
+                  ) : (
+                    <>Showing {jobs.length} of {totalJobs} jobs</>
                   )}
                 </span>
               </div>
@@ -117,7 +122,7 @@ export default function Jobs() {
 
           {loading || matchingLoading ? (
             <div className="text-center py-8">
-              <div className="text-gray-600 dark:text-gray-400">Loading jobs...</div>
+              <div className="text-gray-600 dark:text-gray-400">Loading your personalized job matches...</div>
             </div>
           ) : (
             <div className="space-y-8">
@@ -127,41 +132,31 @@ export default function Jobs() {
                   <div className="flex items-center gap-2 mb-6">
                     <Target className="h-5 w-5 text-orange-500" />
                     <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                      Jobs Matched For You
+                      Your Personalized Matches
                     </h2>
                     <Badge variant="secondary" className="bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300">
                       {matchedJobs.length} matches
                     </Badge>
                   </div>
                   <div className="grid gap-6 mb-8">
-                    {matchedJobs.slice(0, 5).map((jobMatch) => (
+                    {matchedJobs.map((jobMatch) => (
                       <JobMatchCard key={jobMatch.job.id} jobMatch={jobMatch} />
                     ))}
                   </div>
-                  {matchedJobs.length > 5 && (
-                    <div className="text-center mb-8">
-                      <p className="text-gray-600 dark:text-gray-400 mb-2">
-                        {matchedJobs.length - 5} more personalized matches available
-                      </p>
-                      <Button variant="outline" onClick={() => setFilters({ ...filters })}>
-                        Show All Matches
-                      </Button>
-                    </div>
-                  )}
                 </div>
               )}
 
-              {/* All Other Jobs */}
-              {otherJobs.length > 0 ? (
+              {/* Other Jobs (for authenticated users) or All Jobs (for non-authenticated) */}
+              {(!user || otherJobs.length > 0) && (
                 <div>
                   <div className="flex items-center gap-2 mb-6">
                     <Briefcase className="h-5 w-5 text-blue-500" />
                     <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                      {user && matchedJobs.length > 0 ? 'Other Available Jobs' : 'All Jobs'}
+                      {user && matchedJobs.length > 0 ? 'More Opportunities' : 'Latest Job Opportunities'}
                     </h2>
                   </div>
                   <div className="grid gap-6">
-                    {otherJobs.map((job) => (
+                    {(user ? otherJobs : jobs).map((job) => (
                       <Card key={job.id} className="hover:shadow-lg transition-shadow">
                         <CardHeader>
                           <div className="flex justify-between items-start">
@@ -232,10 +227,16 @@ export default function Jobs() {
                     ))}
                   </div>
                 </div>
-              ) : jobs.length === 0 ? (
+              )}
+
+              {/* No jobs message */}
+              {jobs.length === 0 && (
                 <div className="text-center py-8">
                   <div className="text-gray-600 dark:text-gray-400">
-                    {totalJobs === 0 ? "No jobs available. Try scraping some jobs using the tool above!" : "No jobs match your current filters."}
+                    {user ? 
+                      "No jobs match your profile yet. Check back later as we add fresh opportunities throughout the day!" :
+                      "No jobs available right now. Fresh opportunities are added throughout the day!"
+                    }
                   </div>
                   {totalJobs > 0 && (
                     <Button 
@@ -247,7 +248,7 @@ export default function Jobs() {
                     </Button>
                   )}
                 </div>
-              ) : null}
+              )}
             </div>
           )}
         </div>

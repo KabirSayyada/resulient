@@ -1,52 +1,44 @@
 
 project_id = "zllrplxlewqyipxxpetl"
 
-[api]
-enabled = true
-port = 54321
-schemas = ["public", "storage", "graphql_public"]
-
-[db]
-port = 54322
-
-[studio]
-enabled = true
-port = 54323
-api_url = "http://localhost"
-
-[inbucket]
-enabled = true
-port = 54324
-
-[storage]
-enabled = true
-
 [auth]
 enabled = true
+email_signup_enabled = true
+email_confirmation_enabled = false
+email_double_confirm_changes_enabled = false
 
-[realtime]
+[auth.email]
 enabled = true
 
-[[functions]]
-name = "gumroad-checkout"
-verify_jwt = true
+[auth.external.google]
+enabled = false
 
-[[functions]]
-name = "gumroad-webhook"
+[auth.external.github]
+enabled = false
+
+[functions.gumroad-checkout]
 verify_jwt = false
 
-[[functions]]
-name = "optimize-resume"
-verify_jwt = true
-
-[[functions]]
-name = "score-resume"
-verify_jwt = true
-
-[[functions]]
-name = "verify-subscription"
-verify_jwt = true
-
-[[functions]]
-name = "sitemap"
+[functions.gumroad-webhook]
 verify_jwt = false
+
+[functions.auto-scrape-jobs]
+verify_jwt = false
+
+[functions.scrape-jobs]
+verify_jwt = true
+
+[functions.optimize-resume]
+verify_jwt = true
+
+[functions.parse-ats-resume]
+verify_jwt = true
+
+[functions.score-resume]
+verify_jwt = true
+
+[functions.sitemap]
+verify_jwt = false
+
+[functions.verify-subscription]
+verify_jwt = true

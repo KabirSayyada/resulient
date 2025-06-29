@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Job = Tables<'jobs'>;
@@ -17,17 +18,24 @@ export function useJobs(filters?: JobFilters) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [allJobs, setAllJobs] = useState<Job[]>([]);
+  const { user } = useAuth();
 
   const fetchJobs = async () => {
     try {
       setLoading(true);
       setError(null);
       
+      // Get recent jobs (last 7 days) to show fresh opportunities
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
       const { data, error: fetchError } = await supabase
         .from('jobs')
         .select('*')
         .eq('is_active', true)
-        .order('posted_date', { ascending: false });
+        .gte('posted_date', sevenDaysAgo.toISOString())
+        .order('posted_date', { ascending: false })
+        .limit(200); // Limit to keep response manageable
 
       if (fetchError) {
         throw fetchError;
