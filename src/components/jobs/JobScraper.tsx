@@ -14,13 +14,14 @@ interface JobScraperProps {
 }
 
 export function JobScraper({ onJobsScraped }: JobScraperProps) {
-  const { scrapeJobs, loading, error } = useJobScraper();
+  const { scrapeJobs, loading } = useJobScraper();
   const [searchParams, setSearchParams] = useState<JobScrapingParams>({
     query: 'software engineer',
     location: 'United States',
     employment_types: 'FULLTIME',
     date_posted: 'week',
-    num_pages: 5 // Default to 5 pages for high volume
+    num_pages: 5, // Default to 5 pages for high volume
+    user_id: '' // This will be set when calling the function
   });
 
   const handleScrape = async () => {
@@ -213,12 +214,6 @@ export function JobScraper({ onJobsScraped }: JobScraperProps) {
             )}
           </Button>
         </div>
-
-        {error && (
-          <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg">
-            <strong>Error:</strong> {error}
-          </div>
-        )}
 
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <Badge variant="outline" className="text-xs">

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-interface JobScrapingParams {
+export interface JobScrapingParams {
   query: string;
   location: string;
   employment_types?: string;
