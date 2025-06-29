@@ -14,10 +14,9 @@ export interface JobFilters {
 }
 
 export function useJobs(filters?: JobFilters) {
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [allJobs, setAllJobs] = useState<Job[]>([]);
   const { user } = useAuth();
 
   const fetchJobs = async () => {
@@ -25,13 +24,12 @@ export function useJobs(filters?: JobFilters) {
       setLoading(true);
       setError(null);
       
-      // Fetch all active jobs, ordered by most recent first
+      // Always fetch ALL active jobs for better matching
       const { data, error: fetchError } = await supabase
         .from('jobs')
         .select('*')
         .eq('is_active', true)
-        .order('posted_date', { ascending: false })
-        .limit(500); // Fetch more jobs to have a good selection
+        .order('posted_date', { ascending: false });
 
       if (fetchError) {
         throw fetchError;
@@ -130,13 +128,9 @@ export function useJobs(filters?: JobFilters) {
     fetchJobs();
   }, []);
 
-  // Update jobs when filters change
-  useEffect(() => {
-    setJobs(filteredJobs);
-  }, [filteredJobs]);
-
   return {
     jobs: filteredJobs,
+    allJobs, // Always provide access to all jobs
     loading,
     error,
     refetch: fetchJobs,
