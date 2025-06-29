@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, Search, MapPin, Briefcase, Calendar, Download } from "lucide-react";
+import { RefreshCw, Search, MapPin, Briefcase, Calendar, Download, Zap } from "lucide-react";
 import { useJobScraper, type JobScrapingParams } from "@/hooks/useJobScraper";
 
 interface JobScraperProps {
@@ -19,7 +19,8 @@ export function JobScraper({ onJobsScraped }: JobScraperProps) {
     query: 'software engineer',
     location: 'United States',
     employment_types: 'FULLTIME',
-    date_posted: 'week'
+    date_posted: 'week',
+    num_pages: 5 // Default to 5 pages for high volume
   });
 
   const handleScrape = async () => {
@@ -34,7 +35,8 @@ export function JobScraper({ onJobsScraped }: JobScraperProps) {
 
   const handleQuickScrape = async (params: Partial<JobScrapingParams>) => {
     try {
-      await scrapeJobs({ ...searchParams, ...params });
+      // Use high page count for quick scrapes too
+      await scrapeJobs({ ...searchParams, ...params, num_pages: 8 });
       onJobsScraped?.();
     } catch (error) {
       console.error('Quick scraping failed:', error);
@@ -46,55 +48,66 @@ export function JobScraper({ onJobsScraped }: JobScraperProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Download className="h-5 w-5" />
-          Live Job Scraper
+          High-Volume Job Scraper
+          <Badge variant="secondary" className="ml-2">
+            <Zap className="h-3 w-3 mr-1" />
+            Max Jobs
+          </Badge>
         </CardTitle>
         <CardDescription>
-          Fetch the latest jobs from major job boards including Indeed, LinkedIn, and more
+          Fetch MAXIMUM jobs from major job boards including Indeed, LinkedIn, and more. Optimized for high-volume collection.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Quick Actions */}
+        {/* Quick Actions with High Volume */}
         <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => handleQuickScrape({ query: 'software engineer', location: 'United States' })}
+            onClick={() => handleQuickScrape({ query: 'software engineer OR developer OR programmer', location: 'United States' })}
             disabled={loading}
           >
             <Briefcase className="h-3 w-3 mr-1" />
-            Software Jobs
+            Tech Jobs (High Vol)
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => handleQuickScrape({ query: 'data scientist', location: 'United States' })}
+            onClick={() => handleQuickScrape({ query: 'data scientist OR analyst OR engineer', location: 'Remote' })}
             disabled={loading}
           >
             <Briefcase className="h-3 w-3 mr-1" />
-            Data Science
+            Data Science (High Vol)
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => handleQuickScrape({ query: 'product manager', location: 'United States' })}
+            onClick={() => handleQuickScrape({ query: 'manager OR director OR lead', location: 'California' })}
             disabled={loading}
           >
             <Briefcase className="h-3 w-3 mr-1" />
-            Product Management
+            Management (High Vol)
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => handleQuickScrape({ query: 'remote', location: 'United States' })}
+            onClick={() => handleQuickScrape({ query: 'entry level OR junior OR intern', location: 'United States' })}
             disabled={loading}
           >
             <MapPin className="h-3 w-3 mr-1" />
-            Remote Jobs
+            Entry Level (High Vol)
           </Button>
         </div>
 
         {/* Custom Search Form */}
-        <div className="grid gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900/50">
+        <div className="grid gap-4 p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10">
+          <div className="flex items-center gap-2 mb-2">
+            <Zap className="h-4 w-4 text-blue-500" />
+            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+              High-Volume Mode: Fetch 5-10 pages per search for maximum job collection
+            </span>
+          </div>
+          
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="query" className="text-sm font-medium flex items-center gap-1">
@@ -103,7 +116,7 @@ export function JobScraper({ onJobsScraped }: JobScraperProps) {
               </Label>
               <Input
                 id="query"
-                placeholder="e.g., software engineer, data analyst"
+                placeholder="e.g., software engineer OR developer"
                 value={searchParams.query || ''}
                 onChange={(e) => setSearchParams(prev => ({ ...prev, query: e.target.value }))}
               />
@@ -163,18 +176,39 @@ export function JobScraper({ onJobsScraped }: JobScraperProps) {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="num_pages" className="text-sm font-medium flex items-center gap-1">
+                <Zap className="h-3 w-3" />
+                Pages to Fetch
+              </Label>
+              <Select
+                value={searchParams.num_pages?.toString() || '5'}
+                onValueChange={(value) => setSearchParams(prev => ({ ...prev, num_pages: parseInt(value) }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">3 pages (~150 jobs)</SelectItem>
+                  <SelectItem value="5">5 pages (~250 jobs)</SelectItem>
+                  <SelectItem value="8">8 pages (~400 jobs)</SelectItem>
+                  <SelectItem value="10">10 pages (~500 jobs)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <Button onClick={handleScrape} disabled={loading} className="w-full">
             {loading ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Scraping Jobs...
+                Scraping {searchParams.num_pages} Pages...
               </>
             ) : (
               <>
                 <Download className="h-4 w-4 mr-2" />
-                Scrape Jobs
+                Scrape {searchParams.num_pages} Pages for Maximum Jobs
               </>
             )}
           </Button>
@@ -188,10 +222,15 @@ export function JobScraper({ onJobsScraped }: JobScraperProps) {
 
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <Badge variant="outline" className="text-xs">
-            Powered by JSearch API
+            <Zap className="h-2 w-2 mr-1" />
+            High-Volume JSearch API
           </Badge>
           <span>•</span>
-          <span>Sources: Indeed, LinkedIn, Glassdoor, and more</span>
+          <span>Sources: Indeed, LinkedIn, Glassdoor, ZipRecruiter, and more</span>
+          <span>•</span>
+          <span className="text-blue-600 dark:text-blue-400 font-medium">
+            Up to 500+ jobs per request
+          </span>
         </div>
       </CardContent>
     </Card>

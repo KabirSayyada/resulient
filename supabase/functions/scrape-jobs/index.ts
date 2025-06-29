@@ -86,7 +86,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting job scraping request...');
+    console.log('Starting HIGH-VOLUME manual job scraping request...');
     
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -104,11 +104,11 @@ serve(async (req) => {
       query: body.query || 'software engineer',
       location: body.location || 'United States',
       employment_types: body.employment_types || 'FULLTIME',
-      num_pages: body.num_pages || 1,
+      num_pages: Math.min(body.num_pages || 5, 10), // Default to 5 pages, max 10 for high volume
       date_posted: body.date_posted || 'week'
     };
 
-    console.log('Search parameters:', searchParams);
+    console.log('High-volume search parameters:', searchParams);
 
     // Build URL for JSearch API
     const baseUrl = 'https://jsearch.p.rapidapi.com/search';
@@ -121,7 +121,7 @@ serve(async (req) => {
       }
     });
 
-    console.log('Fetching jobs from JSearch API...');
+    console.log(`🚀 Fetching MAXIMUM jobs from JSearch API (${searchParams.num_pages} pages)...`);
     
     // Fetch jobs from JSearch API
     const response = await fetch(url.toString(), {
@@ -139,7 +139,7 @@ serve(async (req) => {
     }
 
     const jsearchData: JSearchResponse = await response.json();
-    console.log(`Found ${jsearchData.data?.length || 0} jobs from JSearch API`);
+    console.log(`🎯 Found ${jsearchData.data?.length || 0} jobs from JSearch API (${searchParams.num_pages} pages)`);
 
     if (!jsearchData.data || jsearchData.data.length === 0) {
       return new Response(
@@ -155,7 +155,7 @@ serve(async (req) => {
       );
     }
 
-    // Transform JSearch jobs to our database format
+    // Transform JSearch jobs to our database format with enhanced data
     const transformedJobs = jsearchData.data.map((job: JSearchJob) => {
       // Build location string
       let location = '';
@@ -174,14 +174,14 @@ serve(async (req) => {
         salary = `$${job.job_min_salary.toLocaleString()} - $${job.job_max_salary.toLocaleString()} per ${period}`;
       }
 
-      // Extract tags from skills and highlights
+      // Enhanced tag extraction from skills and highlights
       const tags = [];
       if (job.job_required_skills) {
-        tags.push(...job.job_required_skills.slice(0, 5)); // Limit to 5 skills
+        tags.push(...job.job_required_skills.slice(0, 6)); // More skills for better matching
       }
       if (job.job_highlights?.Qualifications) {
         // Extract key qualifications as tags
-        job.job_highlights.Qualifications.slice(0, 3).forEach(qual => {
+        job.job_highlights.Qualifications.slice(0, 4).forEach(qual => {
           const match = qual.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b/g);
           if (match) tags.push(...match.slice(0, 2));
         });
@@ -194,25 +194,45 @@ serve(async (req) => {
         salary: salary,
         type: job.job_employment_type === 'FULLTIME' ? 'Full-time' : 
               job.job_employment_type === 'PARTTIME' ? 'Part-time' : 
-              job.job_employment_type === 'CONTRACTOR' ? 'Contract' : 'Full-time',
-        description: job.job_description?.substring(0, 500) + (job.job_description?.length > 500 ? '...' : ''),
+              job.job_employment_type === 'CONTRACTOR' ? 'Contract' : 
+              job.job_employment_type === 'INTERN' ? 'Internship' : 'Full-time',
+        description: job.job_description?.substring(0, 600) + (job.job_description?.length > 600 ? '...' : ''),
         requirements: job.job_highlights?.Qualifications?.join('; ') || null,
-        tags: [...new Set(tags)].slice(0, 8), // Remove duplicates and limit to 8 tags
+        tags: [...new Set(tags)].slice(0, 10), // More tags for better matching
         posted_date: new Date(job.job_posted_at_datetime_utc).toISOString(),
         expires_at: job.job_offer_expiration_datetime_utc ? 
                    new Date(job.job_offer_expiration_datetime_utc).toISOString() : null,
         is_active: true,
         external_url: job.job_apply_link,
-        source: `jsearch-${job.job_publisher.toLowerCase().replace(/\s+/g, '-')}`
+        source: `jsearch-${job.job_publisher.toLowerCase().replace(/\s+/g, '-')}`,
+        external_job_id: job.job_id
       };
     });
 
-    console.log(`Transformed ${transformedJobs.length} jobs for database insertion`);
+    console.log(`📊 Transformed ${transformedJobs.length} jobs for database insertion`);
+
+    // Check for duplicates before inserting
+    const existingJobIds = new Set();
+    const { data: existingJobs } = await supabase
+      .from('jobs')
+      .select('external_job_id')
+      .not('external_job_id', 'is', null);
+
+    if (existingJobs) {
+      existingJobs.forEach(job => existingJobIds.add(job.external_job_id));
+    }
+
+    // Filter out duplicates
+    const newJobs = transformedJobs.filter(job => 
+      job.external_job_id && !existingJobIds.has(job.external_job_id)
+    );
+
+    console.log(`✅ Inserting ${newJobs.length} new jobs (${transformedJobs.length - newJobs.length} duplicates filtered)`);
 
     // Insert jobs into database
     const { data: insertedJobs, error: insertError } = await supabase
       .from('jobs')
-      .insert(transformedJobs)
+      .insert(newJobs)
       .select();
 
     if (insertError) {
@@ -220,14 +240,17 @@ serve(async (req) => {
       throw new Error(`Failed to insert jobs: ${insertError.message}`);
     }
 
-    console.log(`Successfully inserted ${insertedJobs?.length || 0} jobs into database`);
+    console.log(`🎉 Successfully inserted ${insertedJobs?.length || 0} jobs into database`);
 
     return new Response(
       JSON.stringify({
-        message: `Successfully scraped and stored ${insertedJobs?.length || 0} jobs`,
+        message: `🚀 HIGH-VOLUME SUCCESS: Scraped and stored ${insertedJobs?.length || 0} jobs from ${searchParams.num_pages} pages!`,
         count: insertedJobs?.length || 0,
+        totalScraped: transformedJobs.length,
+        duplicatesFiltered: transformedJobs.length - newJobs.length,
         jobs: insertedJobs,
-        searchParams
+        searchParams,
+        pagesRequested: searchParams.num_pages
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -236,11 +259,11 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Job scraping error:', error);
+    console.error('High-volume job scraping error:', error);
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        message: 'Failed to scrape jobs'
+        message: 'Failed to execute high-volume job scraping'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
