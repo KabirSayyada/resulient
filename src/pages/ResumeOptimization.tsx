@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -255,7 +254,7 @@ const ResumeOptimization = () => {
                 </span>
               </Link>
               <span className="rounded-full px-2 py-1 text-xs sm:text-sm font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 shadow border border-purple-200 dark:border-purple-700 animate-fade-in whitespace-nowrap">
-                ATS Resume Optimizer
+                Resume Optimizer
               </span>
             </div>
             <div className="flex justify-between items-center w-full sm:w-auto mt-2 sm:mt-0">
@@ -299,12 +298,12 @@ const ResumeOptimization = () => {
             <div className="text-lg sm:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-0 flex flex-wrap items-center justify-center gap-2">
               <Wand2 className="h-6 w-6 text-purple-600" />
               <span className="text-purple-700 dark:text-purple-400 font-bold">
-                ATS Resume Optimizer
+                AI-Powered Resume Optimizer
               </span>
             </div>
             <p className="text-gray-700 dark:text-gray-300 text-sm mt-3 max-w-2xl mx-auto">
-              Optimize your resume to beat Applicant Tracking Systems (ATS). Our AI analyzes job requirements 
-              and tailors your resume for maximum compatibility and recruiter appeal.
+              Transform your resume to perfectly match any job description. Our AI analyzes the role requirements 
+              and optimizes your resume content, keywords, and structure for maximum ATS compatibility and recruiter appeal.
             </p>
             {subscription.tier === "free" && (
               <div className="mt-3 text-sm font-medium text-purple-700 dark:text-purple-400">
@@ -350,7 +349,7 @@ const ResumeOptimization = () => {
                       placeholder="Paste your resume here..."
                       className="w-full h-64 p-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                       value={resumeText}
-                      onChange={(e) => setResumeText(e.target.value)}
+                      onChange={handleInputChange}
                     />
                   ) : (
                     <FileUploadSection 
