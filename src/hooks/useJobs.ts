@@ -13,13 +13,19 @@ export interface JobFilters {
   salaryRange: string;
 }
 
-export function useJobs(filters?: JobFilters, userId?: string) {
+export function useJobs(filters?: JobFilters) {
   const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
   const fetchJobs = async () => {
+    if (!user) {
+      setAllJobs([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -28,10 +34,11 @@ export function useJobs(filters?: JobFilters, userId?: string) {
       const threeDaysAgo = new Date();
       threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
-      // Execute query - removed user_id filter since column doesn't exist
+      // Fetch only the current user's jobs
       const { data, error: fetchError } = await supabase
         .from('jobs')
         .select('*')
+        .eq('user_id', user.id)
         .eq('is_active', true)
         .gte('posted_date', threeDaysAgo.toISOString())
         .order('posted_date', { ascending: false });
@@ -151,11 +158,11 @@ export function useJobs(filters?: JobFilters, userId?: string) {
 
   useEffect(() => {
     fetchJobs();
-  }, []); // Removed userId dependency since we're not using it
+  }, [user]); // Only refetch when user changes
 
   return {
     jobs: filteredJobs,
-    allJobs, // Always provide access to all jobs
+    allJobs, // Always provide access to all user's jobs
     loading,
     error,
     refetch: fetchJobs,

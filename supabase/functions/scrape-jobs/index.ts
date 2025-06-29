@@ -14,6 +14,7 @@ interface JobSearchParams {
   job_requirements?: string;
   num_pages?: number;
   date_posted?: string;
+  user_id?: string; // Add user_id parameter
 }
 
 interface JSearchJob {
@@ -86,7 +87,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting HIGH-VOLUME manual job scraping request...');
+    console.log('Starting user-specific job scraping request...');
     
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -105,23 +106,29 @@ serve(async (req) => {
       location: body.location || 'United States',
       employment_types: body.employment_types || 'FULLTIME',
       num_pages: Math.min(body.num_pages || 5, 10), // Default to 5 pages, max 10 for high volume
-      date_posted: body.date_posted || 'week'
+      date_posted: body.date_posted || 'week',
+      user_id: body.user_id // Get user_id from request
     };
 
-    console.log('High-volume search parameters:', searchParams);
+    // Validate user_id is provided
+    if (!searchParams.user_id) {
+      throw new Error('User ID is required for job scraping');
+    }
+
+    console.log('User-specific search parameters:', searchParams);
 
     // Build URL for JSearch API
     const baseUrl = 'https://jsearch.p.rapidapi.com/search';
     const url = new URL(baseUrl);
     
-    // Add search parameters
+    // Add search parameters (excluding user_id which is not for the API)
     Object.entries(searchParams).forEach(([key, value]) => {
-      if (value !== undefined) {
+      if (value !== undefined && key !== 'user_id') {
         url.searchParams.append(key, value.toString());
       }
     });
 
-    console.log(`🚀 Fetching MAXIMUM jobs from JSearch API (${searchParams.num_pages} pages)...`);
+    console.log(`🚀 Fetching personalized jobs from JSearch API (${searchParams.num_pages} pages) for user: ${searchParams.user_id}...`);
     
     // Fetch jobs from JSearch API
     const response = await fetch(url.toString(), {
@@ -139,7 +146,7 @@ serve(async (req) => {
     }
 
     const jsearchData: JSearchResponse = await response.json();
-    console.log(`🎯 Found ${jsearchData.data?.length || 0} jobs from JSearch API (${searchParams.num_pages} pages)`);
+    console.log(`🎯 Found ${jsearchData.data?.length || 0} jobs from JSearch API for user: ${searchParams.user_id}`);
 
     if (!jsearchData.data || jsearchData.data.length === 0) {
       return new Response(
@@ -205,17 +212,19 @@ serve(async (req) => {
         is_active: true,
         external_url: job.job_apply_link,
         source: `jsearch-${job.job_publisher.toLowerCase().replace(/\s+/g, '-')}`,
-        external_job_id: job.job_id
+        external_job_id: job.job_id,
+        user_id: searchParams.user_id // Add user_id to each job
       };
     });
 
-    console.log(`📊 Transformed ${transformedJobs.length} jobs for database insertion`);
+    console.log(`📊 Transformed ${transformedJobs.length} jobs for user: ${searchParams.user_id}`);
 
-    // Check for duplicates before inserting
+    // Check for duplicates for this specific user before inserting
     const existingJobIds = new Set();
     const { data: existingJobs } = await supabase
       .from('jobs')
       .select('external_job_id')
+      .eq('user_id', searchParams.user_id)
       .not('external_job_id', 'is', null);
 
     if (existingJobs) {
@@ -227,7 +236,7 @@ serve(async (req) => {
       job.external_job_id && !existingJobIds.has(job.external_job_id)
     );
 
-    console.log(`✅ Inserting ${newJobs.length} new jobs (${transformedJobs.length - newJobs.length} duplicates filtered)`);
+    console.log(`✅ Inserting ${newJobs.length} new jobs for user: ${searchParams.user_id} (${transformedJobs.length - newJobs.length} duplicates filtered)`);
 
     // Insert jobs into database
     const { data: insertedJobs, error: insertError } = await supabase
@@ -240,17 +249,18 @@ serve(async (req) => {
       throw new Error(`Failed to insert jobs: ${insertError.message}`);
     }
 
-    console.log(`🎉 Successfully inserted ${insertedJobs?.length || 0} jobs into database`);
+    console.log(`🎉 Successfully inserted ${insertedJobs?.length || 0} jobs for user: ${searchParams.user_id}`);
 
     return new Response(
       JSON.stringify({
-        message: `🚀 HIGH-VOLUME SUCCESS: Scraped and stored ${insertedJobs?.length || 0} jobs from ${searchParams.num_pages} pages!`,
+        message: `🚀 SUCCESS: Scraped and stored ${insertedJobs?.length || 0} personalized jobs from ${searchParams.num_pages} pages!`,
         count: insertedJobs?.length || 0,
         totalScraped: transformedJobs.length,
         duplicatesFiltered: transformedJobs.length - newJobs.length,
         jobs: insertedJobs,
         searchParams,
-        pagesRequested: searchParams.num_pages
+        pagesRequested: searchParams.num_pages,
+        userId: searchParams.user_id
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -259,11 +269,11 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('High-volume job scraping error:', error);
+    console.error('User-specific job scraping error:', error);
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        message: 'Failed to execute high-volume job scraping'
+        message: 'Failed to execute user-specific job scraping'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
