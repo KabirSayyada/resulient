@@ -1,9 +1,9 @@
-
 import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import Index from "@/pages/Index";
+import LandingPage from "@/pages/LandingPage";
 import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
 import ResumeScoring from "@/pages/ResumeScoring";
@@ -19,7 +19,6 @@ import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
 import SubscriptionDetails from "@/pages/SubscriptionDetails";
 import ReferralProgram from "@/pages/ReferralProgram";
 import Jobs from "@/pages/Jobs";
-import ResumeOptimization from "@/pages/ResumeOptimization";
 // Blog imports
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
@@ -33,9 +32,9 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/resume-builder" element={<ATSResumeBuilder />} />
-          <Route path="/resume-optimization" element={<ResumeOptimization />} />
+          <Route path="/resume-optimization" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile-setup" element={<ProfileSetup />} />
           <Route path="/profile-edit" element={<ProfileEdit />} />

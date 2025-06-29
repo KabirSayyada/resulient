@@ -65,7 +65,7 @@ export function MainNavigation() {
                     Resume Score
                   </Link>
                   <Link
-                    to="/"
+                    to="/resume-optimization"
                     className="text-center py-3 px-4 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors font-medium"
                     onClick={() => setMenuOpen(false)}
                   >
@@ -124,7 +124,7 @@ export function MainNavigation() {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
-                    to="/"
+                    to="/resume-optimization"
                     className={navigationMenuTriggerStyle()}
                   >
                     Resume Optimization
