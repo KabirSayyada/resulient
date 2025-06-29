@@ -46,17 +46,18 @@ export function useJobs(filters?: JobFilters, userId?: string) {
       }
 
       // Remove duplicates based on external_job_id and title+company combination
-      const uniqueJobs = data?.filter((job, index, arr) => {
+      const jobData = data || [];
+      const uniqueJobs = jobData.filter((job: Job, index: number, arr: Job[]) => {
         // First check by external_job_id if it exists
         if (job.external_job_id) {
-          return arr.findIndex(j => j.external_job_id === job.external_job_id) === index;
+          return arr.findIndex((j: Job) => j.external_job_id === job.external_job_id) === index;
         }
         // Fallback to title + company combination
-        return arr.findIndex(j => 
+        return arr.findIndex((j: Job) => 
           j.title.toLowerCase() === job.title.toLowerCase() && 
           j.company.toLowerCase() === job.company.toLowerCase()
         ) === index;
-      }) || [];
+      });
 
       setAllJobs(uniqueJobs);
     } catch (err) {
@@ -71,25 +72,31 @@ export function useJobs(filters?: JobFilters, userId?: string) {
   const filteredJobs = useMemo(() => {
     if (!filters) return allJobs;
 
-    return allJobs.filter((job) => {
+    return allJobs.filter((job: Job) => {
       // Search filter
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
+        const jobTitle = job.title?.toLowerCase() || '';
+        const jobCompany = job.company?.toLowerCase() || '';
+        const jobDescription = job.description?.toLowerCase() || '';
+        const jobTags = job.tags || [];
+        
         const matchesSearch = 
-          job.title.toLowerCase().includes(searchLower) ||
-          job.company.toLowerCase().includes(searchLower) ||
-          job.description.toLowerCase().includes(searchLower) ||
-          (job.tags && job.tags.some(tag => tag.toLowerCase().includes(searchLower)));
+          jobTitle.includes(searchLower) ||
+          jobCompany.includes(searchLower) ||
+          jobDescription.includes(searchLower) ||
+          jobTags.some((tag: string) => tag.toLowerCase().includes(searchLower));
         
         if (!matchesSearch) return false;
       }
 
       // Location filter
       if (filters.location) {
+        const jobLocation = job.location?.toLowerCase() || '';
         if (filters.location === 'remote') {
-          if (!job.location.toLowerCase().includes('remote')) return false;
+          if (!jobLocation.includes('remote')) return false;
         } else {
-          const locationMap: { [key: string]: string } = {
+          const locationMap: Record<string, string> = {
             'san-francisco': 'san francisco',
             'new-york': 'new york',
             'los-angeles': 'los angeles',
@@ -100,7 +107,7 @@ export function useJobs(filters?: JobFilters, userId?: string) {
           };
           
           const targetLocation = locationMap[filters.location];
-          if (targetLocation && !job.location.toLowerCase().includes(targetLocation)) {
+          if (targetLocation && !jobLocation.includes(targetLocation)) {
             return false;
           }
         }
