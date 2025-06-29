@@ -140,8 +140,8 @@ export function ResumeSelector({ onResumeSelected, selectedResumeId }: ResumeSel
                         <Calendar className="h-3 w-3" />
                         {format(new Date(score.created_at), 'MMM d, yyyy')}
                       </span>
-                      <span>Skills: {score.skills_breadth}/100</span>
-                      <span>Experience: {score.experience_duration}/100</span>
+                      <span>Skills: {score.skills_breadth}/25</span>
+                      <span>Experience: {score.experience_duration}/25</span>
                     </div>
                   </div>
                 ))}

@@ -3,73 +3,61 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-export interface JobScrapingParams {
-  query?: string;
-  location?: string;
-  employment_types?: 'FULLTIME' | 'PARTTIME' | 'CONTRACTOR' | 'INTERN';
+interface JobScrapingParams {
+  query: string;
+  location: string;
+  employment_types?: string;
   num_pages?: number;
-  date_posted?: 'today' | '3days' | 'week' | 'month';
-  user_id?: string;
+  date_posted?: string;
+  user_id: string;
 }
 
 export function useJobScraper() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [lastScrapeTime, setLastScrapeTime] = useState<string | null>(
+    localStorage.getItem('lastJobScrapeTime')
+  );
   const { toast } = useToast();
 
-  const scrapeJobs = async (params: JobScrapingParams = {}) => {
+  const scrapeJobs = async (params: JobScrapingParams) => {
+    setLoading(true);
+    
     try {
-      setLoading(true);
-      setError(null);
-
-      console.log('Starting user-specific job scraping with params:', params);
-
-      const { data, error: functionError } = await supabase.functions.invoke('scrape-jobs', {
-        body: {
-          query: params.query || 'software engineer',
-          location: params.location || 'United States',
-          employment_types: params.employment_types || 'FULLTIME',
-          num_pages: params.num_pages || 1,
-          date_posted: params.date_posted || '3days',
-          user_id: params.user_id // Pass user ID for personalized job storage
-        }
+      const { data, error } = await supabase.functions.invoke('scrape-jobs', {
+        body: params
       });
 
-      if (functionError) {
-        throw new Error(functionError.message);
+      if (error) {
+        throw error;
       }
 
-      console.log('User-specific job scraping response:', data);
+      // Update last scrape time
+      const now = new Date().toISOString();
+      setLastScrapeTime(now);
+      localStorage.setItem('lastJobScrapeTime', now);
 
       toast({
-        title: "Your Jobs Updated!",
-        description: `Successfully found ${data.count} personalized jobs from the past 3 days.`,
+        title: "Jobs Scraped Successfully",
+        description: `Found ${data?.jobCount || 0} new jobs matching your criteria.`,
       });
 
       return data;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to scrape jobs';
-      console.error('Job scraping error:', err);
-      setError(errorMessage);
-      
+    } catch (error) {
+      console.error('Job scraping error:', error);
       toast({
-        title: "Scraping Failed",
-        description: errorMessage,
+        title: "Job Scraping Failed",
+        description: "Failed to fetch new jobs. Please try again later.",
         variant: "destructive",
       });
-      
-      throw err;
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const clearError = () => setError(null);
-
   return {
     scrapeJobs,
     loading,
-    error,
-    clearError
+    lastScrapeTime
   };
 }

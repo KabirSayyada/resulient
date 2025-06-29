@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,14 +7,13 @@ import { MapPin, Clock, DollarSign, ExternalLink, RefreshCw, Target, Info, Zap }
 import { useJobs, type JobFilters } from "@/hooks/useJobs";
 import { useEnhancedJobMatching } from "@/hooks/useEnhancedJobMatching";
 import { ResumeSelector } from "@/components/jobs/ResumeSelector";
-import { JobFilters as JobFiltersComponent } from "@/components/jobs/JobFilters";
 import { EnhancedJobMatchCard } from "@/components/jobs/EnhancedJobMatchCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useJobScraper } from "@/hooks/useJobScraper";
 import { format } from "date-fns";
 
 export default function Jobs() {
-  const [filters, setFilters] = useState<JobFilters>({
+  const [filters] = useState<JobFilters>({
     search: '',
     location: '',
     jobType: '',
@@ -22,7 +22,7 @@ export default function Jobs() {
 
   const { user } = useAuth();
   const { allJobs, loading, error, refetch, totalJobs } = useJobs(filters);
-  const { scrapeJobs, loading: scrapingLoading } = useJobScraper();
+  const { scrapeJobs, loading: scrapingLoading, lastScrapeTime } = useJobScraper();
   const { 
     matchedJobs, 
     loading: matchingLoading, 
@@ -31,29 +31,31 @@ export default function Jobs() {
     reanalyzeJobs
   } = useEnhancedJobMatching();
 
-  const handleFiltersChange = (newFilters: JobFilters) => {
-    setFilters(newFilters);
+  const canFetchJobs = () => {
+    if (!lastScrapeTime) return true;
+    const tenHoursAgo = new Date(Date.now() - 10 * 60 * 60 * 1000);
+    return new Date(lastScrapeTime) < tenHoursAgo;
   };
 
-  const handleClearFilters = () => {
-    setFilters({
-      search: '',
-      location: '',
-      jobType: '',
-      salaryRange: ''
-    });
+  const getTimeUntilNextFetch = () => {
+    if (!lastScrapeTime) return null;
+    const nextFetchTime = new Date(lastScrapeTime).getTime() + (10 * 60 * 60 * 1000);
+    const now = Date.now();
+    if (nextFetchTime <= now) return null;
+    
+    const hoursLeft = Math.ceil((nextFetchTime - now) / (60 * 60 * 1000));
+    return hoursLeft;
   };
 
   const handleTargetedJobFetch = async () => {
-    if (!selectedResume || !user) {
-      console.error('No resume selected or user not authenticated for job fetching');
+    if (!selectedResume || !user || !canFetchJobs()) {
+      console.error('Cannot fetch jobs: no resume selected, user not authenticated, or cooldown active');
       return;
     }
 
     try {
-      // Extract job title and location from selected resume
       const jobTitle = selectedResume.industry || 'software engineer';
-      const location = 'United States'; // Could be enhanced to extract from resume data
+      const location = 'United States';
       
       await scrapeJobs({
         query: jobTitle,
@@ -88,75 +90,7 @@ export default function Jobs() {
     );
   }
 
-  const JobCard = ({ job, showGapAnalysis = false }: { job: any; showGapAnalysis?: boolean }) => (
-    <Card key={job.id} className="hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-xl mb-2">{job.title}</CardTitle>
-            <CardDescription className="text-base font-medium text-blue-600 dark:text-blue-400">
-              {job.company}
-            </CardDescription>
-          </div>
-          <div className="flex gap-2">
-            <Badge variant="secondary">{job.type}</Badge>
-            {job.source && job.source !== 'manual' && (
-              <Badge variant="outline" className="text-xs">
-                {job.source.replace('jsearch-', '').replace('-', ' ')}
-              </Badge>
-            )}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
-          <div className="flex items-center gap-1">
-            <MapPin className="h-4 w-4" />
-            {job.location}
-          </div>
-          {job.salary && (
-            <div className="flex items-center gap-1">
-              <DollarSign className="h-4 w-4" />
-              {job.salary}
-            </div>
-          )}
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            {format(new Date(job.posted_date), 'MMM d, yyyy')}
-          </div>
-        </div>
-        
-        <p className="text-gray-700 dark:text-gray-300 mb-4">
-          {job.description}
-        </p>
-        
-        {job.tags && job.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {job.tags.map((tag) => (
-              <Badge key={tag} variant="outline">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
-        
-        <div className="flex gap-2">
-          {job.external_url ? (
-            <Button asChild className="flex-1 sm:flex-none">
-              <a href={job.external_url} target="_blank" rel="noopener noreferrer">
-                Apply Now
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
-          ) : (
-            <Button className="flex-1 sm:flex-none">
-              Apply Now
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+  const hoursUntilNextFetch = getTimeUntilNextFetch();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
@@ -196,13 +130,18 @@ export default function Jobs() {
                           : 'Select a resume first to fetch personalized job opportunities'
                         }
                       </p>
+                      {hoursUntilNextFetch && (
+                        <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                          Next fetch available in {hoursUntilNextFetch} hour{hoursUntilNextFetch !== 1 ? 's' : ''}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <Button
                     onClick={handleTargetedJobFetch}
-                    disabled={scrapingLoading || !selectedResume}
+                    disabled={scrapingLoading || !selectedResume || !canFetchJobs()}
                     size="lg"
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-6"
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-6 disabled:opacity-50"
                   >
                     {scrapingLoading ? (
                       <>
@@ -212,7 +151,7 @@ export default function Jobs() {
                     ) : (
                       <>
                         <Target className="h-5 w-5 mr-2" />
-                        Fetch My Job Matches
+                        {hoursUntilNextFetch ? `Available in ${hoursUntilNextFetch}h` : 'Fetch My Job Matches'}
                       </>
                     )}
                   </Button>
@@ -228,6 +167,10 @@ export default function Jobs() {
                   <span className="font-medium">
                     {selectedResume ? `${selectedResume.industry} focused` : 'Select resume first'}
                   </span>
+                  <span>•</span>
+                  <span className="font-medium text-orange-600 dark:text-orange-400">
+                    10hr cooldown between fetches
+                  </span>
                 </div>
               </div>
 
@@ -241,13 +184,6 @@ export default function Jobs() {
                   </span>
                 </div>
               </div>
-
-              {/* Filters */}
-              <JobFiltersComponent 
-                filters={filters}
-                onFiltersChange={handleFiltersChange}
-                onClearFilters={handleClearFilters}
-              />
 
               {/* Job Stats */}
               {!loading && !matchingLoading && (
