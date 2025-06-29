@@ -1,9 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, FileText, Sparkles, Target, Info, Wand2 } from "lucide-react";
 import { MainNavigation } from "@/components/resume/MainNavigation";
 import { LegalFooter } from "@/components/layout/LegalFooter";
@@ -27,11 +27,19 @@ const ResumeOptimization = () => {
   const [jobDescription, setJobDescription] = useState("");
   const [inputMode, setInputMode] = useState<"upload" | "paste">("paste");
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [optimizedResult, setOptimizedResult] = useState<string | null>(null);
   const [jobFromJobsPage, setJobFromJobsPage] = useState<{jobTitle: string; company: string} | null>(null);
   
-  const { optimizedResume, optimizationHistory, addOptimization } = useResumeOptimizationHistory(user?.id);
+  const { saveOptimization, fetchOptimizationHistory, optimizationHistory } = useResumeOptimizationHistory(user?.id);
   const { subscription } = useSubscription();
   const { usage, showLimitReachedMessage } = useUsageLimits();
+
+  // Fetch optimization history on component mount
+  useEffect(() => {
+    if (user?.id) {
+      fetchOptimizationHistory();
+    }
+  }, [user?.id, fetchOptimizationHistory]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -70,7 +78,23 @@ const ResumeOptimization = () => {
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     const optimizedContent = `Optimized Resume Content:\n${resumeText}\n\nBased on Job Description:\n${jobDescription}`;
-    addOptimization(resumeText, jobDescription, optimizedContent);
+    
+    // Save optimization using the hook
+    const savedOptimization = await saveOptimization({
+      optimizedResume: optimizedContent,
+      originalResume: resumeText,
+      jobDescription: jobDescription,
+      qualificationGaps: [],
+      overallScore: 85,
+      keywordScore: 90,
+      structureScore: 80,
+      atsScore: 88,
+      suggestions: ["Improve keyword density", "Add more quantifiable achievements"]
+    });
+
+    if (savedOptimization) {
+      setOptimizedResult(optimizedContent);
+    }
 
     setIsOptimizing(false);
   };
@@ -191,7 +215,11 @@ const ResumeOptimization = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <ResumeInputToggle mode={inputMode} setMode={handleInputModeChange} />
+                  <ResumeInputToggle 
+                    resumeContent={resumeText}
+                    setResumeContent={setResumeText}
+                    userId={user?.id}
+                  />
                   {inputMode === "paste" ? (
                     <textarea
                       placeholder="Paste your resume here..."
@@ -200,11 +228,14 @@ const ResumeOptimization = () => {
                       onChange={handleInputChange}
                     />
                   ) : (
-                    <FileUploadSection onFileUpload={handleFileUpload} />
+                    <FileUploadSection 
+                      resumeContent={resumeText}
+                      setResumeContent={setResumeText}
+                    />
                   )}
                   <JobDescriptionInput
                     jobDescription={jobDescription}
-                    onJobDescriptionChange={handleJobDescriptionChange}
+                    setJobDescription={setJobDescription}
                   />
                   <Button
                     className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold"
@@ -229,8 +260,8 @@ const ResumeOptimization = () => {
 
             {/* Output Section */}
             <div className="space-y-6">
-              {optimizedResume ? (
-                <OptimizedResumeDisplay optimizedResume={optimizedResume.optimizedContent} />
+              {optimizedResult ? (
+                <OptimizedResumeDisplay optimizedResume={optimizedResult} />
               ) : (
                 <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-indigo-200">
                   <CardHeader>
@@ -243,7 +274,7 @@ const ResumeOptimization = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <OptimizationHistory history={optimizationHistory} />
+                    <OptimizationHistory userId={user?.id || ""} />
                   </CardContent>
                 </Card>
               )}
