@@ -27,24 +27,13 @@ export function useJobs(filters?: JobFilters, userId?: string) {
       // Calculate date for past 3 days
       const threeDaysAgo = new Date();
       threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-      const dateFilter = threeDaysAgo.toISOString();
 
-      // Build the query object first
-      const queryFilters: Record<string, any> = {
-        is_active: true,
-        posted_date: `gte.${dateFilter}`
-      };
-
-      // Add user filter if provided
-      if (userId) {
-        queryFilters.user_id = userId;
-      }
-
-      // Execute single query with all filters
+      // Execute query - removed user_id filter since column doesn't exist
       const { data, error: fetchError } = await supabase
         .from('jobs')
         .select('*')
-        .match(queryFilters)
+        .eq('is_active', true)
+        .gte('posted_date', threeDaysAgo.toISOString())
         .order('posted_date', { ascending: false });
 
       if (fetchError) {
@@ -162,7 +151,7 @@ export function useJobs(filters?: JobFilters, userId?: string) {
 
   useEffect(() => {
     fetchJobs();
-  }, [userId]);
+  }, []); // Removed userId dependency since we're not using it
 
   return {
     jobs: filteredJobs,

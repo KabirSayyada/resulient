@@ -25,7 +25,7 @@ export default function Jobs() {
   const [hasUserFetchedJobs, setHasUserFetchedJobs] = useState(false);
 
   const { user } = useAuth();
-  const { allJobs, loading, error, refetch, totalJobs } = useJobs(filters, user?.id); // Pass user ID for personalized jobs
+  const { allJobs, loading, error, refetch, totalJobs } = useJobs(filters); // Removed user?.id parameter
   const { scrapeJobs, loading: scrapingLoading } = useJobScraper();
   const { 
     matchedJobs, 
@@ -337,138 +337,124 @@ export default function Jobs() {
                   <Info className="h-5 w-5" />
                   <span className="font-medium">Job Management:</span>
                   <span className="text-sm">
-                    Your personalized jobs are automatically cleaned up after 1 week. Only jobs from the past 3 days matching your resume are shown.
+                    Jobs from the past 3 days are automatically fetched and displayed. Use the fetch button above to get fresh job listings.
                   </span>
                 </div>
               </div>
 
-              {/* Show jobs only after user has fetched them */}
-              {hasUserFetchedJobs || totalJobs > 0 ? (
-                <Tabs defaultValue="matches" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="matches" className="flex items-center gap-2">
-                      <Target className="h-4 w-4" />
-                      My Matches
-                      {matchedJobs.length > 0 && (
-                        <Badge variant="secondary" className="ml-2">
-                          {matchedJobs.length}
-                        </Badge>
-                      )}
-                    </TabsTrigger>
-                    <TabsTrigger value="all" className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      All My Jobs
-                      <Badge variant="outline" className="ml-2">
-                        {totalJobs}
+              {/* Show jobs tabs */}
+              <Tabs defaultValue="matches" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="matches" className="flex items-center gap-2">
+                    <Target className="h-4 w-4" />
+                    My Matches
+                    {matchedJobs.length > 0 && (
+                      <Badge variant="secondary" className="ml-2">
+                        {matchedJobs.length}
                       </Badge>
-                    </TabsTrigger>
-                  </TabsList>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="all" className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    All Jobs
+                    <Badge variant="outline" className="ml-2">
+                      {totalJobs}
+                    </Badge>
+                  </TabsTrigger>
+                </TabsList>
 
-                  <TabsContent value="matches" className="space-y-6">
-                    <JobFiltersComponent 
-                      filters={filters}
-                      onFiltersChange={handleFiltersChange}
-                      onClearFilters={handleClearFilters}
-                    />
+                <TabsContent value="matches" className="space-y-6">
+                  <JobFiltersComponent 
+                    filters={filters}
+                    onFiltersChange={handleFiltersChange}
+                    onClearFilters={handleClearFilters}
+                  />
 
-                    {!loading && !matchingLoading && selectedResume && (
-                      <div className="mb-4 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                        <div className="flex items-center gap-2">
-                          <Target className="h-4 w-4" />
-                          <span>Showing {matchedJobs.length} personalized matches from past 3 days</span>
+                  {!loading && !matchingLoading && selectedResume && (
+                    <div className="mb-4 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4" />
+                        <span>Showing {matchedJobs.length} personalized matches from past 3 days</span>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => { refetch(); reanalyzeJobs(); }}>
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Refresh
+                      </Button>
+                    </div>
+                  )}
+
+                  {loading || matchingLoading ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-600 dark:text-gray-400">Loading your personalized job matches...</div>
+                    </div>
+                  ) : selectedResume ? (
+                    <div className="space-y-6">
+                      {matchedJobs.length > 0 ? (
+                        <div className="grid gap-6">
+                          {matchedJobs.map((jobMatch) => (
+                            <EnhancedJobCard key={jobMatch.job.id} jobMatch={jobMatch} />
+                          ))}
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => { refetch(); reanalyzeJobs(); }}>
-                          <RefreshCw className="h-4 w-4 mr-2" />
-                          Refresh
-                        </Button>
-                      </div>
-                    )}
-
-                    {loading || matchingLoading ? (
-                      <div className="text-center py-8">
-                        <div className="text-gray-600 dark:text-gray-400">Loading your personalized job matches...</div>
-                      </div>
-                    ) : selectedResume ? (
-                      <div className="space-y-6">
-                        {matchedJobs.length > 0 ? (
-                          <div className="grid gap-6">
-                            {matchedJobs.map((jobMatch) => (
-                              <EnhancedJobCard key={jobMatch.job.id} jobMatch={jobMatch} />
-                            ))}
+                      ) : (
+                        <div className="text-center py-8">
+                          <div className="text-gray-600 dark:text-gray-400 mb-4">
+                            No matches found. Try fetching fresh jobs with the button above.
                           </div>
-                        ) : (
-                          <div className="text-center py-8">
-                            <div className="text-gray-600 dark:text-gray-400 mb-4">
-                              No matches found. Try fetching fresh jobs with the button above.
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <div className="text-gray-600 dark:text-gray-400">
-                          Please select a resume above to see your personalized job matches.
                         </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="text-gray-600 dark:text-gray-400">
+                        Please select a resume above to see your personalized job matches.
                       </div>
-                    )}
-                  </TabsContent>
+                    </div>
+                  )}
+                </TabsContent>
 
-                  <TabsContent value="all" className="space-y-6">
-                    <JobFiltersComponent 
-                      filters={filters}
-                      onFiltersChange={handleFiltersChange}
-                      onClearFilters={handleClearFilters}
-                    />
+                <TabsContent value="all" className="space-y-6">
+                  <JobFiltersComponent 
+                    filters={filters}
+                    onFiltersChange={handleFiltersChange}
+                    onClearFilters={handleClearFilters}
+                  />
 
-                    {!loading && (
-                      <div className="mb-4 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                        <div className="flex items-center gap-2">
-                          <Briefcase className="h-4 w-4" />
-                          <span>Showing {allJobs.length} of {totalJobs} personalized jobs from past 3 days</span>
+                  {!loading && (
+                    <div className="mb-4 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="h-4 w-4" />
+                        <span>Showing {allJobs.length} of {totalJobs} jobs from past 3 days</span>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={refetch}>
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Refresh
+                      </Button>
+                    </div>
+                  )}
+
+                  {loading ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-600 dark:text-gray-400">Loading job opportunities...</div>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {allJobs.length > 0 ? (
+                        <div className="grid gap-6">
+                          {allJobs.map((job) => (
+                            <JobCard key={job.id} job={job} showGapAnalysis={!!selectedResume} />
+                          ))}
                         </div>
-                        <Button variant="outline" size="sm" onClick={refetch}>
-                          <RefreshCw className="h-4 w-4 mr-2" />
-                          Refresh
-                        </Button>
-                      </div>
-                    )}
-
-                    {loading ? (
-                      <div className="text-center py-8">
-                        <div className="text-gray-600 dark:text-gray-400">Loading your job opportunities...</div>
-                      </div>
-                    ) : (
-                      <div className="space-y-6">
-                        {allJobs.length > 0 ? (
-                          <div className="grid gap-6">
-                            {allJobs.map((job) => (
-                              <JobCard key={job.id} job={job} showGapAnalysis={!!selectedResume} />
-                            ))}
+                      ) : (
+                        <div className="text-center py-8">
+                          <div className="text-gray-600 dark:text-gray-400">
+                            No jobs available from the past 3 days. Click "Fetch My Job Matches" above to get fresh listings!
                           </div>
-                        ) : (
-                          <div className="text-center py-8">
-                            <div className="text-gray-600 dark:text-gray-400">
-                              No personalized jobs available. Click "Fetch My Job Matches" above to get started!
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </TabsContent>
-                </Tabs>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="mb-6">
-                    <Briefcase className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
-                      Ready to Find Your Perfect Job Match?
-                    </h2>
-                    <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                      Select a resume above and click "Fetch My Job Matches" to discover personalized opportunities from the past 3 days.
-                    </p>
-                  </div>
-                </div>
-              )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </div>
           ) : (
             <div className="text-center py-12">
