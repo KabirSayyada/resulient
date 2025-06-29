@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,17 +10,20 @@ import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { ScoreResultSection } from "@/components/resume/ScoreResultSection";
 import { useResumeScoring } from "@/hooks/useResumeScoring";
 import { JobDescriptionInput } from "@/components/resume/JobDescriptionInput";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Index() {
   const [jobDescription, setJobDescription] = useState("");
+  const [resumeContent, setResumeContent] = useState("");
+  const { user } = useAuth();
+  
   const {
-    resumeText,
-    setResumeText,
-    isLoading,
     scoreData,
-    handleSubmit,
-    resetForm
-  } = useResumeScoring();
+    scoreHistory,
+    isScoring,
+    hasReachedLimit,
+    handleScoreResume
+  } = useResumeScoring(user?.id);
 
   // Check for pre-filled job description from job matching
   useEffect(() => {
@@ -29,6 +33,16 @@ export default function Index() {
       localStorage.removeItem('prefilledJobDescription'); // Clean up after use
     }
   }, []);
+
+  const handleSubmit = async () => {
+    if (!resumeContent.trim()) return;
+    await handleScoreResume(resumeContent, -1); // -1 for unlimited (free tier)
+  };
+
+  const resetForm = () => {
+    setResumeContent("");
+    setJobDescription("");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
@@ -98,11 +112,13 @@ export default function Index() {
             {/* Input Section */}
             <div className="space-y-6">
               <ResumeScoringForm
-                resumeText={resumeText}
-                setResumeText={setResumeText}
-                isLoading={isLoading}
-                onSubmit={(resumeContent, jobDesc) => handleSubmit(resumeContent, jobDesc)}
-                onReset={resetForm}
+                scoringMode="resumeOnly"
+                setScoringMode={() => {}}
+                resumeContent={resumeContent}
+                setResumeContent={setResumeContent}
+                isScoring={isScoring}
+                onScore={handleSubmit}
+                disableButton={hasReachedLimit}
               />
               
               <JobDescriptionInput 
@@ -111,12 +127,12 @@ export default function Index() {
               />
               
               <Button 
-                onClick={() => handleSubmit(resumeText, jobDescription)} 
-                disabled={!resumeText.trim() || isLoading}
+                onClick={handleSubmit} 
+                disabled={!resumeContent.trim() || isScoring || hasReachedLimit}
                 size="lg"
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4"
               >
-                {isLoading ? (
+                {isScoring ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                     Analyzing Your Resume...
