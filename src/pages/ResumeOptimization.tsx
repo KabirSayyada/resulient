@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -19,8 +20,6 @@ import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionA
 import { useUsageLimits } from "@/hooks/useUsageLimits";
 import { OptimizationAnimation } from "@/components/resume/OptimizationAnimation";
 import { AutoLoadAnimation } from "@/components/resume/AutoLoadAnimation";
-import { QualificationWarnings } from "@/components/resume/components/QualificationWarnings";
-import { OptimizedResumeContent } from "@/components/resume/components/OptimizedResumeContent";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { QualificationGap } from "@/types/resume";
@@ -469,54 +468,12 @@ const ResumeOptimization = () => {
             {/* Output Section */}
             <div className="space-y-6">
               {optimizedResult ? (
-                <div className="space-y-6">
-                  {/* Enhanced Optimized Resume Display */}
-                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-xl border-green-200 dark:border-green-800">
-                    <CardHeader className="pb-6">
-                      <CardTitle className="flex items-center gap-3 text-green-700 dark:text-green-300 text-xl">
-                        <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                          <CheckCircle className="h-6 w-6" />
-                        </div>
-                        Optimized Resume
-                      </CardTitle>
-                      <CardDescription className="text-base">
-                        Your resume has been optimized with AI to match the job description perfectly.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <OptimizedResumeContent content={optimizedResult} />
-                    </CardContent>
-                  </Card>
-
-                  {/* Qualification Gaps Display */}
-                  {qualificationGaps && qualificationGaps.length > 0 && (
-                    <QualificationWarnings qualificationGaps={qualificationGaps} />
-                  )}
-
-                  {/* Job Application Card */}
-                  {jobFromJobsPage && (
-                    <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800 shadow-lg">
-                      <CardContent className="p-6">
-                        <div className="text-center">
-                          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                          <h3 className="text-2xl font-bold text-green-800 dark:text-green-300 mb-2">
-                            Resume Optimized Successfully!
-                          </h3>
-                          <p className="text-green-600 dark:text-green-400 mb-6">
-                            Your resume has been perfectly tailored for the <strong>{jobFromJobsPage.jobTitle}</strong> position at <strong>{jobFromJobsPage.company}</strong>
-                          </p>
-                          <Button
-                            onClick={handleApplyForJob}
-                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 text-lg rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
-                          >
-                            <ExternalLink className="h-5 w-5 mr-2" />
-                            Apply for This Job Now
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
+                <OptimizedResumeDisplay 
+                  optimizedResume={optimizedResult}
+                  jobDescription={jobDescription}
+                  originalResume={resumeText}
+                  qualificationGaps={qualificationGaps}
+                />
               ) : (
                 <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-xl border-indigo-200 dark:border-indigo-800">
                   <CardHeader>
