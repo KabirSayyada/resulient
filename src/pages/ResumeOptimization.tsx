@@ -40,38 +40,9 @@ const ResumeOptimization = () => {
   const { subscription } = useSubscription();
   const { usage, showLimitReachedMessage } = useUsageLimits();
 
-  // Fetch user's best scoring resume
-  const fetchBestScoringResume = async () => {
-    if (!user?.id) {
-      console.log('No user ID available for fetching best resume');
-      return null;
-    }
-    
-    try {
-      console.log('Fetching best scoring resume for user:', user.id);
-      const { data, error } = await supabase
-        .from("resume_scores")
-        .select("resume_content, overall_score")
-        .eq("user_id", user.id)
-        .order("overall_score", { ascending: false })
-        .limit(1);
-      
-      if (error) {
-        console.error("Error fetching best resume:", error);
-        return null;
-      }
-      
-      console.log('Best resume data:', data);
-      return data?.[0]?.resume_content || null;
-    } catch (error) {
-      console.error("Error fetching best resume:", error);
-      return null;
-    }
-  };
-
-  // Auto-load job description and resume content
+  // Auto-load job description only
   const autoLoadContent = async () => {
-    console.log('autoLoadContent called');
+    console.log('autoLoadContent called - job description only');
     
     try {
       const optimizerData = sessionStorage.getItem('resumeOptimizerData');
@@ -90,7 +61,7 @@ const ResumeOptimization = () => {
         return false;
       }
 
-      console.log('Starting auto-load process...');
+      console.log('Starting auto-load process for job description only...');
       setIsAutoLoading(true);
       
       // Set job description immediately
@@ -107,16 +78,6 @@ const ResumeOptimization = () => {
           company: data.company || '',
           externalUrl: data.externalUrl || ''
         });
-      }
-
-      // Fetch and set best resume
-      console.log('Fetching best scoring resume...');
-      const bestResume = await fetchBestScoringResume();
-      console.log('Best resume result:', bestResume ? 'Found resume content' : 'No resume found');
-      
-      if (bestResume) {
-        console.log('Setting resume text...');
-        setResumeText(bestResume);
       }
       
       // Complete the auto-loading process
@@ -277,7 +238,7 @@ const ResumeOptimization = () => {
                     Optimizing for: {jobFromJobsPage.jobTitle}
                   </h3>
                   <p className="text-sm text-green-600 dark:text-green-400">
-                    at {jobFromJobsPage.company} - Job description and your best resume have been automatically loaded
+                    at {jobFromJobsPage.company} - Job description has been automatically loaded
                   </p>
                 </div>
                 {optimizedResult && (
@@ -333,7 +294,7 @@ const ResumeOptimization = () => {
                   </CardTitle>
                   <CardDescription>
                     {jobFromJobsPage 
-                      ? "Your resume and job description have been automatically loaded. Review and optimize!"
+                      ? "Job description has been automatically loaded. Add your resume and optimize!"
                       : "Paste your resume and the job description to get started."
                     }
                   </CardDescription>
