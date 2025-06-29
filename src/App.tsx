@@ -8,7 +8,6 @@ import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
 import ResumeScoring from "@/pages/ResumeScoring";
 import ATSResumeBuilder from "@/pages/ATSResumeBuilder";
-import ResumeOptimization from "@/pages/ResumeOptimization";
 import ProfileSetup from "@/pages/ProfileSetup";
 import ProfileEdit from "@/pages/ProfileEdit";
 import TermsOfService from "@/pages/TermsOfService";
@@ -35,7 +34,6 @@ function App() {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/resume-builder" element={<ATSResumeBuilder />} />
-          <Route path="/resume-optimization" element={<ResumeOptimization />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile-setup" element={<ProfileSetup />} />
           <Route path="/profile-edit" element={<ProfileEdit />} />

@@ -26,6 +26,13 @@ const loadingStages = [
     color: "from-blue-500 to-cyan-500"
   },
   {
+    icon: FileText,
+    title: "Loading Your Best Resume",
+    description: "Retrieving your highest-scoring resume",
+    duration: 1200,
+    color: "from-purple-500 to-indigo-500"
+  },
+  {
     icon: Brain,
     title: "Preparing AI Optimization",
     description: "Setting up intelligent resume enhancement",
@@ -35,7 +42,7 @@ const loadingStages = [
   {
     icon: Sparkles,
     title: "Ready for Optimization",
-    description: "Job description loaded - add your resume to continue",
+    description: "Job description and resume loaded - ready to optimize",
     duration: 500,
     color: "from-orange-500 to-amber-500"
   }
