@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,30 +50,16 @@ export default function Jobs() {
 
   const handleMassiveJobFetch = async () => {
     try {
-      // Fetch maximum jobs with multiple high-volume searches
-      const searchStrategies = [
-        { query: 'software OR developer OR engineer OR programmer OR tech OR IT OR data OR analyst', location: 'United States', pages: 20 },
-        { query: 'manager OR director OR lead OR supervisor OR coordinator OR executive', location: 'Remote', pages: 15 },
-        { query: 'sales OR marketing OR business OR account OR customer OR consultant', location: 'California', pages: 15 },
-        { query: 'nurse OR healthcare OR medical OR education OR teacher OR social', location: 'New York', pages: 10 },
-        { query: 'finance OR accounting OR banking OR investment OR insurance', location: 'Texas', pages: 10 },
-        { query: 'entry level OR junior OR intern OR graduate OR trainee OR associate', location: 'Florida', pages: 10 }
-      ];
-
-      for (const strategy of searchStrategies) {
-        await scrapeJobs({
-          query: strategy.query,
-          location: strategy.location,
-          employment_types: 'FULLTIME',
-          num_pages: strategy.pages,
-          date_posted: 'week'
-        });
-        
-        // Small delay between massive requests
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
+      // Single broad search strategy for all jobs in the last 24 hours
+      await scrapeJobs({
+        query: '', // No specific query - get all jobs
+        location: '', // No specific location - get jobs from everywhere
+        employment_types: 'FULLTIME',
+        num_pages: 20, // Maximum pages to get as many jobs as possible
+        date_posted: 'today' // Only jobs from last 24 hours
+      });
       
-      // Refresh jobs after massive fetch
+      // Refresh jobs after fetch
       await refetch();
       await reanalyzeJobs();
     } catch (error) {
@@ -281,10 +266,10 @@ export default function Jobs() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-300">
-                    Massive Job Collection
+                    Latest Jobs Collection
                   </h3>
                   <p className="text-sm text-purple-600 dark:text-purple-400">
-                    Fetch up to 10,000 jobs from multiple sources in one operation
+                    Fetch all jobs posted in the last 24 hours from all sources
                   </p>
                 </div>
               </div>
@@ -297,12 +282,12 @@ export default function Jobs() {
                 {scrapingLoading ? (
                   <>
                     <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                    Fetching Maximum Jobs...
+                    Fetching Latest Jobs...
                   </>
                 ) : (
                   <>
                     <Rocket className="h-5 w-5 mr-2" />
-                    Fetch 10K+ Jobs Now
+                    Fetch Latest Jobs
                   </>
                 )}
               </Button>
@@ -310,12 +295,12 @@ export default function Jobs() {
             <div className="mt-3 flex items-center gap-4 text-xs text-purple-600 dark:text-purple-400">
               <Badge variant="outline" className="border-purple-300 text-purple-700 dark:text-purple-300">
                 <Zap className="h-3 w-3 mr-1" />
-                6 Search Strategies
+                Last 24 Hours Only
               </Badge>
               <span>•</span>
-              <span>Multiple Industries & Locations</span>
+              <span>All Industries & Locations</span>
               <span>•</span>
-              <span className="font-medium">Up to 500+ jobs per search</span>
+              <span className="font-medium">Up to 1000+ fresh jobs</span>
             </div>
           </div>
 
