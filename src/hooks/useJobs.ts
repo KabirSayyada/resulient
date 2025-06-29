@@ -29,23 +29,23 @@ export function useJobs(filters?: JobFilters, userId?: string) {
       threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
       const dateFilter = threeDaysAgo.toISOString();
 
-      // Build query step by step to avoid deep type instantiation
-      const baseQuery = supabase
-        .from('jobs')
-        .select('*');
+      // Build the query object first
+      const queryFilters: Record<string, any> = {
+        is_active: true,
+        posted_date: `gte.${dateFilter}`
+      };
 
-      // Apply filters conditionally
-      let query = baseQuery.eq('is_active', true);
-      
+      // Add user filter if provided
       if (userId) {
-        query = query.eq('user_id', userId);
+        queryFilters.user_id = userId;
       }
-      
-      // Apply date filter separately
-      query = query.gte('posted_date', dateFilter);
-      
-      // Execute query
-      const { data, error: fetchError } = await query.order('posted_date', { ascending: false });
+
+      // Execute single query with all filters
+      const { data, error: fetchError } = await supabase
+        .from('jobs')
+        .select('*')
+        .match(queryFilters)
+        .order('posted_date', { ascending: false });
 
       if (fetchError) {
         throw fetchError;
