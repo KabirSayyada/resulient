@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileText, Sparkles, Target, Info, Wand2, ExternalLink } from "lucide-react";
+import { ArrowLeft, FileText, Sparkles, Target, Info, Wand2, ExternalLink, CheckCircle, TrendingUp, Users, Award } from "lucide-react";
 import { MainNavigation } from "@/components/resume/MainNavigation";
 import { LegalFooter } from "@/components/layout/LegalFooter";
 import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
@@ -20,10 +21,12 @@ import { useUsageLimits } from "@/hooks/useUsageLimits";
 import { OptimizationAnimation } from "@/components/resume/OptimizationAnimation";
 import { AutoLoadAnimation } from "@/components/resume/AutoLoadAnimation";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const ResumeOptimization = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [resumeText, setResumeText] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [inputMode, setInputMode] = useState<"upload" | "paste">("paste");
@@ -160,6 +163,24 @@ const ResumeOptimization = () => {
   }, [user, authLoading, navigate]);
 
   const handleOptimizeResume = async () => {
+    if (!resumeText.trim()) {
+      toast({
+        title: "Resume Required",
+        description: "Please upload or paste your resume content before optimizing.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!jobDescription.trim()) {
+      toast({
+        title: "Job Description Required", 
+        description: "Please add a job description to optimize your resume against.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Check if user has reached limit
     if (usage.resumeOptimizations.hasReachedLimit) {
       showLimitReachedMessage("resume optimization");
@@ -167,29 +188,53 @@ const ResumeOptimization = () => {
     }
 
     setIsOptimizing(true);
-    // Simulate optimization process (replace with actual AI optimization)
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    const optimizedContent = `Optimized Resume Content:\n${resumeText}\n\nBased on Job Description:\n${jobDescription}`;
     
-    // Save optimization using the hook
-    const savedOptimization = await saveOptimization({
-      optimizedResume: optimizedContent,
-      originalResume: resumeText,
-      jobDescription: jobDescription,
-      qualificationGaps: [],
-      overallScore: 85,
-      keywordScore: 90,
-      structureScore: 80,
-      atsScore: 88,
-      suggestions: ["Improve keyword density", "Add more quantifiable achievements"]
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('optimize-resume', {
+        body: {
+          resume: resumeText,
+          jobDescription: jobDescription,
+          userId: user?.id
+        }
+      });
 
-    if (savedOptimization) {
-      setOptimizedResult(optimizedContent);
+      if (error || !data) {
+        console.error('Optimization error:', error);
+        throw new Error(error?.message || 'Failed to optimize resume');
+      }
+
+      console.log('Optimization result:', data);
+
+      // Save optimization using the hook
+      const savedOptimization = await saveOptimization({
+        optimizedResume: data.optimizedResume,
+        originalResume: resumeText,
+        jobDescription: jobDescription,
+        qualificationGaps: data.qualificationGaps || [],
+        overallScore: data.overallScore || 85,
+        keywordScore: data.keywordScore || 90,
+        structureScore: data.structureScore || 80,
+        atsScore: data.atsScore || 88,
+        suggestions: data.suggestions || ["Improve keyword density", "Add more quantifiable achievements"]
+      });
+
+      if (savedOptimization) {
+        setOptimizedResult(data.optimizedResume);
+        toast({
+          title: "Resume Optimized!",
+          description: "Your resume has been successfully optimized for the job description.",
+        });
+      }
+    } catch (error) {
+      console.error('Error optimizing resume:', error);
+      toast({
+        title: "Optimization Failed",
+        description: error instanceof Error ? error.message : "Failed to optimize resume. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsOptimizing(false);
     }
-
-    setIsOptimizing(false);
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -244,48 +289,86 @@ const ResumeOptimization = () => {
         mode="optimization"
       />
       
-      <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950 dark:text-white py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950 dark:text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
             <div className="flex items-center gap-2 sm:gap-4">
               <Link to="/" className="flex items-center">
                 <span className="font-brand text-3xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
                   Resulient
                 </span>
               </Link>
-              <span className="rounded-full px-2 py-1 text-xs sm:text-sm font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 shadow border border-purple-200 dark:border-purple-700 animate-fade-in whitespace-nowrap">
+              <span className="rounded-full px-3 py-1 text-sm font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 shadow border border-purple-200 dark:border-purple-700 animate-fade-in whitespace-nowrap">
                 Resume Optimizer
               </span>
             </div>
-            <div className="flex justify-between items-center w-full sm:w-auto mt-2 sm:mt-0">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <SubscriptionTierIndicator variant="badge" size="sm" />
-                <UserMenuWithTheme />
+            <div className="flex items-center gap-3">
+              <SubscriptionTierIndicator variant="badge" size="sm" />
+              <UserMenuWithTheme />
+            </div>
+          </div>
+
+          {/* Hero Section */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl sm:text-6xl font-bold mb-6 text-gray-900 dark:text-white">
+              AI-Powered Resume
+              <span className="text-transparent bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text block">
+                Optimization
+              </span>
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+              Transform your resume to perfectly match any job description. Our advanced AI analyzes requirements 
+              and optimizes your content for maximum ATS compatibility and recruiter appeal.
+            </p>
+            
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg">
+                <div className="flex items-center justify-center mb-2">
+                  <TrendingUp className="h-8 w-8 text-green-500" />
+                </div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">5x</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Higher callback rate</div>
+              </div>
+              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg">
+                <div className="flex items-center justify-center mb-2">
+                  <Users className="h-8 w-8 text-blue-500" />
+                </div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">50K+</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Resumes optimized</div>
+              </div>
+              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg">
+                <div className="flex items-center justify-center mb-2">
+                  <Award className="h-8 w-8 text-purple-500" />
+                </div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">95%</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">ATS compatibility</div>
               </div>
             </div>
           </div>
 
           {/* Job context info if coming from jobs page */}
           {jobFromJobsPage && (
-            <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border border-green-200 dark:border-green-800 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-500 rounded-lg">
-                  <Target className="h-5 w-5 text-white" />
+            <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border border-green-200 dark:border-green-800 rounded-xl shadow-lg">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-green-500 rounded-xl">
+                  <Target className="h-6 w-6 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-green-800 dark:text-green-300">
+                  <h3 className="text-xl font-bold text-green-800 dark:text-green-300">
                     Optimizing for: {jobFromJobsPage.jobTitle}
                   </h3>
-                  <p className="text-sm text-green-600 dark:text-green-400">
+                  <p className="text-green-600 dark:text-green-400">
                     at {jobFromJobsPage.company} - Job description and your best resume have been automatically loaded
                   </p>
                 </div>
                 {optimizedResult && (
                   <Button
                     onClick={handleApplyForJob}
-                    className="bg-green-600 hover:bg-green-700 text-white font-semibold"
+                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3"
                   >
-                    <ExternalLink className="h-4 w-4 mr-2" />
+                    <ExternalLink className="h-5 w-5 mr-2" />
                     Apply for Job
                   </Button>
                 )}
@@ -293,64 +376,61 @@ const ResumeOptimization = () => {
             </div>
           )}
 
-          {/* Info block */}
-          <div className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:from-purple-950 dark:via-indigo-950 dark:to-blue-950 border-purple-200 dark:border-purple-800 rounded-xl border shadow-md px-4 py-5 mb-6 sm:px-7 max-w-3xl mx-auto text-center transition-all duration-300">
-            <div className="text-lg sm:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-0 flex flex-wrap items-center justify-center gap-2">
-              <Wand2 className="h-6 w-6 text-purple-600" />
-              <span className="text-purple-700 dark:text-purple-400 font-bold">
-                AI-Powered Resume Optimizer
-              </span>
-            </div>
-            <p className="text-gray-700 dark:text-gray-300 text-sm mt-3 max-w-2xl mx-auto">
-              Transform your resume to perfectly match any job description. Our AI analyzes the role requirements 
-              and optimizes your resume content, keywords, and structure for maximum ATS compatibility and recruiter appeal.
-            </p>
-            {subscription.tier === "free" && (
-              <div className="mt-3 text-sm font-medium text-purple-700 dark:text-purple-400">
-                Free tier: {usage.resumeOptimizations.used}/{usage.resumeOptimizations.limit} optimizations used today
-              </div>
-            )}
-          </div>
-
+          {/* Usage limits alert */}
           {usage.resumeOptimizations.hasReachedLimit && subscription.tier === "free" && (
-            <UseSubscriptionAlert 
-              subscriptionTier={subscription.tier} 
-              requiredTier="premium" 
-              message="You've reached your daily limit for resume optimization. Free users can optimize 2 resumes per day. Upgrade to Premium or Platinum for unlimited usage."
-            />
+            <div className="mb-8">
+              <UseSubscriptionAlert 
+                subscriptionTier={subscription.tier} 
+                requiredTier="premium" 
+                message="You've reached your daily limit for resume optimization. Free users can optimize 2 resumes per day. Upgrade to Premium or Platinum for unlimited usage."
+              />
+            </div>
           )}
 
           <MainNavigation />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          {/* Main Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
             {/* Input Section */}
             <div className="space-y-6">
-              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-purple-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-purple-700">
-                    <FileText className="h-5 w-5" />
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-xl border-purple-200 dark:border-purple-800">
+                <CardHeader className="pb-6">
+                  <CardTitle className="flex items-center gap-3 text-purple-700 dark:text-purple-300 text-xl">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                      <FileText className="h-6 w-6" />
+                    </div>
                     Optimize Your Resume
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-base">
                     {jobFromJobsPage 
                       ? "Your resume and job description have been automatically loaded. Review and optimize!"
-                      : "Paste your resume and the job description to get started."
+                      : "Upload your resume and add the job description to get started with AI-powered optimization."
                     }
                   </CardDescription>
+                  {subscription.tier === "free" && (
+                    <div className="text-sm font-medium text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/30 px-3 py-2 rounded-lg">
+                      Free tier: {usage.resumeOptimizations.used}/{usage.resumeOptimizations.limit} optimizations used today
+                    </div>
+                  )}
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                   <ResumeInputToggle 
                     resumeContent={resumeText}
                     setResumeContent={setResumeText}
                     userId={user?.id}
                   />
                   {inputMode === "paste" ? (
-                    <textarea
-                      placeholder="Paste your resume here..."
-                      className="w-full h-64 p-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                      value={resumeText}
-                      onChange={handleInputChange}
-                    />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Resume Content
+                      </label>
+                      <textarea
+                        placeholder="Paste your resume here..."
+                        className="w-full h-64 p-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none"
+                        value={resumeText}
+                        onChange={handleInputChange}
+                      />
+                    </div>
                   ) : (
                     <FileUploadSection 
                       resumeContent={resumeText}
@@ -362,19 +442,19 @@ const ResumeOptimization = () => {
                     setJobDescription={setJobDescription}
                   />
                   <Button
-                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold"
+                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 text-lg rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
                     onClick={handleOptimizeResume}
-                    disabled={isOptimizing || usage.resumeOptimizations.hasReachedLimit}
+                    disabled={isOptimizing || usage.resumeOptimizations.hasReachedLimit || !resumeText.trim() || !jobDescription.trim()}
                   >
                     {isOptimizing ? (
                       <>
-                        <Sparkles className="mr-2 h-4 w-4 animate-spin" />
-                        Optimizing...
+                        <Sparkles className="mr-3 h-6 w-6 animate-spin" />
+                        Optimizing Your Resume...
                       </>
                     ) : (
                       <>
-                        <Wand2 className="mr-2 h-4 w-4" />
-                        Optimize Resume
+                        <Wand2 className="mr-3 h-6 w-6" />
+                        Optimize Resume with AI
                       </>
                     )}
                   </Button>
@@ -385,23 +465,24 @@ const ResumeOptimization = () => {
             {/* Output Section */}
             <div className="space-y-6">
               {optimizedResult ? (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <OptimizedResumeDisplay optimizedResume={optimizedResult} />
                   {jobFromJobsPage && (
-                    <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800">
+                    <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800 shadow-lg">
                       <CardContent className="p-6">
                         <div className="text-center">
-                          <h3 className="text-lg font-semibold text-green-800 dark:text-green-300 mb-2">
+                          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                          <h3 className="text-2xl font-bold text-green-800 dark:text-green-300 mb-2">
                             Resume Optimized Successfully!
                           </h3>
-                          <p className="text-sm text-green-600 dark:text-green-400 mb-4">
-                            Your resume has been tailored for the {jobFromJobsPage.jobTitle} position at {jobFromJobsPage.company}
+                          <p className="text-green-600 dark:text-green-400 mb-6">
+                            Your resume has been perfectly tailored for the <strong>{jobFromJobsPage.jobTitle}</strong> position at <strong>{jobFromJobsPage.company}</strong>
                           </p>
                           <Button
                             onClick={handleApplyForJob}
-                            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
+                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 text-lg rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
                           >
-                            <ExternalLink className="h-4 w-4 mr-2" />
+                            <ExternalLink className="h-5 w-5 mr-2" />
                             Apply for This Job Now
                           </Button>
                         </div>
@@ -410,14 +491,16 @@ const ResumeOptimization = () => {
                   )}
                 </div>
               ) : (
-                <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-indigo-200">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-xl border-indigo-200 dark:border-indigo-800">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-indigo-700">
-                      <Sparkles className="h-5 w-5" />
+                    <CardTitle className="flex items-center gap-3 text-indigo-700 dark:text-indigo-300 text-xl">
+                      <div className="p-2 bg-indigo-100 dark:bg-indigo-900 rounded-lg">
+                        <Sparkles className="h-6 w-6" />
+                      </div>
                       Optimization History
                     </CardTitle>
-                    <CardDescription>
-                      View your past resume optimizations and track your progress.
+                    <CardDescription className="text-base">
+                      View your past resume optimizations and track your progress over time.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -429,7 +512,7 @@ const ResumeOptimization = () => {
           </div>
         </div>
         
-        <div className="mt-8">
+        <div className="mt-16">
           <LegalFooter />
         </div>
       </div>
