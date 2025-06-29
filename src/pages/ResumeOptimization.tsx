@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -20,8 +19,11 @@ import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionA
 import { useUsageLimits } from "@/hooks/useUsageLimits";
 import { OptimizationAnimation } from "@/components/resume/OptimizationAnimation";
 import { AutoLoadAnimation } from "@/components/resume/AutoLoadAnimation";
+import { QualificationWarnings } from "@/components/resume/components/QualificationWarnings";
+import { OptimizedResumeContent } from "@/components/resume/components/OptimizedResumeContent";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { QualificationGap } from "@/types/resume";
 
 const ResumeOptimization = () => {
   const { user, loading: authLoading } = useAuth();
@@ -33,6 +35,7 @@ const ResumeOptimization = () => {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [isAutoLoading, setIsAutoLoading] = useState(false);
   const [optimizedResult, setOptimizedResult] = useState<string | null>(null);
+  const [qualificationGaps, setQualificationGaps] = useState<QualificationGap[]>([]);
   const [jobFromJobsPage, setJobFromJobsPage] = useState<{
     jobTitle: string; 
     company: string; 
@@ -220,6 +223,7 @@ const ResumeOptimization = () => {
 
       if (savedOptimization) {
         setOptimizedResult(data.optimizedResume);
+        setQualificationGaps(data.qualificationGaps || []);
         toast({
           title: "Resume Optimized!",
           description: "Your resume has been successfully optimized for the job description.",
@@ -466,7 +470,30 @@ const ResumeOptimization = () => {
             <div className="space-y-6">
               {optimizedResult ? (
                 <div className="space-y-6">
-                  <OptimizedResumeDisplay optimizedResume={optimizedResult} />
+                  {/* Enhanced Optimized Resume Display */}
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-xl border-green-200 dark:border-green-800">
+                    <CardHeader className="pb-6">
+                      <CardTitle className="flex items-center gap-3 text-green-700 dark:text-green-300 text-xl">
+                        <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                          <CheckCircle className="h-6 w-6" />
+                        </div>
+                        Optimized Resume
+                      </CardTitle>
+                      <CardDescription className="text-base">
+                        Your resume has been optimized with AI to match the job description perfectly.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <OptimizedResumeContent content={optimizedResult} />
+                    </CardContent>
+                  </Card>
+
+                  {/* Qualification Gaps Display */}
+                  {qualificationGaps && qualificationGaps.length > 0 && (
+                    <QualificationWarnings qualificationGaps={qualificationGaps} />
+                  )}
+
+                  {/* Job Application Card */}
                   {jobFromJobsPage && (
                     <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800 shadow-lg">
                       <CardContent className="p-6">
