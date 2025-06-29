@@ -13,7 +13,7 @@ export interface JobFilters {
   salaryRange: string;
 }
 
-export function useJobs(filters?: JobFilters) {
+export function useJobs(filters?: JobFilters, userId?: string) {
   const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,18 +24,41 @@ export function useJobs(filters?: JobFilters) {
       setLoading(true);
       setError(null);
       
-      // Always fetch ALL active jobs for better matching
-      const { data, error: fetchError } = await supabase
+      let query = supabase
         .from('jobs')
         .select('*')
-        .eq('is_active', true)
-        .order('posted_date', { ascending: false });
+        .eq('is_active', true);
+
+      // If userId is provided, filter for user-specific jobs
+      if (userId) {
+        query = query.eq('user_id', userId);
+      }
+
+      // Only show jobs from past 3 days
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+      query = query.gte('posted_date', threeDaysAgo.toISOString());
+
+      const { data, error: fetchError } = await query.order('posted_date', { ascending: false });
 
       if (fetchError) {
         throw fetchError;
       }
 
-      setAllJobs(data || []);
+      // Remove duplicates based on external_job_id and title+company combination
+      const uniqueJobs = data?.filter((job, index, arr) => {
+        // First check by external_job_id if it exists
+        if (job.external_job_id) {
+          return arr.findIndex(j => j.external_job_id === job.external_job_id) === index;
+        }
+        // Fallback to title + company combination
+        return arr.findIndex(j => 
+          j.title.toLowerCase() === job.title.toLowerCase() && 
+          j.company.toLowerCase() === job.company.toLowerCase()
+        ) === index;
+      }) || [];
+
+      setAllJobs(uniqueJobs);
     } catch (err) {
       console.error('Error fetching jobs:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch jobs');
@@ -126,7 +149,7 @@ export function useJobs(filters?: JobFilters) {
 
   useEffect(() => {
     fetchJobs();
-  }, []);
+  }, [userId]);
 
   return {
     jobs: filteredJobs,
