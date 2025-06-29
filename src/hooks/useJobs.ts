@@ -24,21 +24,27 @@ export function useJobs(filters?: JobFilters, userId?: string) {
       setLoading(true);
       setError(null);
       
-      let query = supabase
-        .from('jobs')
-        .select('*')
-        .eq('is_active', true);
+      // Calculate date for past 3 days
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+      const dateFilter = threeDaysAgo.toISOString();
 
-      // If userId is provided, filter for user-specific jobs
+      // Build query step by step to avoid deep type instantiation
+      const baseQuery = supabase
+        .from('jobs')
+        .select('*');
+
+      // Apply filters conditionally
+      let query = baseQuery.eq('is_active', true);
+      
       if (userId) {
         query = query.eq('user_id', userId);
       }
-
-      // Only show jobs from past 3 days
-      const threeDaysAgo = new Date();
-      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-      query = query.gte('posted_date', threeDaysAgo.toISOString());
-
+      
+      // Apply date filter separately
+      query = query.gte('posted_date', dateFilter);
+      
+      // Execute query
       const { data, error: fetchError } = await query.order('posted_date', { ascending: false });
 
       if (fetchError) {
