@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -69,103 +70,38 @@ interface JSearchResponse {
   data: JSearchJob[];
 }
 
-const JOB_QUERIES = [
-  // Tech roles
-  'software engineer',
-  'data scientist', 
-  'product manager',
-  'developer',
-  'devops engineer',
-  'ui ux designer',
-  'data analyst',
-  'cybersecurity analyst',
-  'cloud engineer',
-  'mobile developer',
-  
-  // Business roles
-  'business analyst',
-  'project manager',
-  'account manager',
-  'operations manager',
-  'consultant',
-  'business development',
-  'program manager',
-  'strategy analyst',
-  
-  // Marketing & Sales
-  'marketing manager',
-  'digital marketing',
-  'sales representative',
-  'content marketing',
-  'growth marketing',
-  'social media manager',
-  'sales manager',
-  'customer success',
-  
-  // Finance & Accounting
-  'financial analyst',
-  'accountant',
-  'finance manager',
-  'investment analyst',
-  'controller',
-  'treasury analyst',
-  
-  // HR & Operations
-  'human resources',
-  'recruiter',
-  'office manager',
-  'executive assistant',
-  'coordinator',
-  'specialist',
-  
-  // Healthcare & Education
-  'nurse',
-  'teacher',
-  'healthcare',
-  'medical assistant',
-  'therapist',
-  'counselor',
-  
-  // Creative & Design
-  'graphic designer',
-  'writer',
-  'editor',
-  'photographer',
-  'video editor',
-  'creative director',
-  
-  // General broad searches
-  'manager',
-  'analyst',
-  'assistant',
-  'engineer',
-  'associate',
-  'director',
-  'coordinator',
-  'representative'
-];
-
-const LOCATIONS = [
-  'United States',
-  'Remote',
-  'New York, NY',
-  'San Francisco, CA',
-  'Los Angeles, CA',
-  'Chicago, IL',
-  'Seattle, WA',
-  'Austin, TX',
-  'Boston, MA',
-  'Denver, CO',
-  'Atlanta, GA',
-  'Dallas, TX',
-  'Phoenix, AZ',
-  'Philadelphia, PA',
-  'Houston, TX',
-  'Miami, FL',
-  'Washington, DC',
-  'Portland, OR',
-  'Minneapolis, MN',
-  'Detroit, MI'
+// Strategic search queries that capture broad job categories
+const STRATEGIC_SEARCHES = [
+  {
+    query: 'software engineer OR developer OR programmer OR data scientist OR analyst',
+    location: 'United States',
+    description: 'Tech & Data roles'
+  },
+  {
+    query: 'manager OR director OR coordinator OR assistant OR administrator',
+    location: 'Remote',
+    description: 'Management & Admin roles'
+  },
+  {
+    query: 'sales OR marketing OR business development OR account manager OR consultant',
+    location: 'New York, NY',
+    description: 'Sales & Marketing roles'
+  },
+  {
+    query: 'nurse OR teacher OR healthcare OR therapist OR counselor OR social worker',
+    location: 'California',
+    description: 'Healthcare & Education roles'
+  },
+  {
+    query: 'engineer OR technician OR specialist OR designer OR architect',
+    location: 'Texas',
+    description: 'Engineering & Design roles'
+  },
+  {
+    query: 'finance OR accounting OR analyst OR recruiter OR human resources',
+    location: 'Florida',
+    description: 'Finance & HR roles'
+  }
 ];
 
 serve(async (req) => {
@@ -174,7 +110,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting automated job scraping...');
+    console.log('Starting automated job scraping with strategic searches...');
     
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -193,23 +129,22 @@ serve(async (req) => {
     const yesterday = new Date();
     yesterday.setHours(yesterday.getHours() - 24);
 
-    // Scrape jobs for different query/location combinations to get diverse results
-    const maxQueries = Math.min(JOB_QUERIES.length, 15); // Increase variety
-    for (let i = 0; i < maxQueries; i++) {
-      const query = JOB_QUERIES[i];
-      const location = LOCATIONS[i % LOCATIONS.length];
+    // Make 6 strategic requests to maximize job diversity while staying within API limits
+    for (let i = 0; i < STRATEGIC_SEARCHES.length; i++) {
+      const search = STRATEGIC_SEARCHES[i];
       
       try {
-        console.log(`Scraping jobs for: ${query} in ${location}`);
+        console.log(`Strategic search ${i + 1}/6: ${search.description} - "${search.query}" in ${search.location}`);
         
         const baseUrl = 'https://jsearch.p.rapidapi.com/search';
         const url = new URL(baseUrl);
         
-        url.searchParams.append('query', query);
-        url.searchParams.append('location', location);
+        url.searchParams.append('query', search.query);
+        url.searchParams.append('location', search.location);
         url.searchParams.append('employment_types', 'FULLTIME,PARTTIME,CONTRACTOR,INTERN');
         url.searchParams.append('date_posted', 'today');
-        url.searchParams.append('num_pages', '1');
+        url.searchParams.append('num_pages', '3'); // Get more results per request
+        url.searchParams.append('page', '1');
 
         const response = await fetch(url.toString(), {
           method: 'GET',
@@ -220,7 +155,7 @@ serve(async (req) => {
         });
 
         if (!response.ok) {
-          console.error(`API error for ${query}: ${response.status}`);
+          console.error(`API error for ${search.description}: ${response.status} - ${response.statusText}`);
           continue;
         }
 
@@ -233,7 +168,7 @@ serve(async (req) => {
             return jobDate >= yesterday;
           });
 
-          console.log(`Found ${recentJobs.length} recent jobs for ${query}`);
+          console.log(`Found ${recentJobs.length} recent jobs for ${search.description} (${jsearchData.data.length} total)`);
           
           // Transform jobs
           const transformedJobs = recentJobs.map((job: JSearchJob) => {
@@ -289,16 +224,18 @@ serve(async (req) => {
           totalJobsScraped += transformedJobs.length;
         }
 
-        // Add delay between requests to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Add 2-second delay between requests to be respectful to the API
+        if (i < STRATEGIC_SEARCHES.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
         
       } catch (error) {
-        console.error(`Error scraping ${query}:`, error);
+        console.error(`Error in strategic search ${i + 1} (${search.description}):`, error);
         continue;
       }
     }
 
-    console.log(`Total jobs scraped: ${totalJobsScraped}`);
+    console.log(`Total jobs scraped across all strategic searches: ${totalJobsScraped}`);
 
     if (allJobs.length > 0) {
       // Check for existing jobs to avoid duplicates
@@ -350,10 +287,12 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({
             success: true,
-            message: `Successfully scraped and stored ${insertedJobs?.length || 0} new jobs`,
+            message: `Successfully scraped and stored ${insertedJobs?.length || 0} new jobs using strategic searches`,
             totalScraped: totalJobsScraped,
             newJobs: insertedJobs?.length || 0,
-            duplicatesFiltered: allJobs.length - newJobs.length
+            duplicatesFiltered: allJobs.length - newJobs.length,
+            searchStrategies: STRATEGIC_SEARCHES.map(search => search.description),
+            apiRequestsUsed: STRATEGIC_SEARCHES.length
           }),
           { 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -366,9 +305,10 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'No new jobs found',
+        message: 'No new jobs found in strategic searches',
         totalScraped: totalJobsScraped,
-        newJobs: 0
+        newJobs: 0,
+        apiRequestsUsed: STRATEGIC_SEARCHES.length
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
