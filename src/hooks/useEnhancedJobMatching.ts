@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,7 +14,7 @@ export interface EnhancedJobMatch {
   matchReasons: string[];
   keywordMatches: string[];
   skillsScore: number;
-  skillsGapScore: number;
+  experienceScore: number;
   locationScore: number;
   industryScore: number;
   qualityBonus: number;
@@ -24,10 +25,10 @@ export interface EnhancedJobMatch {
       score: number;
       maxScore: number;
     };
-    skillsGapAnalysis: {
-      criticalMissingSkills: string[];
-      recommendedSkills: string[];
-      skillsStrength: string;
+    experienceAnalysis: {
+      userExperience: number;
+      requiredExperience: number | null;
+      experienceGap: number;
       score: number;
       maxScore: number;
     };
@@ -59,8 +60,7 @@ export function useEnhancedJobMatching() {
       'javascript', 'python', 'react', 'node', 'sql', 'aws', 'docker', 'kubernetes', 
       'typescript', 'java', 'c++', 'angular', 'vue', 'mongodb', 'postgresql', 'git',
       'html', 'css', 'express', 'django', 'flask', 'spring', 'graphql', 'redis',
-      'elasticsearch', 'jenkins', 'terraform', 'linux', 'windows', 'azure', 'gcp',
-      'figma', 'photoshop', 'sketch', 'illustrator', 'marketing', 'seo', 'analytics'
+      'elasticsearch', 'jenkins', 'terraform', 'linux', 'windows', 'azure', 'gcp'
     ];
     
     const jobRequiredSkills = commonTechSkills.filter(skill => jobText.includes(skill));
@@ -75,14 +75,25 @@ export function useEnhancedJobMatching() {
     const skillsScore = Math.min(35, jobRequiredSkills.length > 0 ? 
       (matchingSkills.length / jobRequiredSkills.length) * 35 : 20);
     
-    // Skills gap analysis (max 25 points)
-    const criticalMissingSkills = missingSkills.slice(0, 3); // Top 3 most important missing skills
-    const recommendedSkills = missingSkills.slice(3, 6); // Additional skills to consider
-    const skillsStrength = matchingSkills.length > 0 ? 
-      `Strong in ${matchingSkills.slice(0, 2).join(', ')}` : 
-      'Limited technical alignment';
+    // Experience analysis
+    const experienceMatch = jobText.match(/(\d+)\+?\s*years?\s*(of\s*)?experience/i);
+    const requiredExperience = experienceMatch ? parseInt(experienceMatch[1]) : null;
+    const userExperience = resumeData.experience_duration || 0;
+    const experienceGap = requiredExperience ? Math.max(0, requiredExperience - userExperience) : 0;
     
-    const skillsGapScore = Math.max(5, 25 - (missingSkills.length * 3));
+    // Experience scoring (max 25 points)
+    let experienceScore = 15; // Base score
+    if (requiredExperience) {
+      if (userExperience >= requiredExperience) {
+        experienceScore = 25;
+      } else if (userExperience >= requiredExperience * 0.7) {
+        experienceScore = 20;
+      } else if (userExperience >= requiredExperience * 0.5) {
+        experienceScore = 15;
+      } else {
+        experienceScore = 10;
+      }
+    }
     
     // Industry matching (max 20 points)
     const industryScore = jobText.includes(resumeData.industry.toLowerCase()) ? 20 : 8;
@@ -93,17 +104,17 @@ export function useEnhancedJobMatching() {
     // Resume quality bonus (max 10 points)
     const qualityBonus = Math.min(10, (resumeData.overall_score / 100) * 10);
     
-    const totalScore = skillsScore + skillsGapScore + industryScore + locationScore + qualityBonus;
+    const totalScore = skillsScore + experienceScore + industryScore + locationScore + qualityBonus;
     
     // Generate match reasons
     const matchReasons: string[] = [];
     if (matchingSkills.length > 0) {
       matchReasons.push(`${matchingSkills.length} of ${jobRequiredSkills.length} required skills match`);
     }
-    if (criticalMissingSkills.length === 0) {
-      matchReasons.push('All critical technical skills present');
-    } else if (criticalMissingSkills.length <= 2) {
-      matchReasons.push('Only minor skill gaps identified');
+    if (experienceGap === 0 && requiredExperience) {
+      matchReasons.push(`Meets ${requiredExperience}+ years experience requirement`);
+    } else if (experienceGap > 0) {
+      matchReasons.push(`${experienceGap} years short of experience requirement`);
     }
     if (industryScore > 10) {
       matchReasons.push(`${resumeData.industry} industry experience aligns`);
@@ -120,11 +131,11 @@ export function useEnhancedJobMatching() {
         score: Math.round(skillsScore),
         maxScore: 35
       },
-      skillsGapAnalysis: {
-        criticalMissingSkills,
-        recommendedSkills,
-        skillsStrength,
-        score: Math.round(skillsGapScore),
+      experienceAnalysis: {
+        userExperience,
+        requiredExperience,
+        experienceGap,
+        score: Math.round(experienceScore),
         maxScore: 25
       },
       resumeQualityAnalysis: {
@@ -143,7 +154,7 @@ export function useEnhancedJobMatching() {
       matchReasons,
       keywordMatches: matchingSkills,
       skillsScore: Math.round(skillsScore),
-      skillsGapScore: Math.round(skillsGapScore),
+      experienceScore: Math.round(experienceScore),
       locationScore: Math.round(locationScore),
       industryScore: Math.round(industryScore),
       qualityBonus: Math.round(qualityBonus),

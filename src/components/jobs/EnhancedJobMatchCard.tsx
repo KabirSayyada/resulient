@@ -7,11 +7,9 @@ import { Separator } from "@/components/ui/separator";
 import { 
   MapPin, Clock, DollarSign, ExternalLink, Target, Sparkles, 
   TrendingUp, Building, Calendar, Award, AlertTriangle, CheckCircle, 
-  XCircle, User, Zap, BookOpen, Briefcase, Star, FileText, 
-  ArrowRight, Lightbulb, Shield
+  XCircle, User, Zap, BookOpen, Briefcase, Star
 } from "lucide-react";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
 import type { EnhancedJobMatch } from "@/hooks/useEnhancedJobMatching";
 
 interface EnhancedJobMatchCardProps {
@@ -20,7 +18,6 @@ interface EnhancedJobMatchCardProps {
 
 export function EnhancedJobMatchCard({ jobMatch }: EnhancedJobMatchCardProps) {
   const { job, matchScore, detailedScoring } = jobMatch;
-  const navigate = useNavigate();
 
   const getMatchColor = (score: number) => {
     if (score >= 70) return "from-green-500 to-emerald-600";
@@ -45,32 +42,6 @@ export function EnhancedJobMatchCard({ jobMatch }: EnhancedJobMatchCardProps) {
     if (percentage >= 80) return "text-green-600 dark:text-green-400";
     if (percentage >= 60) return "text-yellow-600 dark:text-yellow-400";
     return "text-red-600 dark:text-red-400";
-  };
-
-  const handleOptimizeResume = () => {
-    // Navigate to resume optimization page with job description pre-filled
-    const jobDescription = `${job.title} at ${job.company}\n\nLocation: ${job.location}\n\nJob Description:\n${job.description}\n\nRequirements:\n${job.requirements || 'See job description above'}`;
-    
-    // Store job description in localStorage to pre-fill the form
-    localStorage.setItem('prefilledJobDescription', jobDescription);
-    navigate('/resume-optimization');
-  };
-
-  const getApplicationTips = () => {
-    const tips = [];
-    if (detailedScoring.skillsGapAnalysis.criticalMissingSkills.length > 0) {
-      tips.push(`Focus on ${detailedScoring.skillsGapAnalysis.criticalMissingSkills[0]} skills`);
-    }
-    if (detailedScoring.resumeQualityAnalysis.overallScore < 75) {
-      tips.push('Improve resume quality first');
-    }
-    if (detailedScoring.skillsAnalysis.matchingSkills.length > 3) {
-      tips.push('Highlight relevant experience');
-    } else {
-      tips.push('Emphasize transferable skills');
-    }
-    tips.push('Tailor resume to job keywords');
-    return tips;
   };
 
   return (
@@ -213,61 +184,33 @@ export function EnhancedJobMatchCard({ jobMatch }: EnhancedJobMatchCardProps) {
               )}
             </div>
 
-            {/* Skills Gap Analysis */}
+            {/* Experience Analysis */}
             <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-orange-600" />
-                  <span className="font-medium text-gray-800 dark:text-gray-200">Skills Gap Analysis</span>
+                  <User className="h-4 w-4 text-blue-600" />
+                  <span className="font-medium text-gray-800 dark:text-gray-200">Experience Match</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`font-bold ${getScoreColor(detailedScoring.skillsGapAnalysis.score, detailedScoring.skillsGapAnalysis.maxScore)}`}>
-                    {detailedScoring.skillsGapAnalysis.score}/{detailedScoring.skillsGapAnalysis.maxScore}
+                  <span className={`font-bold ${getScoreColor(detailedScoring.experienceAnalysis.score, detailedScoring.experienceAnalysis.maxScore)}`}>
+                    {detailedScoring.experienceAnalysis.score}/{detailedScoring.experienceAnalysis.maxScore}
                   </span>
                 </div>
               </div>
               <Progress 
-                value={(detailedScoring.skillsGapAnalysis.score / detailedScoring.skillsGapAnalysis.maxScore) * 100} 
+                value={(detailedScoring.experienceAnalysis.score / detailedScoring.experienceAnalysis.maxScore) * 100} 
                 className="h-2 mb-3"
               />
               
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-blue-500" />
-                  <span className="font-medium text-blue-700 dark:text-blue-400">
-                    {detailedScoring.skillsGapAnalysis.skillsStrength}
-                  </span>
-                </div>
-                
-                {detailedScoring.skillsGapAnalysis.criticalMissingSkills.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-1 mb-1">
-                      <AlertTriangle className="h-4 w-4 text-red-500" />
-                      <span className="font-medium text-red-700 dark:text-red-400">Critical Skills Gap</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {detailedScoring.skillsGapAnalysis.criticalMissingSkills.map((skill) => (
-                        <Badge key={skill} variant="outline" className="text-xs bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <div>Your Experience: <span className="font-medium">{detailedScoring.experienceAnalysis.userExperience} years</span></div>
+                {detailedScoring.experienceAnalysis.requiredExperience && (
+                  <div>Required: <span className="font-medium">{detailedScoring.experienceAnalysis.requiredExperience}+ years</span></div>
                 )}
-
-                {detailedScoring.skillsGapAnalysis.recommendedSkills.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-1 mb-1">
-                      <Lightbulb className="h-4 w-4 text-yellow-500" />
-                      <span className="font-medium text-yellow-700 dark:text-yellow-400">Nice to Have</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {detailedScoring.skillsGapAnalysis.recommendedSkills.map((skill) => (
-                        <Badge key={skill} variant="outline" className="text-xs bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
+                {detailedScoring.experienceAnalysis.experienceGap > 0 && (
+                  <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400">
+                    <AlertTriangle className="h-3 w-3" />
+                    <span>Gap: {detailedScoring.experienceAnalysis.experienceGap} years</span>
                   </div>
                 )}
               </div>
@@ -324,53 +267,40 @@ export function EnhancedJobMatchCard({ jobMatch }: EnhancedJobMatchCardProps) {
           </div>
         </div>
 
-        {/* Application Tips */}
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 rounded-xl p-4 border border-purple-200/50 dark:border-purple-800/50">
-          <div className="flex items-center gap-2 mb-3">
-            <Lightbulb className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            <h5 className="font-semibold text-purple-800 dark:text-purple-300">Application Tips</h5>
+        {/* Job tags */}
+        {job.tags && job.tags.length > 0 && (
+          <div>
+            <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Job Tags</h5>
+            <div className="flex flex-wrap gap-2">
+              {job.tags.map((tag) => (
+                <Badge key={tag} variant="outline" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {getApplicationTips().map((tip, index) => (
-              <div key={index} className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
-                <ArrowRight className="h-3 w-3 flex-shrink-0" />
-                <span>{tip}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
 
         <Separator />
 
         {/* Action buttons */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex gap-3 flex-1">
-            {job.external_url ? (
-              <Button asChild className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-                <a href={job.external_url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Apply Now
-                </a>
-              </Button>
-            ) : (
-              <Button className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+        <div className="flex gap-3">
+          {job.external_url ? (
+            <Button asChild className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+              <a href={job.external_url} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="mr-2 h-4 w-4" />
                 Apply Now
-              </Button>
-            )}
-            <Button variant="outline" size="default" className="border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
-              <Star className="mr-2 h-4 w-4" />
-              Save Job
+              </a>
             </Button>
-          </div>
-          
-          {/* Resume Optimization Button */}
-          <Button 
-            onClick={handleOptimizeResume}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
-          >
-            <FileText className="mr-2 h-4 w-4" />
-            Optimize Resume for This Job
+          ) : (
+            <Button className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Apply Now
+            </Button>
+          )}
+          <Button variant="outline" size="default" className="border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <Star className="mr-2 h-4 w-4" />
+            Save Job
           </Button>
         </div>
       </CardContent>
