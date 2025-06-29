@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -20,6 +18,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
 import { OptimizationAnimation } from "@/components/resume/OptimizationAnimation";
+import { AutoLoadAnimation } from "@/components/resume/AutoLoadAnimation";
 import { supabase } from "@/integrations/supabase/client";
 
 const ResumeOptimization = () => {
@@ -29,6 +28,7 @@ const ResumeOptimization = () => {
   const [jobDescription, setJobDescription] = useState("");
   const [inputMode, setInputMode] = useState<"upload" | "paste">("paste");
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [isAutoLoading, setIsAutoLoading] = useState(false);
   const [optimizedResult, setOptimizedResult] = useState<string | null>(null);
   const [jobFromJobsPage, setJobFromJobsPage] = useState<{
     jobTitle: string; 
@@ -64,6 +64,52 @@ const ResumeOptimization = () => {
     }
   };
 
+  // Auto-load job description and resume content
+  const autoLoadContent = async () => {
+    const optimizerData = sessionStorage.getItem('resumeOptimizerData');
+    if (!optimizerData) return false;
+
+    try {
+      const data = JSON.parse(optimizerData);
+      if (!data.needsAutoLoad) return false;
+
+      setIsAutoLoading(true);
+      
+      // Set job description immediately
+      if (data.jobDescription) {
+        setJobDescription(data.jobDescription);
+      }
+
+      // Set job context
+      setJobFromJobsPage({
+        jobTitle: data.jobTitle || '',
+        company: data.company || '',
+        externalUrl: data.externalUrl || ''
+      });
+
+      // Fetch and set best resume after a small delay for better UX
+      setTimeout(async () => {
+        const bestResume = await fetchBestScoringResume();
+        if (bestResume) {
+          setResumeText(bestResume);
+        }
+        
+        // Complete the auto-loading after another small delay
+        setTimeout(() => {
+          setIsAutoLoading(false);
+          // Clear the session storage
+          sessionStorage.removeItem('resumeOptimizerData');
+        }, 1000);
+      }, 2000);
+
+      return true;
+    } catch (error) {
+      console.error('Error during auto-loading:', error);
+      setIsAutoLoading(false);
+      return false;
+    }
+  };
+
   // Fetch optimization history on component mount
   useEffect(() => {
     if (user?.id) {
@@ -77,37 +123,9 @@ const ResumeOptimization = () => {
       return;
     }
 
-    // Check for pre-filled data from job matching
-    const optimizerData = sessionStorage.getItem('resumeOptimizerData');
-    if (optimizerData) {
-      const loadPrefilledData = async () => {
-        try {
-          const data = JSON.parse(optimizerData);
-          setJobDescription(data.jobDescription || '');
-          setJobFromJobsPage({
-            jobTitle: data.jobTitle || '',
-            company: data.company || '',
-            externalUrl: data.externalUrl || ''
-          });
-
-          // Auto-fill resume with best scoring resume if no resume content provided
-          if (!data.resumeContent) {
-            const bestResume = await fetchBestScoringResume();
-            if (bestResume) {
-              setResumeText(bestResume);
-            }
-          } else {
-            setResumeText(data.resumeContent || '');
-          }
-
-          // Clear the session storage after using it
-          sessionStorage.removeItem('resumeOptimizerData');
-        } catch (error) {
-          console.error('Error parsing optimizer data:', error);
-        }
-      };
-
-      loadPrefilledData();
+    if (user?.id) {
+      // Check if we need to auto-load content
+      autoLoadContent();
     }
   }, [user, authLoading, navigate]);
 
@@ -182,6 +200,11 @@ const ResumeOptimization = () => {
 
   return (
     <>
+      <AutoLoadAnimation 
+        isLoading={isAutoLoading} 
+        onComplete={() => setIsAutoLoading(false)} 
+      />
+      
       <OptimizationAnimation 
         isOptimizing={isOptimizing} 
         onComplete={() => setIsOptimizing(false)} 
@@ -221,7 +244,7 @@ const ResumeOptimization = () => {
                     Optimizing for: {jobFromJobsPage.jobTitle}
                   </h3>
                   <p className="text-sm text-green-600 dark:text-green-400">
-                    at {jobFromJobsPage.company} - Job description and your best resume have been pre-filled
+                    at {jobFromJobsPage.company} - Job description and your best resume have been automatically loaded
                   </p>
                 </div>
                 {optimizedResult && (
@@ -277,7 +300,7 @@ const ResumeOptimization = () => {
                   </CardTitle>
                   <CardDescription>
                     {jobFromJobsPage 
-                      ? "Your resume and job description have been pre-filled. Review and optimize!"
+                      ? "Your resume and job description have been automatically loaded. Review and optimize!"
                       : "Paste your resume and the job description to get started."
                     }
                   </CardDescription>
@@ -382,4 +405,3 @@ const ResumeOptimization = () => {
 };
 
 export default ResumeOptimization;
-

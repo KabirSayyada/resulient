@@ -48,13 +48,13 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
   };
 
   const handleOptimizeResume = () => {
-    // Store job description, resume content, and job application URL in sessionStorage
+    // Store comprehensive job data for the resume optimizer
     const optimizerData = {
-      jobDescription: `${job.title} at ${job.company}\n\nLocation: ${job.location}\n\nJob Description:\n${job.description}\n\nRequirements:\n${job.requirements || 'Not specified'}`,
-      resumeContent: selectedResumeContent || '',
+      jobDescription: `Job Title: ${job.title}\n\nCompany: ${job.company}\n\nLocation: ${job.location}\n\nSalary: ${job.salary || 'Not specified'}\n\nJob Type: ${job.type}\n\nJob Description:\n${job.description}\n\nRequirements:\n${job.requirements || 'Not specified'}`,
       jobTitle: job.title,
       company: job.company,
-      externalUrl: job.external_url
+      externalUrl: job.external_url,
+      needsAutoLoad: true // Flag to trigger auto-loading
     };
     
     sessionStorage.setItem('resumeOptimizerData', JSON.stringify(optimizerData));
