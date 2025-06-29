@@ -58,13 +58,13 @@ export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
         // Continue with navigation even if storage fails
       }
       
-      console.log('Navigating to resume optimization...');
-      navigate('/resume-optimization');
+      console.log('Navigating to home page (resume optimization)...');
+      navigate('/');
       
     } catch (error) {
       console.error('Error in handleOptimizeResume:', error);
       // Fallback navigation without data
-      navigate('/resume-optimization');
+      navigate('/');
     }
   };
 
@@ -187,30 +187,25 @@ export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
         )}
         
         <div className="flex gap-2">
+          <Button
+            onClick={handleOptimizeResume}
+            className="flex-1 sm:flex-none bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold"
+          >
+            <Wand2 className="h-4 w-4 mr-2" />
+            Optimize & Apply
+          </Button>
           {job.external_url ? (
-            <Button asChild className="flex-1 sm:flex-none">
+            <Button asChild variant="outline" size="sm">
               <a href={job.external_url} target="_blank" rel="noopener noreferrer">
-                Apply Now
-                <ExternalLink className="ml-2 h-4 w-4" />
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Apply Direct
               </a>
             </Button>
           ) : (
-            <Button className="flex-1 sm:flex-none">
-              Apply Now
+            <Button variant="outline" size="sm">
+              Save Job
             </Button>
           )}
-          <Button variant="outline" size="sm">
-            Save Job
-          </Button>
-          <Button
-            onClick={handleOptimizeResume}
-            variant="outline"
-            size="sm"
-            className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold border-0"
-          >
-            <Wand2 className="h-4 w-4 mr-1" />
-            Optimize & Apply
-          </Button>
         </div>
       </CardContent>
     </Card>
