@@ -1,4 +1,3 @@
-
 export interface QualificationGap {
   skill: string;
   importance: string;
@@ -28,27 +27,25 @@ export interface ScoreData {
 
 // Interface to help with type safety when accessing Supabase resume_scores table
 export interface ResumeScoreRecord {
-  ats_readiness: number;
-  content_structure: number;
-  created_at: string;
-  experience_duration: number;
   id: string;
-  industry: string;
-  job_description: string;
-  keyword_relevance: number;
-  overall_score: number;
-  percentile: number;
-  resume_content: string;
-  scoring_mode: string | null;
-  skills_breadth: number;
-  suggested_skills: string[] | null;
   user_id: string;
-  
-  // Add these optional fields that might not exist in all database records
+  overall_score: number;
+  keyword_relevance: number;
+  skills_breadth: number;
+  experience_duration: number;
+  content_structure: number;
+  ats_readiness: number;
+  percentile: number;
   achievements_score?: number;
   education_score?: number;
   certifications_score?: number;
   similar_resumes?: number;
+  industry: string;
+  resume_content: string;
+  job_description: string;
+  scoring_mode?: string;
   elite_indicators?: string[];
   improvement_tips?: string[];
+  suggested_skills?: string[];
+  created_at: string;
 }

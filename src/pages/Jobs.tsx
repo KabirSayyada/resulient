@@ -273,7 +273,11 @@ export default function Jobs() {
                   {matchedJobs.length > 0 ? (
                     <div className="grid gap-8">
                       {matchedJobs.map((jobMatch) => (
-                        <EnhancedJobMatchCard key={jobMatch.job.id} jobMatch={jobMatch} />
+                        <EnhancedJobMatchCard 
+                          key={jobMatch.job.id} 
+                          jobMatch={jobMatch} 
+                          selectedResumeContent={selectedResume.resume_content}
+                        />
                       ))}
                     </div>
                   ) : (

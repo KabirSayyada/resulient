@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,17 +6,20 @@ import { Separator } from "@/components/ui/separator";
 import { 
   MapPin, Clock, DollarSign, ExternalLink, Target, Sparkles, 
   TrendingUp, Building, Calendar, Award, AlertTriangle, CheckCircle, 
-  XCircle, User, Zap, BookOpen, Briefcase, Star
+  XCircle, User, Zap, BookOpen, Briefcase, Star, Wand2
 } from "lucide-react";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 import type { EnhancedJobMatch } from "@/hooks/useEnhancedJobMatching";
 
 interface EnhancedJobMatchCardProps {
   jobMatch: EnhancedJobMatch;
+  selectedResumeContent?: string;
 }
 
-export function EnhancedJobMatchCard({ jobMatch }: EnhancedJobMatchCardProps) {
+export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: EnhancedJobMatchCardProps) {
   const { job, matchScore, detailedScoring } = jobMatch;
+  const navigate = useNavigate();
 
   const getMatchColor = (score: number) => {
     if (score >= 70) return "from-green-500 to-emerald-600";
@@ -42,6 +44,19 @@ export function EnhancedJobMatchCard({ jobMatch }: EnhancedJobMatchCardProps) {
     if (percentage >= 80) return "text-green-600 dark:text-green-400";
     if (percentage >= 60) return "text-yellow-600 dark:text-yellow-400";
     return "text-red-600 dark:text-red-400";
+  };
+
+  const handleOptimizeResume = () => {
+    // Store job description and resume content in sessionStorage for the optimizer page
+    const optimizerData = {
+      jobDescription: `${job.title} at ${job.company}\n\nLocation: ${job.location}\n\nJob Description:\n${job.description}\n\nRequirements:\n${job.requirements || 'Not specified'}`,
+      resumeContent: selectedResumeContent || '',
+      jobTitle: job.title,
+      company: job.company
+    };
+    
+    sessionStorage.setItem('resumeOptimizerData', JSON.stringify(optimizerData));
+    navigate('/resume-optimization');
   };
 
   return (
@@ -109,6 +124,28 @@ export function EnhancedJobMatchCard({ jobMatch }: EnhancedJobMatchCardProps) {
               : job.description
             }
           </p>
+        </div>
+
+        {/* Resume Optimization CTA */}
+        <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-xl p-5 border border-orange-200/50 dark:border-orange-800/50">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 bg-orange-500 rounded-lg">
+              <Wand2 className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-orange-800 dark:text-orange-300">Boost Your Match Score</h4>
+              <p className="text-sm text-orange-600 dark:text-orange-400">
+                Optimize your resume specifically for this job to increase your chances
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={handleOptimizeResume}
+            className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold"
+          >
+            <Wand2 className="h-4 w-4 mr-2" />
+            Optimize Resume for This Job
+          </Button>
         </div>
 
         {/* Detailed scoring breakdown */}
@@ -267,19 +304,40 @@ export function EnhancedJobMatchCard({ jobMatch }: EnhancedJobMatchCardProps) {
           </div>
         </div>
 
-        {/* Job tags */}
-        {job.tags && job.tags.length > 0 && (
-          <div>
-            <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Job Tags</h5>
-            <div className="flex flex-wrap gap-2">
-              {job.tags.map((tag) => (
-                <Badge key={tag} variant="outline" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
+        {/* Application tips instead of job tags */}
+        <div>
+          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            Application Tips
+          </h5>
+          <div className="space-y-2 text-sm">
+            {matchScore >= 70 ? (
+              <div className="flex items-start gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-green-800 dark:text-green-300">Strong Match - Apply Now!</p>
+                  <p className="text-green-700 dark:text-green-400">Your profile aligns well with this role. Consider applying directly.</p>
+                </div>
+              </div>
+            ) : matchScore >= 50 ? (
+              <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-yellow-800 dark:text-yellow-300">Good Potential - Optimize First</p>
+                  <p className="text-yellow-700 dark:text-yellow-400">Tailor your resume to highlight relevant skills before applying.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <Star className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-blue-800 dark:text-blue-300">Room for Improvement</p>
+                  <p className="text-blue-700 dark:text-blue-400">Focus on developing missing skills and optimizing your resume structure.</p>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
         <Separator />
 
