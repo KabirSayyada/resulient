@@ -1,10 +1,10 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock, DollarSign, ExternalLink, Target, Sparkles, TrendingUp, MapIcon, Building } from "lucide-react";
 import { format } from "date-fns";
 import type { JobMatch } from "@/hooks/useJobMatching";
+import { useNavigate } from "react-router-dom";
 
 interface JobMatchCardProps {
   jobMatch: JobMatch;
@@ -12,6 +12,7 @@ interface JobMatchCardProps {
 
 export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
   const { job, matchScore, matchReasons, keywordMatches, skillsScore, experienceScore, locationScore, industryScore, qualityBonus } = jobMatch;
+  const navigate = useNavigate();
 
   const getMatchColor = (score: number) => {
     if (score >= 70) return "bg-green-500";
@@ -29,6 +30,41 @@ export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
     if (score >= 70) return "text-green-600 dark:text-green-400";
     if (score >= 50) return "text-yellow-600 dark:text-yellow-400";
     return "text-blue-600 dark:text-blue-400";
+  };
+
+  const handleOptimizeResume = () => {
+    try {
+      console.log('handleOptimizeResume called for job:', job.title);
+      
+      // Store comprehensive job data for the resume optimizer
+      const optimizerData = {
+        jobDescription: job.description || '',
+        jobTitle: job.title || '',
+        company: job.company || '',
+        externalUrl: job.external_url || '',
+        requirements: job.requirements || '',
+        needsAutoLoad: true
+      };
+      
+      console.log('Setting session storage with data:', optimizerData);
+      
+      // Use try-catch for session storage in case of quota issues
+      try {
+        sessionStorage.setItem('resumeOptimizerData', JSON.stringify(optimizerData));
+        console.log('Session storage set successfully');
+      } catch (storageError) {
+        console.error('Session storage error:', storageError);
+        // Continue with navigation even if storage fails
+      }
+      
+      console.log('Navigating to resume optimization...');
+      navigate('/resume-optimization');
+      
+    } catch (error) {
+      console.error('Error in handleOptimizeResume:', error);
+      // Fallback navigation without data
+      navigate('/resume-optimization');
+    }
   };
 
   return (
@@ -162,8 +198,8 @@ export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
               Apply Now
             </Button>
           )}
-          <Button variant="outline" size="sm">
-            Save Job
+          <Button variant="outline" size="sm" onClick={handleOptimizeResume}>
+            Optimize Resume
           </Button>
         </div>
       </CardContent>
