@@ -3,13 +3,16 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, DollarSign, ExternalLink, RefreshCw, Target, Info, Zap } from "lucide-react";
+import { MapPin, Clock, DollarSign, ExternalLink, RefreshCw, Target, Info, Zap, Lock, Crown } from "lucide-react";
 import { useJobs, type JobFilters } from "@/hooks/useJobs";
 import { useEnhancedJobMatching } from "@/hooks/useEnhancedJobMatching";
+import { useJobFetchLimits } from "@/hooks/useJobFetchLimits";
 import { ResumeSelector } from "@/components/jobs/ResumeSelector";
 import { EnhancedJobMatchCard } from "@/components/jobs/EnhancedJobMatchCard";
+import { RestrictedJobView } from "@/components/jobs/RestrictedJobView";
 import { useAuth } from "@/hooks/useAuth";
 import { useJobScraper } from "@/hooks/useJobScraper";
+import { useSubscription } from "@/hooks/useSubscription";
 import { format } from "date-fns";
 import { MainNavigation } from "@/components/resume/MainNavigation";
 
@@ -22,8 +25,10 @@ export default function Jobs() {
   });
 
   const { user } = useAuth();
+  const { subscription } = useSubscription();
   const { allJobs, loading, error, refetch, totalJobs } = useJobs(filters);
   const { scrapeJobs, loading: scrapingLoading, lastScrapeTime } = useJobScraper();
+  const { limits, incrementUsage, showUpgradeMessage } = useJobFetchLimits();
   const { 
     matchedJobs, 
     loading: matchingLoading, 
@@ -31,6 +36,9 @@ export default function Jobs() {
     handleResumeSelection,
     reanalyzeJobs
   } = useEnhancedJobMatching();
+
+  // Check if user has premium access (premium or platinum)
+  const hasPremiumAccess = subscription.tier === "premium" || subscription.tier === "platinum";
 
   const canFetchJobs = () => {
     if (!lastScrapeTime) return true;
@@ -49,8 +57,19 @@ export default function Jobs() {
   };
 
   const handleTargetedJobFetch = async () => {
-    if (!selectedResume || !user || !canFetchJobs()) {
-      console.error('Cannot fetch jobs: no resume selected, user not authenticated, or cooldown active');
+    if (!selectedResume || !user) {
+      console.error('Cannot fetch jobs: no resume selected or user not authenticated');
+      return;
+    }
+
+    // Check subscription limits
+    if (limits.hasReachedLimit) {
+      showUpgradeMessage();
+      return;
+    }
+
+    if (!canFetchJobs()) {
+      console.error('Cannot fetch jobs: cooldown active');
       return;
     }
 
@@ -96,6 +115,9 @@ export default function Jobs() {
         user_id: user.id
       });
       
+      // Increment usage count after successful fetch
+      await incrementUsage();
+      
       await refetch();
       await reanalyzeJobs();
     } catch (error) {
@@ -139,6 +161,33 @@ export default function Jobs() {
         <div className="max-w-6xl mx-auto">
           {user ? (
             <div className="space-y-6">
+              {/* Subscription requirement notice for free users */}
+              {!hasPremiumAccess && (
+                <div className="mb-6 p-6 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Crown className="h-6 w-6 text-amber-600" />
+                    <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-300">
+                      Premium Job Matching Experience
+                    </h3>
+                  </div>
+                  <p className="text-amber-700 dark:text-amber-400 mb-4">
+                    You get 1 free job fetch to experience our premium AI job matching. After that, upgrade for full access!
+                  </p>
+                  <div className="flex gap-4 text-sm">
+                    <Badge variant="outline" className="border-amber-300">
+                      Free: 1 fetch + 3 visible results
+                    </Badge>
+                    <Badge variant="outline" className="border-purple-300">
+                      Premium: 20 fetches + full access
+                    </Badge>
+                    <Badge variant="outline" className="border-blue-300">
+                      <Zap className="h-3 w-3 mr-1" />
+                      Platinum: Unlimited
+                    </Badge>
+                  </div>
+                </div>
+              )}
+
               {/* Resume Selector */}
               <ResumeSelector 
                 onResumeSelected={handleResumeSelection}
@@ -172,7 +221,7 @@ export default function Jobs() {
                   
                   <Button
                     onClick={handleTargetedJobFetch}
-                    disabled={scrapingLoading || !selectedResume || !canFetchJobs()}
+                    disabled={scrapingLoading || !selectedResume || !canFetchJobs() || limits.hasReachedLimit}
                     size="lg"
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-12 py-4 text-lg rounded-full disabled:opacity-50 min-w-[300px]"
                   >
@@ -180,6 +229,11 @@ export default function Jobs() {
                       <>
                         <RefreshCw className="h-6 w-6 mr-3 animate-spin" />
                         Searching Thousands of Jobs...
+                      </>
+                    ) : limits.hasReachedLimit ? (
+                      <>
+                        <Lock className="h-6 w-6 mr-3" />
+                        {subscription.tier === "free" ? "Free Fetch Used - Upgrade" : "Fetch Limit Reached"}
                       </>
                     ) : (
                       <>
@@ -201,6 +255,14 @@ export default function Jobs() {
                   <span className="font-medium">
                     {selectedResume ? `${selectedResume.industry} focused` : 'Select resume first'}
                   </span>
+                  {subscription.tier === "premium" && (
+                    <>
+                      <span>•</span>
+                      <span className="font-medium text-blue-600 dark:text-blue-400">
+                        {limits.limit - limits.used} fetches remaining
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -237,15 +299,19 @@ export default function Jobs() {
               ) : selectedResume ? (
                 <div className="space-y-8">
                   {matchedJobs.length > 0 ? (
-                    <div className="grid gap-8">
-                      {matchedJobs.map((jobMatch) => (
-                        <EnhancedJobMatchCard 
-                          key={jobMatch.job.id} 
-                          jobMatch={jobMatch} 
-                          selectedResumeContent={selectedResume.resume_content}
-                        />
-                      ))}
-                    </div>
+                    hasPremiumAccess ? (
+                      <div className="grid gap-8">
+                        {matchedJobs.map((jobMatch) => (
+                          <EnhancedJobMatchCard 
+                            key={jobMatch.job.id} 
+                            jobMatch={jobMatch} 
+                            selectedResumeContent={selectedResume.resume_content}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <RestrictedJobView jobs={matchedJobs.map(match => match.job)} tier={subscription.tier} />
+                    )
                   ) : (
                     <div className="text-center py-8">
                       <div className="text-gray-600 dark:text-gray-400 mb-4">
@@ -257,58 +323,62 @@ export default function Jobs() {
               ) : totalJobs > 0 ? (
                 <div className="space-y-6">
                   <div className="grid gap-6">
-                    {allJobs.map((job) => (
-                      <Card key={job.id} className="hover:shadow-lg transition-shadow">
-                        <CardHeader>
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <CardTitle className="text-xl mb-2">{job.title}</CardTitle>
-                              <CardDescription className="text-base font-medium text-blue-600 dark:text-blue-400">
-                                {job.company}
-                              </CardDescription>
-                            </div>
-                            <Badge variant="secondary">{job.type}</Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
-                              {job.location}
-                            </div>
-                            {job.salary && (
-                              <div className="flex items-center gap-1">
-                                <DollarSign className="h-4 w-4" />
-                                {job.salary}
+                    {hasPremiumAccess ? (
+                      allJobs.map((job) => (
+                        <Card key={job.id} className="hover:shadow-lg transition-shadow">
+                          <CardHeader>
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <CardTitle className="text-xl mb-2">{job.title}</CardTitle>
+                                <CardDescription className="text-base font-medium text-blue-600 dark:text-blue-400">
+                                  {job.company}
+                                </CardDescription>
                               </div>
-                            )}
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              {format(new Date(job.posted_date), 'MMM d, yyyy')}
+                              <Badge variant="secondary">{job.type}</Badge>
                             </div>
-                          </div>
-                          
-                          <p className="text-gray-700 dark:text-gray-300 mb-4">
-                            {job.description}
-                          </p>
-                          
-                          <div className="flex gap-2">
-                            {job.external_url ? (
-                              <Button asChild className="flex-1 sm:flex-none">
-                                <a href={job.external_url} target="_blank" rel="noopener noreferrer">
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-4 w-4" />
+                                {job.location}
+                              </div>
+                              {job.salary && (
+                                <div className="flex items-center gap-1">
+                                  <DollarSign className="h-4 w-4" />
+                                  {job.salary}
+                                </div>
+                              )}
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {format(new Date(job.posted_date), 'MMM d, yyyy')}
+                              </div>
+                            </div>
+                            
+                            <p className="text-gray-700 dark:text-gray-300 mb-4">
+                              {job.description}
+                            </p>
+                            
+                            <div className="flex gap-2">
+                              {job.external_url ? (
+                                <Button asChild className="flex-1 sm:flex-none">
+                                  <a href={job.external_url} target="_blank" rel="noopener noreferrer">
+                                    Apply Now
+                                    <ExternalLink className="ml-2 h-4 w-4" />
+                                  </a>
+                                </Button>
+                              ) : (
+                                <Button className="flex-1 sm:flex-none">
                                   Apply Now
-                                  <ExternalLink className="ml-2 h-4 w-4" />
-                                </a>
-                              </Button>
-                            ) : (
-                              <Button className="flex-1 sm:flex-none">
-                                Apply Now
-                              </Button>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                                </Button>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <RestrictedJobView jobs={allJobs} tier={subscription.tier} />
+                    )}
                   </div>
                 </div>
               ) : (
