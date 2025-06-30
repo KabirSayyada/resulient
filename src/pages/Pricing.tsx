@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,13 +38,14 @@ const pricingTiers: PricingTier[] = [
     monthlyPrice: null,
     yearlyPrice: null,
     features: [
-      { text: "2 Resume Scorings Daily", included: true },
+      { text: "1 Resume Scoring Daily", included: true },
       { text: "1 Resume Optimization Daily", included: true },
+      { text: "1 Job Fetch Lifetime (3 visible results)", included: true },
       { text: "Detailed Reports (View Only)", included: true },
       { text: "Daily Reset of Credits", included: true },
       { text: "Basic Support", included: true },
       { text: "Report Downloads", included: false },
-      { text: "Resume Comparison", included: false },
+      { text: "Full Job Match Results", included: false },
       { text: "Unlimited Optimizations", included: false },
     ],
     badge: "Free Forever",
@@ -63,6 +63,7 @@ const pricingTiers: PricingTier[] = [
       { text: "Unlimited Resume Scorings", included: true },
       { text: "Unlimited Resume Optimizations", included: true },
       { text: "Unlimited Resume Building", included: true },
+      { text: "20 Job Fetches with Full Results", included: true },
       { text: "10 Report Downloads Daily", included: true },
       { text: "Priority Support", included: true },
       { text: "All Free Features", included: true },
@@ -85,6 +86,7 @@ const pricingTiers: PricingTier[] = [
       { text: "Unlimited Resume Scorings", included: true },
       { text: "Unlimited Resume Optimizations", included: true },
       { text: "Unlimited Resume Building", included: true },
+      { text: "Unlimited Job Fetches", included: true },
       { text: "Unlimited Report Downloads", included: true },
       { text: "Resume Comparison Tool", included: true },
       { text: "Priority Support", included: true },
@@ -315,62 +317,69 @@ const PricingPage = () => {
             </AccordionItem>
 
             <AccordionItem value="item-2">
+              <AccordionTrigger>How does the job matching feature work?</AccordionTrigger>
+              <AccordionContent>
+                Our AI scans thousands of job boards to find personalized matches based on your resume. Free users get 1 lifetime fetch showing 3 results. Premium users get 20 fetches with full results, while Platinum users enjoy unlimited access.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-3">
               <AccordionTrigger>Can I switch between monthly and yearly billing?</AccordionTrigger>
               <AccordionContent>
                 Yes! You can switch between monthly and yearly billing at any time. If you switch to yearly, you'll immediately benefit from the discounted rate. If you switch to monthly, the change will take effect at your next billing cycle.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-3">
+            <AccordionItem value="item-4">
               <AccordionTrigger>What payment methods do you accept?</AccordionTrigger>
               <AccordionContent>
                 We accept all major credit cards (Visa, MasterCard, American Express) and PayPal. All payments are processed securely through our payment processor.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-4">
+            <AccordionItem value="item-5">
               <AccordionTrigger>Is there a difference in features between monthly and yearly subscriptions?</AccordionTrigger>
               <AccordionContent>
                 No, you get exactly the same features whether you choose monthly or yearly billing. The only difference is that yearly subscribers enjoy significant savings on their subscription cost.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-5">
+            <AccordionItem value="item-6">
               <AccordionTrigger>Can I cancel my subscription at any time?</AccordionTrigger>
               <AccordionContent>
                 Yes, you can cancel your subscription at any time. Your access will continue until the end of your current billing period. We don't offer refunds for partial months, but you can check our refund policy for more details.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-6">
+            <AccordionItem value="item-7">
               <AccordionTrigger>What happens to my saved reports if I downgrade to the free tier?</AccordionTrigger>
               <AccordionContent>
                 Your previously generated reports remain accessible, but download capabilities will be limited to free tier restrictions. We recommend downloading any important reports before downgrading.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-7">
+            <AccordionItem value="item-8">
               <AccordionTrigger>Do you offer refunds if I'm not satisfied?</AccordionTrigger>
               <AccordionContent>
                 Yes, we offer a satisfaction guarantee. If you're not happy with our service, you can request a refund within 14 days of your subscription purchase. Please refer to our refund policy for detailed information.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-8">
+            <AccordionItem value="item-9">
               <AccordionTrigger>Can I share my account with others?</AccordionTrigger>
               <AccordionContent>
                 No, accounts are for individual use only. Each user should have their own account to maintain the quality of service and ensure proper tracking of usage limits.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-9">
+            <AccordionItem value="item-10">
               <AccordionTrigger>How do I get started with the free tier?</AccordionTrigger>
               <AccordionContent>
-                Simply sign up for an account - no credit card required! You'll immediately have access to all free tier features, including daily resume scorings and optimizations.
+                Simply sign up for an account - no credit card required! You'll immediately have access to all free tier features, including daily resume scoring and optimization, plus one lifetime job fetch to experience our matching system.
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="item-10">
+            <AccordionItem value="item-11">
               <AccordionTrigger>What support options are available?</AccordionTrigger>
               <AccordionContent>
                 Free tier users receive basic email support. Premium and Platinum subscribers enjoy priority support with faster response times and access to advanced troubleshooting assistance.
