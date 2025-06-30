@@ -124,7 +124,7 @@ const ResumeScoring = () => {
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
           <div className="flex items-center gap-2 sm:gap-4">
-            <Link to="/" className="flex items-center">
+            <Link to="/ats-resume-builder" className="flex items-center">
               <span className="font-brand text-3xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
                 Resulient
               </span>
@@ -140,7 +140,7 @@ const ResumeScoring = () => {
               className="flex items-center gap-1 sm:hidden"
               asChild
             >
-              <Link to="/">
+              <Link to="/ats-resume-builder">
                 <ArrowLeft className="h-4 w-4" />
                 Back
               </Link>
@@ -186,9 +186,9 @@ const ResumeScoring = () => {
           className="mb-4 hidden sm:flex items-center gap-1"
           asChild
         >
-          <Link to="/">
+          <Link to="/ats-resume-builder">
             <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
+            Back to Resume Builder
           </Link>
         </Button>
 
@@ -198,7 +198,7 @@ const ResumeScoring = () => {
           <UseSubscriptionAlert 
             subscriptionTier={subscription.tier} 
             requiredTier="premium" 
-            message="You've reached your daily limit for resume scoring. Free users can perform 2 resume scorings per day. Upgrade to Premium or Platinum for unlimited usage."
+            message="You've reached your daily limit for resume scoring. Free users can perform 1 resume scoring per day. Upgrade to Premium or Platinum for unlimited usage."
           />
         )}
 
@@ -224,7 +224,7 @@ const ResumeScoring = () => {
                 {subscription.tier === "free" && (
                   <div className="flex items-center justify-center gap-1 text-sm text-gray-600 dark:text-gray-400 font-medium">
                     <span>
-                      Daily limit: {usage.resumeScorings.used}/{usage.resumeScorings.limit} resume scorings used
+                      Daily limit: {usage.resumeScorings.used}/{usage.resumeScorings.limit} resume scoring used
                     </span>
                   </div>
                 )}

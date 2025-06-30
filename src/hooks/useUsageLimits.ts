@@ -16,7 +16,7 @@ export const useUsageLimits = () => {
   const { subscription } = useSubscription();
   const { toast } = useToast();
   const [usage, setUsage] = useState<UsageLimits>({
-    resumeScorings: { used: 0, limit: 2, hasReachedLimit: false },
+    resumeScorings: { used: 0, limit: 1, hasReachedLimit: false },
     resumeOptimizations: { used: 0, limit: 1, hasReachedLimit: false },
     resumeBuilding: { used: 0, limit: 1, hasReachedLimit: false }
   });
@@ -54,7 +54,7 @@ export const useUsageLimits = () => {
 
       // Set limits based on subscription tier
       const limits = {
-        resumeScorings: subscription.tier === "free" ? 2 : -1, // unlimited for paid
+        resumeScorings: subscription.tier === "free" ? 1 : -1, // Changed from 2 to 1 for free tier
         resumeOptimizations: subscription.tier === "free" ? 1 : -1, // unlimited for paid
         resumeBuilding: subscription.tier === "free" ? 1 : -1 // unlimited for paid
       };
