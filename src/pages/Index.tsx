@@ -271,38 +271,6 @@ const Index = () => {
             )}
           </div>
 
-          {/* Job Source Information */}
-          {sourceJobData && (
-            <Card className="mb-6 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-                  <Building className="h-5 w-5" />
-                  Optimizing for this Job
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">{sourceJobData.title}</h3>
-                  <p className="text-blue-700 dark:text-blue-300 font-medium">{sourceJobData.company}</p>
-                  <div className="flex flex-wrap gap-4 text-sm text-blue-600 dark:text-blue-400">
-                    {sourceJobData.location && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" />
-                        {sourceJobData.location}
-                      </div>
-                    )}
-                    {sourceJobData.salary && (
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="h-4 w-4" />
-                        {sourceJobData.salary}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           {/* About section with mobile-first design */}
           <div className="bg-gradient-to-br from-indigo-50 via-gray-50 to-blue-50 dark:from-indigo-950 dark:via-gray-900 dark:to-blue-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-md px-4 py-5 mb-6 text-center">
             <p className="text-base sm:text-lg lg:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-2">
@@ -364,6 +332,38 @@ const Index = () => {
               </div>
             </div>
 
+            {/* Job Information Section - Show only when user came from job card */}
+            {sourceJobData && (
+              <Card className="mb-6 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                    <Building className="h-5 w-5" />
+                    Optimizing Resume for This Job
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">{sourceJobData.title}</h3>
+                    <p className="text-blue-700 dark:text-blue-300 font-medium">{sourceJobData.company}</p>
+                    <div className="flex flex-wrap gap-4 text-sm text-blue-600 dark:text-blue-400">
+                      {sourceJobData.location && (
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4" />
+                          {sourceJobData.location}
+                        </div>
+                      )}
+                      {sourceJobData.salary && (
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="h-4 w-4" />
+                          {sourceJobData.salary}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <div className="space-y-6 animate-fade-in">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <JobDescriptionInput 
@@ -402,7 +402,7 @@ const Index = () => {
                     qualificationGaps={qualificationGaps}
                   />
                   
-                  {/* Continue to Job Application Section */}
+                  {/* Continue to Job Application Section - Show only when user came from job card */}
                   {sourceJobData && (
                     <Card className="border-t-4 border-t-green-500 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 shadow-lg">
                       <CardHeader>
