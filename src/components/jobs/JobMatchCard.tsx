@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock, DollarSign, ExternalLink, Target, Sparkles, TrendingUp, MapIcon, Building } from "lucide-react";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 import type { JobMatch } from "@/hooks/useJobMatching";
 
 interface JobMatchCardProps {
@@ -11,6 +12,7 @@ interface JobMatchCardProps {
 }
 
 export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
+  const navigate = useNavigate();
   const { job, matchScore, matchReasons, keywordMatches, skillsScore, experienceScore, locationScore, industryScore, qualityBonus } = jobMatch;
 
   const getMatchColor = (score: number) => {
@@ -29,6 +31,27 @@ export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
     if (score >= 70) return "text-green-600 dark:text-green-400";
     if (score >= 50) return "text-yellow-600 dark:text-yellow-400";
     return "text-blue-600 dark:text-blue-400";
+  };
+
+  const handleOptimizeAndApply = () => {
+    // Store job data and description in session storage
+    const optimizerData = {
+      jobDescription: job.description,
+      jobData: {
+        id: job.id,
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        salary: job.salary,
+        type: job.type,
+        external_url: job.external_url
+      }
+    };
+    
+    sessionStorage.setItem('resumeOptimizerData', JSON.stringify(optimizerData));
+    
+    // Navigate to resume optimization page
+    navigate('/resume-optimization');
   };
 
   return (
@@ -150,21 +173,19 @@ export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
         )}
         
         <div className="flex gap-2">
-          {job.external_url ? (
-            <Button asChild className="flex-1 sm:flex-none">
+          <Button 
+            onClick={handleOptimizeAndApply}
+            className="flex-1 sm:flex-none bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+          >
+            Optimize & Apply to This Job
+          </Button>
+          {job.external_url && (
+            <Button variant="outline" size="sm" asChild>
               <a href={job.external_url} target="_blank" rel="noopener noreferrer">
-                Apply Now
-                <ExternalLink className="ml-2 h-4 w-4" />
+                <ExternalLink className="h-4 w-4" />
               </a>
             </Button>
-          ) : (
-            <Button className="flex-1 sm:flex-none">
-              Apply Now
-            </Button>
           )}
-          <Button variant="outline" size="sm">
-            Save Job
-          </Button>
         </div>
       </CardContent>
     </Card>

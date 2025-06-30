@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -30,7 +31,8 @@ import { SubscriptionTierIndicator } from "@/components/subscription/Subscriptio
 import { Helmet } from "react-helmet-async";
 import { useReferralTracking } from "@/hooks/useReferralTracking";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
-import { Diamond } from "lucide-react";
+import { Diamond, ExternalLink, Building, MapPin, DollarSign, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
@@ -49,6 +51,7 @@ const Index = () => {
   const [qualificationGaps, setQualificationGaps] = useState<QualificationGap[]>([]);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [showJobOptimizationAnimation, setShowJobOptimizationAnimation] = useState(false);
+  const [sourceJobData, setSourceJobData] = useState<any>(null);
 
   const { callFunction, loading: functionLoading, error: functionError } = useSupabaseFunction();
   const { saveOptimization } = useResumeOptimizationHistory(user?.id);
@@ -70,6 +73,7 @@ const Index = () => {
         
         if (optimizerData.jobDescription) {
           setJobDescription(optimizerData.jobDescription);
+          setSourceJobData(optimizerData.jobData || null);
           
           // Show job optimization animation
           setShowJobOptimizationAnimation(true);
@@ -267,6 +271,38 @@ const Index = () => {
             )}
           </div>
 
+          {/* Job Source Information */}
+          {sourceJobData && (
+            <Card className="mb-6 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                  <Building className="h-5 w-5" />
+                  Optimizing for this Job
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">{sourceJobData.title}</h3>
+                  <p className="text-blue-700 dark:text-blue-300 font-medium">{sourceJobData.company}</p>
+                  <div className="flex flex-wrap gap-4 text-sm text-blue-600 dark:text-blue-400">
+                    {sourceJobData.location && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-4 w-4" />
+                        {sourceJobData.location}
+                      </div>
+                    )}
+                    {sourceJobData.salary && (
+                      <div className="flex items-center gap-1">
+                        <DollarSign className="h-4 w-4" />
+                        {sourceJobData.salary}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* About section with mobile-first design */}
           <div className="bg-gradient-to-br from-indigo-50 via-gray-50 to-blue-50 dark:from-indigo-950 dark:via-gray-900 dark:to-blue-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-md px-4 py-5 mb-6 text-center">
             <p className="text-base sm:text-lg lg:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-2">
@@ -358,12 +394,61 @@ const Index = () => {
               </div>
               
               {optimizedResume && (
-                <OptimizedResumeDisplay 
-                  optimizedResume={optimizedResume}
-                  jobDescription={jobDescription}
-                  originalResume={resumeContent}
-                  qualificationGaps={qualificationGaps}
-                />
+                <>
+                  <OptimizedResumeDisplay 
+                    optimizedResume={optimizedResume}
+                    jobDescription={jobDescription}
+                    originalResume={resumeContent}
+                    qualificationGaps={qualificationGaps}
+                  />
+                  
+                  {/* Continue to Job Application Section */}
+                  {sourceJobData && (
+                    <Card className="border-t-4 border-t-green-500 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 shadow-lg">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                          <ArrowRight className="h-5 w-5" />
+                          Ready to Apply?
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <p className="text-green-600 dark:text-green-400">
+                            Your resume has been optimized for <span className="font-semibold">{sourceJobData.title}</span> at <span className="font-semibold">{sourceJobData.company}</span>. 
+                            You're now ready to submit your application!
+                          </p>
+                          
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            {sourceJobData.external_url && (
+                              <Button 
+                                asChild 
+                                className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none"
+                              >
+                                <a 
+                                  href={sourceJobData.external_url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-2"
+                                >
+                                  Apply to {sourceJobData.company}
+                                  <ExternalLink className="h-4 w-4" />
+                                </a>
+                              </Button>
+                            )}
+                            
+                            <Button 
+                              variant="outline" 
+                              onClick={() => navigate("/jobs")}
+                              className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-950"
+                            >
+                              Find More Jobs
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
               )}
             </div>
           </div>
