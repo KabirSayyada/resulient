@@ -7,10 +7,9 @@ import { Separator } from "@/components/ui/separator";
 import { 
   MapPin, Clock, DollarSign, ExternalLink, Target, Sparkles, 
   TrendingUp, Building, Calendar, Award, AlertTriangle, CheckCircle, 
-  XCircle, User, BookOpen, Briefcase, Star, Copy, ArrowRight
+  XCircle, User, BookOpen, Briefcase, Star
 } from "lucide-react";
 import { format } from "date-fns";
-import { useToast } from "@/hooks/use-toast";
 import type { EnhancedJobMatch } from "@/hooks/useEnhancedJobMatching";
 
 interface EnhancedJobMatchCardProps {
@@ -20,7 +19,6 @@ interface EnhancedJobMatchCardProps {
 
 export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: EnhancedJobMatchCardProps) {
   const { job, matchScore, detailedScoring } = jobMatch;
-  const { toast } = useToast();
 
   const getMatchColor = (score: number) => {
     if (score >= 70) return "from-green-500 to-emerald-600";
@@ -45,14 +43,6 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
     if (percentage >= 80) return "text-green-600 dark:text-green-400";
     if (percentage >= 60) return "text-yellow-600 dark:text-yellow-400";
     return "text-red-600 dark:text-red-400";
-  };
-
-  const handleCopyJobDescription = () => {
-    navigator.clipboard.writeText(job.description);
-    toast({
-      title: "Job Description Copied",
-      description: "Job description has been copied to your clipboard. Now go to Resume Optimization to tailor your resume for this job!",
-    });
   };
 
   return (
@@ -312,35 +302,18 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
           </div>
         </div>
 
-        {/* Resume Optimization Instructions */}
+        {/* Resume Optimization Reminder */}
         <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-xl p-5 border border-orange-200/50 dark:border-orange-800/50">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 bg-orange-500 rounded-lg">
-              <Copy className="h-5 w-5 text-white" />
+              <AlertTriangle className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h4 className="font-semibold text-orange-800 dark:text-orange-300">Boost Your Match Score</h4>
+              <h4 className="font-semibold text-orange-800 dark:text-orange-300">Important Reminder</h4>
               <p className="text-sm text-orange-600 dark:text-orange-400">
-                Copy the job description below, then optimize your resume to increase your chances
+                Before applying, make sure to come back and use our Resume Optimizer to get a tailored resume for this specific job. This significantly increases your chances of getting an interview!
               </p>
             </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button
-              onClick={handleCopyJobDescription}
-              variant="outline"
-              className="border-orange-300 text-orange-700 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-950"
-            >
-              <Copy className="h-4 w-4 mr-2" />
-              Copy Job Description
-            </Button>
-            <Button
-              className="bg-orange-600 hover:bg-orange-700 text-white"
-              onClick={() => window.open('/resume-optimization', '_blank')}
-            >
-              <ArrowRight className="h-4 w-4 mr-2" />
-              Go to Resume Optimization
-            </Button>
           </div>
         </div>
 
