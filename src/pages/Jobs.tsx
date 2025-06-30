@@ -11,6 +11,7 @@ import { EnhancedJobMatchCard } from "@/components/jobs/EnhancedJobMatchCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useJobScraper } from "@/hooks/useJobScraper";
 import { format } from "date-fns";
+import { MainNavigation } from "@/components/resume/MainNavigation";
 
 export default function Jobs() {
   const [filters] = useState<JobFilters>({
@@ -124,6 +125,8 @@ export default function Jobs() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
       <div className="container mx-auto px-4 py-8">
+        <MainNavigation />
+        
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             My Personal Job Matches
