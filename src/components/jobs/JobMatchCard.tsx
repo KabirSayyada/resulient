@@ -2,9 +2,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, DollarSign, ExternalLink, Target, Sparkles, TrendingUp, MapIcon, Building } from "lucide-react";
+import { MapPin, Clock, DollarSign, ExternalLink, Target, Sparkles, TrendingUp, Copy, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import type { JobMatch } from "@/hooks/useJobMatching";
 
 interface JobMatchCardProps {
@@ -12,7 +12,7 @@ interface JobMatchCardProps {
 }
 
 export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
-  const navigate = useNavigate();
+  const { toast } = useToast();
   const { job, matchScore, matchReasons, keywordMatches, skillsScore, experienceScore, locationScore, industryScore, qualityBonus } = jobMatch;
 
   const getMatchColor = (score: number) => {
@@ -33,26 +33,12 @@ export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
     return "text-blue-600 dark:text-blue-400";
   };
 
-  const handleOptimizeAndApply = () => {
-    // Store job data and description in session storage with the structure expected by Index component
-    const optimizerData = {
-      jobDescription: job.description,
-      jobData: {
-        id: job.id,
-        title: job.title,
-        company: job.company,
-        location: job.location,
-        salary: job.salary,
-        type: job.type,
-        external_url: job.external_url
-      }
-    };
-    
-    console.log('Storing optimizer data:', optimizerData);
-    sessionStorage.setItem('resumeOptimizerData', JSON.stringify(optimizerData));
-    
-    // Navigate to resume optimization page
-    navigate('/resume-optimization');
+  const handleCopyJobDescription = () => {
+    navigator.clipboard.writeText(job.description);
+    toast({
+      title: "Job Description Copied",
+      description: "Job description has been copied to your clipboard. Now go to Resume Optimization to tailor your resume for this job!",
+    });
   };
 
   return (
@@ -172,14 +158,44 @@ export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
             ))}
           </div>
         )}
+
+        {/* Resume Optimization Instructions */}
+        <div className="mb-4 p-4 bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-orange-500 rounded-lg flex-shrink-0">
+              <Copy className="h-4 w-4 text-white" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-semibold text-orange-800 dark:text-orange-300 mb-2">
+                Increase Your Chances of Getting This Job
+              </h4>
+              <p className="text-sm text-orange-700 dark:text-orange-400 mb-3">
+                Copy the job description below, then go to Resume Optimization to tailor your resume specifically for this role. This can increase your interview rate by up to 500%!
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button
+                  onClick={handleCopyJobDescription}
+                  variant="outline"
+                  size="sm"
+                  className="border-orange-300 text-orange-700 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-950"
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Job Description
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                  onClick={() => window.open('/resume-optimization', '_blank')}
+                >
+                  <ArrowRight className="h-4 w-4 mr-2" />
+                  Go to Resume Optimization
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
         
         <div className="flex gap-2">
-          <Button 
-            onClick={handleOptimizeAndApply}
-            className="flex-1 sm:flex-none bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
-          >
-            Optimize & Apply to This Job
-          </Button>
           {job.external_url && (
             <Button variant="outline" size="sm" asChild>
               <a href={job.external_url} target="_blank" rel="noopener noreferrer">

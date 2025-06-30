@@ -194,6 +194,11 @@ serve(async (req) => {
         });
       }
 
+      // Truncate job description to 300 characters
+      const truncatedDescription = job.job_description.length > 300 
+        ? job.job_description.substring(0, 300) + '...' 
+        : job.job_description;
+
       return {
         title: job.job_title,
         company: job.employer_name,
@@ -203,7 +208,7 @@ serve(async (req) => {
               job.job_employment_type === 'PARTTIME' ? 'Part-time' : 
               job.job_employment_type === 'CONTRACTOR' ? 'Contract' : 
               job.job_employment_type === 'INTERN' ? 'Internship' : 'Full-time',
-        description: job.job_description || '', // Remove truncation entirely
+        description: truncatedDescription, // Restored truncation to 300 characters
         requirements: job.job_highlights?.Qualifications?.join('; ') || null,
         tags: [...new Set(tags)].slice(0, 10), // More tags for better matching
         posted_date: new Date(job.job_posted_at_datetime_utc).toISOString(),

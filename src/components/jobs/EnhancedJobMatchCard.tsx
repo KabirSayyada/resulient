@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,10 +7,10 @@ import { Separator } from "@/components/ui/separator";
 import { 
   MapPin, Clock, DollarSign, ExternalLink, Target, Sparkles, 
   TrendingUp, Building, Calendar, Award, AlertTriangle, CheckCircle, 
-  XCircle, User, Zap, BookOpen, Briefcase, Star, Wand2
+  XCircle, User, BookOpen, Briefcase, Star, Copy, ArrowRight
 } from "lucide-react";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import type { EnhancedJobMatch } from "@/hooks/useEnhancedJobMatching";
 
 interface EnhancedJobMatchCardProps {
@@ -19,7 +20,7 @@ interface EnhancedJobMatchCardProps {
 
 export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: EnhancedJobMatchCardProps) {
   const { job, matchScore, detailedScoring } = jobMatch;
-  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const getMatchColor = (score: number) => {
     if (score >= 70) return "from-green-500 to-emerald-600";
@@ -46,39 +47,12 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
     return "text-red-600 dark:text-red-400";
   };
 
-  const handleOptimizeResume = () => {
-    try {
-      console.log('handleOptimizeResume called for job:', job.title);
-      
-      // Store comprehensive job data for the resume optimizer
-      const optimizerData = {
-        jobDescription: job.description || '',
-        jobTitle: job.title || '',
-        company: job.company || '',
-        externalUrl: job.external_url || '',
-        requirements: job.requirements || '',
-        needsAutoLoad: true
-      };
-      
-      console.log('Setting session storage with data:', optimizerData);
-      
-      // Use try-catch for session storage in case of quota issues
-      try {
-        sessionStorage.setItem('resumeOptimizerData', JSON.stringify(optimizerData));
-        console.log('Session storage set successfully');
-      } catch (storageError) {
-        console.error('Session storage error:', storageError);
-        // Continue with navigation even if storage fails
-      }
-      
-      console.log('Navigating to resume optimization...');
-      navigate('/resume-optimization');
-      
-    } catch (error) {
-      console.error('Error in handleOptimizeResume:', error);
-      // Fallback navigation without data
-      navigate('/resume-optimization');
-    }
+  const handleCopyJobDescription = () => {
+    navigator.clipboard.writeText(job.description);
+    toast({
+      title: "Job Description Copied",
+      description: "Job description has been copied to your clipboard. Now go to Resume Optimization to tailor your resume for this job!",
+    });
   };
 
   return (
@@ -338,26 +312,36 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
           </div>
         </div>
 
-        {/* Resume Optimization CTA */}
+        {/* Resume Optimization Instructions */}
         <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-xl p-5 border border-orange-200/50 dark:border-orange-800/50">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 bg-orange-500 rounded-lg">
-              <Wand2 className="h-5 w-5 text-white" />
+              <Copy className="h-5 w-5 text-white" />
             </div>
             <div>
               <h4 className="font-semibold text-orange-800 dark:text-orange-300">Boost Your Match Score</h4>
               <p className="text-sm text-orange-600 dark:text-orange-400">
-                Optimize your resume specifically for this job and apply directly after optimization
+                Copy the job description below, then optimize your resume to increase your chances
               </p>
             </div>
           </div>
-          <Button
-            onClick={handleOptimizeResume}
-            className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold"
-          >
-            <Wand2 className="h-4 w-4 mr-2" />
-            Optimize & Apply for This Job
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button
+              onClick={handleCopyJobDescription}
+              variant="outline"
+              className="border-orange-300 text-orange-700 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-950"
+            >
+              <Copy className="h-4 w-4 mr-2" />
+              Copy Job Description
+            </Button>
+            <Button
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+              onClick={() => window.open('/resume-optimization', '_blank')}
+            >
+              <ArrowRight className="h-4 w-4 mr-2" />
+              Go to Resume Optimization
+            </Button>
+          </div>
         </div>
 
         <Separator />
