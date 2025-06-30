@@ -34,7 +34,7 @@ export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
   };
 
   const handleOptimizeAndApply = () => {
-    // Store job data and description in session storage
+    // Store job data and description in session storage with the structure expected by Index component
     const optimizerData = {
       jobDescription: job.description,
       jobData: {
@@ -48,6 +48,7 @@ export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
       }
     };
     
+    console.log('Storing optimizer data:', optimizerData);
     sessionStorage.setItem('resumeOptimizerData', JSON.stringify(optimizerData));
     
     // Navigate to resume optimization page
