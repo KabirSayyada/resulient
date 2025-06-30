@@ -143,6 +143,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setSession(null);
     setUser(null);
+    // Redirect to landing page after logout
+    window.location.href = '/';
   };
 
   // Check if the current user is an admin
