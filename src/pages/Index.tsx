@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -52,6 +51,7 @@ const Index = () => {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [showJobOptimizationAnimation, setShowJobOptimizationAnimation] = useState(false);
   const [sourceJobData, setSourceJobData] = useState<any>(null);
+  const [showJobDetails, setShowJobDetails] = useState(false);
 
   const { callFunction, loading: functionLoading, error: functionError } = useSupabaseFunction();
   const { saveOptimization } = useResumeOptimizationHistory(user?.id);
@@ -126,7 +126,12 @@ const Index = () => {
   }, [highestScoringResume, jobDescription, resumeContent, toast]);
 
   const handleJobOptimizationAnimationComplete = () => {
+    console.log('Job optimization animation completed');
     setShowJobOptimizationAnimation(false);
+    // Show job details only after animation completes
+    if (sourceJobData) {
+      setShowJobDetails(true);
+    }
   };
 
   const handleOptimizeResume = async () => {
@@ -352,8 +357,8 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Job Information Section - Show only when sourceJobData exists */}
-            {sourceJobData && (
+            {/* Job Information Section - Show only when sourceJobData exists AND showJobDetails is true */}
+            {sourceJobData && showJobDetails && (
               <Card className="mb-6 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 shadow-lg animate-fade-in">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
