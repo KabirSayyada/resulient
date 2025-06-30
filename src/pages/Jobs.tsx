@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -132,7 +131,7 @@ export default function Jobs() {
                       </p>
                       {hoursUntilNextFetch && (
                         <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                          Next fetch available in {hoursUntilNextFetch} hour{hoursUntilNextFetch !== 1 ? 's' : ''}
+                          You can fetch jobs again in {hoursUntilNextFetch} hour{hoursUntilNextFetch !== 1 ? 's' : ''}
                         </p>
                       )}
                     </div>
@@ -169,7 +168,7 @@ export default function Jobs() {
                   </span>
                   <span>•</span>
                   <span className="font-medium text-orange-600 dark:text-orange-400">
-                    10hr cooldown between fetches
+                    10hr cooldown per user
                   </span>
                 </div>
               </div>
