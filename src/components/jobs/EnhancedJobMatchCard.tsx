@@ -319,7 +319,7 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
 
         <Separator />
 
-        {/* Action buttons */}
+        {/* Action buttons - removed Save Job button */}
         <div className="flex gap-3">
           {job.external_url ? (
             <Button asChild className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
@@ -334,10 +334,6 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
               Apply Now
             </Button>
           )}
-          <Button variant="outline" size="default" className="border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
-            <Star className="mr-2 h-4 w-4" />
-            Save Job
-          </Button>
         </div>
       </CardContent>
     </Card>
