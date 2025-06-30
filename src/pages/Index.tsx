@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -62,124 +63,54 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Enhanced auto-load job data with better error handling and persistence
+  // Auto-load job data from session storage when component mounts
   useEffect(() => {
-    console.log('=== JOB DATA LOADER START ===');
-    
-    const loadJobData = () => {
-      try {
-        // Try sessionStorage first
-        const storedData = sessionStorage.getItem('resumeOptimizerData');
-        console.log('SessionStorage data found:', !!storedData);
-        console.log('Raw sessionStorage data:', storedData);
+    console.log('Checking for stored optimizer data...');
+    try {
+      const storedData = sessionStorage.getItem('resumeOptimizerData');
+      console.log('Raw stored data:', storedData);
+      
+      if (storedData) {
+        const optimizerData = JSON.parse(storedData);
+        console.log('Parsed optimizer data:', optimizerData);
         
-        if (storedData) {
-          const optimizerData = JSON.parse(storedData);
-          console.log('Parsed optimizer data:', optimizerData);
+        if (optimizerData.jobDescription) {
+          console.log('Setting job description:', optimizerData.jobDescription);
+          setJobDescription(optimizerData.jobDescription);
           
-          if (optimizerData.jobDescription) {
-            console.log('Setting job description from sessionStorage:', optimizerData.jobDescription.substring(0, 100) + '...');
-            setJobDescription(optimizerData.jobDescription);
-            
-            if (optimizerData.jobData) {
-              console.log('Setting source job data from sessionStorage:', optimizerData.jobData);
-              setSourceJobData(optimizerData.jobData);
-              
-              // Show animation
-              setShowJobOptimizationAnimation(true);
-              
-              // Show success toast
-              toast({
-                title: "Job Description Loaded",
-                description: `Job description for ${optimizerData.jobData.title} has been loaded.`,
-              });
-              
-              console.log('=== JOB DATA LOADED SUCCESSFULLY ===');
-              return true;
-            }
+          if (optimizerData.jobData) {
+            console.log('Setting source job data:', optimizerData.jobData);
+            setSourceJobData(optimizerData.jobData);
           }
-        }
-        
-        // Try URL parameters as fallback
-        const urlParams = new URLSearchParams(window.location.search);
-        const jobTitle = urlParams.get('jobTitle');
-        const jobCompany = urlParams.get('jobCompany');
-        
-        if (jobTitle && jobCompany) {
-          console.log('Loading from URL parameters:', { jobTitle, jobCompany });
-          const jobData = {
-            title: jobTitle,
-            company: jobCompany,
-            location: urlParams.get('jobLocation') || '',
-            salary: urlParams.get('jobSalary') || '',
-            id: urlParams.get('jobId') || 'url-job'
-          };
           
-          setSourceJobData(jobData);
+          // Show job optimization animation
           setShowJobOptimizationAnimation(true);
           
+          // Show a toast to inform the user
           toast({
-            title: "Job Information Loaded",
-            description: `Job details for ${jobTitle} at ${jobCompany} loaded from URL.`,
+            title: "Job Description Loaded",
+            description: "Job description has been automatically loaded from your job selection.",
           });
-          
-          console.log('=== JOB DATA LOADED FROM URL ===');
-          return true;
         }
         
-        console.log('No job data found in sessionStorage or URL');
-        return false;
-        
-      } catch (error) {
-        console.error('Error loading job data:', error);
-        toast({
-          title: "Error Loading Job Data",
-          description: "There was an issue loading the job information.",
-          variant: "destructive",
-        });
-        return false;
-      }
-    };
-
-    // Try loading immediately
-    const loaded = loadJobData();
-    
-    // If not loaded, try again after a short delay (in case of timing issues)
-    if (!loaded) {
-      const timeoutId = setTimeout(() => {
-        console.log('Retrying job data load after delay...');
-        loadJobData();
-      }, 500);
-      
-      return () => clearTimeout(timeoutId);
-    }
-    
-    // Clean up sessionStorage only after successful load
-    if (loaded) {
-      const cleanupTimeout = setTimeout(() => {
+        // Clear the session storage after loading
         sessionStorage.removeItem('resumeOptimizerData');
-        console.log('SessionStorage cleaned up');
-      }, 1000);
-      
-      return () => clearTimeout(cleanupTimeout);
+      }
+    } catch (error) {
+      console.error('Error loading stored optimizer data:', error);
     }
   }, [toast]);
 
   // Debug log for sourceJobData changes
   useEffect(() => {
-    console.log('=== SOURCE JOB DATA STATE CHANGE ===');
-    console.log('sourceJobData:', sourceJobData);
+    console.log('sourceJobData changed:', sourceJobData);
     console.log('sourceJobData exists:', !!sourceJobData);
-    if (sourceJobData) {
-      console.log('Job details:', {
-        title: sourceJobData.title,
-        company: sourceJobData.company,
-        location: sourceJobData.location,
-        salary: sourceJobData.salary,
-        id: sourceJobData.id
-      });
-    }
-    console.log('=== END SOURCE JOB DATA CHANGE ===');
+    console.log('sourceJobData details:', {
+      title: sourceJobData?.title,
+      company: sourceJobData?.company,
+      location: sourceJobData?.location,
+      salary: sourceJobData?.salary
+    });
   }, [sourceJobData]);
 
   // Auto-populate resume content when highest scoring resume is available and job optimization animation completes
@@ -421,7 +352,7 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Job Information Section - Show when sourceJobData exists */}
+            {/* Job Information Section - Show only when sourceJobData exists */}
             {sourceJobData && (
               <Card className="mb-6 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 shadow-lg animate-fade-in">
                 <CardHeader className="pb-3">
@@ -491,7 +422,7 @@ const Index = () => {
                     qualificationGaps={qualificationGaps}
                   />
                   
-                  {/* Continue to Job Application Section - Show when sourceJobData exists and resume is optimized */}
+                  {/* Continue to Job Application Section - Show only when sourceJobData exists */}
                   {sourceJobData && (
                     <Card className="border-t-4 border-t-green-500 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 shadow-lg animate-fade-in">
                       <CardHeader>
