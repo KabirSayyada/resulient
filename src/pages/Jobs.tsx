@@ -55,7 +55,36 @@ export default function Jobs() {
 
     try {
       const jobTitle = selectedResume.industry || 'software engineer';
-      const location = 'United States';
+      
+      // Extract location from resume data if available
+      let location = 'United States'; // Default fallback
+      
+      if (selectedResume.resume_content) {
+        try {
+          const resumeData = JSON.parse(selectedResume.resume_content);
+          
+          // Try to extract location from various possible fields in resume
+          if (resumeData.personalInfo?.location) {
+            location = resumeData.personalInfo.location;
+          } else if (resumeData.personalInfo?.city && resumeData.personalInfo?.state) {
+            location = `${resumeData.personalInfo.city}, ${resumeData.personalInfo.state}`;
+          } else if (resumeData.contact?.location) {
+            location = resumeData.contact.location;
+          } else if (resumeData.location) {
+            location = resumeData.location;
+          } else if (resumeData.workExperience && resumeData.workExperience.length > 0) {
+            // Try to get location from most recent work experience
+            const mostRecentJob = resumeData.workExperience[0];
+            if (mostRecentJob.location) {
+              location = mostRecentJob.location;
+            }
+          }
+        } catch (error) {
+          console.log('Could not parse resume content for location, using default');
+        }
+      }
+      
+      console.log(`Fetching jobs for ${jobTitle} in ${location}`);
       
       await scrapeJobs({
         query: jobTitle,
