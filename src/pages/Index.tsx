@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -65,15 +64,23 @@ const Index = () => {
 
   // Auto-load job data from session storage when component mounts
   useEffect(() => {
+    console.log('Checking for stored optimizer data...');
     try {
       const storedData = sessionStorage.getItem('resumeOptimizerData');
+      console.log('Raw stored data:', storedData);
+      
       if (storedData) {
         const optimizerData = JSON.parse(storedData);
-        console.log('Loading stored optimizer data:', optimizerData);
+        console.log('Parsed optimizer data:', optimizerData);
         
         if (optimizerData.jobDescription) {
+          console.log('Setting job description:', optimizerData.jobDescription);
           setJobDescription(optimizerData.jobDescription);
-          setSourceJobData(optimizerData.jobData || null);
+          
+          if (optimizerData.jobData) {
+            console.log('Setting source job data:', optimizerData.jobData);
+            setSourceJobData(optimizerData.jobData);
+          }
           
           // Show job optimization animation
           setShowJobOptimizationAnimation(true);
@@ -92,6 +99,11 @@ const Index = () => {
       console.error('Error loading stored optimizer data:', error);
     }
   }, [toast]);
+
+  // Debug log for sourceJobData changes
+  useEffect(() => {
+    console.log('sourceJobData changed:', sourceJobData);
+  }, [sourceJobData]);
 
   // Auto-populate resume content when highest scoring resume is available and job optimization animation completes
   useEffect(() => {
@@ -332,9 +344,9 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Job Information Section - Show only when user came from job card */}
+            {/* Job Information Section - Show when user came from job card */}
             {sourceJobData && (
-              <Card className="mb-6 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950">
+              <Card className="mb-6 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 shadow-lg">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
                     <Building className="h-5 w-5" />
@@ -402,7 +414,7 @@ const Index = () => {
                     qualificationGaps={qualificationGaps}
                   />
                   
-                  {/* Continue to Job Application Section - Show only when user came from job card */}
+                  {/* Continue to Job Application Section - Show when user came from job card */}
                   {sourceJobData && (
                     <Card className="border-t-4 border-t-green-500 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 shadow-lg">
                       <CardHeader>
