@@ -60,6 +60,8 @@ export const JobOptimizationAnimation = ({ isVisible, onComplete }: JobOptimizat
 
   if (!isVisible) return null;
 
+  const CurrentStepIcon = steps[currentStep]?.icon || FileText;
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-indigo-900/95 via-purple-900/95 to-pink-900/95 backdrop-blur-sm z-50 flex items-center justify-center">
       <Card className="max-w-md w-full mx-4 p-8 bg-white/10 backdrop-blur-md border-white/20 text-white shadow-2xl">
@@ -69,9 +71,7 @@ export const JobOptimizationAnimation = ({ isVisible, onComplete }: JobOptimizat
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-ping opacity-30"></div>
             <div className="absolute inset-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
             <div className="relative z-10 w-12 h-12 bg-white rounded-full flex items-center justify-center">
-              {steps[currentStep] && (
-                <steps[currentStep].icon className={`h-6 w-6 ${steps[currentStep].color}`} />
-              )}
+              <CurrentStepIcon className={`h-6 w-6 ${steps[currentStep]?.color || 'text-blue-500'}`} />
             </div>
           </div>
 
@@ -96,7 +96,7 @@ export const JobOptimizationAnimation = ({ isVisible, onComplete }: JobOptimizat
             
             {steps[currentStep] && (
               <div className="flex items-center justify-center gap-3 p-4 bg-white/10 rounded-lg backdrop-blur-sm">
-                <steps[currentStep].icon className={`h-5 w-5 ${steps[currentStep].color} animate-pulse`} />
+                <CurrentStepIcon className={`h-5 w-5 ${steps[currentStep].color} animate-pulse`} />
                 <span className="text-white font-medium">
                   {steps[currentStep].text}
                 </span>
