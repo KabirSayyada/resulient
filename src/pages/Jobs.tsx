@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -125,7 +126,7 @@ export default function Jobs() {
                       </h3>
                       <p className="text-lg text-purple-600 dark:text-purple-400 mt-2">
                         {selectedResume 
-                          ? `Get ${selectedResume.industry} jobs from the past 3 days matching your resume`
+                          ? `Get the most latest ${selectedResume.industry} jobs matching your resume`
                           : 'Select a resume first to fetch personalized job opportunities'
                         }
                       </p>
@@ -160,7 +161,7 @@ export default function Jobs() {
                 <div className="mt-6 flex items-center justify-center gap-6 text-sm text-purple-600 dark:text-purple-400">
                   <Badge variant="outline" className="border-purple-300 text-purple-700 dark:text-purple-300">
                     <Zap className="h-3 w-3 mr-1" />
-                    Past 3 Days Only
+                    Most Latest Jobs
                   </Badge>
                   <span>•</span>
                   <span>Personal & Private</span>
@@ -171,13 +172,13 @@ export default function Jobs() {
                 </div>
               </div>
 
-              {/* Privacy notice */}
-              <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-                  <Info className="h-5 w-5" />
-                  <span className="font-medium">Personal Job Storage:</span>
+              {/* Quality work notice */}
+              <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                  <Target className="h-5 w-5" />
+                  <span className="font-medium">Premium Job Matching:</span>
                   <span className="text-sm">
-                    Jobs you fetch are stored privately in your account and only visible to you. Other users cannot see your job listings.
+                    Our AI scans thousands of job boards daily to find the perfect matches for your skills and experience. Each job is carefully analyzed for compatibility with your resume.
                   </span>
                 </div>
               </div>
@@ -187,7 +188,7 @@ export default function Jobs() {
                 <div className="mb-4 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                   <div className="flex items-center gap-2">
                     <Target className="h-4 w-4" />
-                    <span>Showing {selectedResume ? matchedJobs.length : totalJobs} of your personal jobs from past 3 days</span>
+                    <span>Showing {selectedResume ? matchedJobs.length : totalJobs} of your personal jobs with the most latest postings</span>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => { refetch(); reanalyzeJobs(); }}>
                     <RefreshCw className="h-4 w-4 mr-2" />
