@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -103,6 +104,13 @@ const Index = () => {
   // Debug log for sourceJobData changes
   useEffect(() => {
     console.log('sourceJobData changed:', sourceJobData);
+    console.log('sourceJobData exists:', !!sourceJobData);
+    console.log('sourceJobData details:', {
+      title: sourceJobData?.title,
+      company: sourceJobData?.company,
+      location: sourceJobData?.location,
+      salary: sourceJobData?.salary
+    });
   }, [sourceJobData]);
 
   // Auto-populate resume content when highest scoring resume is available and job optimization animation completes
@@ -344,37 +352,37 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Job Information Section - Always present but hidden when no job data */}
-            <Card className={`mb-6 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 shadow-lg transition-all duration-300 ${
-              sourceJobData ? 'opacity-100 visible' : 'opacity-0 invisible h-0 overflow-hidden'
-            }`}>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-                  <Building className="h-5 w-5" />
-                  Optimizing Resume for This Job
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">{sourceJobData?.title}</h3>
-                  <p className="text-blue-700 dark:text-blue-300 font-medium">{sourceJobData?.company}</p>
-                  <div className="flex flex-wrap gap-4 text-sm text-blue-600 dark:text-blue-400">
-                    {sourceJobData?.location && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" />
-                        {sourceJobData.location}
-                      </div>
-                    )}
-                    {sourceJobData?.salary && (
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="h-4 w-4" />
-                        {sourceJobData.salary}
-                      </div>
-                    )}
+            {/* Job Information Section - Show only when sourceJobData exists */}
+            {sourceJobData && (
+              <Card className="mb-6 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 shadow-lg animate-fade-in">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                    <Building className="h-5 w-5" />
+                    Optimizing Resume for This Job
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">{sourceJobData.title}</h3>
+                    <p className="text-blue-700 dark:text-blue-300 font-medium">{sourceJobData.company}</p>
+                    <div className="flex flex-wrap gap-4 text-sm text-blue-600 dark:text-blue-400">
+                      {sourceJobData.location && (
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4" />
+                          {sourceJobData.location}
+                        </div>
+                      )}
+                      {sourceJobData.salary && (
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="h-4 w-4" />
+                          {sourceJobData.salary}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
             <div className="space-y-6 animate-fade-in">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -414,52 +422,52 @@ const Index = () => {
                     qualificationGaps={qualificationGaps}
                   />
                   
-                  {/* Continue to Job Application Section - Always present but hidden when no job data */}
-                  <Card className={`border-t-4 border-t-green-500 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 shadow-lg transition-all duration-300 ${
-                    sourceJobData ? 'opacity-100 visible' : 'opacity-0 invisible h-0 overflow-hidden'
-                  }`}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
-                        <ArrowRight className="h-5 w-5" />
-                        Ready to Apply?
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <p className="text-green-600 dark:text-green-400">
-                          Your resume has been optimized for <span className="font-semibold">{sourceJobData?.title}</span> at <span className="font-semibold">{sourceJobData?.company}</span>. 
-                          You're now ready to submit your application!
-                        </p>
-                        
-                        <div className="flex flex-col sm:flex-row gap-3">
-                          {sourceJobData?.external_url && (
-                            <Button 
-                              asChild 
-                              className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none"
-                            >
-                              <a 
-                                href={sourceJobData.external_url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2"
-                              >
-                                Apply to {sourceJobData.company}
-                                <ExternalLink className="h-4 w-4" />
-                              </a>
-                            </Button>
-                          )}
+                  {/* Continue to Job Application Section - Show only when sourceJobData exists */}
+                  {sourceJobData && (
+                    <Card className="border-t-4 border-t-green-500 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 shadow-lg animate-fade-in">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                          <ArrowRight className="h-5 w-5" />
+                          Ready to Apply?
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <p className="text-green-600 dark:text-green-400">
+                            Your resume has been optimized for <span className="font-semibold">{sourceJobData.title}</span> at <span className="font-semibold">{sourceJobData.company}</span>. 
+                            You're now ready to submit your application!
+                          </p>
                           
-                          <Button 
-                            variant="outline" 
-                            onClick={() => navigate("/jobs")}
-                            className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-950"
-                          >
-                            Find More Jobs
-                          </Button>
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            {sourceJobData.external_url && (
+                              <Button 
+                                asChild 
+                                className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none"
+                              >
+                                <a 
+                                  href={sourceJobData.external_url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-2"
+                                >
+                                  Apply to {sourceJobData.company}
+                                  <ExternalLink className="h-4 w-4" />
+                                </a>
+                              </Button>
+                            )}
+                            
+                            <Button 
+                              variant="outline" 
+                              onClick={() => navigate("/jobs")}
+                              className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-950"
+                            >
+                              Find More Jobs
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  )}
                 </>
               )}
             </div>
