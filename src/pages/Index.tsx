@@ -5,12 +5,14 @@ import { JobDescriptionInput } from "@/components/resume/JobDescriptionInput";
 import { ResumeInputToggle } from "@/components/resume/ResumeInputToggle";
 import { OptimizedResumeDisplay } from "@/components/resume/OptimizedResumeDisplay";
 import { OptimizationAnimation } from "@/components/resume/OptimizationAnimation";
+import { JobOptimizationAnimation } from "@/components/resume/JobOptimizationAnimation";
 import { useToast } from "@/hooks/use-toast";
 import { useSupabaseFunction } from "@/hooks/useSupabaseFunction";
 import { QualificationGap } from "@/types/resume";
 import { useResumeOptimizationHistory } from "@/hooks/useResumeOptimizationHistory";
 import { OptimizationHistory } from "@/components/resume/OptimizationHistory";
 import { MainNavigation } from "@/components/resume/MainNavigation";
+import { useHighestScoringResume } from "@/hooks/useHighestScoringResume";
 import { 
   calculateKeywordScore, 
   calculateStructureScore, 
@@ -36,6 +38,7 @@ const Index = () => {
   const { toast } = useToast();
   const { subscription } = useSubscription();
   const { usage, checkUsage, showLimitReachedMessage } = useUsageLimits();
+  const { highestScoringResume } = useHighestScoringResume(user?.id);
 
   // Initialize referral tracking
   useReferralTracking();
@@ -45,6 +48,7 @@ const Index = () => {
   const [optimizedResume, setOptimizedResume] = useState("");
   const [qualificationGaps, setQualificationGaps] = useState<QualificationGap[]>([]);
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [showJobOptimizationAnimation, setShowJobOptimizationAnimation] = useState(false);
 
   const { callFunction, loading: functionLoading, error: functionError } = useSupabaseFunction();
   const { saveOptimization } = useResumeOptimizationHistory(user?.id);
@@ -67,6 +71,9 @@ const Index = () => {
         if (optimizerData.jobDescription) {
           setJobDescription(optimizerData.jobDescription);
           
+          // Show job optimization animation
+          setShowJobOptimizationAnimation(true);
+          
           // Show a toast to inform the user
           toast({
             title: "Job Description Loaded",
@@ -81,6 +88,22 @@ const Index = () => {
       console.error('Error loading stored optimizer data:', error);
     }
   }, [toast]);
+
+  // Auto-populate resume content when highest scoring resume is available and job optimization animation completes
+  useEffect(() => {
+    if (highestScoringResume && jobDescription && !resumeContent) {
+      setResumeContent(highestScoringResume.resume_content);
+      
+      toast({
+        title: "Resume Auto-Loaded",
+        description: `Your highest scoring resume (${highestScoringResume.overall_score}/100) has been loaded automatically.`,
+      });
+    }
+  }, [highestScoringResume, jobDescription, resumeContent, toast]);
+
+  const handleJobOptimizationAnimationComplete = () => {
+    setShowJobOptimizationAnimation(false);
+  };
 
   const handleOptimizeResume = async () => {
     // Check if user has reached limit
@@ -349,6 +372,12 @@ const Index = () => {
           <LegalFooter />
         </div>
         <GuidedTour />
+        
+        {/* Job Optimization Animation */}
+        <JobOptimizationAnimation 
+          isVisible={showJobOptimizationAnimation}
+          onComplete={handleJobOptimizationAnimationComplete}
+        />
         
         {/* Optimization Animation */}
         <OptimizationAnimation 
