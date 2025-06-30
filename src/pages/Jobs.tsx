@@ -113,49 +113,51 @@ export default function Jobs() {
               />
 
               {/* Targeted Job Fetch Button */}
-              <div className="mb-6 p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-500 rounded-lg">
-                      <Target className="h-6 w-6 text-white" />
+              <div className="mb-6 p-8 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-2xl">
+                <div className="text-center space-y-6">
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="p-3 bg-purple-500 rounded-full">
+                      <Target className="h-8 w-8 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-300">
+                      <h3 className="text-2xl font-bold text-purple-800 dark:text-purple-300">
                         Fetch My Personal Job Matches
                       </h3>
-                      <p className="text-sm text-purple-600 dark:text-purple-400">
+                      <p className="text-lg text-purple-600 dark:text-purple-400 mt-2">
                         {selectedResume 
                           ? `Get ${selectedResume.industry} jobs from the past 3 days matching your resume`
                           : 'Select a resume first to fetch personalized job opportunities'
                         }
                       </p>
-                      {hoursUntilNextFetch && (
-                        <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                          You can fetch jobs again in {hoursUntilNextFetch} hour{hoursUntilNextFetch !== 1 ? 's' : ''}
+                      {!canFetchJobs() && (
+                        <p className="text-sm text-purple-600 dark:text-purple-400 mt-2">
+                          Our system needs time to look through thousands of jobs from many job boards to get you the best matches
                         </p>
                       )}
                     </div>
                   </div>
+                  
                   <Button
                     onClick={handleTargetedJobFetch}
                     disabled={scrapingLoading || !selectedResume || !canFetchJobs()}
                     size="lg"
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-6 disabled:opacity-50"
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-12 py-4 text-lg rounded-full disabled:opacity-50 min-w-[300px]"
                   >
                     {scrapingLoading ? (
                       <>
-                        <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                        Fetching Your Jobs...
+                        <RefreshCw className="h-6 w-6 mr-3 animate-spin" />
+                        Searching Thousands of Jobs...
                       </>
                     ) : (
                       <>
-                        <Target className="h-5 w-5 mr-2" />
-                        {hoursUntilNextFetch ? `Available in ${hoursUntilNextFetch}h` : 'Fetch My Job Matches'}
+                        <Target className="h-6 w-6 mr-3" />
+                        {!canFetchJobs() ? 'System Processing Jobs...' : 'Fetch My Job Matches'}
                       </>
                     )}
                   </Button>
                 </div>
-                <div className="mt-3 flex items-center gap-4 text-xs text-purple-600 dark:text-purple-400">
+                
+                <div className="mt-6 flex items-center justify-center gap-6 text-sm text-purple-600 dark:text-purple-400">
                   <Badge variant="outline" className="border-purple-300 text-purple-700 dark:text-purple-300">
                     <Zap className="h-3 w-3 mr-1" />
                     Past 3 Days Only
@@ -165,10 +167,6 @@ export default function Jobs() {
                   <span>•</span>
                   <span className="font-medium">
                     {selectedResume ? `${selectedResume.industry} focused` : 'Select resume first'}
-                  </span>
-                  <span>•</span>
-                  <span className="font-medium text-orange-600 dark:text-orange-400">
-                    10hr cooldown per user
                   </span>
                 </div>
               </div>
