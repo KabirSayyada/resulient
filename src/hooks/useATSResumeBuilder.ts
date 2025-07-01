@@ -1,20 +1,15 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ATSResumeData } from "@/types/atsResume";
 import { generateTextFormattedPDF } from "@/utils/textFormattedPdfGenerator";
-import { generateResumeWithTemplate, getRecommendedTemplate, ResumeTemplateType } from "@/utils/resumeTemplates/templateSelector";
-import { ParsedResume } from "@/types/resumeStructure";
 
 export const useATSResumeBuilder = (userId?: string) => {
   const [resumeData, setResumeData] = useState<string>("");
-  const [selectedTemplate, setSelectedTemplate] = useState<ResumeTemplateType>('standard');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [parsedResumeData, setParsedResumeData] = useState<ParsedResume | null>(null);
   const { toast } = useToast();
 
-  const generateResume = async (formData: ATSResumeData, templateType?: ResumeTemplateType) => {
+  const generateResume = async (formData: ATSResumeData) => {
     if (!userId) {
       toast({
         title: "Authentication Required",
@@ -32,29 +27,15 @@ export const useATSResumeBuilder = (userId?: string) => {
 
       if (error) throw error;
 
-      if (data?.parsedResume) {
-        const parsedResume = data.parsedResume as ParsedResume;
-        setParsedResumeData(parsedResume);
-        
-        // Determine template to use
-        const template = templateType || getRecommendedTemplate(parsedResume);
-        setSelectedTemplate(template);
-        
-        // Generate resume with selected template
-        const formattedResume = generateResumeWithTemplate(parsedResume, template);
-        setResumeData(formattedResume);
+      if (data?.optimizedResume) {
+        setResumeData(data.optimizedResume);
         
         // Store the resume data to track usage
         await supabase
           .from("user_resume_data")
           .upsert({
             user_id: userId,
-            resume_data: { 
-              content: formattedResume, 
-              formData: formData,
-              template: template,
-              parsedResume: parsedResume
-            } as any
+            resume_data: { content: data.optimizedResume, formData: formData as any }
           });
 
         // Increment usage count for resume building
@@ -65,7 +46,7 @@ export const useATSResumeBuilder = (userId?: string) => {
 
         toast({
           title: "Resume Generated!",
-          description: `Your ATS-optimized resume has been created using the ${template} template.`,
+          description: "Your ATS-optimized resume has been created successfully.",
         });
       }
     } catch (error) {
@@ -80,58 +61,6 @@ export const useATSResumeBuilder = (userId?: string) => {
     }
   };
 
-  const regenerateWithTemplate = async (templateType: ResumeTemplateType) => {
-    if (!userId || !parsedResumeData) {
-      toast({
-        title: "No Resume Data",
-        description: "Please generate a resume first.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      const formattedResume = generateResumeWithTemplate(parsedResumeData, templateType);
-      
-      setResumeData(formattedResume);
-      setSelectedTemplate(templateType);
-
-      // Update stored data with new template
-      const { data: userData } = await supabase
-        .from("user_resume_data")
-        .select("resume_data")
-        .eq("user_id", userId)
-        .single();
-
-      if (userData?.resume_data) {
-        const resumeDataObj = userData.resume_data as any;
-        
-        await supabase
-          .from("user_resume_data")
-          .update({
-            resume_data: {
-              ...resumeDataObj,
-              content: formattedResume,
-              template: templateType
-            } as any
-          })
-          .eq("user_id", userId);
-      }
-
-      toast({
-        title: "Template Applied!",
-        description: `Your resume has been reformatted using the ${templateType} template.`,
-      });
-    } catch (error) {
-      console.error('Error regenerating with template:', error);
-      toast({
-        title: "Template Change Failed",
-        description: "Failed to apply the new template. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
   const downloadResume = () => {
     if (!resumeData) return;
 
@@ -139,7 +68,7 @@ export const useATSResumeBuilder = (userId?: string) => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `ats-optimized-resume-${selectedTemplate}.txt`;
+    a.download = 'ats-optimized-resume.txt';
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
@@ -161,7 +90,7 @@ export const useATSResumeBuilder = (userId?: string) => {
 
     const success = await generateTextFormattedPDF(
       resumeData,
-      `ats-optimized-resume-${selectedTemplate}.pdf`
+      'ats-optimized-resume.pdf'
     );
 
     if (success) {
@@ -180,11 +109,8 @@ export const useATSResumeBuilder = (userId?: string) => {
 
   return {
     resumeData,
-    selectedTemplate,
     isGenerating,
-    parsedResumeData,
     generateResume,
-    regenerateWithTemplate,
     downloadResume,
     downloadResumePDF
   };

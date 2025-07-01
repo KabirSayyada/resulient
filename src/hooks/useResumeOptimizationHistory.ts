@@ -3,8 +3,6 @@ import { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { QualificationGap } from '@/types/resume';
-import { generateResumeWithTemplate, getRecommendedTemplate, ResumeTemplateType } from "@/utils/resumeTemplates/templateSelector";
-import { ParsedResume } from '@/types/resumeStructure';
 
 interface OptimizationData {
   optimizedResume: string;
@@ -16,8 +14,6 @@ interface OptimizationData {
   structureScore: number;
   atsScore: number;
   suggestions: string[];
-  parsedResume?: ParsedResume;
-  template?: ResumeTemplateType;
 }
 
 export const useResumeOptimizationHistory = (userId: string | undefined) => {
@@ -35,20 +31,11 @@ export const useResumeOptimizationHistory = (userId: string | undefined) => {
     }
 
     try {
-      // If we have parsed resume data, apply recommended template
-      let finalOptimizedResume = data.optimizedResume;
-      let selectedTemplate = data.template || 'standard';
-      
-      if (data.parsedResume) {
-        selectedTemplate = data.template || getRecommendedTemplate(data.parsedResume);
-        finalOptimizedResume = generateResumeWithTemplate(data.parsedResume, selectedTemplate);
-      }
-
       const { data: savedData, error } = await supabase
         .from('resume_optimizations')
         .insert({
           user_id: userId,
-          optimized_resume: finalOptimizedResume,
+          optimized_resume: data.optimizedResume,
           original_resume: data.originalResume,
           job_description: data.jobDescription,
           qualification_gaps: data.qualificationGaps as any,
@@ -56,9 +43,7 @@ export const useResumeOptimizationHistory = (userId: string | undefined) => {
           keyword_score: data.keywordScore,
           structure_score: data.structureScore,
           ats_score: data.atsScore,
-          suggestions: data.suggestions,
-          template_used: selectedTemplate,
-          parsed_resume_data: data.parsedResume as any
+          suggestions: data.suggestions
         })
         .select('*');
 
@@ -68,7 +53,7 @@ export const useResumeOptimizationHistory = (userId: string | undefined) => {
         setOptimizationHistory(prev => [savedData[0], ...prev]);
         toast({
           title: "Optimization Saved",
-          description: `Resume optimization saved using ${selectedTemplate} template.`,
+          description: "Your resume optimization has been saved to history.",
         });
         return savedData[0];
       }
@@ -81,66 +66,6 @@ export const useResumeOptimizationHistory = (userId: string | undefined) => {
       });
     }
     return null;
-  };
-
-  const regenerateOptimizationWithTemplate = async (optimizationId: string, templateType: ResumeTemplateType) => {
-    try {
-      // Get the optimization record
-      const { data: optimization, error: fetchError } = await supabase
-        .from('resume_optimizations')
-        .select('*')
-        .eq('id', optimizationId)
-        .single();
-
-      if (fetchError || !optimization) {
-        throw new Error('Optimization not found');
-      }
-
-      if (!optimization.parsed_resume_data) {
-        toast({
-          title: "Template Change Failed",
-          description: "This optimization doesn't have parsed resume data for template changes.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const parsedResume = optimization.parsed_resume_data as unknown as ParsedResume;
-      const newOptimizedResume = generateResumeWithTemplate(parsedResume, templateType);
-
-      // Update the optimization record
-      const { error: updateError } = await supabase
-        .from('resume_optimizations')
-        .update({
-          optimized_resume: newOptimizedResume,
-          template_used: templateType
-        })
-        .eq('id', optimizationId);
-
-      if (updateError) throw updateError;
-
-      // Update local state
-      setOptimizationHistory(prev => 
-        prev.map(opt => 
-          opt.id === optimizationId 
-            ? { ...opt, optimized_resume: newOptimizedResume, template_used: templateType }
-            : opt
-        )
-      );
-
-      toast({
-        title: "Template Applied",
-        description: `Resume has been reformatted using the ${templateType} template.`,
-      });
-
-    } catch (error) {
-      console.error("Error regenerating with template:", error);
-      toast({
-        title: "Template Change Failed",
-        description: "Failed to apply the new template.",
-        variant: "destructive",
-      });
-    }
   };
 
   const fetchOptimizationHistory = async () => {
@@ -169,7 +94,6 @@ export const useResumeOptimizationHistory = (userId: string | undefined) => {
   return {
     saveOptimization,
     fetchOptimizationHistory,
-    regenerateOptimizationWithTemplate,
     optimizationHistory
   };
 };

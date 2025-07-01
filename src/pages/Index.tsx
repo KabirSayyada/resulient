@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -354,7 +353,7 @@ const Index = () => {
                 </p>
               </div>
               <div className="flex justify-center sm:justify-end">
-                <OptimizationHistory />
+                <OptimizationHistory userId={user?.id} />
               </div>
             </div>
 

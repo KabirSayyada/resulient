@@ -21,16 +21,7 @@ const ATSResumeBuilder = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
-  const { 
-    resumeData, 
-    selectedTemplate, 
-    isGenerating, 
-    parsedResumeData, 
-    generateResume, 
-    regenerateWithTemplate, 
-    downloadResume, 
-    downloadResumePDF 
-  } = useATSResumeBuilder(user?.id);
+  const { resumeData, isGenerating, generateResume, downloadResume, downloadResumePDF } = useATSResumeBuilder(user?.id);
   const { subscription } = useSubscription();
   const { usage, checkUsage, showLimitReachedMessage } = useUsageLimits();
 
@@ -57,10 +48,6 @@ const ATSResumeBuilder = () => {
     await generateResume(formData);
     // Refresh usage after generating resume
     await checkUsage();
-  };
-
-  const handleTemplateChange = async (templateType: any) => {
-    await regenerateWithTemplate(templateType);
   };
 
   return (
@@ -175,12 +162,7 @@ const ATSResumeBuilder = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ATSResumePreview 
-                    resumeData={resumeData}
-                    selectedTemplate={selectedTemplate}
-                    onTemplateChange={handleTemplateChange}
-                    canChangeTemplate={Boolean(resumeData && parsedResumeData)}
-                  />
+                  <ATSResumePreview resumeData={resumeData} />
                 </CardContent>
               </Card>
             </div>

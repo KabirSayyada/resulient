@@ -438,11 +438,9 @@ export type Database = {
           optimized_resume: string
           original_resume: string
           overall_score: number | null
-          parsed_resume_data: Json | null
           qualification_gaps: Json | null
           structure_score: number | null
           suggestions: string[] | null
-          template_used: string | null
           user_id: string
         }
         Insert: {
@@ -454,11 +452,9 @@ export type Database = {
           optimized_resume: string
           original_resume: string
           overall_score?: number | null
-          parsed_resume_data?: Json | null
           qualification_gaps?: Json | null
           structure_score?: number | null
           suggestions?: string[] | null
-          template_used?: string | null
           user_id: string
         }
         Update: {
@@ -470,11 +466,9 @@ export type Database = {
           optimized_resume?: string
           original_resume?: string
           overall_score?: number | null
-          parsed_resume_data?: Json | null
           qualification_gaps?: Json | null
           structure_score?: number | null
           suggestions?: string[] | null
-          template_used?: string | null
           user_id?: string
         }
         Relationships: []
