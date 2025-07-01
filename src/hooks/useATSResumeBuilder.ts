@@ -11,6 +11,7 @@ export const useATSResumeBuilder = (userId?: string) => {
   const [resumeData, setResumeData] = useState<string>("");
   const [selectedTemplate, setSelectedTemplate] = useState<ResumeTemplateType>('standard');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [parsedResumeData, setParsedResumeData] = useState<ParsedResume | null>(null);
   const { toast } = useToast();
 
   const generateResume = async (formData: ATSResumeData, templateType?: ResumeTemplateType) => {
@@ -33,6 +34,7 @@ export const useATSResumeBuilder = (userId?: string) => {
 
       if (data?.parsedResume) {
         const parsedResume = data.parsedResume as ParsedResume;
+        setParsedResumeData(parsedResume);
         
         // Determine template to use
         const template = templateType || getRecommendedTemplate(parsedResume);
@@ -79,52 +81,42 @@ export const useATSResumeBuilder = (userId?: string) => {
   };
 
   const regenerateWithTemplate = async (templateType: ResumeTemplateType) => {
-    if (!userId) return;
+    if (!userId || !parsedResumeData) {
+      toast({
+        title: "No Resume Data",
+        description: "Please generate a resume first.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
-      // Get the stored resume data
-      const { data: userData, error } = await supabase
-        .from("user_resume_data")
-        .select("resume_data")
-        .eq("user_id", userId)
-        .single();
-
-      if (error || !userData?.resume_data) {
-        toast({
-          title: "No Resume Data",
-          description: "Please generate a resume first.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const resumeDataObj = userData.resume_data as any;
-      if (!resumeDataObj.parsedResume) {
-        toast({
-          title: "No Resume Data",
-          description: "Please generate a resume first.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const parsedResume = resumeDataObj.parsedResume as ParsedResume;
-      const formattedResume = generateResumeWithTemplate(parsedResume, templateType);
+      const formattedResume = generateResumeWithTemplate(parsedResumeData, templateType);
       
       setResumeData(formattedResume);
       setSelectedTemplate(templateType);
 
       // Update stored data with new template
-      await supabase
+      const { data: userData } = await supabase
         .from("user_resume_data")
-        .update({
-          resume_data: {
-            ...resumeDataObj,
-            content: formattedResume,
-            template: templateType
-          } as any
-        })
-        .eq("user_id", userId);
+        .select("resume_data")
+        .eq("user_id", userId)
+        .single();
+
+      if (userData?.resume_data) {
+        const resumeDataObj = userData.resume_data as any;
+        
+        await supabase
+          .from("user_resume_data")
+          .update({
+            resume_data: {
+              ...resumeDataObj,
+              content: formattedResume,
+              template: templateType
+            } as any
+          })
+          .eq("user_id", userId);
+      }
 
       toast({
         title: "Template Applied!",
@@ -190,6 +182,7 @@ export const useATSResumeBuilder = (userId?: string) => {
     resumeData,
     selectedTemplate,
     isGenerating,
+    parsedResumeData,
     generateResume,
     regenerateWithTemplate,
     downloadResume,
