@@ -48,9 +48,9 @@ export const ResumeScoringForm = ({
           <Button
             onClick={onScore}
             disabled={isScoring || !resumeContent || isResumeTooLong || disableButton}
-            className="px-10 py-3 text-lg font-bold rounded-full shadow transition-all bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500"
+            className="px-10 py-3 text-lg font-bold rounded-full shadow transition-all bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isScoring ? "Analyzing..." : "🕹️ Benchmark Resume"}
+            {isScoring ? "Analyzing..." : "🕹️ Score My Resume"}
           </Button>
         </div>
         

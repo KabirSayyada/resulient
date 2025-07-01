@@ -25,9 +25,10 @@ const ResumeScoring = () => {
   const navigate = useNavigate();
   const [resumeContent, setResumeContent] = useState("");
   const [activeTab, setActiveTab] = useState("current");
+  const [hasScored, setHasScored] = useState(false); // Track if user has scored today
   const { scoreData, scoreHistory, setScoreHistory, isScoring, hasReachedLimit, handleScoreResume } = useResumeScoring(user?.id);
   const { subscription } = useSubscription();
-  const { usage, showLimitReachedMessage } = useUsageLimits();
+  const { usage, showLimitReachedMessage, checkUsage } = useUsageLimits();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -36,6 +37,20 @@ const ResumeScoring = () => {
       fetchScoreHistory();
     }
   }, [user, authLoading, navigate]);
+
+  // Check if user has already scored today when scoreData changes
+  useEffect(() => {
+    if (scoreData && subscription.tier === "free") {
+      setHasScored(true);
+    }
+  }, [scoreData, subscription.tier]);
+
+  // Reset hasScored when usage is refreshed (e.g., new day)
+  useEffect(() => {
+    if (usage.resumeScorings.used === 0 && subscription.tier === "free") {
+      setHasScored(false);
+    }
+  }, [usage.resumeScorings.used, subscription.tier]);
 
   const fetchScoreHistory = async () => {
     try {
@@ -105,19 +120,30 @@ const ResumeScoring = () => {
     );
   }
 
-  const onScore = () => {
+  const onScore = async () => {
     // Check if user has reached limit
-    if (usage.resumeScorings.hasReachedLimit) {
+    if (usage.resumeScorings.hasReachedLimit || (subscription.tier === "free" && hasScored)) {
       showLimitReachedMessage("resume scoring");
       return;
     }
 
     const dailyLimit = subscription.limits.resumeScorings;
-    handleScoreResume(resumeContent, dailyLimit);
+    await handleScoreResume(resumeContent, dailyLimit);
+    
+    // Mark as scored for free users
+    if (subscription.tier === "free") {
+      setHasScored(true);
+    }
+    
+    // Refresh usage count
+    await checkUsage();
   };
 
   // Show upgrade alert if reached limit and on free tier
-  const showUpgradeAlert = usage.resumeScorings.hasReachedLimit && subscription.tier === "free";
+  const showUpgradeAlert = (usage.resumeScorings.hasReachedLimit || hasScored) && subscription.tier === "free";
+  
+  // Determine if button should be disabled
+  const isButtonDisabled = usage.resumeScorings.hasReachedLimit || (subscription.tier === "free" && hasScored);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950 dark:text-white py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
@@ -224,7 +250,7 @@ const ResumeScoring = () => {
                 {subscription.tier === "free" && (
                   <div className="flex items-center justify-center gap-1 text-sm text-gray-600 dark:text-gray-400 font-medium">
                     <span>
-                      Daily limit: {usage.resumeScorings.used}/{usage.resumeScorings.limit} resume scoring used
+                      Daily limit: {hasScored ? 1 : usage.resumeScorings.used}/{usage.resumeScorings.limit} resume scoring used
                     </span>
                   </div>
                 )}
@@ -235,7 +261,7 @@ const ResumeScoring = () => {
                   setResumeContent={setResumeContent}
                   isScoring={isScoring}
                   onScore={onScore}
-                  disableButton={usage.resumeScorings.hasReachedLimit && subscription.tier === "free"}
+                  disableButton={isButtonDisabled}
                 />
               </CardContent>
             </Card>
