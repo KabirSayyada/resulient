@@ -49,10 +49,10 @@ export const useATSResumeBuilder = (userId?: string) => {
             user_id: userId,
             resume_data: { 
               content: formattedResume, 
-              formData: formData as any,
+              formData: formData,
               template: template,
               parsedResume: parsedResume
-            }
+            } as any
           });
 
         // Increment usage count for resume building
@@ -89,7 +89,7 @@ export const useATSResumeBuilder = (userId?: string) => {
         .eq("user_id", userId)
         .single();
 
-      if (error || !userData?.resume_data?.parsedResume) {
+      if (error || !userData?.resume_data) {
         toast({
           title: "No Resume Data",
           description: "Please generate a resume first.",
@@ -98,7 +98,17 @@ export const useATSResumeBuilder = (userId?: string) => {
         return;
       }
 
-      const parsedResume = userData.resume_data.parsedResume as ParsedResume;
+      const resumeDataObj = userData.resume_data as any;
+      if (!resumeDataObj.parsedResume) {
+        toast({
+          title: "No Resume Data",
+          description: "Please generate a resume first.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const parsedResume = resumeDataObj.parsedResume as ParsedResume;
       const formattedResume = generateResumeWithTemplate(parsedResume, templateType);
       
       setResumeData(formattedResume);
@@ -109,10 +119,10 @@ export const useATSResumeBuilder = (userId?: string) => {
         .from("user_resume_data")
         .update({
           resume_data: {
-            ...userData.resume_data,
+            ...resumeDataObj,
             content: formattedResume,
             template: templateType
-          }
+          } as any
         })
         .eq("user_id", userId);
 
