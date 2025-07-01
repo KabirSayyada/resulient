@@ -19,7 +19,7 @@ interface ScoreResultSectionProps {
 export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
   const scoreCardRef = useRef<HTMLDivElement | null>(null);
   const completeReportRef = useRef<HTMLDivElement | null>(null);
-  const [showAnimations, setShowAnimations] = useState(!scoreData.id?.includes("newly-generated"));
+  const [showAnimations, setShowAnimations] = useState(scoreData.id?.includes("newly-generated") || false);
   const [showScorecard, setShowScorecard] = useState(scoreData.id && !scoreData.id.includes("newly-generated"));
 
   const isCachedResult = scoreData.id && !scoreData.id.includes("newly-generated");
