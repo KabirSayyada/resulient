@@ -105,7 +105,7 @@ export const useResumeOptimizationHistory = (userId: string | undefined) => {
         return;
       }
 
-      const parsedResume = optimization.parsed_resume_data as ParsedResume;
+      const parsedResume = optimization.parsed_resume_data as unknown as ParsedResume;
       const newOptimizedResume = generateResumeWithTemplate(parsedResume, templateType);
 
       // Update the optimization record
