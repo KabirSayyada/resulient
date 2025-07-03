@@ -36,17 +36,13 @@ export const ResumeScoreModal = ({
     }
   }, [isOpen, isScoring]);
 
-  // Show animations when scoring is complete and we have data
-  React.useEffect(() => {
+  const handleOptimizationComplete = () => {
+    // When optimization animation completes, move directly to score animations
+    // Only if we have score data and are not currently scoring
     if (scoreData && !isScoring) {
       setShowAnimations(true);
       setShowResults(false);
     }
-  }, [scoreData, isScoring]);
-
-  const handleOptimizationComplete = () => {
-    // When optimization animation completes, move to score animations
-    setShowAnimations(true);
   };
 
   const handleAnimationsComplete = () => {
@@ -107,7 +103,7 @@ export const ResumeScoreModal = ({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                 >
-                  <ScoreResultSection scoreData={scoreData} />
+                  <ScoreResultSection scoreData={scoreData} skipAnimations={true} />
                   
                   {/* Action buttons */}
                   <div className="flex justify-center gap-4 mt-8 pt-6 border-t">
