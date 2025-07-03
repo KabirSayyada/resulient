@@ -24,25 +24,29 @@ export const ResumeScoreModal = ({
 }: ResumeScoreModalProps) => {
   const [showAnimations, setShowAnimations] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [optimizationComplete, setOptimizationComplete] = useState(false);
 
-  // Reset states when modal opens/closes
+  // Reset states when modal opens/closes or when scoring starts
   React.useEffect(() => {
     if (isOpen && isScoring) {
       setShowAnimations(false);
       setShowResults(false);
+      setOptimizationComplete(false);
     } else if (!isOpen) {
       setShowAnimations(false);
       setShowResults(false);
+      setOptimizationComplete(false);
     }
   }, [isOpen, isScoring]);
 
   const handleOptimizationComplete = () => {
-    // When optimization animation completes, move directly to score animations
-    // Only if we have score data and are not currently scoring
-    if (scoreData && !isScoring) {
-      setShowAnimations(true);
-      setShowResults(false);
-    }
+    setOptimizationComplete(true);
+    // Small delay to ensure smooth transition
+    setTimeout(() => {
+      if (scoreData && !isScoring) {
+        setShowAnimations(true);
+      }
+    }, 300);
   };
 
   const handleAnimationsComplete = () => {
@@ -59,8 +63,8 @@ export const ResumeScoreModal = ({
         mode="scoring"
       />
 
-      {/* Score Modal */}
-      <Dialog open={isOpen && !isScoring} onOpenChange={onClose}>
+      {/* Score Modal - Show when optimization is complete */}
+      <Dialog open={isOpen && optimizationComplete} onOpenChange={onClose}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0">
           {/* Header with close button */}
           <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
@@ -87,6 +91,7 @@ export const ResumeScoreModal = ({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
                 >
                   <ResumeScoreAnimations 
                     score={scoreData.overallScore} 
@@ -102,6 +107,7 @@ export const ResumeScoreModal = ({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
                 >
                   <ScoreResultSection scoreData={scoreData} skipAnimations={true} />
                   
