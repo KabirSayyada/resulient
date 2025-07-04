@@ -137,7 +137,12 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
                 color: "blue"
               },
               { 
-                score: Math.min(60 + (job.description.length % 30) + (job.location.includes('Remote') ? 15 : 5), 100), 
+                score: Math.min(55 + 
+                  (job.company.length % 15) + 
+                  (job.title.includes('Senior') ? 12 : job.title.includes('Lead') ? 10 : 5) +
+                  (job.location.includes('Remote') ? 8 : 3) +
+                  (job.salary ? 10 : 0) +
+                  (Math.abs(job.id.charCodeAt(0) + job.id.charCodeAt(job.id.length - 1)) % 10), 100), 
                 maxScore: 100, 
                 label: "Market Demand",
                 icon: TrendingUp,
