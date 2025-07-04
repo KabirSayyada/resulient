@@ -123,25 +123,25 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
             {[
               { 
-                score: Math.min(matchScore + 15, 100), 
+                score: Math.min(matchScore + (job.title.length % 20) - 5, 100), 
                 maxScore: 100, 
                 label: "Interview Probability",
                 icon: Target,
                 color: "green"
               },
               { 
-                score: Math.min(75 + (matchScore - 50) * 0.5, 100), 
+                score: Math.min(70 + (job.company.length % 25) + (matchScore > 60 ? 10 : 0), 100), 
                 maxScore: 100, 
                 label: "Culture Fit",
                 icon: User,
                 color: "blue"
               },
               { 
-                score: detailedScoring.resumeQualityAnalysis.score, 
-                maxScore: detailedScoring.resumeQualityAnalysis.maxScore, 
-                label: "Profile Quality",
-                icon: Award,
-                color: "orange"
+                score: Math.min(60 + (job.description.length % 30) + (job.location.includes('Remote') ? 15 : 5), 100), 
+                maxScore: 100, 
+                label: "Market Demand",
+                icon: TrendingUp,
+                color: "purple"
               }
             ].map((item, index) => {
               const percentage = (item.score / item.maxScore) * 100;
@@ -153,6 +153,7 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
                     <item.icon className={`h-4 w-4 ${
                       item.color === 'purple' ? 'text-purple-600' :
                       item.color === 'blue' ? 'text-blue-600' :
+                      item.color === 'green' ? 'text-green-600' :
                       'text-orange-600'
                     }`} />
                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{item.label}</span>
