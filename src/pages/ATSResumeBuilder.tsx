@@ -10,7 +10,7 @@ import { LegalFooter } from "@/components/layout/LegalFooter";
 import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
 import { SubscriptionTierIndicator } from "@/components/subscription/SubscriptionTierIndicator";
 import { ATSResumeForm } from "@/components/resume/ATSResumeForm";
-import { ATSResumePreview } from "@/components/resume/ATSResumePreview";
+import { ATSResumeModal } from "@/components/resume/ATSResumeModal";
 import { useATSResumeBuilder } from "@/hooks/useATSResumeBuilder";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 const ATSResumeBuilder = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [activeStep, setActiveStep] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { resumeData, isGenerating, generateResume, downloadResume, downloadResumePDF } = useATSResumeBuilder(user?.id);
   const { subscription } = useSubscription();
   const { usage, checkUsage, showLimitReachedMessage } = useUsageLimits();
@@ -50,6 +50,11 @@ const ATSResumeBuilder = () => {
 
     await generateResume(formData);
     await checkUsage();
+    
+    // Open modal when resume is generated
+    if (!isGenerating) {
+      setIsModalOpen(true);
+    }
   };
 
   const features = [
@@ -63,8 +68,16 @@ const ATSResumeBuilder = () => {
     <>
       <OptimizationAnimation 
         isOptimizing={isGenerating} 
-        onComplete={() => {}} 
+        onComplete={() => setIsModalOpen(true)} 
         mode="ats-building"
+      />
+      
+      <ATSResumeModal 
+        isOpen={isModalOpen && !!resumeData}
+        onClose={() => setIsModalOpen(false)}
+        resumeData={resumeData || ""}
+        onDownloadTXT={downloadResume}
+        onDownloadPDF={downloadResumePDF}
       />
       
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
@@ -150,76 +163,31 @@ const ATSResumeBuilder = () => {
 
             <MainNavigation />
 
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
-              {/* Form Section */}
-              <div className="space-y-6">
-                <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-xl border-2 border-emerald-200/60 dark:border-emerald-800/40 hover:shadow-2xl transition-all duration-300">
-                  <CardHeader className="pb-6">
-                    <CardTitle className="flex items-center gap-3 text-2xl font-bold">
-                      <div className="p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl shadow-lg">
-                        <FileText className="h-6 w-6 text-white" />
-                      </div>
-                      <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                        Build Your Resume
-                      </span>
-                      <Badge variant="secondary" className="ml-auto bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 px-3 py-1">
-                        <Sparkles className="h-3 w-3 mr-1" />
-                        AI-Enhanced
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ATSResumeForm 
-                      onGenerate={handleGenerate}
-                      isGenerating={isGenerating}
-                      disabled={usage.resumeBuilding.hasReachedLimit && subscription.tier === "free"}
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Preview Section */}
-              <div className="space-y-6">
-                <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-xl border-2 border-blue-200/60 dark:border-blue-800/40 hover:shadow-2xl transition-all duration-300">
-                  <CardHeader className="pb-6">
-                    <CardTitle className="flex items-center gap-3 justify-between text-2xl font-bold">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg">
-                          <Sparkles className="h-6 w-6 text-white" />
-                        </div>
-                        <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                          Resume Preview
-                        </span>
-                      </div>
-                      {resumeData && (
-                        <div className="flex gap-3">
-                          <Button 
-                            onClick={downloadResume}
-                            size="sm"
-                            variant="outline"
-                            className="text-emerald-600 border-2 border-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 font-semibold transition-all duration-300 hover:scale-105"
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            TXT
-                          </Button>
-                          <Button 
-                            onClick={downloadResumePDF}
-                            size="sm"
-                            className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold"
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            PDF
-                          </Button>
-                        </div>
-                      )}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ATSResumePreview resumeData={resumeData} />
-                  </CardContent>
-                </Card>
-              </div>
+            {/* Main Content - Single Form Section */}
+            <div className="max-w-4xl mx-auto mt-8">
+              <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-xl border-2 border-emerald-200/60 dark:border-emerald-800/40 hover:shadow-2xl transition-all duration-300">
+                <CardHeader className="pb-6">
+                  <CardTitle className="flex items-center gap-3 text-2xl font-bold">
+                    <div className="p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl shadow-lg">
+                      <FileText className="h-6 w-6 text-white" />
+                    </div>
+                    <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                      Build Your Resume
+                    </span>
+                    <Badge variant="secondary" className="ml-auto bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 px-3 py-1">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      AI-Enhanced
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ATSResumeForm 
+                    onGenerate={handleGenerate}
+                    isGenerating={isGenerating}
+                    disabled={usage.resumeBuilding.hasReachedLimit && subscription.tier === "free"}
+                  />
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
