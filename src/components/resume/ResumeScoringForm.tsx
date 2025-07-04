@@ -20,10 +20,11 @@ export const ResumeScoringForm = ({
   setResumeContent,
   isScoring,
   onScore,
-  disableButton
+  disableButton = false
 }: ResumeScoringFormProps) => {
-  const wordCount = resumeContent.trim().split(/\s+/).length;
+  const wordCount = resumeContent.trim().split(/\s+/).filter(word => word.length > 0).length;
   const isResumeTooLong = wordCount > 800;
+  const isButtonDisabled = isScoring || !resumeContent.trim() || isResumeTooLong || disableButton;
 
   const features = [
     {
@@ -47,6 +48,13 @@ export const ResumeScoringForm = ({
       description: "Discover what makes you stand out"
     }
   ];
+
+  const handleScoreClick = () => {
+    console.log('Score button clicked', { isButtonDisabled, resumeContent: resumeContent.length });
+    if (!isButtonDisabled) {
+      onScore();
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -174,13 +182,13 @@ export const ResumeScoringForm = ({
         className="flex justify-center"
       >
         <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: isButtonDisabled ? 1 : 1.02 }}
+          whileTap={{ scale: isButtonDisabled ? 1 : 0.98 }}
           className="relative"
         >
           <Button
-            onClick={onScore}
-            disabled={isScoring || !resumeContent || isResumeTooLong || disableButton}
+            onClick={handleScoreClick}
+            disabled={isButtonDisabled}
             className="relative px-12 py-4 text-lg font-bold rounded-full shadow-lg transition-all duration-300 bg-gradient-to-r from-fuchsia-500 to-indigo-500 hover:from-fuchsia-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white border-0 overflow-hidden group"
           >
             {/* Animated background effect */}
@@ -203,7 +211,7 @@ export const ResumeScoringForm = ({
           </Button>
           
           {/* Glow effect */}
-          {!isScoring && !disableButton && resumeContent && !isResumeTooLong && (
+          {!isButtonDisabled && (
             <div className="absolute -inset-1 bg-gradient-to-r from-fuchsia-500 to-indigo-500 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
           )}
         </motion.div>
