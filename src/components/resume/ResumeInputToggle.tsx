@@ -1,11 +1,12 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileUploadSection } from "./FileUploadSection";
 import { useResumeBuilder } from "@/hooks/useResumeBuilder";
-import { Edit } from "lucide-react";
+import { Edit, Sparkles, FileText, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 interface ResumeInputToggleProps {
   resumeContent: string;
@@ -39,23 +40,37 @@ export const ResumeInputToggle = ({
   };
 
   return (
-    <div className="space-y-4">
-      <Card className="bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+    <div className="space-y-6">
+      <Card className="bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/80 dark:from-blue-950/30 dark:via-background dark:to-indigo-950/30 border-2 border-blue-200/60 dark:border-blue-800/60 shadow-xl hover:shadow-2xl transition-all duration-300">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3 text-xl font-bold">
+            <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+              <FileText className="h-6 w-6 text-white" />
+            </div>
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Resume Builder
+            </span>
+            <Badge variant="secondary" className="ml-auto bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+              <Zap className="h-3 w-3 mr-1" />
+              AI-Powered
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex flex-col sm:flex-row gap-4">
             <Button
-              variant="outline"
               onClick={handleBuildResumeClick}
-              className="flex items-center gap-2 border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950 w-full sm:w-auto"
+              className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl h-12 font-semibold"
             >
-              <Edit className="h-4 w-4" />
+              <Edit className="h-5 w-5" />
               Build New Resume
+              <Sparkles className="h-4 w-4" />
             </Button>
           </div>
 
           <div className="space-y-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Upload your existing resume or use our AI-powered resume builder to create a new one
+            <p className="text-muted-foreground text-base leading-relaxed">
+              Upload your existing resume or use our AI-powered resume builder to create a professional one from scratch
             </p>
             
             <FileUploadSection 
@@ -64,21 +79,26 @@ export const ResumeInputToggle = ({
             />
 
             {resumeData && (
-              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="mt-6 p-6 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/50 dark:to-green-950/50 border-2 border-emerald-200 dark:border-emerald-800 rounded-2xl shadow-lg">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-blue-900 dark:text-blue-100">
-                      Previously Built Resume Available
-                    </h4>
-                    <p className="text-sm text-blue-600 dark:text-blue-400">
-                      You have a resume created with our builder
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg">
+                      <FileText className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-emerald-900 dark:text-emerald-100 text-lg">
+                        Previously Built Resume Available
+                      </h4>
+                      <p className="text-emerald-700 dark:text-emerald-300 text-sm">
+                        You have a resume created with our builder
+                      </p>
+                    </div>
                   </div>
                   <Button
                     onClick={handleUseBuiltResume}
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
                   >
+                    <Zap className="h-4 w-4 mr-2" />
                     Use Built Resume
                   </Button>
                 </div>
