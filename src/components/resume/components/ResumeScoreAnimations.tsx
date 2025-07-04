@@ -14,13 +14,11 @@ export const ResumeScoreAnimations = ({ score, onComplete }: ResumeScoreAnimatio
   const [showQuote, setShowQuote] = useState(false);
 
   const handleGaugeComplete = () => {
-    console.log("Gauge animation completed");
     setShowGauge(false);
     setShowQuote(true);
   };
 
   const handleQuoteComplete = () => {
-    console.log("Quote animation completed");
     setShowQuote(false);
     onComplete();
   };
@@ -28,7 +26,6 @@ export const ResumeScoreAnimations = ({ score, onComplete }: ResumeScoreAnimatio
   return (
     <div className="w-full bg-gradient-to-br from-indigo-50 via-white to-blue-50 dark:from-indigo-950 dark:via-gray-900 dark:to-blue-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-lg mb-8">
       <AnimatePresence mode="wait">
-        {/* Gauge Animation */}
         {showGauge && (
           <motion.div
             key="gauge"
@@ -41,7 +38,6 @@ export const ResumeScoreAnimations = ({ score, onComplete }: ResumeScoreAnimatio
           </motion.div>
         )}
         
-        {/* Motivational Quote Animation */}
         {showQuote && (
           <motion.div
             key="quote"
