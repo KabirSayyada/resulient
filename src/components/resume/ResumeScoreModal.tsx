@@ -53,24 +53,24 @@ export const ResumeScoreModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0">
+      <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0">
         {/* Header with close button */}
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-xl font-semibold text-indigo-900">
+        <div className="sticky top-0 bg-white dark:bg-slate-900 border-b px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
+          <h2 className="text-lg sm:text-xl font-semibold text-indigo-900 dark:text-indigo-100">
             {isScoring ? "Analyzing Your Resume..." : "Resume Score Results"}
           </h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-8 w-8 p-0"
+            className="h-7 w-7 sm:h-8 sm:w-8 p-0"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-3 sm:p-6">
           <AnimatePresence mode="wait">
             {/* Scoring in progress */}
             {isScoring && (
@@ -79,13 +79,13 @@ export const ResumeScoreModal = ({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="text-center py-12"
+                className="text-center py-8 sm:py-12"
               >
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                <p className="text-lg text-indigo-700">
+                <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                <p className="text-base sm:text-lg text-indigo-700 dark:text-indigo-300">
                   Please wait while we analyze your resume...
                 </p>
-                <p className="text-sm text-gray-600 mt-2">
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2">
                   This may take a few moments
                 </p>
               </motion.div>
@@ -117,17 +117,17 @@ export const ResumeScoreModal = ({
                 <ScoreResultSection scoreData={scoreData} />
                 
                 {/* Action buttons */}
-                <div className="flex justify-center gap-4 mt-8 pt-6 border-t">
+                <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t">
                   <Button
                     onClick={onClose}
                     variant="outline"
-                    className="px-8"
+                    className="px-6 sm:px-8 w-full sm:w-auto"
                   >
                     Close
                   </Button>
                   <Button
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                    className="px-8 bg-indigo-600 hover:bg-indigo-700"
+                    className="px-6 sm:px-8 bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto"
                   >
                     Score Another Resume
                   </Button>

@@ -33,10 +33,10 @@ const ATSResumeBuilder = () => {
 
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950 px-4">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-lg font-semibold text-slate-700 dark:text-slate-300">Loading your workspace...</span>
+          <span className="text-lg font-semibold text-slate-700 dark:text-slate-300 text-center">Loading your workspace...</span>
         </div>
       </div>
     );
@@ -80,68 +80,70 @@ const ATSResumeBuilder = () => {
         onDownloadPDF={downloadResumePDF}
       />
       
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-x-hidden">
         {/* Animated background elements */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-emerald-200/20 to-blue-200/20 dark:from-emerald-800/10 dark:to-blue-800/10 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-purple-200/20 to-pink-200/20 dark:from-purple-800/10 dark:to-pink-800/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
         </div>
 
-        <div className="relative z-10 py-6 px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 py-4 sm:py-6 px-3 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             {/* Header Section */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
-              <div className="flex items-center gap-4">
-                <Link to="/" className="flex items-center group">
-                  <span className="font-brand text-4xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-600 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none group-hover:scale-105 transition-transform duration-300">
-                    Resulient
-                  </span>
-                </Link>
-                <div className="flex flex-col gap-2">
-                  <Badge className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 px-4 py-2 text-sm font-semibold">
-                    <Brain className="h-4 w-4 mr-2" />
-                    ATS Resume Builder
-                  </Badge>
+            <div className="flex flex-col gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <Link to="/" className="flex items-center group">
+                    <span className="font-brand text-2xl sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-600 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none group-hover:scale-105 transition-transform duration-300">
+                      Resulient
+                    </span>
+                  </Link>
+                  <div className="flex flex-col gap-2">
+                    <Badge className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-semibold">
+                      <Brain className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                      ATS Resume Builder
+                    </Badge>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <SubscriptionTierIndicator variant="badge" size="sm" />
-                <UserMenuWithTheme />
+                
+                <div className="flex items-center gap-2 sm:gap-4 justify-between sm:justify-end">
+                  <SubscriptionTierIndicator variant="badge" size="sm" />
+                  <UserMenuWithTheme />
+                </div>
               </div>
             </div>
 
             {/* Hero Info Section */}
-            <div className="relative mb-8">
+            <div className="relative mb-6 sm:mb-8">
               <Card className="bg-gradient-to-br from-white/90 via-emerald-50/50 to-blue-50/50 dark:from-slate-900/90 dark:via-slate-800/50 dark:to-slate-900/50 border-2 border-emerald-200/60 dark:border-emerald-800/40 shadow-2xl backdrop-blur-sm">
-                <CardContent className="p-8">
-                  <div className="text-center space-y-6">
-                    <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 via-emerald-700 to-blue-700 dark:from-slate-100 dark:via-emerald-300 dark:to-blue-300 bg-clip-text text-transparent leading-tight">
+                <CardContent className="p-4 sm:p-6 lg:p-8">
+                  <div className="text-center space-y-4 sm:space-y-6">
+                    <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-800 via-emerald-700 to-blue-700 dark:from-slate-100 dark:via-emerald-300 dark:to-blue-300 bg-clip-text text-transparent leading-tight">
                       Build Your Perfect ATS Resume
                     </h1>
                     
-                    <p className="text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
+                    <p className="text-sm sm:text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed px-2">
                       Create a professional, ATS-optimized resume in minutes using our AI-powered builder. 
                       Simply describe yourself in natural language, and we'll craft the perfect resume format.
                     </p>
 
                     {/* Feature Pills */}
-                    <div className="flex flex-wrap justify-center gap-3 mt-8">
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mt-6 sm:mt-8">
                       {features.map((feature, index) => (
                         <div 
                           key={index}
-                          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r ${feature.color} text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-default`}
+                          className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r ${feature.color} text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-default`}
                         >
-                          <feature.icon className="h-5 w-5" />
-                          <span className="font-semibold">{feature.text}</span>
+                          <feature.icon className="h-3 w-3 sm:h-5 sm:w-5" />
+                          <span className="font-semibold text-xs sm:text-base">{feature.text}</span>
                         </div>
                       ))}
                     </div>
 
                     {subscription.tier === "free" && (
-                      <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl">
-                        <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300 font-semibold">
-                          <Target className="h-5 w-5" />
+                      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl mx-2 sm:mx-0">
+                        <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300 font-semibold text-sm sm:text-base">
+                          <Target className="h-4 w-4 sm:h-5 sm:w-5" />
                           Free tier: {usage.resumeBuilding.used}/{usage.resumeBuilding.limit} resume builds used
                         </div>
                       </div>
@@ -152,7 +154,7 @@ const ATSResumeBuilder = () => {
             </div>
 
             {usage.resumeBuilding.hasReachedLimit && subscription.tier === "free" && (
-              <div className="mb-8">
+              <div className="mb-6 sm:mb-8">
                 <UseSubscriptionAlert 
                   subscriptionTier={subscription.tier} 
                   requiredTier="premium" 
@@ -164,23 +166,25 @@ const ATSResumeBuilder = () => {
             <MainNavigation />
 
             {/* Main Content - Single Form Section */}
-            <div className="max-w-4xl mx-auto mt-8">
+            <div className="max-w-4xl mx-auto mt-6 sm:mt-8">
               <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-xl border-2 border-emerald-200/60 dark:border-emerald-800/40 hover:shadow-2xl transition-all duration-300">
-                <CardHeader className="pb-6">
-                  <CardTitle className="flex items-center gap-3 text-2xl font-bold">
-                    <div className="p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl shadow-lg">
-                      <FileText className="h-6 w-6 text-white" />
+                <CardHeader className="pb-4 sm:pb-6 px-4 sm:px-6">
+                  <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-3 text-lg sm:text-2xl font-bold">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 sm:p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl shadow-lg">
+                        <FileText className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+                      </div>
+                      <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                        Build Your Resume
+                      </span>
                     </div>
-                    <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                      Build Your Resume
-                    </span>
-                    <Badge variant="secondary" className="ml-auto bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 px-3 py-1">
+                    <Badge variant="secondary" className="sm:ml-auto bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 px-2 sm:px-3 py-1 text-xs sm:text-sm w-fit">
                       <Sparkles className="h-3 w-3 mr-1" />
                       AI-Enhanced
                     </Badge>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 sm:px-6">
                   <ATSResumeForm 
                     onGenerate={handleGenerate}
                     isGenerating={isGenerating}
@@ -192,7 +196,7 @@ const ATSResumeBuilder = () => {
           </div>
         </div>
         
-        <div className="relative z-10 mt-16">
+        <div className="relative z-10 mt-12 sm:mt-16">
           <LegalFooter />
         </div>
       </div>
