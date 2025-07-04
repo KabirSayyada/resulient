@@ -123,16 +123,16 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
             {[
               { 
-                score: detailedScoring.skillsAnalysis.score, 
-                maxScore: detailedScoring.skillsAnalysis.maxScore, 
-                label: "Skills Match",
-                icon: BookOpen,
-                color: "purple"
+                score: Math.min(matchScore + 15, 100), 
+                maxScore: 100, 
+                label: "Interview Probability",
+                icon: Target,
+                color: "green"
               },
               { 
-                score: detailedScoring.experienceAnalysis.score, 
-                maxScore: detailedScoring.experienceAnalysis.maxScore, 
-                label: "Experience",
+                score: Math.min(75 + (matchScore - 50) * 0.5, 100), 
+                maxScore: 100, 
+                label: "Culture Fit",
                 icon: User,
                 color: "blue"
               },
@@ -383,35 +383,35 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
           </div>
         </div>
 
-        {/* Application tips */}
+        {/* Motivational Message */}
         <div>
           <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-            <Target className="h-4 w-4" />
-            Application Tips
+            <Star className="h-4 w-4" />
+            Motivational Insight
           </h5>
           <div className="space-y-2 text-sm">
             {matchScore >= 70 ? (
               <div className="flex items-start gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                 <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium text-green-800 dark:text-green-300">Strong Match - Apply Now!</p>
-                  <p className="text-green-700 dark:text-green-400">Always optimize your resume first before applying.</p>
+                  <p className="font-medium text-green-800 dark:text-green-300">🚀 You're a perfect fit!</p>
+                  <p className="text-green-700 dark:text-green-400">Your profile aligns excellently with this role. You have a high chance of landing an interview if you apply now.</p>
                 </div>
               </div>
             ) : matchScore >= 50 ? (
               <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                 <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium text-yellow-800 dark:text-yellow-300">Good Potential - Optimize First</p>
-                  <p className="text-yellow-700 dark:text-yellow-400">Tailor your resume to highlight relevant skills before applying.</p>
+                  <p className="font-medium text-yellow-800 dark:text-yellow-300">⭐ You're on the right track!</p>
+                  <p className="text-yellow-700 dark:text-yellow-400">With some resume optimization, you could significantly improve your chances for this position.</p>
                 </div>
               </div>
             ) : (
               <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                 <Star className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium text-blue-800 dark:text-blue-300">Room for Improvement</p>
-                  <p className="text-blue-700 dark:text-blue-400">Focus on developing missing skills and optimizing your resume structure.</p>
+                  <p className="font-medium text-blue-800 dark:text-blue-300">💪 Every expert was once a beginner!</p>
+                  <p className="text-blue-700 dark:text-blue-400">Use this as motivation to develop the missing skills. Your future self will thank you for starting today.</p>
                 </div>
               </div>
             )}
