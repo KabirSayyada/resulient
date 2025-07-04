@@ -38,25 +38,6 @@ export const VisibleReportContent = ({ scoreData }: VisibleReportContentProps) =
             </div>
           </div>
           
-          {/* Enhanced Score Summary */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-2xl mx-auto">
-            <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <Award className="h-6 w-6" />
-              <div className="text-center">
-                <div className="text-2xl font-bold">{scoreData.overallScore}/100</div>
-                <div className="text-sm opacity-90">Overall Score</div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <Building className="h-6 w-6" />
-              <div className="text-center">
-                <div className="text-lg font-bold">{scoreData.Industry}</div>
-                <div className="text-sm opacity-90">Industry Focus</div>
-              </div>
-            </div>
-          </div>
-
           {/* Performance Badge */}
           <div className="flex justify-center">
             <Badge className="bg-gradient-to-r from-purple-500 to-pink-600 text-white border-0 shadow-lg px-6 py-3 text-base font-semibold rounded-xl hover:shadow-xl transition-all duration-300">

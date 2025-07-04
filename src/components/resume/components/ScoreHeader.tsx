@@ -40,17 +40,17 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
 
   const getBgGradient = () => {
     if (subscription.tier === "platinum") {
-      return "from-purple-300 via-indigo-300 to-blue-300";
+      return "from-slate-600 via-gray-700 to-slate-800";
     } else if (subscription.tier === "premium") {
-      return "from-blue-300 via-indigo-300 to-blue-300";
+      return "from-slate-600 via-gray-700 to-slate-800";
     }
-    return "from-indigo-400 via-fuchsia-300 to-blue-300";
+    return "from-slate-600 via-gray-700 to-slate-800";
   };
 
   return (
     <CardHeader 
       className={`pdf-header flex flex-col items-center justify-center gap-2 bg-gradient-to-r ${getBgGradient()} py-6 animate-fade-in`}
-      style={{ backgroundColor: '#9b87f5' }} // More prominent backup color for PDF export
+      style={{ backgroundColor: '#64748b' }} // Modern slate backup color for PDF export
     >
       <div className="flex items-center gap-2">
         <Award className="text-yellow-400 w-12 h-12 drop-shadow-lg" />
@@ -58,13 +58,13 @@ export const ScoreHeader: React.FC<ScoreHeaderProps> = ({
           <SubscriptionTierIndicator variant="badge" size="lg" showTooltip={false} />
         )}
       </div>
-      <CardTitle className="text-2xl font-black text-indigo-900 drop-shadow">
+      <CardTitle className="text-2xl font-black text-white drop-shadow">
         Resume Scorecard
       </CardTitle>
-      <span className="font-semibold text-indigo-700 text-lg">
+      <span className="font-semibold text-slate-200 text-lg">
         {industry}
       </span>
-      <Badge variant="secondary" className="mt-1 bg-fuchsia-100 text-fuchsia-700 font-bold text-xs rounded-full px-4 py-1 shadow animate-pulse">
+      <Badge variant="secondary" className="mt-1 bg-white/90 text-slate-700 font-bold text-xs rounded-full px-4 py-1 shadow animate-pulse">
         {scoringMode === "resumeOnly"
           ? displayPercentile(percentile)
           : "Job Fit Score"}
