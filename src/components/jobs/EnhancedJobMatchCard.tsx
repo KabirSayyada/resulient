@@ -15,10 +15,20 @@ import type { EnhancedJobMatch } from "@/hooks/useEnhancedJobMatching";
 interface EnhancedJobMatchCardProps {
   jobMatch: EnhancedJobMatch;
   selectedResumeContent?: string;
+  onJobApplication?: (jobId: string, externalUrl?: string) => Promise<boolean>;
 }
 
-export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: EnhancedJobMatchCardProps) {
-  const { job, matchScore, detailedScoring } = jobMatch;
+export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent, onJobApplication }: EnhancedJobMatchCardProps) {
+  const { job, matchScore, detailedScoring, hasApplied, appliedAt } = jobMatch;
+
+  const handleApplyClick = async () => {
+    if (hasApplied || !onJobApplication) return;
+    
+    const success = await onJobApplication(job.id, job.external_url || undefined);
+    if (success && job.external_url) {
+      window.open(job.external_url, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   const getMatchColor = (score: number) => {
     if (score >= 70) return "from-green-500 to-emerald-600";
@@ -70,6 +80,12 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
           </div>
           
           <div className="flex flex-col items-end gap-2">
+            {hasApplied && (
+              <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0 px-3 py-1 font-semibold shadow-lg">
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Applied {appliedAt && format(new Date(appliedAt), 'MMM d')}
+              </Badge>
+            )}
             <Badge 
               className={`${getMatchBadgeColor(matchScore)} text-white border-0 px-3 py-1 font-semibold shadow-lg`}
             >
@@ -441,17 +457,21 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
 
         <Separator />
 
-        {/* Action buttons - removed Save Job button */}
+        {/* Action buttons */}
         <div className="flex gap-3">
-          {job.external_url ? (
-            <Button asChild className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-              <a href={job.external_url} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Apply Now
-              </a>
+          {hasApplied ? (
+            <Button 
+              disabled 
+              className="flex-1 sm:flex-none bg-gray-400 text-gray-600 cursor-not-allowed"
+            >
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Already Applied
             </Button>
           ) : (
-            <Button className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+            <Button 
+              onClick={handleApplyClick}
+              className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            >
               <ExternalLink className="mr-2 h-4 w-4" />
               Apply Now
             </Button>

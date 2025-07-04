@@ -18,6 +18,8 @@ export interface EnhancedJobMatch {
   locationScore: number;
   industryScore: number;
   qualityBonus: number;
+  hasApplied: boolean;
+  appliedAt: string | null;
   detailedScoring: {
     skillsAnalysis: {
       matchingSkills: string[];
@@ -51,9 +53,14 @@ export function useEnhancedJobMatching() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const calculateJobMatch = (job: Job, resumeData: ResumeScoreRecord): EnhancedJobMatch => {
+  const calculateJobMatch = (job: Job, resumeData: ResumeScoreRecord, applications: any[] = []): EnhancedJobMatch => {
     const jobText = `${job.title} ${job.description} ${job.requirements || ''}`.toLowerCase();
     const resumeSkills = resumeData.suggested_skills || [];
+    
+    // Check if user has applied to this job
+    const application = applications.find(app => app.job_id === job.id);
+    const hasApplied = !!application;
+    const appliedAt = application?.applied_at || null;
     
     // Extract required skills from job description
     const commonTechSkills = [
@@ -158,6 +165,8 @@ export function useEnhancedJobMatching() {
       locationScore: Math.round(locationScore),
       industryScore: Math.round(industryScore),
       qualityBonus: Math.round(qualityBonus),
+      hasApplied,
+      appliedAt,
       detailedScoring
     };
   };
@@ -185,17 +194,27 @@ export function useEnhancedJobMatching() {
 
     setLoading(true);
     try {
-      // Fetch user's own jobs
-      const { data: jobs, error } = await supabase
-        .from('jobs')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .order('posted_date', { ascending: false });
+      // Fetch user's own jobs and their applications
+      const [jobsResult, applicationsResult] = await Promise.all([
+        supabase
+          .from('jobs')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .order('posted_date', { ascending: false }),
+        supabase
+          .from('job_applications')
+          .select('job_id, applied_at')
+          .eq('user_id', user.id)
+      ]);
 
-      if (error) throw error;
+      if (jobsResult.error) throw jobsResult.error;
+      if (applicationsResult.error) throw applicationsResult.error;
 
-      const jobsWithScores = (jobs || []).map(job => calculateJobMatch(job, resumeScore));
+      const jobs = jobsResult.data || [];
+      const applications = applicationsResult.data || [];
+
+      const jobsWithScores = jobs.map(job => calculateJobMatch(job, resumeScore, applications));
       
       // Sort by match score
       jobsWithScores.sort((a, b) => b.matchScore - a.matchScore);
@@ -205,7 +224,7 @@ export function useEnhancedJobMatching() {
 
       toast({
         title: "Job Analysis Complete",
-        description: `Analyzed ${jobs?.length || 0} of your personal job listings.`,
+        description: `Analyzed ${jobs.length} job listings. Found ${applications.length} previous applications.`,
       });
     } catch (error) {
       console.error('Error analyzing jobs:', error);
@@ -216,6 +235,42 @@ export function useEnhancedJobMatching() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleJobApplication = async (jobId: string, externalUrl?: string) => {
+    if (!user) return false;
+
+    try {
+      const { error } = await supabase
+        .from('job_applications')
+        .insert({
+          user_id: user.id,
+          job_id: jobId,
+          external_application_url: externalUrl
+        });
+
+      if (error) throw error;
+
+      // Refresh job data to update application status
+      if (selectedResume) {
+        analyzeAllJobs(selectedResume);
+      }
+
+      toast({
+        title: "Application Tracked",
+        description: "Successfully recorded your job application.",
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error tracking application:', error);
+      toast({
+        title: "Error",
+        description: "Failed to track application. You can still apply to the job.",
+        variant: "destructive",
+      });
+      return false;
     }
   };
 
@@ -230,6 +285,7 @@ export function useEnhancedJobMatching() {
     loading,
     selectedResume,
     handleResumeSelection,
+    handleJobApplication,
     reanalyzeJobs: () => selectedResume && analyzeAllJobs(selectedResume)
   };
 }

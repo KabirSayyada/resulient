@@ -34,6 +34,7 @@ export default function Jobs() {
     loading: matchingLoading, 
     selectedResume,
     handleResumeSelection,
+    handleJobApplication,
     reanalyzeJobs
   } = useEnhancedJobMatching();
 
@@ -301,13 +302,14 @@ export default function Jobs() {
                   {matchedJobs.length > 0 ? (
                     hasPremiumAccess ? (
                       <div className="grid gap-8">
-                        {matchedJobs.map((jobMatch) => (
-                          <EnhancedJobMatchCard 
-                            key={jobMatch.job.id} 
-                            jobMatch={jobMatch} 
-                            selectedResumeContent={selectedResume.resume_content}
-                          />
-                        ))}
+                         {matchedJobs.map((jobMatch) => (
+                           <EnhancedJobMatchCard 
+                             key={jobMatch.job.id} 
+                             jobMatch={jobMatch} 
+                             selectedResumeContent={selectedResume.resume_content}
+                             onJobApplication={handleJobApplication}
+                           />
+                         ))}
                       </div>
                     ) : (
                       <RestrictedJobView jobs={matchedJobs.map(match => match.job)} tier={subscription.tier} />

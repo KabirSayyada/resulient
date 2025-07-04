@@ -246,6 +246,50 @@ export type Database = {
           },
         ]
       }
+      job_applications: {
+        Row: {
+          application_status: string
+          applied_at: string
+          created_at: string
+          external_application_url: string | null
+          id: string
+          job_id: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_status?: string
+          applied_at?: string
+          created_at?: string
+          external_application_url?: string | null
+          id?: string
+          job_id: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_status?: string
+          applied_at?: string
+          created_at?: string
+          external_application_url?: string | null
+          id?: string
+          job_id?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           company: string
