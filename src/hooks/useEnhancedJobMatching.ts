@@ -194,13 +194,18 @@ export function useEnhancedJobMatching() {
 
     setLoading(true);
     try {
-      // Fetch user's own jobs and their applications
+      // Calculate cutoff date (3 days ago)
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+      // Fetch user's own jobs and their applications, filtering out jobs older than 3 days
       const [jobsResult, applicationsResult] = await Promise.all([
         supabase
           .from('jobs')
           .select('*')
           .eq('user_id', user.id)
           .eq('is_active', true)
+          .gte('posted_date', threeDaysAgo.toISOString())
           .order('posted_date', { ascending: false }),
         supabase
           .from('job_applications')
@@ -214,7 +219,13 @@ export function useEnhancedJobMatching() {
       const jobs = jobsResult.data || [];
       const applications = applicationsResult.data || [];
 
-      const jobsWithScores = jobs.map(job => calculateJobMatch(job, resumeScore, applications));
+      // Double-check client-side filtering for jobs older than 3 days
+      const freshJobs = jobs.filter(job => {
+        const jobDate = new Date(job.posted_date);
+        return jobDate >= threeDaysAgo;
+      });
+
+      const jobsWithScores = freshJobs.map(job => calculateJobMatch(job, resumeScore, applications));
       
       // Sort by match score
       jobsWithScores.sort((a, b) => b.matchScore - a.matchScore);
@@ -224,7 +235,7 @@ export function useEnhancedJobMatching() {
 
       toast({
         title: "Job Analysis Complete",
-        description: `Analyzed ${jobs.length} job listings. Found ${applications.length} previous applications.`,
+        description: `Analyzed ${freshJobs.length} fresh job listings (within 3 days). Found ${applications.length} previous applications.`,
       });
     } catch (error) {
       console.error('Error analyzing jobs:', error);
