@@ -30,7 +30,7 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
   };
 
   return (
-    <div className="space-y-6 mt-10 animate-fade-in">
+    <div className="space-y-3 sm:space-y-6 mt-4 sm:mt-10 animate-fade-in min-h-0">
       <AnimatePresence mode="wait">
         {showAnimations && !isCachedResult && (
           <motion.div
@@ -55,19 +55,20 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
+            className="min-h-0"
           >
-            <Card className="border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 dark:from-gray-800 dark:via-indigo-900/50 dark:to-blue-900/50 relative overflow-hidden">
+            <Card className="border-t-4 sm:border-t-8 border-t-indigo-600 shadow-xl bg-gradient-to-bl from-white via-indigo-50 to-blue-100 dark:from-gray-800 dark:via-indigo-900/50 dark:to-blue-900/50 relative overflow-hidden">
               <CachedResultIndicator isCached={isCachedResult} />
               
-              <div className="flex flex-col items-center justify-center py-6 px-2 sm:px-6">
+              <div className="flex flex-col items-center justify-center py-3 sm:py-6 px-2 sm:px-6">
                 <HiddenScoreCard scoreCardRef={scoreCardRef} scoreData={scoreData} />
                 
-                <div className="w-full max-w-md mx-auto">
+                <div className="w-full max-w-sm sm:max-w-md mx-auto">
                   <ResumeScoreCard scoreData={scoreData} />
                 </div>
               </div>
               
-              <CardContent className="px-3 sm:px-6 pb-6">
+              <CardContent className="px-2 sm:px-6 pb-3 sm:pb-6">
                 <ResumeActions 
                   scoreCardRef={scoreCardRef} 
                   completeReportRef={completeReportRef} 
