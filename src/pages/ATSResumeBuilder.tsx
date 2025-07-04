@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Sparkles, FileText, Download } from "lucide-react";
+import { ArrowLeft, Sparkles, FileText, Download, Zap, Target, Brain, Shield } from "lucide-react";
 import { MainNavigation } from "@/components/resume/MainNavigation";
 import { LegalFooter } from "@/components/layout/LegalFooter";
 import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
@@ -16,6 +16,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
 import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
 import { OptimizationAnimation } from "@/components/resume/OptimizationAnimation";
+import { Badge } from "@/components/ui/badge";
 
 const ATSResumeBuilder = () => {
   const { user, loading: authLoading } = useAuth();
@@ -32,144 +33,198 @@ const ATSResumeBuilder = () => {
 
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <span className="text-lg font-semibold">Loading...</span>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-lg font-semibold text-slate-700 dark:text-slate-300">Loading your workspace...</span>
+        </div>
       </div>
     );
   }
 
   const handleGenerate = async (formData: any) => {
-    // Check if user has reached limit
     if (usage.resumeBuilding.hasReachedLimit) {
       showLimitReachedMessage("resume building");
       return;
     }
 
     await generateResume(formData);
-    // Refresh usage after generating resume
     await checkUsage();
   };
 
+  const features = [
+    { icon: Brain, text: "AI-Powered", color: "from-purple-500 to-indigo-600" },
+    { icon: Shield, text: "ATS-Optimized", color: "from-emerald-500 to-teal-600" },
+    { icon: Zap, text: "Lightning Fast", color: "from-yellow-500 to-orange-600" },
+    { icon: Target, text: "Job-Targeted", color: "from-rose-500 to-pink-600" }
+  ];
+
   return (
     <>
-      {/* Add the OptimizationAnimation component */}
       <OptimizationAnimation 
         isOptimizing={isGenerating} 
         onComplete={() => {}} 
         mode="ats-building"
       />
       
-      <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-950 dark:to-blue-950 dark:text-white py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <Link to="/" className="flex items-center">
-                <span className="font-brand text-3xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
-                  Resulient
-                </span>
-              </Link>
-              <span className="rounded-full px-2 py-1 text-xs sm:text-sm font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 shadow border border-emerald-200 dark:border-emerald-700 animate-fade-in whitespace-nowrap">
-                ATS Resume Builder
-              </span>
-            </div>
-            <div className="flex justify-between items-center w-full sm:w-auto mt-2 sm:mt-0">
-              <div className="flex items-center gap-2 sm:gap-3">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+        {/* Animated background elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-emerald-200/20 to-blue-200/20 dark:from-emerald-800/10 dark:to-blue-800/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-purple-200/20 to-pink-200/20 dark:from-purple-800/10 dark:to-pink-800/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+
+        <div className="relative z-10 py-6 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
+              <div className="flex items-center gap-4">
+                <Link to="/" className="flex items-center group">
+                  <span className="font-brand text-4xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-600 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none group-hover:scale-105 transition-transform duration-300">
+                    Resulient
+                  </span>
+                </Link>
+                <div className="flex flex-col gap-2">
+                  <Badge className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 px-4 py-2 text-sm font-semibold">
+                    <Brain className="h-4 w-4 mr-2" />
+                    ATS Resume Builder
+                  </Badge>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4">
                 <SubscriptionTierIndicator variant="badge" size="sm" />
                 <UserMenuWithTheme />
               </div>
             </div>
-          </div>
 
-          {/* Info block */}
-          <div className="bg-gradient-to-br from-emerald-50 via-indigo-50 to-blue-50 dark:from-emerald-950 dark:via-indigo-950 dark:to-blue-950 border-emerald-200 dark:border-emerald-800 rounded-xl border shadow-md px-4 py-5 mb-6 sm:px-7 max-w-3xl mx-auto text-center transition-all duration-300">
-            <div className="text-lg sm:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-0 flex flex-wrap items-center justify-center gap-2">
-              <Sparkles className="h-6 w-6 text-emerald-600" />
-              <span className="text-emerald-700 dark:text-emerald-400 font-bold">
-                AI-Powered Resume Builder
-              </span>
-            </div>
-            <p className="text-gray-700 dark:text-gray-300 text-sm mt-3 max-w-2xl mx-auto">
-              Create a professional ATS-optimized resume in minutes. Simply describe yourself in natural sentences, 
-              and our AI will automatically organize your information into the perfect resume format.
-            </p>
-            {subscription.tier === "free" && (
-              <div className="mt-3 text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                Free tier: {usage.resumeBuilding.used}/{usage.resumeBuilding.limit} resume builds used (lifetime limit)
-              </div>
-            )}
-          </div>
+            {/* Hero Info Section */}
+            <div className="relative mb-8">
+              <Card className="bg-gradient-to-br from-white/90 via-emerald-50/50 to-blue-50/50 dark:from-slate-900/90 dark:via-slate-800/50 dark:to-slate-900/50 border-2 border-emerald-200/60 dark:border-emerald-800/40 shadow-2xl backdrop-blur-sm">
+                <CardContent className="p-8">
+                  <div className="text-center space-y-6">
+                    <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-800 via-emerald-700 to-blue-700 dark:from-slate-100 dark:via-emerald-300 dark:to-blue-300 bg-clip-text text-transparent leading-tight">
+                      Build Your Perfect ATS Resume
+                    </h1>
+                    
+                    <p className="text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
+                      Create a professional, ATS-optimized resume in minutes using our AI-powered builder. 
+                      Simply describe yourself in natural language, and we'll craft the perfect resume format.
+                    </p>
 
-          {usage.resumeBuilding.hasReachedLimit && subscription.tier === "free" && (
-            <UseSubscriptionAlert 
-              subscriptionTier={subscription.tier} 
-              requiredTier="premium" 
-              message="You've reached your lifetime limit for resume building. Free users can build 1 resume. Upgrade to Premium or Platinum for unlimited resume building."
-            />
-          )}
-
-          <MainNavigation />
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            {/* Form Section */}
-            <div className="space-y-6">
-              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-emerald-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-emerald-700">
-                    <FileText className="h-5 w-5" />
-                    Build Your Resume
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ATSResumeForm 
-                    onGenerate={handleGenerate}
-                    isGenerating={isGenerating}
-                    disabled={usage.resumeBuilding.hasReachedLimit && subscription.tier === "free"}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Preview Section */}
-            <div className="space-y-6">
-              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-indigo-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 justify-between text-indigo-700">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5" />
-                      Preview
+                    {/* Feature Pills */}
+                    <div className="flex flex-wrap justify-center gap-3 mt-8">
+                      {features.map((feature, index) => (
+                        <div 
+                          key={index}
+                          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r ${feature.color} text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-default`}
+                        >
+                          <feature.icon className="h-5 w-5" />
+                          <span className="font-semibold">{feature.text}</span>
+                        </div>
+                      ))}
                     </div>
-                    {resumeData && (
-                      <div className="flex gap-2">
-                        <Button 
-                          onClick={downloadResume}
-                          size="sm"
-                          variant="outline"
-                          className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
-                        >
-                          <Download className="h-4 w-4 mr-1" />
-                          TXT
-                        </Button>
-                        <Button 
-                          onClick={downloadResumePDF}
-                          size="sm"
-                          className="bg-emerald-600 hover:bg-emerald-700"
-                        >
-                          <Download className="h-4 w-4 mr-1" />
-                          PDF
-                        </Button>
+
+                    {subscription.tier === "free" && (
+                      <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl">
+                        <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300 font-semibold">
+                          <Target className="h-5 w-5" />
+                          Free tier: {usage.resumeBuilding.used}/{usage.resumeBuilding.limit} resume builds used
+                        </div>
                       </div>
                     )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ATSResumePreview resumeData={resumeData} />
+                  </div>
                 </CardContent>
               </Card>
+            </div>
+
+            {usage.resumeBuilding.hasReachedLimit && subscription.tier === "free" && (
+              <div className="mb-8">
+                <UseSubscriptionAlert 
+                  subscriptionTier={subscription.tier} 
+                  requiredTier="premium" 
+                  message="You've reached your lifetime limit for resume building. Free users can build 1 resume. Upgrade to Premium or Platinum for unlimited resume building."
+                />
+              </div>
+            )}
+
+            <MainNavigation />
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
+              {/* Form Section */}
+              <div className="space-y-6">
+                <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-xl border-2 border-emerald-200/60 dark:border-emerald-800/40 hover:shadow-2xl transition-all duration-300">
+                  <CardHeader className="pb-6">
+                    <CardTitle className="flex items-center gap-3 text-2xl font-bold">
+                      <div className="p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl shadow-lg">
+                        <FileText className="h-6 w-6 text-white" />
+                      </div>
+                      <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                        Build Your Resume
+                      </span>
+                      <Badge variant="secondary" className="ml-auto bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 px-3 py-1">
+                        <Sparkles className="h-3 w-3 mr-1" />
+                        AI-Enhanced
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ATSResumeForm 
+                      onGenerate={handleGenerate}
+                      isGenerating={isGenerating}
+                      disabled={usage.resumeBuilding.hasReachedLimit && subscription.tier === "free"}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Preview Section */}
+              <div className="space-y-6">
+                <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-xl border-2 border-blue-200/60 dark:border-blue-800/40 hover:shadow-2xl transition-all duration-300">
+                  <CardHeader className="pb-6">
+                    <CardTitle className="flex items-center gap-3 justify-between text-2xl font-bold">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+                          <Sparkles className="h-6 w-6 text-white" />
+                        </div>
+                        <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                          Resume Preview
+                        </span>
+                      </div>
+                      {resumeData && (
+                        <div className="flex gap-3">
+                          <Button 
+                            onClick={downloadResume}
+                            size="sm"
+                            variant="outline"
+                            className="text-emerald-600 border-2 border-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 font-semibold transition-all duration-300 hover:scale-105"
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            TXT
+                          </Button>
+                          <Button 
+                            onClick={downloadResumePDF}
+                            size="sm"
+                            className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold"
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            PDF
+                          </Button>
+                        </div>
+                      )}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ATSResumePreview resumeData={resumeData} />
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
         
-        <div className="mt-8">
+        <div className="relative z-10 mt-16">
           <LegalFooter />
         </div>
       </div>
