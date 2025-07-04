@@ -5,65 +5,83 @@
  
 @layer base {
   :root {
+    /* Light theme colors */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 224 71% 4%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 224 71% 4%;
  
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 224 71% 4%;
  
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
  
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 9% 46%;
  
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
  
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 224 71% 4%;
  
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 221 83% 53%;
  
     --radius: 0.5rem;
+
+    /* Custom semantic colors */
+    --success: 142 76% 36%;
+    --success-foreground: 138 62% 47%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 48 96% 89%;
+    --info: 199 89% 48%;
+    --info-foreground: 210 40% 98%;
   }
  
   .dark {
-    --background: 222.2 84% 4.9%;
+    /* Dark theme with high contrast */
+    --background: 224 71% 4%;
     --foreground: 210 40% 98%;
  
-    --card: 217.2 32.6% 12%;
+    --card: 224 71% 4%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 217.2 32.6% 12%;
+    --popover: 224 71% 4%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 213 94% 68%;
+    --primary-foreground: 224 71% 4%;
 
-    --secondary: 217.2 32.6% 20%;
+    --secondary: 215 28% 17%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 70%;
+    --muted: 215 28% 17%;
+    --muted-foreground: 217 10% 65%;
 
-    --accent: 217.2 32.6% 20%;
+    --accent: 215 28% 17%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 50%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 20%;
-    --input: 217.2 32.6% 15%;
-    --ring: 217.2 91.2% 59.8%;
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 213 94% 68%;
+
+    /* Dark theme semantic colors */
+    --success: 142 71% 45%;
+    --success-foreground: 224 71% 4%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 224 71% 4%;
+    --info: 199 89% 48%;
+    --info-foreground: 224 71% 4%;
   }
 }
  
@@ -82,154 +100,142 @@
   }
 }
 
-/* Add custom styles for better dark mode support in resume inputs */
-.dark .font-mono, 
-.dark textarea.font-mono, 
-.dark input.font-mono {
-  @apply text-gray-100;
-}
+/* Dark theme overrides for high contrast and visibility */
+.dark {
+  /* Form inputs and textareas */
+  & textarea,
+  & input[type="text"],
+  & input[type="email"],
+  & input[type="password"] {
+    background-color: hsl(var(--muted));
+    border-color: hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
 
-.dark textarea::placeholder,
-.dark input::placeholder {
-  @apply text-gray-400;
-}
+  & textarea::placeholder,
+  & input::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
 
-/* Dark mode specific resume input styles */
-.dark textarea,
-.dark input[type="text"],
-.dark input[type="email"],
-.dark input[type="password"] {
-  @apply bg-gray-800 border-gray-700 text-gray-100;
-}
+  /* Enhanced text contrast for all color variants */
+  & .text-gray-600,
+  & .text-gray-700,
+  & .text-gray-800,
+  & .text-gray-900 {
+    color: hsl(var(--foreground));
+  }
 
-/* Resume input container dark mode styles */
-.dark .section-card {
-  @apply bg-gray-800/80 border-gray-700;
-}
+  & .text-white,
+  & .text-black {
+    color: hsl(var(--foreground));
+  }
 
-/* Enhanced dark mode text visibility for all components */
-.dark .text-indigo-800 {
-  @apply text-indigo-200;
-}
+  & .text-indigo-800,
+  & .text-indigo-700 {
+    color: hsl(var(--primary));
+  }
 
-.dark .text-indigo-700 {
-  @apply text-indigo-300;
-}
+  & .text-fuchsia-600,
+  & .text-fuchsia-700 {
+    color: hsl(213 94% 78%);
+  }
 
-.dark .text-fuchsia-600, 
-.dark .text-fuchsia-700 {
-  @apply text-fuchsia-300;
-}
+  /* Background overrides for better contrast */
+  & .bg-white {
+    background-color: hsl(var(--card));
+  }
 
-.dark .text-gray-600, 
-.dark .text-gray-700 {
-  @apply text-gray-300;
-}
+  & .bg-gray-50 {
+    background-color: hsl(var(--muted));
+  }
 
-.dark .text-gray-800 {
-  @apply text-gray-200;
-}
+  & .bg-indigo-50 {
+    background-color: hsl(var(--muted));
+  }
 
-.dark .text-gray-900 {
-  @apply text-gray-100;
-}
+  /* Card and container improvements */
+  & .section-card {
+    background-color: hsl(var(--card) / 0.8);
+    border-color: hsl(var(--border));
+  }
 
-.dark .bg-indigo-50 {
-  @apply bg-indigo-900/40;
-}
+  /* Gradient improvements */
+  & .bg-gradient-to-r.from-green-500 {
+    --tw-gradient-from: hsl(142 71% 35%);
+  }
 
-.dark .bg-gray-50 {
-  @apply bg-gray-900;
-}
+  & .bg-gradient-to-r.from-blue-500 {
+    --tw-gradient-from: hsl(213 94% 58%);
+  }
 
-.dark .bg-white {
-  @apply bg-gray-800;
-}
+  & .bg-gradient-to-r.from-yellow-500 {
+    --tw-gradient-from: hsl(38 92% 45%);
+  }
 
-/* Fix for hard-coded colors that need better contrast */
-.dark .text-white {
-  @apply text-gray-100;
-}
+  & .bg-gradient-to-r.from-purple-500 {
+    --tw-gradient-from: hsl(268 83% 58%);
+  }
 
-.dark .text-black {
-  @apply text-gray-100;
-}
+  & .bg-gradient-to-r.from-indigo-500 {
+    --tw-gradient-from: hsl(var(--primary));
+  }
 
-/* Better visibility for badges and buttons in dark mode */
-.dark .bg-gradient-to-r.from-green-500 {
-  @apply from-green-600;
-}
+  /* Semi-transparent backgrounds */
+  & .bg-white\/50 {
+    background-color: hsl(var(--card) / 0.7);
+  }
 
-.dark .bg-gradient-to-r.from-blue-500 {
-  @apply from-blue-600;
-}
+  & .bg-white\/90 {
+    background-color: hsl(var(--card) / 0.95);
+  }
 
-.dark .bg-gradient-to-r.from-yellow-500 {
-  @apply from-yellow-600;
-}
+  & .bg-black\/60 {
+    background-color: hsl(var(--background) / 0.8);
+  }
 
-.dark .bg-gradient-to-r.from-purple-500 {
-  @apply from-purple-600;
-}
+  /* Dropdown and popover improvements */
+  & [role="menu"],
+  & [role="listbox"],
+  & .dropdown-content {
+    background-color: hsl(var(--popover));
+    border-color: hsl(var(--border));
+    color: hsl(var(--popover-foreground));
+  }
 
-.dark .bg-gradient-to-r.from-indigo-500 {
-  @apply from-indigo-600;
-}
+  /* Border color improvements */
+  & .border-gray-200,
+  & .border-gray-300 {
+    border-color: hsl(var(--border));
+  }
 
-/* Better contrast for overlays and semi-transparent backgrounds */
-.dark .bg-white\/50 {
-  @apply bg-gray-800/70;
-}
+  /* Shadow improvements */
+  & .shadow-lg {
+    box-shadow: 0 10px 15px -3px hsl(var(--background) / 0.5), 0 4px 6px -2px hsl(var(--background) / 0.05);
+  }
 
-.dark .bg-white\/90 {
-  @apply bg-gray-800/95;
-}
+  & .shadow-xl {
+    box-shadow: 0 20px 25px -5px hsl(var(--background) / 0.6), 0 10px 10px -5px hsl(var(--background) / 0.04);
+  }
 
-.dark .bg-black\/60 {
-  @apply bg-gray-900/80;
-}
+  & .shadow-2xl {
+    box-shadow: 0 25px 50px -12px hsl(var(--background) / 0.7);
+  }
 
-/* Improve dropdown and popover visibility */
-.dark [role="menu"],
-.dark [role="listbox"],
-.dark .dropdown-content {
-  @apply bg-gray-800 border-gray-700 text-gray-100;
-}
+  /* Chart improvements */
+  & .recharts-text {
+    fill: hsl(var(--muted-foreground));
+  }
 
-/* Better visibility for form elements */
-.dark .border-gray-200 {
-  @apply border-gray-700;
-}
+  & .recharts-cartesian-grid-horizontal line,
+  & .recharts-cartesian-grid-vertical line {
+    stroke: hsl(var(--border));
+  }
 
-.dark .border-gray-300 {
-  @apply border-gray-600;
-}
-
-/* Enhanced visibility for cards and containers */
-.dark .shadow-lg {
-  @apply shadow-gray-900/50;
-}
-
-.dark .shadow-xl {
-  @apply shadow-gray-900/60;
-}
-
-.dark .shadow-2xl {
-  @apply shadow-gray-900/70;
-}
-
-/* Ensure chart data is visible in dark mode */
-.dark .recharts-text {
-  @apply fill-gray-300;
-}
-
-.dark .recharts-cartesian-grid-horizontal line,
-.dark .recharts-cartesian-grid-vertical line {
-  @apply stroke-gray-700;
-}
-
-.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
-  @apply bg-gray-800 border-gray-700 text-gray-200;
+  & .recharts-tooltip-wrapper .recharts-default-tooltip {
+    background-color: hsl(var(--popover));
+    border-color: hsl(var(--border));
+    color: hsl(var(--popover-foreground));
+  }
 }
 
 /* Blog content styling */

@@ -90,7 +90,7 @@ export const ATSResumeForm = ({ onGenerate, isGenerating, disabled = false }: AT
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="personal-info">Tell us about yourself</Label>
-                <div className="text-sm text-gray-600 mb-2 p-3 bg-blue-50 rounded-lg">
+                <div className="text-sm text-muted-foreground mb-2 p-3 bg-info/10 border border-info/20 rounded-lg">
                   <strong>Template:</strong> "My name is [Your Name]. I live in [Your City, State]. 
                   You can reach me at [your.email@example.com] or [your phone number]. 
                   My LinkedIn profile is [linkedin.com/in/yourprofile] and my portfolio is [yourwebsite.com]."
@@ -118,7 +118,7 @@ export const ATSResumeForm = ({ onGenerate, isGenerating, disabled = false }: AT
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="work-exp">Add work experience (one at a time)</Label>
-                <div className="text-sm text-gray-600 mb-2 p-3 bg-blue-50 rounded-lg">
+                <div className="text-sm text-muted-foreground mb-2 p-3 bg-info/10 border border-info/20 rounded-lg">
                   <strong>Template:</strong> "I worked as [Job Title] at [Company Name] from [Start Date] to [End Date]. 
                   I was responsible for [key responsibilities]. I achieved [specific accomplishments with numbers if possible]."
                 </div>
@@ -142,7 +142,7 @@ export const ATSResumeForm = ({ onGenerate, isGenerating, disabled = false }: AT
                     <Badge 
                       key={index} 
                       variant="secondary" 
-                      className="p-2 text-left block cursor-pointer hover:bg-red-100"
+                       className="p-2 text-left block cursor-pointer hover:bg-destructive/20"
                       onClick={() => removeWorkExperience(index)}
                     >
                       {exp.substring(0, 100)}...
@@ -165,7 +165,7 @@ export const ATSResumeForm = ({ onGenerate, isGenerating, disabled = false }: AT
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="education">Add education (one at a time)</Label>
-                <div className="text-sm text-gray-600 mb-2 p-3 bg-blue-50 rounded-lg">
+                <div className="text-sm text-muted-foreground mb-2 p-3 bg-info/10 border border-info/20 rounded-lg">
                   <strong>Template:</strong> "I studied [Degree] in [Field of Study] at [University Name] from [Start Year] to [End Year]. 
                   My GPA was [GPA] and I was involved in [relevant activities or honors]."
                 </div>
@@ -189,7 +189,7 @@ export const ATSResumeForm = ({ onGenerate, isGenerating, disabled = false }: AT
                     <Badge 
                       key={index} 
                       variant="secondary" 
-                      className="p-2 text-left block cursor-pointer hover:bg-red-100"
+                      className="p-2 text-left block cursor-pointer hover:bg-destructive/20"
                       onClick={() => removeEducation(index)}
                     >
                       {edu.substring(0, 100)}...
@@ -212,7 +212,7 @@ export const ATSResumeForm = ({ onGenerate, isGenerating, disabled = false }: AT
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="skills">Technical and soft skills</Label>
-                <div className="text-sm text-gray-600 mb-2 p-3 bg-blue-50 rounded-lg">
+                <div className="text-sm text-muted-foreground mb-2 p-3 bg-info/10 border border-info/20 rounded-lg">
                   <strong>Template:</strong> "My technical skills include [list technologies, programming languages, tools]. 
                   My soft skills include [communication, leadership, etc.]. I am proficient in [specific tools or certifications]."
                 </div>
@@ -227,7 +227,7 @@ export const ATSResumeForm = ({ onGenerate, isGenerating, disabled = false }: AT
 
               <div>
                 <Label htmlFor="achievements">Notable achievements and awards</Label>
-                <div className="text-sm text-gray-600 mb-2 p-3 bg-blue-50 rounded-lg">
+                <div className="text-sm text-muted-foreground mb-2 p-3 bg-info/10 border border-info/20 rounded-lg">
                   <strong>Template:</strong> "Some of my key achievements include [specific accomplishments with metrics]. 
                   I have received [awards, recognitions, or certifications]. I have also [published work, speaking engagements, etc.]."
                 </div>
@@ -254,7 +254,7 @@ export const ATSResumeForm = ({ onGenerate, isGenerating, disabled = false }: AT
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="additional">Projects, certifications, languages, volunteer work</Label>
-                <div className="text-sm text-gray-600 mb-2 p-3 bg-blue-50 rounded-lg">
+                <div className="text-sm text-muted-foreground mb-2 p-3 bg-info/10 border border-info/20 rounded-lg">
                   <strong>Template:</strong> "I have worked on projects including [project descriptions]. 
                   I hold certifications in [certifications]. I speak [languages]. 
                   I have volunteered for [organizations or causes]."
@@ -275,7 +275,7 @@ export const ATSResumeForm = ({ onGenerate, isGenerating, disabled = false }: AT
       <Button 
         onClick={handleGenerate} 
         disabled={!isFormValid || isGenerating || disabled}
-        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3"
+        className="w-full bg-success hover:bg-success/90 text-success-foreground py-3"
         size="lg"
       >
         {isGenerating ? (
