@@ -76,29 +76,33 @@ export const VisibleReportContent = ({ scoreData }: VisibleReportContentProps) =
             </Card>
 
             {/* Industry Card */}
-            <Card className="bg-blue-50 border-2 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="bg-gradient-to-br from-indigo-50 to-blue-100 border-2 border-indigo-300 dark:from-indigo-950/30 dark:to-blue-950/30 dark:border-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
               <CardContent className="p-6 text-center">
                 <div className="flex items-center justify-center mb-3">
-                  <Building className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  <div className="p-2 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-xl shadow-md">
+                    <Building className="h-6 w-6 text-white" />
+                  </div>
                 </div>
-                <div className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                <div className="text-lg font-bold text-indigo-800 dark:text-indigo-300 mb-2">
                   {scoreData.Industry}
                 </div>
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200">Industry</h3>
+                <h3 className="font-semibold text-indigo-700 dark:text-indigo-400">Industry Focus</h3>
               </CardContent>
             </Card>
 
             {/* Standing Card */}
-            <Card className="bg-purple-50 border-2 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="bg-gradient-to-br from-violet-50 to-purple-100 border-2 border-violet-300 dark:from-violet-950/30 dark:to-purple-950/30 dark:border-violet-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
               <CardContent className="p-6 text-center">
                 <div className="flex items-center justify-center mb-3">
-                  <Target className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                  <div className="p-2 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl shadow-md">
+                    <Target className="h-6 w-6 text-white" />
+                  </div>
                 </div>
-                <Badge className="bg-gradient-to-r from-purple-500 to-pink-600 text-white border-0 shadow-md mb-2">
+                <Badge className="bg-gradient-to-r from-violet-500 to-purple-600 text-white border-0 shadow-md mb-2 px-3 py-1">
                   <Award className="h-3 w-3 mr-1" />
                   {scoreData.percentile}
                 </Badge>
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200">Standing</h3>
+                <h3 className="font-semibold text-violet-700 dark:text-violet-400">Market Standing</h3>
               </CardContent>
             </Card>
           </div>
