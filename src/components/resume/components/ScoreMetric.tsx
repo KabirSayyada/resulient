@@ -41,15 +41,15 @@ export const ScoreMetric = ({
                         (value / maxValue) >= 0.5 ? 'text-fuchsia-800 dark:text-fuchsia-300' : 'text-red-600 dark:text-red-400';
 
   return (
-    <div className={`flex items-center gap-1 ${textColor}`}>
+    <div className={`flex items-center gap-1 ${textColor} p-2 sm:p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-gray-200/50 dark:border-gray-700/50`}>
       <span>{icon}</span>
-      <span className="font-medium">{label}:</span>
-      <span className={`font-semibold text-[18px] ${valueColor} ml-1`}>
+      <span className="font-medium text-xs sm:text-sm">{label}:</span>
+      <span className={`font-semibold text-sm sm:text-[18px] ${valueColor} ml-1`}>
         {value}
       </span>
-      <span className={`text-sm ${maxValueColor} font-extrabold`}>/{maxValue}</span>
-      {missing && <AlertTriangle className="w-3 h-3 text-red-500 dark:text-red-400 ml-1" />}
-      {isExcellent && !missing && <CheckCircle className="w-3 h-3 text-green-500 dark:text-green-400 ml-1" />}
+      <span className={`text-xs sm:text-sm ${maxValueColor} font-extrabold`}>/{maxValue}</span>
+      {missing && <AlertTriangle className="w-2 h-2 sm:w-3 sm:h-3 text-red-500 dark:text-red-400 ml-1" />}
+      {isExcellent && !missing && <CheckCircle className="w-2 h-2 sm:w-3 sm:h-3 text-green-500 dark:text-green-400 ml-1" />}
     </div>
   );
 };
