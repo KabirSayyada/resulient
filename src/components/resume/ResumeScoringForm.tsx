@@ -83,7 +83,7 @@ export const ResumeScoringForm = ({
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-gray-50/60 dark:from-gray-800/60 dark:to-gray-900/60 rounded-2xl shadow-inner"></div>
           <div className="relative z-10 p-6 rounded-2xl border-2 border-dashed border-blue-300/60 dark:border-blue-700/60 hover:border-blue-400/80 dark:hover:border-blue-600/80 transition-all duration-300">
-            <FileUploadSection onFileContent={setResumeContent} />
+            <FileUploadSection resumeContent={resumeContent} setResumeContent={setResumeContent} />
           </div>
         </div>
 
