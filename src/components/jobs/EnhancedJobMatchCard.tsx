@@ -112,11 +112,127 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent }: Enhanc
           </p>
         </div>
 
-        {/* Detailed scoring breakdown */}
+        {/* Detailed scoring breakdown with enhanced progress bars and confidence badges */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-5 border border-blue-200/50 dark:border-blue-800/50">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             <h4 className="font-semibold text-blue-800 dark:text-blue-300">Detailed Match Analysis</h4>
+          </div>
+
+          {/* Enhanced Score Overview with Progress Bars */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+            {[
+              { 
+                score: detailedScoring.skillsAnalysis.score, 
+                maxScore: detailedScoring.skillsAnalysis.maxScore, 
+                label: "Skills Match",
+                icon: BookOpen,
+                color: "purple"
+              },
+              { 
+                score: detailedScoring.experienceAnalysis.score, 
+                maxScore: detailedScoring.experienceAnalysis.maxScore, 
+                label: "Experience",
+                icon: User,
+                color: "blue"
+              },
+              { 
+                score: detailedScoring.resumeQualityAnalysis.score, 
+                maxScore: detailedScoring.resumeQualityAnalysis.maxScore, 
+                label: "Profile Quality",
+                icon: Award,
+                color: "orange"
+              }
+            ].map((item, index) => {
+              const percentage = (item.score / item.maxScore) * 100;
+              const animationDelay = index * 0.15;
+              
+              return (
+                <div key={item.label} className="text-center space-y-3">
+                  <div className="flex items-center justify-center gap-2">
+                    <item.icon className={`h-4 w-4 ${
+                      item.color === 'purple' ? 'text-purple-600' :
+                      item.color === 'blue' ? 'text-blue-600' :
+                      'text-orange-600'
+                    }`} />
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{item.label}</span>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                          percentage >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
+                          percentage >= 60 ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
+                          percentage >= 40 ? 'bg-gradient-to-r from-blue-500 to-indigo-600' :
+                          'bg-gradient-to-r from-gray-400 to-gray-500'
+                        }`}
+                        style={{ 
+                          width: `${Math.min(percentage, 100)}%`,
+                          animationDelay: `${animationDelay}s`
+                        }}
+                      />
+                    </div>
+                    <div className="absolute -top-1 -right-1">
+                      {percentage >= 80 && (
+                        <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
+                          <div className="w-2 h-2 bg-white rounded-full" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className={`font-bold text-sm ${getScoreColor(item.score, item.maxScore)}`}>
+                    {item.score}/{item.maxScore}
+                  </div>
+                  
+                  <div className="text-xs">
+                    <Badge variant="outline" className={`${
+                      percentage >= 80 ? 'border-green-300 text-green-700 dark:border-green-700 dark:text-green-300' :
+                      percentage >= 60 ? 'border-yellow-300 text-yellow-700 dark:border-yellow-700 dark:text-yellow-300' :
+                      percentage >= 40 ? 'border-blue-300 text-blue-700 dark:border-blue-700 dark:text-blue-300' :
+                      'border-gray-300 text-gray-700 dark:border-gray-700 dark:text-gray-300'
+                    }`}>
+                      {Math.round(percentage)}%
+                    </Badge>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Enhanced Confidence Badges */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {matchScore >= 80 && (
+              <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white animate-pulse px-3 py-1">
+                🏆 {Math.round(matchScore)}% High Confidence
+              </Badge>
+            )}
+            {matchScore >= 60 && matchScore < 80 && (
+              <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-3 py-1">
+                ⭐ {Math.round(matchScore)}% Good Match
+              </Badge>
+            )}
+            {matchScore >= 40 && matchScore < 60 && (
+              <Badge className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 py-1">
+                🎯 {Math.round(matchScore)}% Potential
+              </Badge>
+            )}
+            {detailedScoring.skillsAnalysis.matchingSkills.length >= 5 && (
+              <Badge variant="outline" className="border-green-300 text-green-700 dark:border-green-700 dark:text-green-300">
+                💪 Strong Skills ({detailedScoring.skillsAnalysis.matchingSkills.length})
+              </Badge>
+            )}
+            {detailedScoring.experienceAnalysis.experienceGap <= 1 && (
+              <Badge variant="outline" className="border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-300">
+                📈 Experience Aligned
+              </Badge>
+            )}
+            {detailedScoring.resumeQualityAnalysis.score >= (detailedScoring.resumeQualityAnalysis.maxScore * 0.8) && (
+              <Badge variant="outline" className="border-orange-300 text-orange-700 dark:border-orange-700 dark:text-orange-300">
+                ⚡ Elite Profile
+              </Badge>
+            )}
           </div>
 
           <div className="space-y-4">
