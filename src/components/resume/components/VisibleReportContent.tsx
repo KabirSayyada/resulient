@@ -114,7 +114,7 @@ export const VisibleReportContent = ({ scoreData }: VisibleReportContentProps) =
         </div>
 
         {/* Elite Achievements Section with Enhanced Golden Design */}
-        {scoreData.eliteIndicators && scoreData.eliteIndicators.length > 0 && (
+        {scoreData.eliteIndicatorsFound && scoreData.eliteIndicatorsFound.length > 0 && (
           <div className="mb-10">
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:via-amber-900/30 dark:to-orange-900/20 border-2 border-amber-200 dark:border-amber-700/50 shadow-lg">
               {/* Decorative background elements */}
@@ -138,7 +138,7 @@ export const VisibleReportContent = ({ scoreData }: VisibleReportContentProps) =
                 </div>
                 
                 <div className="grid gap-4">
-                  {scoreData.eliteIndicators.map((achievement, index) => (
+                  {scoreData.eliteIndicatorsFound.map((achievement, index) => (
                     <div 
                       key={index}
                       className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-100/80 via-yellow-100/60 to-orange-100/80 dark:from-amber-800/30 dark:via-yellow-800/20 dark:to-orange-800/30 border border-amber-300/50 dark:border-amber-600/30 p-4 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
