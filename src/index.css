@@ -155,70 +155,35 @@
   @apply text-gray-100;
 }
 
-/* High contrast text on bright elements in dark mode */
-.dark .bg-white .text-gray-600,
-.dark .bg-white .text-gray-700,
-.dark .bg-white .text-gray-800,
-.dark .bg-white .text-gray-900 {
-  @apply text-gray-800;
+/* High contrast text on bright/light backgrounds in dark mode */
+.dark .bg-white *:not(.text-white):not([class*="text-white"]),
+.dark .bg-gray-50 *:not(.text-white):not([class*="text-white"]),
+.dark .bg-blue-50 *:not(.text-white):not([class*="text-white"]),
+.dark .bg-indigo-50 *:not(.text-white):not([class*="text-white"]),
+.dark .bg-purple-50 *:not(.text-white):not([class*="text-white"]),
+.dark .bg-pink-50 *:not(.text-white):not([class*="text-white"]),
+.dark .bg-emerald-50 *:not(.text-white):not([class*="text-white"]),
+.dark .bg-green-50 *:not(.text-white):not([class*="text-white"]),
+.dark .bg-amber-50 *:not(.text-white):not([class*="text-white"]),
+.dark .bg-orange-50 *:not(.text-white):not([class*="text-white"]),
+.dark .bg-red-50 *:not(.text-white):not([class*="text-white"]) {
+  color: rgb(31 41 55) !important; /* gray-800 */
 }
 
-.dark .bg-gradient-to-r .text-white,
-.dark .bg-gradient-to-br .text-white {
-  @apply text-white;
+/* Ensure text on semi-transparent light backgrounds is dark */
+.dark .bg-white\/60 *:not(.text-white),
+.dark .bg-white\/70 *:not(.text-white),
+.dark .bg-white\/80 *:not(.text-white),
+.dark .bg-white\/90 *:not(.text-white) {
+  color: rgb(17 24 39) !important; /* gray-900 */
 }
 
-/* Ensure text on light/bright backgrounds is dark in dark mode */
-.dark .bg-white\/60 *,
-.dark .bg-white\/70 *,
-.dark .bg-white\/80 *,
-.dark .bg-white\/90 * {
-  @apply text-gray-900;
-}
-
-.dark .bg-gray-50 *,
-.dark .bg-blue-50 *,
-.dark .bg-indigo-50 *,
-.dark .bg-purple-50 *,
-.dark .bg-pink-50 *,
-.dark .bg-emerald-50 *,
-.dark .bg-green-50 *,
-.dark .bg-amber-50 *,
-.dark .bg-orange-50 *,
-.dark .bg-red-50 * {
-  @apply text-gray-800;
-}
-
-/* Specific contrast fixes for light colored elements */
-.dark .bg-gradient-to-r.from-blue-50,
-.dark .bg-gradient-to-br.from-blue-50,
-.dark .bg-gradient-to-r.from-indigo-50,
-.dark .bg-gradient-to-br.from-indigo-50,
-.dark .bg-gradient-to-r.from-purple-50,
-.dark .bg-gradient-to-br.from-purple-50 {
-  @apply text-gray-800;
-}
-
-/* Override for elements that should remain light text on dark backgrounds */
-.dark .bg-gradient-to-r.from-indigo-600,
-.dark .bg-gradient-to-r.from-purple-600,
-.dark .bg-gradient-to-r.from-blue-600 {
-  @apply text-white;
-}
-
-/* Ensure buttons and badges have proper contrast */
-.dark .bg-white .badge,
-.dark .bg-white .btn,
-.dark .bg-white button {
-  @apply text-gray-800;
-}
-
-/* Card content in dark mode should have proper contrast */
-.dark .bg-white .card-content,
-.dark .bg-white .card-header,
-.dark .bg-white .card-title,
-.dark .bg-white .card-description {
-  @apply text-gray-800;
+/* Specific overrides for gradient backgrounds that should keep light text */
+.dark .bg-gradient-to-r.from-indigo-600 *,
+.dark .bg-gradient-to-r.from-purple-600 *,
+.dark .bg-gradient-to-r.from-blue-600 *,
+.dark .bg-gradient-to-br.from-purple-600 * {
+  color: white !important;
 }
 
 /* Better visibility for badges and buttons in dark mode */
