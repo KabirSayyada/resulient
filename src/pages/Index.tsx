@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { JobDescriptionInput } from "@/components/resume/JobDescriptionInput";
-import { ResumeInputToggle } from "@/components/resume/ResumeInputToggle";
+import { EnhancedJobDescriptionInput } from "@/components/resume/EnhancedJobDescriptionInput";
+import { EnhancedResumeInputToggle } from "@/components/resume/EnhancedResumeInputToggle";
 import { OptimizationAnimation } from "@/components/resume/OptimizationAnimation";
 import { JobOptimizationAnimation } from "@/components/resume/JobOptimizationAnimation";
 import { ResumeOptimizationModal } from "@/components/resume/ResumeOptimizationModal";
@@ -31,7 +30,7 @@ import { SubscriptionTierIndicator } from "@/components/subscription/Subscriptio
 import { Helmet } from "react-helmet-async";
 import { useReferralTracking } from "@/hooks/useReferralTracking";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
-import { Diamond, ExternalLink, Building, MapPin, DollarSign, ArrowRight } from "lucide-react";
+import { Diamond, ExternalLink, Building, MapPin, DollarSign, ArrowRight, Sparkles, Zap, Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Index = () => {
@@ -65,7 +64,6 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Auto-load job data from session storage when component mounts
   useEffect(() => {
     console.log('Checking for stored optimizer data...');
     try {
@@ -85,17 +83,14 @@ const Index = () => {
             setSourceJobData(optimizerData.jobData);
           }
           
-          // Show job optimization animation
           setShowJobOptimizationAnimation(true);
           
-          // Show a toast to inform the user
           toast({
             title: "Job Description Loaded",
             description: "Job description has been automatically loaded from your job selection.",
           });
         }
         
-        // Clear the session storage after loading
         sessionStorage.removeItem('resumeOptimizerData');
       }
     } catch (error) {
@@ -103,7 +98,6 @@ const Index = () => {
     }
   }, [toast]);
 
-  // Debug log for sourceJobData changes
   useEffect(() => {
     console.log('sourceJobData changed:', sourceJobData);
     console.log('sourceJobData exists:', !!sourceJobData);
@@ -115,7 +109,6 @@ const Index = () => {
     });
   }, [sourceJobData]);
 
-  // Auto-populate resume content when highest scoring resume is available and job optimization animation completes
   useEffect(() => {
     if (highestScoringResume && jobDescription && !resumeContent) {
       setResumeContent(highestScoringResume.resume_content);
@@ -130,14 +123,12 @@ const Index = () => {
   const handleJobOptimizationAnimationComplete = () => {
     console.log('Job optimization animation completed');
     setShowJobOptimizationAnimation(false);
-    // Show job details only after animation completes
     if (sourceJobData) {
       setShowJobDetails(true);
     }
   };
 
   const handleOptimizeResume = async () => {
-    // Check if user has reached limit
     if (usage.resumeOptimizations.hasReachedLimit) {
       showLimitReachedMessage("resume optimization");
       return;
@@ -194,7 +185,6 @@ const Index = () => {
         suggestions
       });
 
-      // Store the optimization result
       if (user) {
         await supabase
           .from("resume_optimizations")
@@ -206,13 +196,11 @@ const Index = () => {
             qualification_gaps: response.qualificationGaps || []
           });
 
-        // Increment usage count for resume optimization
         await supabase.rpc('increment_user_usage', {
           p_user_id: user.id,
           p_feature_type: 'resume_optimizations'
         });
 
-        // Refresh usage after optimization
         await checkUsage();
       }
 
@@ -221,7 +209,6 @@ const Index = () => {
         description: "Your resume has been successfully optimized for ATS.",
       });
 
-      // Show the optimization results modal
       setShowOptimizationModal(true);
     } catch (error) {
       console.error("Error optimizing resume:", error);
@@ -243,7 +230,6 @@ const Index = () => {
     );
   }
 
-  // If user is not logged in, redirect to landing page
   if (!user) {
     navigate("/");
     return null;
@@ -257,23 +243,23 @@ const Index = () => {
         <link rel="canonical" href="https://resulient.com/resume-optimization" />
       </Helmet>
 
-      <div className={`min-h-screen px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${
+      <div className={`min-h-screen px-4 sm:px-6 lg:px-8 transition-all duration-500 ${
         subscription.tier === "premium" 
-          ? "bg-gradient-to-br from-blue-50 via-gray-50 to-indigo-50 dark:from-blue-950 dark:via-gray-900 dark:to-indigo-950" 
+          ? "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950 dark:via-indigo-950 dark:to-purple-950" 
           : subscription.tier === "platinum" 
-            ? "bg-gradient-to-br from-purple-50 via-gray-50 to-indigo-50 dark:from-purple-950 dark:via-gray-900 dark:to-indigo-950" 
-            : "bg-gray-50 dark:bg-gray-900"
+            ? "bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 dark:from-purple-950 dark:via-indigo-950 dark:to-pink-950" 
+            : "bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-950 dark:to-indigo-950"
       }`}>
         <div className="max-w-7xl mx-auto py-4 sm:py-8">
-          {/* Mobile-first brand header - Fixed for mobile */}
+          {/* Enhanced header with animations */}
           <div className="flex flex-col space-y-3 sm:space-y-4 mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                <span className="font-brand text-xl sm:text-2xl md:text-4xl lg:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
+                <span className="font-brand text-xl sm:text-2xl md:text-4xl lg:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none hover:scale-105 transition-transform duration-300 cursor-default">
                   Resulient
                 </span>
-                <span className="hidden sm:inline-block rounded-full px-2 py-1 text-xs sm:text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 shadow border border-indigo-200 dark:border-indigo-700 animate-fade-in whitespace-nowrap">
-                  ATS Resume Optimization
+                <span className="hidden sm:inline-block rounded-full px-3 py-1 text-xs sm:text-sm font-semibold bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 dark:from-indigo-900 dark:to-purple-900 dark:text-indigo-300 shadow-lg border border-indigo-200 dark:border-indigo-700 animate-fade-in whitespace-nowrap backdrop-blur-sm">
+                  ✨ ATS Resume Optimization
                 </span>
               </div>
               <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
@@ -282,58 +268,66 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Mobile badge - shown below on mobile */}
             <div className="sm:hidden">
-              <span className="inline-block rounded-full px-2 py-1 text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 shadow border border-indigo-200 dark:border-indigo-700 animate-fade-in">
-                ATS Resume Optimization
+              <span className="inline-block rounded-full px-3 py-1 text-xs font-semibold bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 dark:from-indigo-900 dark:to-purple-900 dark:text-indigo-300 shadow-lg border border-indigo-200 dark:border-indigo-700 animate-fade-in backdrop-blur-sm">
+                ✨ ATS Resume Optimization
               </span>
             </div>
 
-            {/* Subscription Tier Banner */}
             {subscription.tier !== "free" && (
-              <div className={`py-2 px-4 rounded-lg shadow-md border animate-fade-in text-center ${
+              <div className={`py-3 px-6 rounded-xl shadow-lg border animate-fade-in text-center backdrop-blur-sm ${
                 subscription.tier === "premium" 
-                  ? "bg-blue-100 border-blue-300 text-blue-800 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-200" 
-                  : "bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-900 dark:border-purple-700 dark:text-purple-200"
+                  ? "bg-gradient-to-r from-blue-100/80 to-indigo-100/80 border-blue-300 text-blue-800 dark:from-blue-900/60 dark:to-indigo-900/60 dark:border-blue-700 dark:text-blue-200" 
+                  : "bg-gradient-to-r from-purple-100/80 to-pink-100/80 border-purple-300 text-purple-800 dark:from-purple-900/60 dark:to-pink-900/60 dark:border-purple-700 dark:text-purple-200"
               }`}>
                 <SubscriptionTierIndicator variant="full" size="lg" showTooltip={false} className="justify-center" />
               </div>
             )}
           </div>
 
-          {/* About section with mobile-first design */}
-          <div className="bg-gradient-to-br from-indigo-50 via-gray-50 to-blue-50 dark:from-indigo-950 dark:via-gray-900 dark:to-blue-950 rounded-xl border border-indigo-100 dark:border-indigo-800 shadow-md px-4 py-5 mb-6 text-center">
-            <p className="text-base sm:text-lg lg:text-xl font-semibold text-indigo-900 dark:text-indigo-200 leading-snug mb-2">
-              <span className="text-blue-600 dark:text-blue-400 font-bold">Resulient</span> increases your interview rate by up to 500%
-              <span className="block text-sm sm:text-base lg:text-lg font-normal text-indigo-700 dark:text-indigo-300 mt-1">
-                Our users land 3x more interviews and get hired faster than traditional job seekers.
-              </span>
-            </p>
-            <p className="text-orange-700 dark:text-orange-400 text-sm mt-2">
-              Upload your resume and job description — we'll optimize your application to significantly increase your chances of landing interviews at top companies.
-            </p>
+          {/* Enhanced about section */}
+          <div className="bg-gradient-to-br from-indigo-50/80 via-purple-50/60 to-blue-50/80 dark:from-indigo-950/80 dark:via-purple-950/60 dark:to-blue-950/80 rounded-2xl border border-indigo-200/60 dark:border-indigo-800/60 shadow-xl backdrop-blur-sm px-6 py-8 mb-8 text-center relative overflow-hidden">
+            {/* Animated background elements */}
+            <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full -translate-y-16 -translate-x-16 animate-pulse"></div>
+            <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-indigo-200/20 to-blue-200/20 rounded-full translate-y-12 translate-x-12 animate-pulse delay-1000"></div>
             
-            {/* Usage indicator for free tier */}
-            {subscription.tier === "free" && (
-              <div className="mt-3 text-sm font-medium text-orange-700 dark:text-orange-400">
-                Free tier: {usage.resumeOptimizations.used}/{usage.resumeOptimizations.limit} resume optimizations used today
+            <div className="relative z-10">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Sparkles className="h-6 w-6 text-yellow-500 animate-pulse" />
+                <Target className="h-6 w-6 text-green-500 animate-bounce delay-300" />
+                <Zap className="h-6 w-6 text-purple-500 animate-pulse delay-700" />
               </div>
-            )}
-            
-            {/* Premium/Platinum indicator */}
-            {subscription.tier !== "free" && (
-              <div className="flex items-center justify-center gap-1 text-sm text-indigo-700 dark:text-indigo-400 font-medium mt-3">
-                <Diamond className="h-4 w-4" />
-                <span>
-                  {subscription.tier === "premium" ? 
-                    "Unlimited optimization with Premium" : 
-                    "Unlimited optimization with Platinum"}
+              
+              <p className="text-base sm:text-lg lg:text-xl font-bold text-indigo-900 dark:text-indigo-200 leading-snug mb-3">
+                <span className="text-blue-600 dark:text-blue-400 font-extrabold">Resulient</span> increases your interview rate by up to 
+                <span className="text-green-600 dark:text-green-400 font-extrabold"> 500%</span>
+                <span className="block text-sm sm:text-base lg:text-lg font-semibold text-indigo-700 dark:text-indigo-300 mt-2">
+                  Our users land 3x more interviews and get hired faster than traditional job seekers.
                 </span>
-              </div>
-            )}
+              </p>
+              <p className="text-orange-700 dark:text-orange-400 text-sm font-medium">
+                🚀 Upload your resume and job description — we'll optimize your application to significantly increase your chances of landing interviews at top companies.
+              </p>
+              
+              {subscription.tier === "free" && (
+                <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-orange-700 dark:text-orange-400 bg-orange-100/80 dark:bg-orange-900/30 px-4 py-2 rounded-full">
+                  <span>Free tier: {usage.resumeOptimizations.used}/{usage.resumeOptimizations.limit} resume optimizations used today</span>
+                </div>
+              )}
+              
+              {subscription.tier !== "free" && (
+                <div className="flex items-center justify-center gap-2 text-sm text-indigo-700 dark:text-indigo-400 font-semibold mt-4 bg-white/60 dark:bg-gray-800/60 px-4 py-2 rounded-full backdrop-blur-sm">
+                  <Diamond className="h-4 w-4 animate-pulse" />
+                  <span>
+                    {subscription.tier === "premium" ? 
+                      "Unlimited optimization with Premium" : 
+                      "Unlimited optimization with Platinum"}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Usage limit alert */}
           {usage.resumeOptimizations.hasReachedLimit && subscription.tier === "free" && (
             <div className="mb-6">
               <UseSubscriptionAlert 
@@ -346,15 +340,14 @@ const Index = () => {
 
           <MainNavigation />
 
-          {/* Main functional area with mobile-first layout */}
           <div className="mb-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <div>
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-orange-700 dark:text-orange-400 mb-2">
-                  ATS Resume Optimizer
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-500 bg-clip-text text-transparent mb-2">
+                  🎯 ATS Resume Optimizer
                 </h1>
-                <p className="text-sm sm:text-base text-orange-700 dark:text-orange-400">
-                  Optimize your resume to beat Applicant Tracking Systems (ATS)
+                <p className="text-sm sm:text-base text-orange-700 dark:text-orange-400 font-medium">
+                  Optimize your resume to beat Applicant Tracking Systems (ATS) and land more interviews
                 </p>
               </div>
               <div className="flex justify-center sm:justify-end">
@@ -362,9 +355,8 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Job Information Section - Show only when sourceJobData exists AND showJobDetails is true */}
             {sourceJobData && showJobDetails && (
-              <Card className="mb-6 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 shadow-lg animate-fade-in">
+              <Card className="mb-8 border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 dark:from-blue-950/80 dark:to-indigo-950/80 shadow-xl animate-fade-in backdrop-blur-sm">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
                     <Building className="h-5 w-5" />
@@ -394,13 +386,13 @@ const Index = () => {
               </Card>
             )}
 
-            <div className="space-y-6 animate-fade-in">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <JobDescriptionInput 
+            <div className="space-y-8 animate-fade-in">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <EnhancedJobDescriptionInput 
                   jobDescription={jobDescription} 
                   setJobDescription={setJobDescription} 
                 />
-                <ResumeInputToggle 
+                <EnhancedResumeInputToggle 
                   resumeContent={resumeContent} 
                   setResumeContent={setResumeContent} 
                   userId={user?.id}
@@ -411,21 +403,21 @@ const Index = () => {
                 <Button 
                   onClick={handleOptimizeResume} 
                   disabled={isOptimizing || !resumeContent || !jobDescription || (usage.resumeOptimizations.hasReachedLimit && subscription.tier === "free")}
-                  className={`w-full sm:w-auto px-6 sm:px-7 py-3 text-base sm:text-lg font-bold rounded-full shadow transition-all ${
+                  className={`w-full sm:w-auto px-8 py-4 text-lg font-bold rounded-2xl shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl group ${
                     subscription.tier === "premium" 
-                      ? "bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600" 
+                      ? "bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600" 
                       : subscription.tier === "platinum" 
-                        ? "bg-gradient-to-r from-purple-500 to-indigo-400 hover:from-purple-600 hover:to-indigo-500" 
-                        : "bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500"
+                        ? "bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 hover:from-purple-600 hover:via-pink-600 hover:to-indigo-600" 
+                        : "bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500 hover:from-fuchsia-600 hover:via-purple-600 hover:to-indigo-600"
                   }`}
                 >
-                  {isOptimizing ? "Optimizing..." : "🚀 Optimize Resume"}
+                  <Zap className="h-6 w-6 mr-2 group-hover:animate-pulse" />
+                  {isOptimizing ? "✨ Optimizing..." : "🚀 Optimize Resume"}
                 </Button>
               </div>
               
-              {/* Continue to Job Application Section - Show only when sourceJobData exists and optimization is complete */}
               {sourceJobData && optimizedResume && (
-                <Card className="border-t-4 border-t-green-500 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 shadow-lg animate-fade-in">
+                <Card className="border-t-4 border-t-green-500 bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-950/80 dark:to-emerald-950/80 shadow-xl animate-fade-in backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
                       <ArrowRight className="h-5 w-5" />
@@ -443,7 +435,7 @@ const Index = () => {
                         {sourceJobData.external_url && (
                           <Button 
                             asChild 
-                            className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none"
+                            className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none hover:scale-105 transition-transform duration-200"
                           >
                             <a 
                               href={sourceJobData.external_url} 
@@ -460,7 +452,7 @@ const Index = () => {
                         <Button 
                           variant="outline" 
                           onClick={() => navigate("/jobs")}
-                          className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-950"
+                          className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-950 hover:scale-105 transition-transform duration-200"
                         >
                           Find More Jobs
                         </Button>
@@ -477,21 +469,16 @@ const Index = () => {
         </div>
         <GuidedTour />
         
-        {/* Job Optimization Animation */}
         <JobOptimizationAnimation 
           isVisible={showJobOptimizationAnimation}
           onComplete={handleJobOptimizationAnimationComplete}
         />
         
-        {/* Optimization Animation */}
         <OptimizationAnimation 
           isOptimizing={isOptimizing}
-          onComplete={() => {
-            // Animation completes naturally when isOptimizing becomes false
-          }}
+          onComplete={() => {}}
         />
 
-        {/* Resume Optimization Modal */}
         <ResumeOptimizationModal
           isOpen={showOptimizationModal}
           onClose={() => setShowOptimizationModal(false)}
