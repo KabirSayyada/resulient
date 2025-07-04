@@ -86,12 +86,12 @@
 .dark .font-mono, 
 .dark textarea.font-mono, 
 .dark input.font-mono {
-  color: rgb(243 244 246);
+  @apply text-gray-100;
 }
 
 .dark textarea::placeholder,
 .dark input::placeholder {
-  color: rgb(156 163 175);
+  @apply text-gray-400;
 }
 
 /* Dark mode specific resume input styles */
@@ -99,238 +99,137 @@
 .dark input[type="text"],
 .dark input[type="email"],
 .dark input[type="password"] {
-  background-color: rgb(31 41 55);
-  border-color: rgb(75 85 99);
-  color: rgb(243 244 246);
+  @apply bg-gray-800 border-gray-700 text-gray-100;
 }
 
 /* Resume input container dark mode styles */
 .dark .section-card {
-  background-color: rgb(31 41 55 / 0.8);
-  border-color: rgb(75 85 99);
+  @apply bg-gray-800/80 border-gray-700;
 }
 
 /* Enhanced dark mode text visibility for all components */
 .dark .text-indigo-800 {
-  color: rgb(199 210 254);
+  @apply text-indigo-200;
 }
 
 .dark .text-indigo-700 {
-  color: rgb(165 180 252);
+  @apply text-indigo-300;
 }
 
 .dark .text-fuchsia-600, 
 .dark .text-fuchsia-700 {
-  color: rgb(240 171 252);
+  @apply text-fuchsia-300;
 }
 
 .dark .text-gray-600, 
 .dark .text-gray-700 {
-  color: rgb(209 213 219);
+  @apply text-gray-300;
 }
 
 .dark .text-gray-800 {
-  color: rgb(229 231 235);
+  @apply text-gray-200;
 }
 
 .dark .text-gray-900 {
-  color: rgb(243 244 246);
+  @apply text-gray-100;
 }
 
 .dark .bg-indigo-50 {
-  background-color: rgb(55 48 163 / 0.4);
+  @apply bg-indigo-900/40;
 }
 
 .dark .bg-gray-50 {
-  background-color: rgb(17 24 39);
+  @apply bg-gray-900;
 }
 
 .dark .bg-white {
-  background-color: rgb(55 65 81);
-}
-
-/* Specific fixes for template boxes and cards */
-.dark .bg-blue-50 {
-  background-color: rgb(30 58 138 / 0.2);
-}
-
-.dark .bg-blue-50 .text-gray-600 {
-  color: rgb(209 213 219);
-}
-
-.dark .text-blue-700 {
-  color: rgb(147 197 253);
-}
-
-.dark .text-blue-500 {
-  color: rgb(96 165 250);
-}
-
-/* Fix card titles and labels in dark mode */
-.dark .text-lg {
-  color: rgb(243 244 246);
-}
-
-/* Ensure placeholder text is visible */
-.dark textarea::placeholder,
-.dark input::placeholder {
-  color: rgb(156 163 175);
+  @apply bg-gray-800;
 }
 
 /* Fix for hard-coded colors that need better contrast */
 .dark .text-white {
-  color: rgb(243 244 246);
+  @apply text-gray-100;
 }
 
 .dark .text-black {
-  color: rgb(243 244 246);
-}
-
-/* High contrast text on bright elements in dark mode */
-.dark .bg-white .text-gray-600,
-.dark .bg-white .text-gray-700,
-.dark .bg-white .text-gray-800,
-.dark .bg-white .text-gray-900 {
-  color: rgb(31 41 55);
-}
-
-.dark .bg-gradient-to-r .text-white,
-.dark .bg-gradient-to-br .text-white {
-  color: white;
-}
-
-/* Ensure text on light/bright backgrounds is dark in dark mode */
-.dark .bg-white\/60 *,
-.dark .bg-white\/70 *,
-.dark .bg-white\/80 *,
-.dark .bg-white\/90 * {
-  color: rgb(17 24 39);
-}
-
-.dark .bg-gray-50 *,
-.dark .bg-blue-50 *,
-.dark .bg-indigo-50 *,
-.dark .bg-purple-50 *,
-.dark .bg-pink-50 *,
-.dark .bg-emerald-50 *,
-.dark .bg-green-50 *,
-.dark .bg-amber-50 *,
-.dark .bg-orange-50 *,
-.dark .bg-red-50 * {
-  color: rgb(31 41 55);
-}
-
-/* Specific contrast fixes for light colored elements */
-.dark .bg-gradient-to-r.from-blue-50,
-.dark .bg-gradient-to-br.from-blue-50,
-.dark .bg-gradient-to-r.from-indigo-50,
-.dark .bg-gradient-to-br.from-indigo-50,
-.dark .bg-gradient-to-r.from-purple-50,
-.dark .bg-gradient-to-br.from-purple-50 {
-  color: rgb(31 41 55);
-}
-
-/* Override for elements that should remain light text on dark backgrounds */
-.dark .bg-gradient-to-r.from-indigo-600,
-.dark .bg-gradient-to-r.from-purple-600,
-.dark .bg-gradient-to-r.from-blue-600 {
-  color: white;
-}
-
-/* Ensure buttons and badges have proper contrast */
-.dark .bg-white .badge,
-.dark .bg-white .btn,
-.dark .bg-white button {
-  color: rgb(31 41 55);
-}
-
-/* Card content in dark mode should have proper contrast */
-.dark .bg-white .card-content,
-.dark .bg-white .card-header,
-.dark .bg-white .card-title,
-.dark .bg-white .card-description {
-  color: rgb(31 41 55);
+  @apply text-gray-100;
 }
 
 /* Better visibility for badges and buttons in dark mode */
 .dark .bg-gradient-to-r.from-green-500 {
-  background-image: linear-gradient(to right, rgb(22 163 74), var(--tw-gradient-stops));
+  @apply from-green-600;
 }
 
 .dark .bg-gradient-to-r.from-blue-500 {
-  background-image: linear-gradient(to right, rgb(37 99 235), var(--tw-gradient-stops));
+  @apply from-blue-600;
 }
 
 .dark .bg-gradient-to-r.from-yellow-500 {
-  background-image: linear-gradient(to right, rgb(202 138 4), var(--tw-gradient-stops));
+  @apply from-yellow-600;
 }
 
 .dark .bg-gradient-to-r.from-purple-500 {
-  background-image: linear-gradient(to right, rgb(147 51 234), var(--tw-gradient-stops));
+  @apply from-purple-600;
 }
 
 .dark .bg-gradient-to-r.from-indigo-500 {
-  background-image: linear-gradient(to right, rgb(99 102 241), var(--tw-gradient-stops));
+  @apply from-indigo-600;
 }
 
 /* Better contrast for overlays and semi-transparent backgrounds */
 .dark .bg-white\/50 {
-  background-color: rgb(55 65 81 / 0.7);
+  @apply bg-gray-800/70;
 }
 
 .dark .bg-white\/90 {
-  background-color: rgb(55 65 81 / 0.95);
+  @apply bg-gray-800/95;
 }
 
 .dark .bg-black\/60 {
-  background-color: rgb(17 24 39 / 0.8);
+  @apply bg-gray-900/80;
 }
 
 /* Improve dropdown and popover visibility */
 .dark [role="menu"],
 .dark [role="listbox"],
 .dark .dropdown-content {
-  background-color: rgb(55 65 81);
-  border-color: rgb(75 85 99);
-  color: rgb(243 244 246);
+  @apply bg-gray-800 border-gray-700 text-gray-100;
 }
 
 /* Better visibility for form elements */
 .dark .border-gray-200 {
-  border-color: rgb(75 85 99);
+  @apply border-gray-700;
 }
 
 .dark .border-gray-300 {
-  border-color: rgb(107 114 128);
+  @apply border-gray-600;
 }
 
 /* Enhanced visibility for cards and containers */
 .dark .shadow-lg {
-  box-shadow: 0 10px 15px -3px rgb(17 24 39 / 0.5), 0 4px 6px -4px rgb(17 24 39 / 0.5);
+  @apply shadow-gray-900/50;
 }
 
 .dark .shadow-xl {
-  box-shadow: 0 20px 25px -5px rgb(17 24 39 / 0.6), 0 8px 10px -6px rgb(17 24 39 / 0.6);
+  @apply shadow-gray-900/60;
 }
 
 .dark .shadow-2xl {
-  box-shadow: 0 25px 50px -12px rgb(17 24 39 / 0.7);
+  @apply shadow-gray-900/70;
 }
 
 /* Ensure chart data is visible in dark mode */
 .dark .recharts-text {
-  fill: rgb(209 213 219);
+  @apply fill-gray-300;
 }
 
 .dark .recharts-cartesian-grid-horizontal line,
 .dark .recharts-cartesian-grid-vertical line {
-  stroke: rgb(75 85 99);
+  @apply stroke-gray-700;
 }
 
 .dark .recharts-tooltip-wrapper .recharts-default-tooltip {
-  background-color: rgb(55 65 81);
-  border-color: rgb(75 85 99);
-  color: rgb(229 231 235);
+  @apply bg-gray-800 border-gray-700 text-gray-200;
 }
 
 /* Blog content styling */
