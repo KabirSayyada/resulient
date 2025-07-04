@@ -102,6 +102,16 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
+			},
+			// Enhanced contrast ratios
+			contrast: {
+				'25': '.25',
+				'50': '.5',
+				'75': '.75',
+				'100': '1',
+				'125': '1.25',
+				'150': '1.5',
+				'200': '2',
 			}
 		}
 	},
