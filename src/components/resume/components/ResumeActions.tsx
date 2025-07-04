@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { FileDown, FileText, FileType } from "lucide-react";
+import { FileDown, FileText, FileType, Download, Share2, Sparkles, Gift, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import html2canvas from "html2canvas";
@@ -8,7 +8,9 @@ import { generatePDFFromElement, handleDownloadTextReport } from "@/utils/report
 import { ScoreData } from "@/types/resume";
 import { exportElementAsImage } from "@/utils/imageExportUtils";
 import React, { useState } from "react";
-import { DownloadReportButton } from "./DownloadReportButton"; // ADD this for "Full Report (PDF)"
+import { DownloadReportButton } from "./DownloadReportButton";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface ResumeActionsProps {
   scoreCardRef: React.RefObject<HTMLDivElement>;
@@ -89,39 +91,114 @@ export const ResumeActions = ({ scoreCardRef, completeReportRef, scoreData }: Re
   };
 
   return (
-    <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border border-indigo-100 shadow-sm">
-      {/* Encouragement message for sharing, always visible above export/share buttons */}
-      <div className="mb-4 bg-fuchsia-100 border border-fuchsia-200 px-3 py-2 rounded text-sm text-fuchsia-800 flex flex-col gap-1 sm:flex-row sm:items-center justify-between">
-        <span>
-          <span className="font-medium">Why download your scorecard?</span> Downloading and saving your scorecard allows you to track your progress over time as you improve your resume. Share your progress with mentors or career coaches to get personalized advice on your journey.
-        </span>
+    <div className="relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/80 via-purple-50/60 to-pink-50/80 dark:from-blue-950/50 dark:via-purple-950/40 dark:to-pink-950/50 rounded-2xl"></div>
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-200/20 to-purple-200/20 dark:from-blue-800/10 dark:to-purple-800/10 rounded-full -translate-y-16 translate-x-16 blur-2xl animate-pulse"></div>
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-pink-200/20 to-purple-200/20 dark:from-pink-800/10 dark:to-purple-800/10 rounded-full translate-y-12 -translate-x-12 blur-2xl animate-pulse delay-1000"></div>
+
+      <div className="relative z-10 p-6 border-2 border-blue-200/60 dark:border-blue-800/60 rounded-2xl shadow-xl backdrop-blur-sm">
+        {/* Enhanced Header Section */}
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-xl">
+              <Download className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Export & Share
+              </h3>
+              <p className="text-blue-600 dark:text-blue-400 font-medium text-sm">
+                Download your results in multiple formats
+              </p>
+            </div>
+          </div>
+
+          {/* Enhanced Motivation Card */}
+          <Card className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/40 dark:to-pink-950/40 border-2 border-purple-200/60 dark:border-purple-800/60 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl shadow-lg">
+                  <Gift className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge className="bg-gradient-to-r from-purple-500 to-pink-600 text-white border-0 text-xs px-2 py-1">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Pro Tip
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="font-semibold text-purple-800 dark:text-purple-300 text-sm">
+                      Why download your scorecard?
+                    </p>
+                    <p className="text-purple-700 dark:text-purple-400 text-sm leading-relaxed">
+                      Track your progress over time as you improve your resume. Share with mentors or career coaches for personalized advice on your journey.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Enhanced Export Options */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Share2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <h4 className="font-semibold text-blue-800 dark:text-blue-300">Export Options</h4>
+          </div>
+
+          {/* Enhanced Button Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Button
+              onClick={handleImageDownload}
+              className="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative flex items-center gap-2">
+                <FileDown className="h-4 w-4" />
+                <span>Scorecard Image</span>
+                <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+            </Button>
+
+            {scoreData && (
+              <Button 
+                onClick={handleTextReportDownload}
+                className="group relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative flex items-center gap-2">
+                  <FileType className="h-4 w-4" />
+                  <span>Text Report</span>
+                  <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+              </Button>
+            )}
+          </div>
+
+          {/* Enhanced Full Report Button */}
+          <div className="pt-2">
+            <Button
+              onClick={handleFullReportDownload}
+              className="group relative overflow-hidden w-full bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 hover:from-purple-700 hover:via-pink-700 hover:to-red-700 text-white font-bold py-4 px-6 rounded-xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-[1.02]"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/10 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative flex items-center justify-center gap-3">
+                <div className="p-1 bg-white/20 rounded-lg">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <span className="text-lg">Download Full Report (PDF)</span>
+                <div className="flex items-center gap-1">
+                  <Sparkles className="h-4 w-4 animate-pulse" />
+                  <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
+                </div>
+              </div>
+            </Button>
+          </div>
+        </div>
       </div>
-      <h3 className="text-sm font-medium text-indigo-800 mb-3">Export Options</h3>
-      <div className={`flex ${isMobile ? 'flex-wrap' : ''} gap-2 items-center`}>
-        <Button
-          variant="secondary"
-          size={isMobile ? "sm" : "default"}
-          onClick={handleImageDownload}
-          className="font-semibold text-fuchsia-700 bg-fuchsia-50 hover:bg-fuchsia-100"
-        >
-          <FileDown className="mr-2 h-4 w-4" /> Scorecard (Image)
-        </Button>
-        {scoreData && (
-          <Button 
-            variant="outline" 
-            size={isMobile ? "sm" : "default"}
-            onClick={handleTextReportDownload}
-            className="font-semibold text-gray-700"
-          >
-            <FileType className="mr-2 h-4 w-4" /> Text Report
-          </Button>
-        )}
-      </div>
-      {/* Button for exporting full report PDF (add below all other export options) */}
-      <DownloadReportButton 
-        title="Download Full Report (PDF)"
-        onClick={handleFullReportDownload} 
-      />
     </div>
   );
 };
