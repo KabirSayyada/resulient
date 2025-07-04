@@ -11,19 +11,31 @@ export const CompactResumePdfTemplate = ({ resume, className = '' }: CompactResu
   console.log('Resume object:', resume);
 
   return (
-    <div className={`bg-white p-4 max-w-2xl mx-auto font-sans text-gray-900 leading-tight ${className}`} 
-         style={{ fontFamily: 'Arial, sans-serif', fontSize: '10px', lineHeight: '1.2' }}>
+    <div className={`bg-white text-gray-900 ${className}`} 
+         style={{ 
+           fontFamily: 'Arial, sans-serif', 
+           fontSize: '11px', 
+           lineHeight: '1.4',
+           padding: '20px',
+           maxWidth: '210mm',
+           margin: '0 auto'
+         }}>
       
-      {/* Compact Header Section */}
-      <div className="text-center mb-3 pb-2 border-b-2 border-gray-400">
+      {/* Header Section */}
+      <div style={{ textAlign: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #666' }}>
         {resume.contact.name && (
-          <h1 className="text-lg font-bold mb-1 text-gray-900" style={{ fontSize: '16px', marginBottom: '4px' }}>
+          <h1 style={{ 
+            fontSize: '18px', 
+            fontWeight: 'bold', 
+            margin: '0 0 8px 0',
+            color: '#1a1a1a'
+          }}>
             {resume.contact.name}
           </h1>
         )}
         
-        {/* Compact contact line */}
-        <div className="text-xs text-gray-700" style={{ fontSize: '9px' }}>
+        {/* Contact Information */}
+        <div style={{ fontSize: '10px', color: '#555', lineHeight: '1.3' }}>
           {[
             resume.contact.email,
             resume.contact.phone,
@@ -34,88 +46,162 @@ export const CompactResumePdfTemplate = ({ resume, className = '' }: CompactResu
         </div>
       </div>
 
-      {/* Professional Summary - Compact */}
+      {/* Professional Summary */}
       {resume.professionalSummary && (
-        <div className="mb-3">
-          <h2 className="text-xs font-bold mb-1 text-gray-900 uppercase" 
-              style={{ fontSize: '11px', marginBottom: '4px' }}>
-            Summary
+        <div style={{ marginBottom: '14px' }}>
+          <h2 style={{ 
+            fontSize: '12px', 
+            fontWeight: 'bold', 
+            margin: '0 0 6px 0',
+            color: '#1a1a1a',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}>
+            Professional Summary
           </h2>
-          <p className="text-xs text-gray-800" style={{ fontSize: '9px', lineHeight: '1.3' }}>
+          <p style={{ 
+            fontSize: '10px', 
+            lineHeight: '1.4', 
+            margin: '0',
+            color: '#333'
+          }}>
             {resume.professionalSummary}
           </p>
         </div>
       )}
 
-      {/* Skills - Compact format */}
+      {/* Skills */}
       {resume.skills && resume.skills.length > 0 && (
-        <div className="mb-3">
-          <h2 className="text-xs font-bold mb-1 text-gray-900 uppercase" 
-              style={{ fontSize: '11px', marginBottom: '4px' }}>
-            Skills
+        <div style={{ marginBottom: '14px' }}>
+          <h2 style={{ 
+            fontSize: '12px', 
+            fontWeight: 'bold', 
+            margin: '0 0 6px 0',
+            color: '#1a1a1a',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}>
+            Core Skills
           </h2>
-          <div className="text-xs text-gray-800" style={{ fontSize: '9px', lineHeight: '1.3' }}>
+          <div style={{ 
+            fontSize: '10px', 
+            lineHeight: '1.4',
+            color: '#333'
+          }}>
             {resume.skills.join(' • ')}
           </div>
         </div>
       )}
 
-      {/* Experience - Very compact */}
+      {/* Work Experience */}
       {resume.workExperience && resume.workExperience.length > 0 && (
-        <div className="mb-3">
-          <h2 className="text-xs font-bold mb-1 text-gray-900 uppercase" 
-              style={{ fontSize: '11px', marginBottom: '4px' }}>
-            Experience
+        <div style={{ marginBottom: '14px' }}>
+          <h2 style={{ 
+            fontSize: '12px', 
+            fontWeight: 'bold', 
+            margin: '0 0 8px 0',
+            color: '#1a1a1a',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}>
+            Professional Experience
           </h2>
           
           {resume.workExperience.map((exp, index) => (
-            <div key={index} className="mb-2" style={{ marginBottom: '8px' }}>
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-xs text-gray-900" style={{ fontSize: '10px' }}>
+            <div key={index} style={{ marginBottom: '12px' }}>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'flex-start',
+                marginBottom: '4px'
+              }}>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ 
+                    fontSize: '11px', 
+                    fontWeight: '600',
+                    margin: '0',
+                    color: '#1a1a1a'
+                  }}>
                     {exp.position} | {exp.company}
                   </h3>
                 </div>
-                <div className="text-xs text-gray-600" style={{ fontSize: '8px' }}>
+                <div style={{ 
+                  fontSize: '9px', 
+                  color: '#666',
+                  marginLeft: '8px',
+                  whiteSpace: 'nowrap'
+                }}>
                   {exp.startDate} {exp.endDate && `- ${exp.endDate}`}
                 </div>
               </div>
               
               {exp.responsibilities && exp.responsibilities.length > 0 && (
-                <ul className="list-disc list-inside ml-1 text-xs text-gray-800" 
-                    style={{ fontSize: '8px', lineHeight: '1.2', marginTop: '2px' }}>
+                <div style={{ marginLeft: '12px' }}>
                   {exp.responsibilities.slice(0, 3).map((responsibility, respIndex) => (
-                    <li key={respIndex} className="leading-tight" style={{ marginBottom: '1px' }}>
-                      {responsibility}
-                    </li>
+                    <div key={respIndex} style={{ 
+                      fontSize: '9px', 
+                      lineHeight: '1.3',
+                      marginBottom: '2px',
+                      color: '#444',
+                      display: 'flex',
+                      alignItems: 'flex-start'
+                    }}>
+                      <span style={{ marginRight: '6px', fontSize: '8px' }}>•</span>
+                      <span>{responsibility}</span>
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
             </div>
           ))}
         </div>
       )}
 
-      {/* Education - Compact */}
+      {/* Education */}
       {resume.education && resume.education.length > 0 && (
-        <div className="mb-3">
-          <h2 className="text-xs font-bold mb-1 text-gray-900 uppercase" 
-              style={{ fontSize: '11px', marginBottom: '4px' }}>
+        <div style={{ marginBottom: '14px' }}>
+          <h2 style={{ 
+            fontSize: '12px', 
+            fontWeight: 'bold', 
+            margin: '0 0 6px 0',
+            color: '#1a1a1a',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}>
             Education
           </h2>
           
           {resume.education.map((edu, index) => (
-            <div key={index} className="mb-1 flex justify-between items-start" style={{ marginBottom: '4px' }}>
-              <div className="flex-1">
-                <h3 className="font-semibold text-xs text-gray-900" style={{ fontSize: '10px' }}>
+            <div key={index} style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'flex-start',
+              marginBottom: '6px'
+            }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ 
+                  fontSize: '10px', 
+                  fontWeight: '600',
+                  margin: '0 0 2px 0',
+                  color: '#1a1a1a'
+                }}>
                   {edu.degree} {edu.field && `in ${edu.field}`}
                 </h3>
-                <p className="text-xs text-gray-700" style={{ fontSize: '9px' }}>
+                <p style={{ 
+                  fontSize: '9px', 
+                  margin: '0',
+                  color: '#555'
+                }}>
                   {edu.institution}
                 </p>
               </div>
               {edu.graduationDate && (
-                <div className="text-xs text-gray-600" style={{ fontSize: '8px' }}>
+                <div style={{ 
+                  fontSize: '9px', 
+                  color: '#666',
+                  marginLeft: '8px',
+                  whiteSpace: 'nowrap'
+                }}>
                   {edu.graduationDate}
                 </div>
               )}
@@ -124,27 +210,47 @@ export const CompactResumePdfTemplate = ({ resume, className = '' }: CompactResu
         </div>
       )}
 
-      {/* Projects - Compact */}
+      {/* Projects */}
       {resume.projects && resume.projects.length > 0 && (
-        <div className="mb-3">
-          <h2 className="text-xs font-bold mb-1 text-gray-900 uppercase" 
-              style={{ fontSize: '11px', marginBottom: '4px' }}>
-            Projects
+        <div style={{ marginBottom: '14px' }}>
+          <h2 style={{ 
+            fontSize: '12px', 
+            fontWeight: 'bold', 
+            margin: '0 0 6px 0',
+            color: '#1a1a1a',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}>
+            Key Projects
           </h2>
           
-          {resume.projects.slice(0, 3).map((project, index) => (
-            <div key={index} className="mb-1" style={{ marginBottom: '4px' }}>
-              <h3 className="font-semibold text-xs text-gray-900" style={{ fontSize: '10px' }}>
+          {resume.projects.slice(0, 2).map((project, index) => (
+            <div key={index} style={{ marginBottom: '8px' }}>
+              <h3 style={{ 
+                fontSize: '10px', 
+                fontWeight: '600',
+                margin: '0 0 2px 0',
+                color: '#1a1a1a'
+              }}>
                 {project.name}
               </h3>
               {project.description && (
-                <p className="text-xs text-gray-800" style={{ fontSize: '8px', lineHeight: '1.2' }}>
-                  {project.description.length > 100 ? `${project.description.substring(0, 100)}...` : project.description}
+                <p style={{ 
+                  fontSize: '9px', 
+                  lineHeight: '1.3',
+                  margin: '0 0 2px 0',
+                  color: '#444'
+                }}>
+                  {project.description.length > 120 ? `${project.description.substring(0, 120)}...` : project.description}
                 </p>
               )}
               {project.technologies && project.technologies.length > 0 && (
-                <p className="text-xs text-gray-600" style={{ fontSize: '8px' }}>
-                  <span className="font-medium">Tech:</span> {project.technologies.join(', ')}
+                <p style={{ 
+                  fontSize: '8px', 
+                  margin: '0',
+                  color: '#666'
+                }}>
+                  <span style={{ fontWeight: '500' }}>Technologies:</span> {project.technologies.join(', ')}
                 </p>
               )}
             </div>
@@ -152,50 +258,82 @@ export const CompactResumePdfTemplate = ({ resume, className = '' }: CompactResu
         </div>
       )}
 
-      {/* Certifications - Very compact */}
-      {resume.certifications && resume.certifications.length > 0 && (
-        <div className="mb-2">
-          <h2 className="text-xs font-bold mb-1 text-gray-900 uppercase" 
-              style={{ fontSize: '11px', marginBottom: '4px' }}>
-            Certifications
-          </h2>
-          
-          <div className="text-xs text-gray-800" style={{ fontSize: '8px', lineHeight: '1.2' }}>
-            {resume.certifications.map((cert, index) => (
-              <span key={index}>
-                {cert.name}{cert.date && ` (${cert.date})`}
-                {index < resume.certifications.length - 1 && ' • '}
-              </span>
-            ))}
+      {/* Bottom Section - Certifications and Languages */}
+      <div style={{ display: 'flex', gap: '20px' }}>
+        {/* Certifications */}
+        {resume.certifications && resume.certifications.length > 0 && (
+          <div style={{ flex: 1 }}>
+            <h2 style={{ 
+              fontSize: '12px', 
+              fontWeight: 'bold', 
+              margin: '0 0 6px 0',
+              color: '#1a1a1a',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              Certifications
+            </h2>
+            <div style={{ 
+              fontSize: '9px', 
+              lineHeight: '1.3',
+              color: '#444'
+            }}>
+              {resume.certifications.map((cert, index) => (
+                <span key={index}>
+                  {cert.name}{cert.date && ` (${cert.date})`}
+                  {index < resume.certifications.length - 1 && ' • '}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Languages - Inline */}
-      {resume.languages && resume.languages.length > 0 && (
-        <div className="mb-2">
-          <h2 className="text-xs font-bold mb-1 text-gray-900 uppercase" 
-              style={{ fontSize: '11px', marginBottom: '4px' }}>
-            Languages
-          </h2>
-          <div className="text-xs text-gray-800" style={{ fontSize: '8px', lineHeight: '1.3' }}>
-            {resume.languages.join(' • ')}
+        {/* Languages */}
+        {resume.languages && resume.languages.length > 0 && (
+          <div style={{ flex: 1 }}>
+            <h2 style={{ 
+              fontSize: '12px', 
+              fontWeight: 'bold', 
+              margin: '0 0 6px 0',
+              color: '#1a1a1a',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              Languages
+            </h2>
+            <div style={{ 
+              fontSize: '9px', 
+              lineHeight: '1.3',
+              color: '#444'
+            }}>
+              {resume.languages.join(' • ')}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Additional Sections - Compact */}
+      {/* Additional Sections */}
       {resume.additionalSections && Object.keys(resume.additionalSections).length > 0 && (
-        <>
+        <div style={{ marginTop: '14px' }}>
           {Object.entries(resume.additionalSections).map(([sectionName, sectionContent]) => {
             if (Array.isArray(sectionContent) && sectionContent.length > 0) {
               return (
-                <div key={sectionName} className="mb-2">
-                  <h2 className="text-xs font-bold mb-1 text-gray-900 uppercase" 
-                      style={{ fontSize: '11px', marginBottom: '4px' }}>
+                <div key={sectionName} style={{ marginBottom: '10px' }}>
+                  <h2 style={{ 
+                    fontSize: '12px', 
+                    fontWeight: 'bold', 
+                    margin: '0 0 4px 0',
+                    color: '#1a1a1a',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
                     {sectionName}
                   </h2>
-                  <div className="text-xs text-gray-800" style={{ fontSize: '8px', lineHeight: '1.2' }}>
+                  <div style={{ 
+                    fontSize: '9px', 
+                    lineHeight: '1.3',
+                    color: '#444'
+                  }}>
                     {sectionContent.slice(0, 3).join(' • ')}
                   </div>
                 </div>
@@ -203,7 +341,7 @@ export const CompactResumePdfTemplate = ({ resume, className = '' }: CompactResu
             }
             return null;
           })}
-        </>
+        </div>
       )}
     </div>
   );
