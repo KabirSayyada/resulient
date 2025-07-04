@@ -86,12 +86,12 @@
 .dark .font-mono, 
 .dark textarea.font-mono, 
 .dark input.font-mono {
-  @apply text-gray-100;
+  color: rgb(243 244 246);
 }
 
 .dark textarea::placeholder,
 .dark input::placeholder {
-  @apply text-gray-400;
+  color: rgb(156 163 175);
 }
 
 /* Dark mode specific resume input styles */
@@ -99,60 +99,91 @@
 .dark input[type="text"],
 .dark input[type="email"],
 .dark input[type="password"] {
-  @apply bg-gray-800 border-gray-700 text-gray-100;
+  background-color: rgb(31 41 55);
+  border-color: rgb(75 85 99);
+  color: rgb(243 244 246);
 }
 
 /* Resume input container dark mode styles */
 .dark .section-card {
-  @apply bg-gray-800/80 border-gray-700;
+  background-color: rgb(31 41 55 / 0.8);
+  border-color: rgb(75 85 99);
 }
 
 /* Enhanced dark mode text visibility for all components */
 .dark .text-indigo-800 {
-  @apply text-indigo-200;
+  color: rgb(199 210 254);
 }
 
 .dark .text-indigo-700 {
-  @apply text-indigo-300;
+  color: rgb(165 180 252);
 }
 
 .dark .text-fuchsia-600, 
 .dark .text-fuchsia-700 {
-  @apply text-fuchsia-300;
+  color: rgb(240 171 252);
 }
 
 .dark .text-gray-600, 
 .dark .text-gray-700 {
-  @apply text-gray-300;
+  color: rgb(209 213 219);
 }
 
 .dark .text-gray-800 {
-  @apply text-gray-200;
+  color: rgb(229 231 235);
 }
 
 .dark .text-gray-900 {
-  @apply text-gray-100;
+  color: rgb(243 244 246);
 }
 
 .dark .bg-indigo-50 {
-  @apply bg-indigo-900/40;
+  background-color: rgb(55 48 163 / 0.4);
 }
 
 .dark .bg-gray-50 {
-  @apply bg-gray-900;
+  background-color: rgb(17 24 39);
 }
 
 .dark .bg-white {
-  @apply bg-gray-800;
+  background-color: rgb(55 65 81);
+}
+
+/* Specific fixes for template boxes and cards */
+.dark .bg-blue-50 {
+  background-color: rgb(30 58 138 / 0.2);
+}
+
+.dark .bg-blue-50 .text-gray-600 {
+  color: rgb(209 213 219);
+}
+
+.dark .text-blue-700 {
+  color: rgb(147 197 253);
+}
+
+.dark .text-blue-500 {
+  color: rgb(96 165 250);
+}
+
+/* Fix card titles and labels in dark mode */
+.dark .text-lg {
+  color: rgb(243 244 246);
+}
+
+/* Ensure placeholder text is visible */
+.dark textarea::placeholder,
+.dark input::placeholder {
+  color: rgb(156 163 175);
 }
 
 /* Fix for hard-coded colors that need better contrast */
 .dark .text-white {
-  @apply text-gray-100;
+  color: rgb(243 244 246);
 }
 
 .dark .text-black {
-  @apply text-gray-100;
+  color: rgb(243 244 246);
 }
 
 /* High contrast text on bright elements in dark mode */
@@ -160,12 +191,12 @@
 .dark .bg-white .text-gray-700,
 .dark .bg-white .text-gray-800,
 .dark .bg-white .text-gray-900 {
-  @apply text-gray-800;
+  color: rgb(31 41 55);
 }
 
 .dark .bg-gradient-to-r .text-white,
 .dark .bg-gradient-to-br .text-white {
-  @apply text-white;
+  color: white;
 }
 
 /* Ensure text on light/bright backgrounds is dark in dark mode */
@@ -173,7 +204,7 @@
 .dark .bg-white\/70 *,
 .dark .bg-white\/80 *,
 .dark .bg-white\/90 * {
-  @apply text-gray-900;
+  color: rgb(17 24 39);
 }
 
 .dark .bg-gray-50 *,
@@ -186,7 +217,7 @@
 .dark .bg-amber-50 *,
 .dark .bg-orange-50 *,
 .dark .bg-red-50 * {
-  @apply text-gray-800;
+  color: rgb(31 41 55);
 }
 
 /* Specific contrast fixes for light colored elements */
@@ -196,21 +227,21 @@
 .dark .bg-gradient-to-br.from-indigo-50,
 .dark .bg-gradient-to-r.from-purple-50,
 .dark .bg-gradient-to-br.from-purple-50 {
-  @apply text-gray-800;
+  color: rgb(31 41 55);
 }
 
 /* Override for elements that should remain light text on dark backgrounds */
 .dark .bg-gradient-to-r.from-indigo-600,
 .dark .bg-gradient-to-r.from-purple-600,
 .dark .bg-gradient-to-r.from-blue-600 {
-  @apply text-white;
+  color: white;
 }
 
 /* Ensure buttons and badges have proper contrast */
 .dark .bg-white .badge,
 .dark .bg-white .btn,
 .dark .bg-white button {
-  @apply text-gray-800;
+  color: rgb(31 41 55);
 }
 
 /* Card content in dark mode should have proper contrast */
@@ -218,84 +249,88 @@
 .dark .bg-white .card-header,
 .dark .bg-white .card-title,
 .dark .bg-white .card-description {
-  @apply text-gray-800;
+  color: rgb(31 41 55);
 }
 
 /* Better visibility for badges and buttons in dark mode */
 .dark .bg-gradient-to-r.from-green-500 {
-  @apply from-green-600;
+  background-image: linear-gradient(to right, rgb(22 163 74), var(--tw-gradient-stops));
 }
 
 .dark .bg-gradient-to-r.from-blue-500 {
-  @apply from-blue-600;
+  background-image: linear-gradient(to right, rgb(37 99 235), var(--tw-gradient-stops));
 }
 
 .dark .bg-gradient-to-r.from-yellow-500 {
-  @apply from-yellow-600;
+  background-image: linear-gradient(to right, rgb(202 138 4), var(--tw-gradient-stops));
 }
 
 .dark .bg-gradient-to-r.from-purple-500 {
-  @apply from-purple-600;
+  background-image: linear-gradient(to right, rgb(147 51 234), var(--tw-gradient-stops));
 }
 
 .dark .bg-gradient-to-r.from-indigo-500 {
-  @apply from-indigo-600;
+  background-image: linear-gradient(to right, rgb(99 102 241), var(--tw-gradient-stops));
 }
 
 /* Better contrast for overlays and semi-transparent backgrounds */
 .dark .bg-white\/50 {
-  @apply bg-gray-800/70;
+  background-color: rgb(55 65 81 / 0.7);
 }
 
 .dark .bg-white\/90 {
-  @apply bg-gray-800/95;
+  background-color: rgb(55 65 81 / 0.95);
 }
 
 .dark .bg-black\/60 {
-  @apply bg-gray-900/80;
+  background-color: rgb(17 24 39 / 0.8);
 }
 
 /* Improve dropdown and popover visibility */
 .dark [role="menu"],
 .dark [role="listbox"],
 .dark .dropdown-content {
-  @apply bg-gray-800 border-gray-700 text-gray-100;
+  background-color: rgb(55 65 81);
+  border-color: rgb(75 85 99);
+  color: rgb(243 244 246);
 }
 
 /* Better visibility for form elements */
 .dark .border-gray-200 {
-  @apply border-gray-700;
+  border-color: rgb(75 85 99);
 }
 
 .dark .border-gray-300 {
-  @apply border-gray-600;
+  border-color: rgb(107 114 128);
 }
 
 /* Enhanced visibility for cards and containers */
 .dark .shadow-lg {
-  @apply shadow-gray-900/50;
+  box-shadow: 0 10px 15px -3px rgb(17 24 39 / 0.5), 0 4px 6px -4px rgb(17 24 39 / 0.5);
 }
 
 .dark .shadow-xl {
-  @apply shadow-gray-900/60;
+  box-shadow: 0 20px 25px -5px rgb(17 24 39 / 0.6), 0 8px 10px -6px rgb(17 24 39 / 0.6);
 }
 
 .dark .shadow-2xl {
-  @apply shadow-gray-900/70;
+  box-shadow: 0 25px 50px -12px rgb(17 24 39 / 0.7);
 }
 
 /* Ensure chart data is visible in dark mode */
 .dark .recharts-text {
-  @apply fill-gray-300;
+  fill: rgb(209 213 219);
 }
 
 .dark .recharts-cartesian-grid-horizontal line,
 .dark .recharts-cartesian-grid-vertical line {
-  @apply stroke-gray-700;
+  stroke: rgb(75 85 99);
 }
 
 .dark .recharts-tooltip-wrapper .recharts-default-tooltip {
-  @apply bg-gray-800 border-gray-700 text-gray-200;
+  background-color: rgb(55 65 81);
+  border-color: rgb(75 85 99);
+  color: rgb(229 231 235);
 }
 
 /* Blog content styling */
