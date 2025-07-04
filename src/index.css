@@ -40,30 +40,30 @@
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
  
-    --card: 222.2 84% 4.9%;
+    --card: 217.2 32.6% 12%;
     --card-foreground: 210 40% 98%;
- 
-    --popover: 222.2 84% 4.9%;
+
+    --popover: 217.2 32.6% 12%;
     --popover-foreground: 210 40% 98%;
- 
+
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
- 
-    --secondary: 217.2 32.6% 17.5%;
+
+    --secondary: 217.2 32.6% 20%;
     --secondary-foreground: 210 40% 98%;
- 
+
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
- 
-    --accent: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 70%;
+
+    --accent: 217.2 32.6% 20%;
     --accent-foreground: 210 40% 98%;
- 
-    --destructive: 0 62.8% 30.6%;
+
+    --destructive: 0 62.8% 50%;
     --destructive-foreground: 210 40% 98%;
- 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+
+    --border: 217.2 32.6% 20%;
+    --input: 217.2 32.6% 15%;
+    --ring: 217.2 91.2% 59.8%;
   }
 }
  
@@ -107,7 +107,7 @@
   @apply bg-gray-800/80 border-gray-700;
 }
 
-/* Enhanced dark mode text visibility for industry leaderboard */
+/* Enhanced dark mode text visibility for all components */
 .dark .text-indigo-800 {
   @apply text-indigo-200;
 }
@@ -126,12 +126,96 @@
   @apply text-gray-300;
 }
 
+.dark .text-gray-800 {
+  @apply text-gray-200;
+}
+
+.dark .text-gray-900 {
+  @apply text-gray-100;
+}
+
 .dark .bg-indigo-50 {
   @apply bg-indigo-900/40;
 }
 
+.dark .bg-gray-50 {
+  @apply bg-gray-900;
+}
+
 .dark .bg-white {
   @apply bg-gray-800;
+}
+
+/* Fix for hard-coded colors that need better contrast */
+.dark .text-white {
+  @apply text-gray-100;
+}
+
+.dark .text-black {
+  @apply text-gray-100;
+}
+
+/* Better visibility for badges and buttons in dark mode */
+.dark .bg-gradient-to-r.from-green-500 {
+  @apply from-green-600;
+}
+
+.dark .bg-gradient-to-r.from-blue-500 {
+  @apply from-blue-600;
+}
+
+.dark .bg-gradient-to-r.from-yellow-500 {
+  @apply from-yellow-600;
+}
+
+.dark .bg-gradient-to-r.from-purple-500 {
+  @apply from-purple-600;
+}
+
+.dark .bg-gradient-to-r.from-indigo-500 {
+  @apply from-indigo-600;
+}
+
+/* Better contrast for overlays and semi-transparent backgrounds */
+.dark .bg-white\/50 {
+  @apply bg-gray-800/70;
+}
+
+.dark .bg-white\/90 {
+  @apply bg-gray-800/95;
+}
+
+.dark .bg-black\/60 {
+  @apply bg-gray-900/80;
+}
+
+/* Improve dropdown and popover visibility */
+.dark [role="menu"],
+.dark [role="listbox"],
+.dark .dropdown-content {
+  @apply bg-gray-800 border-gray-700 text-gray-100;
+}
+
+/* Better visibility for form elements */
+.dark .border-gray-200 {
+  @apply border-gray-700;
+}
+
+.dark .border-gray-300 {
+  @apply border-gray-600;
+}
+
+/* Enhanced visibility for cards and containers */
+.dark .shadow-lg {
+  @apply shadow-gray-900/50;
+}
+
+.dark .shadow-xl {
+  @apply shadow-gray-900/60;
+}
+
+.dark .shadow-2xl {
+  @apply shadow-gray-900/70;
 }
 
 /* Ensure chart data is visible in dark mode */
