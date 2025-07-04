@@ -109,16 +109,7 @@ const Index = () => {
     });
   }, [sourceJobData]);
 
-  useEffect(() => {
-    if (highestScoringResume && jobDescription && !resumeContent) {
-      setResumeContent(highestScoringResume.resume_content);
-      
-      toast({
-        title: "Resume Auto-Loaded",
-        description: `Your highest scoring resume (${highestScoringResume.overall_score}/100) has been loaded automatically.`,
-      });
-    }
-  }, [highestScoringResume, jobDescription, resumeContent, toast]);
+  // Removed auto-loading of highest scoring resume
 
   const handleJobOptimizationAnimationComplete = () => {
     console.log('Job optimization animation completed');

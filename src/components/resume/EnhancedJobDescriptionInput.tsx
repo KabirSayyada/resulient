@@ -64,9 +64,7 @@ export const EnhancedJobDescriptionInput = ({ jobDescription, setJobDescription 
             <Badge 
               key={index}
               variant="secondary" 
-              className={`flex items-center gap-1 px-3 py-1 bg-white/80 dark:bg-gray-800/80 border transition-all duration-300 delay-${index * 200} ${
-                jobDescription ? 'animate-pulse' : ''
-              }`}
+              className="flex items-center gap-1 px-3 py-1 bg-white/80 dark:bg-gray-800/80 border transition-all duration-300"
             >
               <step.icon className={`h-3 w-3 ${step.color}`} />
               <span className="text-xs font-medium">{step.text}</span>
@@ -117,9 +115,7 @@ export const EnhancedJobDescriptionInput = ({ jobDescription, setJobDescription 
         
         {/* Enhanced tip section */}
         <div className="relative">
-          <div className={`bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 border-l-4 border-blue-500 rounded-lg p-4 transition-all duration-300 ${
-            jobDescription ? 'animate-pulse' : ''
-          }`}>
+          <div className="bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 border-l-4 border-blue-500 rounded-lg p-4 transition-all duration-300">
             <div className="flex items-start gap-3">
               <div className="p-2 bg-blue-500 rounded-lg">
                 <Sparkles className="h-4 w-4 text-white" />
