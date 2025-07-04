@@ -11,6 +11,18 @@ interface VisibleReportContentProps {
 }
 
 export const VisibleReportContent = ({ scoreData }: VisibleReportContentProps) => {
+  const getScoreGradient = (score: number) => {
+    if (score >= 80) return "from-emerald-500 to-green-600";
+    if (score >= 60) return "from-yellow-500 to-orange-500";
+    return "from-red-500 to-pink-600";
+  };
+
+  const getScoreRing = (score: number) => {
+    if (score >= 80) return "border-emerald-400";
+    if (score >= 60) return "border-yellow-400";
+    return "border-red-400";
+  };
+
   return (
     <div className="relative overflow-hidden">
       {/* Enhanced background */}
@@ -44,6 +56,34 @@ export const VisibleReportContent = ({ scoreData }: VisibleReportContentProps) =
               <Sparkles className="h-5 w-5 mr-2 animate-pulse" />
               Performance: {scoreData.percentile} • {scoreData.numSimilarResumes?.toLocaleString()} profiles analyzed
             </Badge>
+          </div>
+
+          {/* Overall Score Display */}
+          <div className="mt-8">
+            <div className="relative inline-block">
+              <div className={`absolute inset-0 rounded-full bg-gradient-to-r ${getScoreGradient(scoreData.overallScore)} opacity-20 animate-pulse scale-110`}></div>
+              <div className={`relative w-32 h-32 mx-auto rounded-full border-8 ${getScoreRing(scoreData.overallScore)} bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center shadow-2xl`}>
+                <div className="text-center">
+                  <div className={`text-4xl font-extrabold bg-gradient-to-r ${getScoreGradient(scoreData.overallScore)} bg-clip-text text-transparent`}>
+                    {scoreData.overallScore}
+                  </div>
+                  <div className="text-xs font-semibold text-gray-600 dark:text-gray-400">/100</div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4">
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">Overall Resume Score</h3>
+              <div className="flex items-center justify-center gap-4 mt-2">
+                <Badge className={`bg-gradient-to-r ${getScoreGradient(scoreData.overallScore)} text-white border-0 shadow-lg`}>
+                  <Sparkles className="h-3 w-3 mr-1 animate-pulse" />
+                  {scoreData.percentile}
+                </Badge>
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <Building className="h-4 w-4" />
+                  <span>{scoreData.Industry}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
