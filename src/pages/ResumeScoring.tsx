@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, FileText, Diamond } from "lucide-react";
 import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { ResumeScoreModal } from "@/components/resume/ResumeScoreModal";
+import { OptimizationAnimation } from "@/components/resume/OptimizationAnimation";
 import { supabase } from "@/integrations/supabase/client";
 import { ScoreData, ResumeScoreRecord } from "@/types/resume";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ const ResumeScoring = () => {
   const [activeTab, setActiveTab] = useState("current");
   const [hasScored, setHasScored] = useState(false);
   const [showScoreModal, setShowScoreModal] = useState(false);
+  const [showOptimizationAnimation, setShowOptimizationAnimation] = useState(false);
   const { scoreData, scoreHistory, setScoreHistory, isScoring, hasReachedLimit, handleScoreResume } = useResumeScoring(user?.id);
   const { subscription } = useSubscription();
   const { usage, showLimitReachedMessage, checkUsage } = useUsageLimits();
@@ -119,8 +121,8 @@ const ResumeScoring = () => {
       return;
     }
 
-    // Show modal when scoring starts
-    setShowScoreModal(true);
+    // Show optimization animation first
+    setShowOptimizationAnimation(true);
     
     const dailyLimit = subscription.limits.resumeScorings;
     await handleScoreResume(resumeContent, dailyLimit);
@@ -130,6 +132,12 @@ const ResumeScoring = () => {
     }
     
     await checkUsage();
+  };
+
+  const handleOptimizationComplete = () => {
+    // Hide optimization animation and show modal
+    setShowOptimizationAnimation(false);
+    setShowScoreModal(true);
   };
 
   const showUpgradeAlert = (usage.resumeScorings.hasReachedLimit || hasScored) && subscription.tier === "free";
@@ -279,12 +287,20 @@ const ResumeScoring = () => {
         <GuidedTour />
       </div>
 
-      {/* Score Modal */}
+      {/* Optimization Animation - Full Screen */}
+      {showOptimizationAnimation && (
+        <OptimizationAnimation 
+          isOptimizing={isScoring}
+          onComplete={handleOptimizationComplete}
+        />
+      )}
+
+      {/* Score Modal - Opens after optimization completes */}
       <ResumeScoreModal
         isOpen={showScoreModal}
         onClose={() => setShowScoreModal(false)}
         scoreData={scoreData}
-        isScoring={isScoring}
+        isScoring={false}
       />
     </>
   );
