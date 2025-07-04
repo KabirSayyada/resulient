@@ -13,6 +13,7 @@ import { OptimizedResumeContent } from "./components/OptimizedResumeContent";
 import { DownloadReportButton } from "./components/DownloadReportButton";
 import { generatePDFFromElement } from "@/utils/reportGenerationUtils";
 import { generateTextFormattedPDF } from "@/utils/textFormattedPdfGenerator";
+import { generateResumePDFFromContent, parseOptimizedResumeContent, generateDirectResumePDF } from "@/utils/resumePdfGenerator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { 
   formatResumeContent, 
@@ -92,6 +93,42 @@ export const OptimizedResumeDisplay = ({
     }
   };
 
+  const handleCompactResumePdfDownload = async () => {
+    try {
+      setIsPdfDownloading(true);
+      
+      toast({
+        title: "Preparing Compact PDF Resume",
+        description: "Generating your compact ATS-optimized resume in PDF format...",
+      });
+
+      const parsedResume = parseOptimizedResumeContent(formattedResumeContent);
+      const success = generateResumePDFFromContent(
+        formattedResumeContent,
+        `compact-resume-${new Date().toISOString().split('T')[0]}.pdf`
+      );
+
+      if (success) {
+        toast({
+          title: "Compact PDF Resume Downloaded Successfully!",
+          description: "Your compact ATS-optimized resume has been downloaded as a PDF.",
+        });
+      } else {
+        throw new Error("PDF generation failed");
+      }
+      
+    } catch (error) {
+      console.error('Error downloading compact PDF resume:', error);
+      toast({
+        title: "PDF Download Failed",
+        description: "There was an error generating your compact PDF resume. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPdfDownloading(false);
+    }
+  };
+
   const formatResumeForTextDownload = (content: string): string => {
     let formatted = content
       .replace(/\r\n/g, '\n')
@@ -154,20 +191,39 @@ export const OptimizedResumeDisplay = ({
                     Download Your Optimized Resume
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Download your AI-optimized resume as a professionally formatted PDF document.
+                    Choose from our professionally formatted PDF templates.
                   </p>
                 </div>
                 
-                <Button
-                  onClick={handleOptimizedResumePdfDownload}
-                  disabled={isPdfDownloading}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2"
-                >
-                  <FileDown className="h-4 w-4" />
-                  {isPdfDownloading ? 'Generating PDF...' : 'Download Resume PDF'}
-                </Button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <div className="border border-emerald-300 dark:border-emerald-600 rounded-lg p-4 bg-white dark:bg-gray-800">
+                    <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-2">Standard Format</h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">Classic professional layout with detailed sections</p>
+                    <Button
+                      onClick={handleOptimizedResumePdfDownload}
+                      disabled={isPdfDownloading}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 justify-center"
+                    >
+                      <FileDown className="h-4 w-4" />
+                      {isPdfDownloading ? 'Generating...' : 'Download Standard'}
+                    </Button>
+                  </div>
+
+                  <div className="border border-blue-300 dark:border-blue-600 rounded-lg p-4 bg-white dark:bg-gray-800">
+                    <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-2">Compact Format</h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">Space-efficient layout for one-page resumes</p>
+                    <Button
+                      onClick={handleCompactResumePdfDownload}
+                      disabled={isPdfDownloading}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 justify-center"
+                    >
+                      <FileDown className="h-4 w-4" />
+                      {isPdfDownloading ? 'Generating...' : 'Download Compact'}
+                    </Button>
+                  </div>
+                </div>
                 
-                <div className="text-sm text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mt-4">
+                <div className="text-sm text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                   <p className="font-medium mb-2">PDF Features:</p>
                   <ul className="list-disc list-inside space-y-1">
                     <li>ATS-optimized formatting for better parsing</li>
