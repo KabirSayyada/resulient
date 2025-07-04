@@ -6,7 +6,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { ScoreHistory } from "@/components/resume/ScoreHistory";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, FileText, Diamond } from "lucide-react";
+import { ArrowLeft, FileText, Diamond, Sparkles, Target, Zap, TrendingUp, BarChart3, Clock, Shield } from "lucide-react";
 import { ResumeScoringForm } from "@/components/resume/ResumeScoringForm";
 import { ResumeScoreModal } from "@/components/resume/ResumeScoreModal";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,7 @@ import { GuidedTour } from "@/components/onboarding/GuidedTour";
 import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
 import { SubscriptionTierIndicator } from "@/components/subscription/SubscriptionTierIndicator";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
+import { Badge } from "@/components/ui/badge";
 
 const ResumeScoring = () => {
   const { user, loading: authLoading } = useAuth();
@@ -107,8 +108,19 @@ const ResumeScoring = () => {
 
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <span className="text-lg font-semibold">Loading...</span>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 to-blue-950">
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="absolute inset-0 w-16 h-16 border-4 border-purple-300 border-b-transparent rounded-full animate-spin animate-reverse"></div>
+          </div>
+          <div className="text-center space-y-2">
+            <h3 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-purple-600 bg-clip-text text-transparent">
+              Loading Resume Analyzer
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400">Preparing your workspace...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -119,7 +131,6 @@ const ResumeScoring = () => {
       return;
     }
 
-    // Show modal when scoring starts
     setShowScoreModal(true);
     
     const dailyLimit = subscription.limits.resumeScorings;
@@ -135,224 +146,246 @@ const ResumeScoring = () => {
   const showUpgradeAlert = (usage.resumeScorings.hasReachedLimit || hasScored) && subscription.tier === "free";
   const isButtonDisabled = usage.resumeScorings.hasReachedLimit || (subscription.tier === "free" && hasScored);
 
+  const features = [
+    { icon: TrendingUp, text: "AI Analysis", color: "from-emerald-500 to-teal-600" },
+    { icon: BarChart3, text: "Industry Insights", color: "from-blue-500 to-indigo-600" },
+    { icon: Shield, text: "ATS Compatible", color: "from-purple-500 to-pink-600" },
+    { icon: Target, text: "Job Optimized", color: "from-orange-500 to-red-600" }
+  ];
+
   return (
     <>
-      <div className={`min-h-screen transition-all duration-500 py-4 sm:py-8 px-3 sm:px-6 lg:px-8 ${
+      <div className={`min-h-screen relative overflow-hidden transition-all duration-700 ${
         subscription.tier === "premium" 
-          ? "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950 dark:via-indigo-950 dark:to-purple-950" 
+          ? "bg-gradient-to-br from-blue-50 via-indigo-50/80 to-purple-50 dark:from-blue-950 dark:via-indigo-950/80 dark:to-purple-950" 
           : subscription.tier === "platinum" 
-            ? "bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 dark:from-purple-950 dark:via-indigo-950 dark:to-pink-950" 
-            : "bg-gradient-to-br from-fuchsia-50 via-indigo-50 to-blue-50 dark:from-fuchsia-950 dark:via-indigo-950 dark:to-blue-950"
+            ? "bg-gradient-to-br from-purple-50 via-indigo-50/80 to-pink-50 dark:from-purple-950 dark:via-indigo-950/80 dark:to-pink-950" 
+            : "bg-gradient-to-br from-emerald-50 via-blue-50/80 to-indigo-50 dark:from-emerald-950 dark:via-blue-950/80 dark:to-indigo-950"
       }`}>
-        {/* Animated background elements */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-purple-200/10 to-blue-200/10 rounded-full -translate-y-48 -translate-x-48 animate-pulse"></div>
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-tl from-indigo-200/10 to-fuchsia-200/10 rounded-full translate-y-40 translate-x-40 animate-pulse delay-1000"></div>
         
-        <div className="max-w-4xl mx-auto relative z-10">
-          {/* Enhanced Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <Link to="/ats-resume-builder" className="flex items-center group">
-                <span className="font-brand text-3xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-500 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none group-hover:scale-105 transition-transform duration-300">
-                  Resulient
-                </span>
-              </Link>
-              <div className="relative">
-                <span className="rounded-full px-3 py-2 text-xs sm:text-sm font-semibold bg-gradient-to-r from-fuchsia-100 to-purple-100 text-fuchsia-700 dark:from-fuchsia-900/60 dark:to-purple-900/60 dark:text-fuchsia-300 shadow-lg border border-fuchsia-200 dark:border-fuchsia-700 animate-fade-in whitespace-nowrap backdrop-blur-sm">
-                  ✨ Resume Score Analyzer
-                </span>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-fuchsia-500 rounded-full animate-pulse"></div>
-              </div>
-            </div>
-            <div className="flex justify-between items-center w-full sm:w-auto mt-2 sm:mt-0">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="flex items-center gap-1 sm:hidden hover:scale-105 transition-transform duration-200"
-                asChild
-              >
-                <Link to="/ats-resume-builder">
-                  <ArrowLeft className="h-4 w-4" />
-                  Back
+        {/* Enhanced animated background elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-emerald-200/20 via-blue-200/15 to-purple-200/20 dark:from-emerald-800/10 dark:via-blue-800/8 dark:to-purple-800/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-purple-200/20 via-pink-200/15 to-indigo-200/20 dark:from-purple-800/10 dark:via-pink-800/8 dark:to-indigo-800/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-blue-200/10 to-emerald-200/10 dark:from-blue-800/5 dark:to-emerald-800/5 rounded-full blur-2xl animate-pulse delay-2000"></div>
+        </div>
+        
+        <div className="relative z-10 py-6 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto">
+            {/* Enhanced Header Section */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
+              <div className="flex items-center gap-4">
+                <Link to="/ats-resume-builder" className="group">
+                  <div className="flex items-center gap-3">
+                    <span className="font-brand text-4xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 bg-clip-text drop-shadow-lg tracking-tight select-none group-hover:scale-105 transition-transform duration-300">
+                      Resulient
+                    </span>
+                    <div className="flex flex-col gap-2">
+                      <Badge className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 px-4 py-2 text-sm font-semibold">
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Resume Analyzer
+                      </Badge>
+                    </div>
+                  </div>
                 </Link>
-              </Button>
-              <div className="flex items-center gap-2 sm:gap-3">
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex items-center gap-2 hover:scale-105 transition-all duration-200 hover:bg-white/20 dark:hover:bg-gray-800/20 backdrop-blur-sm rounded-xl border border-white/20 dark:border-gray-700/20"
+                  asChild
+                >
+                  <Link to="/ats-resume-builder">
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">Back to Builder</span>
+                    <span className="sm:hidden">Back</span>
+                  </Link>
+                </Button>
                 <SubscriptionTierIndicator variant="badge" size="sm" className="animate-fade-in" />
                 <UserMenuWithTheme />
               </div>
             </div>
-          </div>
 
-          {/* Enhanced Hero Section */}
-          <div className={`relative overflow-hidden transition-all duration-500 ${
-            subscription.tier === "premium" 
-              ? "bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/80 dark:from-blue-950/80 dark:via-indigo-950/60 dark:to-purple-950/80 border-blue-200/60 dark:border-blue-800/60" 
-              : subscription.tier === "platinum" 
-                ? "bg-gradient-to-br from-purple-50/80 via-indigo-50/60 to-pink-50/80 dark:from-purple-950/80 dark:via-indigo-950/60 dark:to-pink-950/80 border-purple-200/60 dark:border-purple-800/60" 
-                : "bg-gradient-to-br from-fuchsia-50/80 via-indigo-50/60 to-blue-50/80 dark:from-fuchsia-950/80 dark:via-indigo-950/60 dark:to-blue-950/80 border-fuchsia-200/60 dark:border-fuchsia-800/60"
-          } rounded-2xl border shadow-xl backdrop-blur-sm px-6 py-8 mb-8 text-center max-w-3xl mx-auto`}>
-            {/* Animated background elements */}
-            <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-fuchsia-200/20 to-purple-200/20 rounded-full -translate-y-16 -translate-x-16 animate-pulse"></div>
-            <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-indigo-200/20 to-blue-200/20 rounded-full translate-y-12 translate-x-12 animate-pulse delay-1000"></div>
-            
-            <div className="relative z-10">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <div className="p-3 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-xl shadow-lg animate-pulse">
-                  <FileText className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-lg sm:text-xl font-bold text-indigo-900 dark:text-indigo-200 leading-snug flex flex-wrap items-center justify-center gap-2">
-                  {subscription.tier !== "free" && (
-                    <SubscriptionTierIndicator variant="icon" size="lg" showTooltip={false} className="animate-bounce" />
-                  )}
-                  <span className="text-fuchsia-700 dark:text-fuchsia-400 font-extrabold">
-                    {subscription.tier !== "free" ? 
-                      `${subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1)} Unlimited Access` : 
-                      "New!"
-                    } 
-                  </span>
-                </div>
-              </div>
-              
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-                Unlock insights with Resulient Resume Scoring
-              </h1>
-              
-              <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-                Instantly compare your resume to <span className="font-bold text-indigo-700 dark:text-indigo-400">hundreds of thousands</span> of real career journeys. 
-                Using Artificial Intelligence, Resulient shows you exactly where you stand among your competition—so you know how to outshine other applicants.
-              </p>
-              
-              {subscription.tier !== "free" && (
-                <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-indigo-700 dark:text-indigo-400 bg-white/60 dark:bg-gray-800/60 px-4 py-2 rounded-full backdrop-blur-sm">
-                  <Diamond className="h-4 w-4 animate-pulse" />
-                  <span>
-                    {subscription.tier === "premium" ? 
-                      "You have unlimited resume scoring with your Premium plan!" : 
-                      "You have unlimited resume scoring with your Platinum plan!"}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Enhanced Back Button */}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mb-6 hidden sm:flex items-center gap-2 hover:scale-105 transition-all duration-200 hover:bg-white/20 dark:hover:bg-gray-800/20 backdrop-blur-sm"
-            asChild
-          >
-            <Link to="/ats-resume-builder">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Resume Builder
-            </Link>
-          </Button>
-
-          <MainNavigation />
-
-          {showUpgradeAlert && (
-            <div className="mb-6 animate-fade-in">
-              <UseSubscriptionAlert 
-                subscriptionTier={subscription.tier} 
-                requiredTier="premium" 
-                message="You've reached your daily limit for resume scoring. Free users can perform 1 resume scoring per day. Upgrade to Premium or Platinum for unlimited usage."
-              />
-            </div>
-          )}
-
-          {/* Enhanced Tabs */}
-          <Tabs defaultValue="current" className="mb-8" onValueChange={setActiveTab}>
-            <TabsList className={`grid w-full max-w-md mx-auto grid-cols-2 rounded-xl shadow-lg overflow-hidden transition-all duration-300 ${
-              subscription.tier === "premium" 
-                ? "bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 border-blue-200 dark:border-blue-700" 
-                : subscription.tier === "platinum" 
-                  ? "bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 border-purple-200 dark:border-purple-700" 
-                  : "bg-gradient-to-r from-fuchsia-100 to-indigo-100 dark:from-fuchsia-900/50 dark:to-indigo-900/50 border-fuchsia-200 dark:border-fuchsia-700"
-            } border backdrop-blur-sm`}>
-              <TabsTrigger 
-                value="current" 
-                className="data-[state=active]:bg-white/80 dark:data-[state=active]:bg-gray-800/80 data-[state=active]:shadow-md transition-all duration-200 font-semibold hover:scale-105"
-              >
-                New Analysis
-              </TabsTrigger>
-              <TabsTrigger 
-                value="history"
-                className="data-[state=active]:bg-white/80 dark:data-[state=active]:bg-gray-800/80 data-[state=active]:shadow-md transition-all duration-200 font-semibold hover:scale-105"
-              >
-                Score History
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="current" className="space-y-6 mt-8">
-              <Card className={`relative overflow-hidden transition-all duration-500 hover:shadow-xl animate-fade-in ${
+            {/* Enhanced Hero Section */}
+            <div className="relative mb-8">
+              <Card className={`relative overflow-hidden transition-all duration-500 hover:shadow-2xl ${
                 subscription.tier === "premium" 
-                  ? "bg-gradient-to-br from-white via-blue-50/80 to-indigo-100/80 border-t-blue-500 shadow-blue-100/50 dark:shadow-blue-900/30" 
+                  ? "bg-gradient-to-br from-white/90 via-blue-50/60 to-indigo-50/90 dark:from-slate-900/90 dark:via-blue-950/60 dark:to-indigo-950/90 border-blue-200/60 dark:border-blue-800/60" 
                   : subscription.tier === "platinum" 
-                    ? "bg-gradient-to-br from-white via-purple-50/80 to-pink-100/80 border-t-purple-500 shadow-purple-100/50 dark:shadow-purple-900/30" 
-                    : "bg-gradient-to-br from-white via-fuchsia-50/80 to-indigo-100/80 border-t-fuchsia-500 shadow-fuchsia-100/50 dark:shadow-fuchsia-900/30"
-              } shadow-lg border-t-4 backdrop-blur-sm`}>
-                {/* Subtle animated background */}
-                <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-purple-100/20 to-blue-100/20 rounded-full -translate-y-20 translate-x-20 animate-pulse delay-500"></div>
+                    ? "bg-gradient-to-br from-white/90 via-purple-50/60 to-pink-50/90 dark:from-slate-900/90 dark:via-purple-950/60 dark:to-pink-950/90 border-purple-200/60 dark:border-purple-800/60" 
+                    : "bg-gradient-to-br from-white/90 via-emerald-50/60 to-blue-50/90 dark:from-slate-900/90 dark:via-emerald-950/60 dark:to-blue-950/90 border-emerald-200/60 dark:border-emerald-800/60"
+              } shadow-2xl border-2 backdrop-blur-sm`}>
                 
-                <CardContent className="space-y-6 pt-6 relative z-10">
-                  {subscription.tier !== "free" && (
-                    <div className="flex items-center justify-center gap-2 text-sm font-semibold bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 text-indigo-700 dark:text-indigo-300 px-4 py-2 rounded-full shadow-sm animate-fade-in">
-                      <Diamond className="h-4 w-4 animate-pulse" />
-                      <span>
-                        {subscription.tier === "premium" ? 
-                          "Unlimited scoring with Premium" : 
-                          "Unlimited scoring with Platinum"}
-                      </span>
+                {/* Animated background pattern */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute -top-16 -right-16 w-32 h-32 bg-gradient-to-br from-emerald-200/20 to-blue-200/20 dark:from-emerald-800/10 dark:to-blue-800/10 rounded-full blur-2xl animate-pulse"></div>
+                  <div className="absolute -bottom-16 -left-16 w-28 h-28 bg-gradient-to-tr from-purple-200/20 to-pink-200/20 dark:from-purple-800/10 dark:to-pink-800/10 rounded-full blur-2xl animate-pulse delay-1000"></div>
+                </div>
+                
+                <CardContent className="p-8 sm:p-12 relative z-10">
+                  <div className="text-center space-y-8">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center gap-3 mb-6">
+                        <div className="p-4 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-2xl shadow-xl animate-pulse">
+                          <FileText className="h-8 w-8 text-white" />
+                        </div>
+                        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
+                          AI Resume Analyzer
+                        </h1>
+                      </div>
+                      
+                      <p className="text-lg sm:text-xl text-slate-700 dark:text-slate-300 max-w-4xl mx-auto leading-relaxed">
+                        Get instant, AI-powered insights into your resume's performance. Compare against 
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400 mx-1">hundreds of thousands</span> 
+                        of real career profiles and discover exactly where you stand in your industry.
+                      </p>
                     </div>
-                  )}
-                  {subscription.tier === "free" && (
-                    <div className="flex items-center justify-center gap-2 text-sm font-medium bg-gradient-to-r from-gray-100 to-blue-100 dark:from-gray-800/50 dark:to-blue-800/50 text-gray-600 dark:text-gray-400 px-4 py-2 rounded-full shadow-sm animate-fade-in">
-                      <span>
-                        Daily limit: {hasScored ? 1 : usage.resumeScorings.used}/{usage.resumeScorings.limit} resume scoring used
-                      </span>
+
+                    {/* Enhanced Feature Pills */}
+                    <div className="flex flex-wrap justify-center gap-4">
+                      {features.map((feature, index) => (
+                        <div 
+                          key={index}
+                          className={`group flex items-center gap-3 px-6 py-4 bg-gradient-to-r ${feature.color} text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-default backdrop-blur-sm`}
+                        >
+                          <feature.icon className="h-5 w-5 group-hover:animate-pulse" />
+                          <span className="font-semibold">{feature.text}</span>
+                        </div>
+                      ))}
                     </div>
-                  )}
-                  <ResumeScoringForm
-                    scoringMode="resumeOnly"
-                    setScoringMode={() => {}}
-                    resumeContent={resumeContent}
-                    setResumeContent={setResumeContent}
-                    isScoring={isScoring}
-                    onScore={onScore}
-                    disableButton={isButtonDisabled}
-                  />
+
+                    {/* Subscription Status */}
+                    {subscription.tier !== "free" ? (
+                      <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-emerald-100 to-blue-100 dark:from-emerald-900/30 dark:to-blue-900/30 border border-emerald-200 dark:border-emerald-700/50 rounded-2xl shadow-lg">
+                        <Diamond className="h-5 w-5 text-emerald-600 dark:text-emerald-400 animate-pulse" />
+                        <span className="font-semibold text-emerald-700 dark:text-emerald-300">
+                          {subscription.tier === "premium" ? 
+                            "Unlimited Analysis with Premium" : 
+                            "Unlimited Analysis with Platinum"}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-700/50 rounded-2xl shadow-lg">
+                        <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        <span className="font-semibold text-amber-700 dark:text-amber-300">
+                          Free tier: {hasScored ? 1 : usage.resumeScorings.used}/1 analysis used
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="history" className="mt-8">
-              {scoreHistory.length > 0 ? (
-                <div className="animate-fade-in">
-                  <ScoreHistory scores={scoreHistory} />
-                </div>
-              ) : (
-                <Card className="bg-gradient-to-br from-white via-gray-50/80 to-blue-50/80 dark:from-gray-800 dark:via-gray-800/80 dark:to-blue-900/20 shadow-lg backdrop-blur-sm animate-fade-in">
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <div className="p-4 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-full mb-6 animate-pulse">
-                      <FileText className="h-12 w-12 text-indigo-500 dark:text-indigo-400" />
+            <MainNavigation />
+
+            {showUpgradeAlert && (
+              <div className="mb-8 animate-fade-in">
+                <UseSubscriptionAlert 
+                  subscriptionTier={subscription.tier} 
+                  requiredTier="premium" 
+                  message="You've reached your daily limit for resume scoring. Free users can perform 1 resume scoring per day. Upgrade to Premium or Platinum for unlimited usage."
+                />
+              </div>
+            )}
+
+            {/* Enhanced Tabs */}
+            <div className="mb-8">
+              <Tabs defaultValue="current" onValueChange={setActiveTab}>
+                <TabsList className={`grid w-full max-w-md mx-auto grid-cols-2 rounded-2xl shadow-xl overflow-hidden transition-all duration-300 h-14 ${
+                  subscription.tier === "premium" 
+                    ? "bg-gradient-to-r from-blue-100/80 to-indigo-100/80 dark:from-blue-900/50 dark:to-indigo-900/50 border-2 border-blue-200 dark:border-blue-700" 
+                    : subscription.tier === "platinum" 
+                      ? "bg-gradient-to-r from-purple-100/80 to-pink-100/80 dark:from-purple-900/50 dark:to-pink-900/50 border-2 border-purple-200 dark:border-purple-700" 
+                      : "bg-gradient-to-r from-emerald-100/80 to-blue-100/80 dark:from-emerald-900/50 dark:to-blue-900/50 border-2 border-emerald-200 dark:border-emerald-700"
+                } backdrop-blur-sm`}>
+                  <TabsTrigger 
+                    value="current" 
+                    className="data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:shadow-lg transition-all duration-200 font-semibold hover:scale-105 rounded-xl text-base"
+                  >
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    New Analysis
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="history"
+                    className="data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:shadow-lg transition-all duration-200 font-semibold hover:scale-105 rounded-xl text-base"
+                  >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Score History
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="current" className="space-y-8 mt-8">
+                  <Card className={`relative overflow-hidden transition-all duration-500 hover:shadow-2xl animate-fade-in ${
+                    subscription.tier === "premium" 
+                      ? "bg-gradient-to-br from-white/90 via-blue-50/60 to-indigo-100/80 border-t-blue-500 shadow-blue-100/50 dark:shadow-blue-900/30" 
+                      : subscription.tier === "platinum" 
+                        ? "bg-gradient-to-br from-white/90 via-purple-50/60 to-pink-100/80 border-t-purple-500 shadow-purple-100/50 dark:shadow-purple-900/30" 
+                        : "bg-gradient-to-br from-white/90 via-emerald-50/60 to-blue-100/80 border-t-emerald-500 shadow-emerald-100/50 dark:shadow-emerald-900/30"
+                  } shadow-2xl border-t-4 backdrop-blur-sm`}>
+                    
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-purple-100/20 to-blue-100/20 dark:from-purple-800/10 dark:to-blue-800/10 rounded-full -translate-y-24 translate-x-24 animate-pulse delay-500"></div>
+                    
+                    <CardContent className="p-8 relative z-10">
+                      <ResumeScoringForm
+                        scoringMode="resumeOnly"
+                        setScoringMode={() => {}}
+                        resumeContent={resumeContent}
+                        setResumeContent={setResumeContent}
+                        isScoring={isScoring}
+                        onScore={onScore}
+                        disableButton={isButtonDisabled}
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="history" className="mt-8">
+                  {scoreHistory.length > 0 ? (
+                    <div className="animate-fade-in">
+                      <ScoreHistory scores={scoreHistory} />
                     </div>
-                    <h3 className="text-xl font-bold text-indigo-900 dark:text-indigo-100 mb-3">No Score History</h3>
-                    <p className="text-indigo-600 dark:text-indigo-300 text-center max-w-md leading-relaxed">
-                      You haven't analyzed any resumes yet. Start by uploading your resume to get detailed, actionable feedback and colorful charts tracking your progress.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-          </Tabs>
+                  ) : (
+                    <Card className="bg-gradient-to-br from-white/90 via-gray-50/60 to-blue-50/80 dark:from-gray-800/90 dark:via-gray-800/60 dark:to-blue-900/20 shadow-2xl backdrop-blur-sm animate-fade-in border-2 border-gray-200/60 dark:border-gray-700/60">
+                      <CardContent className="flex flex-col items-center justify-center py-16 px-8">
+                        <div className="relative mb-8">
+                          <div className="p-6 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-full shadow-xl animate-pulse">
+                            <BarChart3 className="h-16 w-16 text-indigo-500 dark:text-indigo-400" />
+                          </div>
+                          <div className="absolute -top-2 -right-2 p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full shadow-lg">
+                            <Sparkles className="h-5 w-5 text-white animate-pulse" />
+                          </div>
+                        </div>
+                        <div className="text-center space-y-4">
+                          <h3 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            No Analysis History
+                          </h3>
+                          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">
+                            You haven't analyzed any resumes yet. Start by uploading your resume to get detailed, 
+                            actionable feedback and track your progress over time.
+                          </p>
+                          <Badge variant="outline" className="mt-6 border-indigo-300 text-indigo-600 dark:border-indigo-700 dark:text-indigo-400 px-4 py-2">
+                            <TrendingUp className="h-4 w-4 mr-2" />
+                            Ready to get started
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
         </div>
-        <div className="mt-12 relative z-10">
+        
+        <div className="relative z-10 mt-16">
           <LegalFooter />
         </div>
         <GuidedTour />
       </div>
 
-      {/* Score Modal */}
       <ResumeScoreModal
         isOpen={showScoreModal}
         onClose={() => setShowScoreModal(false)}
