@@ -3,7 +3,7 @@ import React from 'react';
 import { ScoreData } from "@/types/resume";
 import { ScoreBreakdown } from "../ScoreBreakdown";
 import { QualificationGaps } from './QualificationGaps';
-import { TrendingUp, Calendar, Building, Award, Sparkles, Target, BarChart3, Star, Trophy } from 'lucide-react';
+import { TrendingUp, Calendar, Building, Award, Sparkles, Target, BarChart3 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -112,60 +112,6 @@ export const VisibleReportContent = ({ scoreData }: VisibleReportContentProps) =
         <div className="mb-10">
           <ScoreBreakdown scoreData={scoreData} />
         </div>
-
-        {/* Elite Achievements Section with Enhanced Golden Design */}
-        {scoreData.eliteIndicatorsFound && scoreData.eliteIndicatorsFound.length > 0 && (
-          <div className="mb-10">
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:via-amber-900/30 dark:to-orange-900/20 border-2 border-amber-200 dark:border-amber-700/50 shadow-lg">
-              {/* Decorative background elements */}
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-100/50 via-yellow-100/30 to-orange-100/50 dark:from-amber-800/10 dark:via-yellow-800/10 dark:to-orange-800/10"></div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-300/20 to-yellow-400/20 dark:from-amber-600/10 dark:to-yellow-700/10 rounded-full -translate-y-16 translate-x-16 blur-2xl"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-orange-300/20 to-amber-400/20 dark:from-orange-600/10 dark:to-amber-700/10 rounded-full translate-y-12 -translate-x-12 blur-2xl"></div>
-              
-              <div className="relative z-10 p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-gradient-to-br from-amber-400 via-yellow-500 to-orange-500 rounded-2xl shadow-xl">
-                    <Trophy className="h-7 w-7 text-white drop-shadow-sm" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold bg-gradient-to-r from-amber-700 via-yellow-600 to-orange-600 dark:from-amber-400 dark:via-yellow-300 dark:to-orange-400 bg-clip-text text-transparent">
-                      Notable Achievements Detected
-                    </h3>
-                    <p className="text-amber-700/80 dark:text-amber-300/80 text-sm font-medium">
-                      Elite indicators found in your profile
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="grid gap-4">
-                  {scoreData.eliteIndicatorsFound.map((achievement, index) => (
-                    <div 
-                      key={index}
-                      className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-100/80 via-yellow-100/60 to-orange-100/80 dark:from-amber-800/30 dark:via-yellow-800/20 dark:to-orange-800/30 border border-amber-300/50 dark:border-amber-600/30 p-4 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
-                    >
-                      {/* Subtle shimmer effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-200/20 to-transparent dark:via-amber-400/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                      
-                      <div className="relative flex items-center gap-4">
-                        <div className="flex-shrink-0 p-2 bg-gradient-to-br from-amber-300 to-yellow-400 dark:from-amber-600 dark:to-yellow-600 rounded-lg shadow-md">
-                          <Star className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-amber-900 dark:text-amber-100 font-semibold leading-relaxed">
-                            {achievement}
-                          </p>
-                        </div>
-                        <div className="flex-shrink-0">
-                          <Sparkles className="h-5 w-5 text-amber-600 dark:text-amber-400 animate-pulse" />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Qualification Gaps */}
         {scoreData.missingQualifications && scoreData.missingQualifications.length > 0 && (
