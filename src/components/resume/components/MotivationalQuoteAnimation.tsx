@@ -89,10 +89,11 @@ export const MotivationalQuoteAnimation = ({ score, onComplete }: MotivationalQu
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
     setCurrentQuote(randomQuote);
 
-    // Auto complete after animation
+    // Auto complete after animation with shorter duration
     const timer = setTimeout(() => {
+      console.log("Quote animation timer completed, calling onComplete");
       onComplete();
-    }, 4000);
+    }, 3000); // Reduced from 4000 to 3000
 
     return () => clearTimeout(timer);
   }, [score, onComplete]);

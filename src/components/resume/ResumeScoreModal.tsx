@@ -27,7 +27,7 @@ export const ResumeScoreModal = ({
   // Reset states when modal opens/closes
   React.useEffect(() => {
     if (isOpen && isScoring) {
-      setShowAnimations(true);
+      setShowAnimations(false);
       setShowResults(false);
     } else if (!isOpen) {
       setShowAnimations(false);
@@ -35,18 +35,25 @@ export const ResumeScoreModal = ({
     }
   }, [isOpen, isScoring]);
 
-  // Show results when scoring is complete and we have data
+  // Show animations when scoring completes and we have data
   React.useEffect(() => {
-    if (scoreData && !isScoring && showAnimations) {
-      const timer = setTimeout(() => {
+    if (scoreData && !isScoring && isOpen) {
+      // Check if this is a newly generated score that should show animations
+      const isNewScore = scoreData.id?.includes("newly-generated");
+      
+      if (isNewScore) {
+        setShowAnimations(true);
+        setShowResults(false);
+      } else {
+        // For cached results, skip animations and show results directly
         setShowAnimations(false);
         setShowResults(true);
-      }, 500);
-      return () => clearTimeout(timer);
+      }
     }
-  }, [scoreData, isScoring, showAnimations]);
+  }, [scoreData, isScoring, isOpen]);
 
   const handleAnimationsComplete = () => {
+    console.log("Animations completed, showing results");
     setShowAnimations(false);
     setShowResults(true);
   };
