@@ -3,24 +3,25 @@ import React from 'react';
 import { ScoreData } from "@/types/resume";
 import { ScoreBreakdown } from "../ScoreBreakdown";
 import { QualificationGaps } from './QualificationGaps';
-import { TrendingUp, Calendar, Building, Award, Sparkles } from 'lucide-react';
+import { TrendingUp, Calendar, Building, Award, Sparkles, Target, BarChart3 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface VisibleReportContentProps {
   scoreData: ScoreData;
 }
 
 export const VisibleReportContent = ({ scoreData }: VisibleReportContentProps) => {
-  const getScoreGradient = (score: number) => {
-    if (score >= 80) return "from-emerald-500 to-green-600";
-    if (score >= 60) return "from-yellow-500 to-orange-500";
-    return "from-red-500 to-pink-600";
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-emerald-600";
+    if (score >= 60) return "text-yellow-600";
+    return "text-red-600";
   };
 
-  const getScoreRing = (score: number) => {
-    if (score >= 80) return "border-emerald-400";
-    if (score >= 60) return "border-yellow-400";
-    return "border-red-400";
+  const getScoreBg = (score: number) => {
+    if (score >= 80) return "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800";
+    if (score >= 60) return "bg-yellow-50 border-yellow-200 dark:bg-yellow-950/20 dark:border-yellow-800";
+    return "bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800";
   };
 
   return (
@@ -58,32 +59,48 @@ export const VisibleReportContent = ({ scoreData }: VisibleReportContentProps) =
             </Badge>
           </div>
 
-          {/* Overall Score Display */}
-          <div className="mt-8">
-            <div className="relative inline-block">
-              <div className={`absolute inset-0 rounded-full bg-gradient-to-r ${getScoreGradient(scoreData.overallScore)} opacity-20 animate-pulse scale-110`}></div>
-              <div className={`relative w-32 h-32 mx-auto rounded-full border-8 ${getScoreRing(scoreData.overallScore)} bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center shadow-2xl`}>
-                <div className="text-center">
-                  <div className={`text-4xl font-extrabold bg-gradient-to-r ${getScoreGradient(scoreData.overallScore)} bg-clip-text text-transparent`}>
-                    {scoreData.overallScore}
-                  </div>
-                  <div className="text-xs font-semibold text-gray-600 dark:text-gray-400">/100</div>
+          {/* Modern Score Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+            {/* Overall Score Card */}
+            <Card className={`${getScoreBg(scoreData.overallScore)} border-2 shadow-lg hover:shadow-xl transition-all duration-300`}>
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center mb-3">
+                  <BarChart3 className={`h-6 w-6 ${getScoreColor(scoreData.overallScore)}`} />
                 </div>
-              </div>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">Overall Resume Score</h3>
-              <div className="flex items-center justify-center gap-4 mt-2">
-                <Badge className={`bg-gradient-to-r ${getScoreGradient(scoreData.overallScore)} text-white border-0 shadow-lg`}>
-                  <Sparkles className="h-3 w-3 mr-1 animate-pulse" />
+                <div className={`text-3xl font-bold ${getScoreColor(scoreData.overallScore)} mb-1`}>
+                  {scoreData.overallScore}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">/100</div>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200">Overall Score</h3>
+              </CardContent>
+            </Card>
+
+            {/* Industry Card */}
+            <Card className="bg-blue-50 border-2 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center mb-3">
+                  <Building className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                  {scoreData.Industry}
+                </div>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200">Industry</h3>
+              </CardContent>
+            </Card>
+
+            {/* Standing Card */}
+            <Card className="bg-purple-50 border-2 border-purple-200 dark:bg-purple-950/20 dark:border-purple-800 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-6 text-center">
+                <div className="flex items-center justify-center mb-3">
+                  <Target className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <Badge className="bg-gradient-to-r from-purple-500 to-pink-600 text-white border-0 shadow-md mb-2">
+                  <Award className="h-3 w-3 mr-1" />
                   {scoreData.percentile}
                 </Badge>
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                  <Building className="h-4 w-4" />
-                  <span>{scoreData.Industry}</span>
-                </div>
-              </div>
-            </div>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200">Standing</h3>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
