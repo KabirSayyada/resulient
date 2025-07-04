@@ -1,55 +1,50 @@
 
-import { AlertTriangle, CheckCircle } from "lucide-react";
-import React from "react";
+import React from 'react';
+import { Card, CardContent } from "@/components/ui/card";
 
 interface ScoreMetricProps {
   icon: React.ReactNode;
   label: string;
-  value: number;
+  value: number | null;
   maxValue: number;
   missing?: boolean;
-  isAtsScore?: boolean; // New prop to identify ATS scores
 }
 
-export const ScoreMetric = ({
-  icon,
-  label,
-  value,
-  maxValue,
-  missing = false,
-  isAtsScore = false
-}: ScoreMetricProps) => {
-  // Calculate if this score is excellent (≥80% of max value)
-  // For ATS, scores of 8-10 are considered excellent
-  const isExcellent = isAtsScore ? 
-    value >= 8 : 
-    (value / maxValue) >= 0.8;
-  
-  // Determine color based on score quality
-  const textColor = missing ? 'text-red-600 dark:text-red-400' : 
-                    isExcellent ? 'text-green-600 dark:text-green-400' : 
-                    (value / maxValue) >= 0.5 ? 'text-indigo-800 dark:text-indigo-300' : 'text-red-600 dark:text-red-400';
-  
-  // Value text color
-  const valueColor = missing ? 'text-red-700 dark:text-red-300' : 
-                     isExcellent ? 'text-green-700 dark:text-green-300' : 
-                     (value / maxValue) >= 0.5 ? 'text-indigo-900 dark:text-indigo-200' : 'text-red-700 dark:text-red-300';
-  
-  // Max value text color
-  const maxValueColor = missing ? 'text-red-600 dark:text-red-400' : 
-                        isExcellent ? 'text-green-600 dark:text-green-400' : 
-                        (value / maxValue) >= 0.5 ? 'text-fuchsia-800 dark:text-fuchsia-300' : 'text-red-600 dark:text-red-400';
+export const ScoreMetric = ({ icon, label, value, maxValue, missing }: ScoreMetricProps) => {
+  const normalizedScore = value ? Math.min(100, Math.max(0, (value / maxValue) * 100)) : 0;
+  const displayValue = value || 0;
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-emerald-600";
+    if (score >= 60) return "text-yellow-600";
+    return "text-red-600";
+  };
+
+  const getScoreBg = (score: number) => {
+    if (score >= 80) return "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800";
+    if (score >= 60) return "bg-yellow-50 border-yellow-200 dark:bg-yellow-950/20 dark:border-yellow-800";
+    return "bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800";
+  };
 
   return (
-    <div className={`flex items-center gap-1 ${textColor}`}>
-      <span>{icon}</span>
-      <span className="font-medium">{label}:</span>
-      <span className={`font-semibold text-[18px] ${valueColor} ml-1`}>
-        {value}
-      </span>
-      <span className={`text-sm ${maxValueColor} font-extrabold`}>/{maxValue}</span>
-      {missing && <AlertTriangle className="w-3 h-3 text-red-500 dark:text-red-400 ml-1" />}
-      {isExcellent && !missing && <CheckCircle className="w-3 h-3 text-green-500 dark:text-green-400 ml-1" />}
-    </div>
+    <Card className={`${getScoreBg(normalizedScore)} border shadow-sm hover:shadow-md transition-all duration-300`}>
+      <CardContent className="p-2 sm:p-3 text-center">
+        <div className="flex items-center justify-center mb-1 sm:mb-2">
+          {icon}
+        </div>
+        <div className={`text-lg sm:text-2xl font-bold ${getScoreColor(normalizedScore)} mb-0.5 sm:mb-1`}>
+          {displayValue}
+        </div>
+        <div className="text-xs text-gray-600 dark:text-gray-400 mb-1 sm:mb-2">/{maxValue}</div>
+        <h3 className="font-semibold text-gray-800 dark:text-gray-200 text-xs break-words leading-tight">
+          {label}
+        </h3>
+        {missing && (
+          <div className="text-xs text-red-600 dark:text-red-400 mt-1 font-medium">
+            Missing
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
