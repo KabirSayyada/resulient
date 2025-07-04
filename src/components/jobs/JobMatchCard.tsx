@@ -61,28 +61,80 @@ export function JobMatchCard({ jobMatch }: JobMatchCardProps) {
             </span>
           </div>
           
-          {/* Score Breakdown */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-3 text-xs">
-            <div className="text-center">
-              <div className={`font-bold ${getScoreColor(skillsScore)}`}>{Math.round(skillsScore)}</div>
-              <div className="text-gray-600 dark:text-gray-400">Skills</div>
-            </div>
-            <div className="text-center">
-              <div className={`font-bold ${getScoreColor(experienceScore)}`}>{Math.round(experienceScore)}</div>
-              <div className="text-gray-600 dark:text-gray-400">Experience</div>
-            </div>
-            <div className="text-center">
-              <div className={`font-bold ${getScoreColor(industryScore)}`}>{Math.round(industryScore)}</div>
-              <div className="text-gray-600 dark:text-gray-400">Industry</div>
-            </div>
-            <div className="text-center">
-              <div className={`font-bold ${getScoreColor(locationScore)}`}>{Math.round(locationScore)}</div>
-              <div className="text-gray-600 dark:text-gray-400">Location</div>
-            </div>
-            <div className="text-center">
-              <div className={`font-bold ${getScoreColor(qualityBonus)}`}>{Math.round(qualityBonus)}</div>
-              <div className="text-gray-600 dark:text-gray-400">Profile</div>
-            </div>
+          {/* Enhanced Score Breakdown with Progress Bars */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+            {[
+              { score: skillsScore, label: "Skills", max: 35 },
+              { score: experienceScore, label: "Experience", max: 25 },
+              { score: industryScore, label: "Industry", max: 20 },
+              { score: locationScore, label: "Location", max: 10 },
+              { score: qualityBonus, label: "Profile", max: 10 }
+            ].map((item, index) => {
+              const percentage = (item.score / item.max) * 100;
+              const animationDelay = index * 0.1;
+              
+              return (
+                <div key={item.label} className="text-center space-y-2">
+                  <div className="relative">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                          percentage >= 80 ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
+                          percentage >= 60 ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
+                          'bg-gradient-to-r from-blue-500 to-indigo-600'
+                        }`}
+                        style={{ 
+                          width: `${Math.min(percentage, 100)}%`,
+                          animationDelay: `${animationDelay}s`
+                        }}
+                      />
+                    </div>
+                    <div className="absolute -top-1 -right-1">
+                      {percentage >= 80 && (
+                        <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
+                          <div className="w-2 h-2 bg-white rounded-full" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className={`font-bold text-sm ${getScoreColor(item.score)}`}>
+                    {Math.round(item.score)}
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                    {item.label}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Confidence Badges */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            {matchScore >= 80 && (
+              <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white animate-pulse">
+                🏆 {Math.round((matchScore / 100) * 100)}% Confidence
+              </Badge>
+            )}
+            {matchScore >= 60 && matchScore < 80 && (
+              <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
+                ⭐ {Math.round((matchScore / 100) * 100)}% Match
+              </Badge>
+            )}
+            {matchScore >= 40 && matchScore < 60 && (
+              <Badge className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+                🎯 {Math.round((matchScore / 100) * 100)}% Potential
+              </Badge>
+            )}
+            {skillsScore >= 25 && (
+              <Badge variant="outline" className="border-green-300 text-green-700 dark:border-green-700 dark:text-green-300">
+                💪 Strong Skills Match
+              </Badge>
+            )}
+            {experienceScore >= 20 && (
+              <Badge variant="outline" className="border-purple-300 text-purple-700 dark:border-purple-700 dark:text-purple-300">
+                📈 Experience Aligned
+              </Badge>
+            )}
           </div>
 
           {/* Match Reasons */}
