@@ -1,150 +1,11 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, DollarSign, ExternalLink, RefreshCw, Target, Info, Zap, Lock, Crown } from "lucide-react";
-import { useJobs, type JobFilters } from "@/hooks/useJobs";
-import { useEnhancedJobMatching } from "@/hooks/useEnhancedJobMatching";
-import { useJobFetchLimits } from "@/hooks/useJobFetchLimits";
-import { ResumeSelector } from "@/components/jobs/ResumeSelector";
-import { EnhancedJobMatchCard } from "@/components/jobs/EnhancedJobMatchCard";
-import { RestrictedJobView } from "@/components/jobs/RestrictedJobView";
-import { useAuth } from "@/hooks/useAuth";
-import { useJobScraper } from "@/hooks/useJobScraper";
-import { useSubscription } from "@/hooks/useSubscription";
-import { format } from "date-fns";
 import { MainNavigation } from "@/components/resume/MainNavigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Target, Zap, Search, Globe, Calendar, TrendingUp, ArrowRight, Crown, Sparkles } from "lucide-react";
 
 export default function Jobs() {
-  const [filters] = useState<JobFilters>({
-    search: '',
-    location: '',
-    jobType: '',
-    salaryRange: ''
-  });
-
-  const { user } = useAuth();
-  const { subscription } = useSubscription();
-  const { allJobs, loading, error, refetch, totalJobs } = useJobs(filters);
-  const { scrapeJobs, loading: scrapingLoading, lastScrapeTime } = useJobScraper();
-  const { limits, incrementUsage, showUpgradeMessage } = useJobFetchLimits();
-  const { 
-    matchedJobs, 
-    loading: matchingLoading, 
-    selectedResume,
-    handleResumeSelection,
-    handleJobApplication,
-    reanalyzeJobs
-  } = useEnhancedJobMatching();
-
-  // Check if user has premium access (premium or platinum)
-  const hasPremiumAccess = subscription.tier === "premium" || subscription.tier === "platinum";
-
-  const canFetchJobs = () => {
-    if (!lastScrapeTime) return true;
-    const tenHoursAgo = new Date(Date.now() - 10 * 60 * 60 * 1000);
-    return new Date(lastScrapeTime) < tenHoursAgo;
-  };
-
-  const getTimeUntilNextFetch = () => {
-    if (!lastScrapeTime) return null;
-    const nextFetchTime = new Date(lastScrapeTime).getTime() + (10 * 60 * 60 * 1000);
-    const now = Date.now();
-    if (nextFetchTime <= now) return null;
-    
-    const hoursLeft = Math.ceil((nextFetchTime - now) / (60 * 60 * 1000));
-    return hoursLeft;
-  };
-
-  const handleTargetedJobFetch = async () => {
-    if (!selectedResume || !user) {
-      console.error('Cannot fetch jobs: no resume selected or user not authenticated');
-      return;
-    }
-
-    // Check subscription limits
-    if (limits.hasReachedLimit) {
-      showUpgradeMessage();
-      return;
-    }
-
-    if (!canFetchJobs()) {
-      console.error('Cannot fetch jobs: cooldown active');
-      return;
-    }
-
-    try {
-      const jobTitle = selectedResume.industry || 'software engineer';
-      
-      // Extract location from resume data if available
-      let location = 'United States'; // Default fallback
-      
-      if (selectedResume.resume_content) {
-        try {
-          const resumeData = JSON.parse(selectedResume.resume_content);
-          
-          // Try to extract location from various possible fields in resume
-          if (resumeData.personalInfo?.location) {
-            location = resumeData.personalInfo.location;
-          } else if (resumeData.personalInfo?.city && resumeData.personalInfo?.state) {
-            location = `${resumeData.personalInfo.city}, ${resumeData.personalInfo.state}`;
-          } else if (resumeData.contact?.location) {
-            location = resumeData.contact.location;
-          } else if (resumeData.location) {
-            location = resumeData.location;
-          } else if (resumeData.workExperience && resumeData.workExperience.length > 0) {
-            // Try to get location from most recent work experience
-            const mostRecentJob = resumeData.workExperience[0];
-            if (mostRecentJob.location) {
-              location = mostRecentJob.location;
-            }
-          }
-        } catch (error) {
-          console.log('Could not parse resume content for location, using default');
-        }
-      }
-      
-      console.log(`Fetching jobs for ${jobTitle} in ${location}`);
-      
-      await scrapeJobs({
-        query: jobTitle,
-        location: location,
-        employment_types: 'FULLTIME',
-        num_pages: 5,
-        date_posted: '3days',
-        user_id: user.id
-      });
-      
-      // Increment usage count after successful fetch
-      await incrementUsage();
-      
-      await refetch();
-      await reanalyzeJobs();
-    } catch (error) {
-      console.error('Targeted job fetch failed:', error);
-    }
-  };
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Job Opportunities
-            </h1>
-            <div className="text-red-600 dark:text-red-400">
-              Error loading jobs: {error}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const hoursUntilNextFetch = getTimeUntilNextFetch();
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
       <div className="container mx-auto px-4 py-8">
@@ -153,390 +14,179 @@ export default function Jobs() {
         {/* Hero Section */}
         <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl shadow-2xl mb-8">
           <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent"></div>
-          <div className="relative px-8 py-16 text-center">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-white/10 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-yellow-400/20 to-transparent rounded-full blur-2xl"></div>
+          
+          <div className="relative px-8 py-20 text-center">
             <div className="max-w-4xl mx-auto">
-              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
-                <Zap className="h-4 w-4 text-yellow-300" />
-                <span className="text-white font-medium text-sm">AI-Powered Job Matching</span>
+              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-3 mb-8">
+                <Sparkles className="h-5 w-5 text-yellow-300 animate-pulse" />
+                <span className="text-white font-bold text-lg">REVOLUTIONARY TECHNOLOGY</span>
+                <Sparkles className="h-5 w-5 text-yellow-300 animate-pulse" />
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
-                Your Perfect Job
-                <span className="block bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                  Matches Await
+              <h1 className="text-6xl md:text-7xl font-bold text-white mb-8 leading-tight">
+                The Future of
+                <span className="block bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 bg-clip-text text-transparent">
+                  Job Matching
                 </span>
+                <span className="block text-5xl md:text-6xl">Is Coming Soon</span>
               </h1>
               
-              <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8 leading-relaxed">
-                We scour <span className="font-bold text-yellow-300">every single job board</span> across the internet, 
-                analyze <span className="font-bold text-yellow-300">millions of opportunities</span>, and use advanced AI 
-                to find jobs that perfectly match your skills, experience, and career goals.
+              <p className="text-2xl text-white/95 max-w-4xl mx-auto mb-12 leading-relaxed">
+                We're building the <span className="font-bold text-yellow-300">first-of-its-kind</span> AI-powered job matching platform 
+                that will <span className="font-bold text-orange-300">completely transform</span> how you find and apply to jobs forever.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center text-white/80">
-                <div className="flex items-center gap-2">
-                  <Target className="h-5 w-5 text-green-300" />
-                  <span className="font-medium">99.2% Match Accuracy</span>
-                </div>
-                <div className="hidden sm:block w-1 h-1 bg-white/40 rounded-full"></div>
-                <div className="flex items-center gap-2">
-                  <RefreshCw className="h-5 w-5 text-blue-300" />
-                  <span className="font-medium">Updated Every Hour</span>
-                </div>
-                <div className="hidden sm:block w-1 h-1 bg-white/40 rounded-full"></div>
-                <div className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-300" />
-                  <span className="font-medium">10,000+ Job Boards</span>
-                </div>
+              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full px-8 py-4 shadow-2xl">
+                <Crown className="h-6 w-6 text-yellow-200" />
+                <span className="text-white font-bold text-xl">COMING SOON</span>
+                <Crown className="h-6 w-6 text-yellow-200" />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto">
-          {user ? (
-            <div className="space-y-6">
-              {/* Enhanced Subscription Experience Notice */}
-              {!hasPremiumAccess && (
-                <div className="relative overflow-hidden mb-8">
-                  <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 via-orange-400/20 to-red-400/20 rounded-3xl"></div>
-                  <div className="relative p-8 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 dark:from-amber-950/30 dark:via-orange-950/30 dark:to-red-950/30 border-2 border-gradient-to-r from-amber-200 to-orange-200 dark:from-amber-800 dark:to-orange-800 rounded-3xl shadow-2xl">
-                    <div className="absolute top-4 right-4">
-                      <div className="animate-pulse">
-                        <Crown className="h-8 w-8 text-amber-500" />
-                      </div>
-                    </div>
-                    
-                    <div className="max-w-4xl">
-                      <div className="flex items-center gap-3 mb-6">
-                        <div className="p-3 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl shadow-lg">
-                          <Crown className="h-6 w-6 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                            Experience The Ultimate Job Matching Platform
-                          </h3>
-                          <p className="text-amber-700 dark:text-amber-400 mt-1">
-                            The most advanced AI job matching technology in the world
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-2xl p-6 mb-6">
-                        <p className="text-amber-800 dark:text-amber-300 text-lg leading-relaxed mb-4">
-                          🚀 We're giving you <span className="font-bold text-orange-600">1 FREE premium job fetch</span> so you can experience 
-                          what makes us the #1 job matching platform. After that, unlock unlimited access to find your dream job faster than ever!
-                        </p>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 p-4 rounded-xl border border-blue-200 dark:border-blue-800">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                              <span className="font-bold text-blue-700 dark:text-blue-300">FREE TIER</span>
-                            </div>
-                            <p className="text-sm text-blue-600 dark:text-blue-400">1 fetch + 3 visible results</p>
-                          </div>
-                          
-                          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 p-4 rounded-xl border border-purple-200 dark:border-purple-800">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                              <span className="font-bold text-purple-700 dark:text-purple-300">PREMIUM</span>
-                            </div>
-                            <p className="text-sm text-purple-600 dark:text-purple-400">20 fetches + unlimited access</p>
-                          </div>
-                          
-                          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 p-4 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Zap className="h-3 w-3 text-emerald-500" />
-                              <span className="font-bold text-emerald-700 dark:text-emerald-300">PLATINUM</span>
-                            </div>
-                            <p className="text-sm text-emerald-600 dark:text-emerald-400">Unlimited everything</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+        <div className="max-w-6xl mx-auto space-y-8">
+          {/* Revolutionary Features */}
+          <div className="text-center mb-12">
+            <Badge variant="secondary" className="mb-4 text-lg px-6 py-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30">
+              🚀 World's First Technology
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent mb-6">
+              What Makes This Revolutionary
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              We're not just another job board. We're creating technology that has never existed before.
+            </p>
+          </div>
+
+          {/* Feature Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <Card className="relative overflow-hidden border-2 border-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-800 dark:to-purple-800 hover:shadow-2xl transition-all duration-300 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30"></div>
+              <CardContent className="relative p-8 text-center">
+                <div className="mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl mx-auto flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
+                    <Globe className="h-8 w-8 text-white" />
                   </div>
                 </div>
-              )}
+                <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  10,000+ Job Boards
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  We scan every corner of the internet - from major job sites to company career pages, 
+                  ensuring you never miss an opportunity.
+                </p>
+              </CardContent>
+            </Card>
 
-              {/* Resume Selector */}
-              <ResumeSelector 
-                onResumeSelected={handleResumeSelection}
-                selectedResumeId={selectedResume?.id}
-              />
+            <Card className="relative overflow-hidden border-2 border-gradient-to-r from-emerald-200 to-teal-200 dark:from-emerald-800 dark:to-teal-800 hover:shadow-2xl transition-all duration-300 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30"></div>
+              <CardContent className="relative p-8 text-center">
+                <div className="mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl mx-auto flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
+                    <Search className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                  Millions of Fresh Jobs
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  Access millions of job postings updated in real-time, giving you first access 
+                  to opportunities as they become available.
+                </p>
+              </CardContent>
+            </Card>
 
-              {/* AI-Powered Job Fetch Section */}
-              <div className="relative overflow-hidden mb-8">
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-red-500/10 rounded-3xl"></div>
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent rounded-3xl"></div>
-                
-                <div className="relative p-10 bg-gradient-to-br from-purple-50 via-pink-50 to-red-50 dark:from-purple-950/30 dark:via-pink-950/30 dark:to-red-950/30 rounded-3xl border-2 border-purple-200 dark:border-purple-800 shadow-2xl">
-                  <div className="text-center space-y-8 max-w-5xl mx-auto">
-                    <div className="flex items-center justify-center gap-4 mb-8">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-lg opacity-75 animate-pulse"></div>
-                        <div className="relative p-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full shadow-xl">
-                          <Target className="h-10 w-10 text-white" />
-                        </div>
-                      </div>
-                      <div className="text-left">
-                        <h3 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent mb-2">
-                          AI Job Discovery Engine
-                        </h3>
-                        <p className="text-xl text-purple-600 dark:text-purple-400 font-medium">
-                          The most advanced job matching technology ever created
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm rounded-2xl p-8 mb-8">
-                      <p className="text-2xl text-purple-800 dark:text-purple-300 leading-relaxed mb-6">
-                        {selectedResume 
-                          ? `🎯 Ready to find perfect ${selectedResume.industry} opportunities just for you!`
-                          : '🔍 Select your resume above to unlock personalized job discovery'
-                        }
-                      </p>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 p-6 rounded-2xl border border-blue-200 dark:border-blue-800">
-                          <div className="text-center">
-                            <div className="w-12 h-12 bg-blue-500 rounded-xl mx-auto mb-3 flex items-center justify-center">
-                              <span className="text-white font-bold text-xl">10K+</span>
-                            </div>
-                            <h4 className="font-bold text-blue-700 dark:text-blue-300 mb-1">Job Boards</h4>
-                            <p className="text-sm text-blue-600 dark:text-blue-400">Scanned daily</p>
-                          </div>
-                        </div>
-                        
-                        <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/40 dark:to-green-950/40 p-6 rounded-2xl border border-emerald-200 dark:border-emerald-800">
-                          <div className="text-center">
-                            <div className="w-12 h-12 bg-emerald-500 rounded-xl mx-auto mb-3 flex items-center justify-center">
-                              <span className="text-white font-bold text-xl">1M+</span>
-                            </div>
-                            <h4 className="font-bold text-emerald-700 dark:text-emerald-300 mb-1">Jobs Daily</h4>
-                            <p className="text-sm text-emerald-600 dark:text-emerald-400">Analyzed by AI</p>
-                          </div>
-                        </div>
-                        
-                        <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/40 dark:to-violet-950/40 p-6 rounded-2xl border border-purple-200 dark:border-purple-800">
-                          <div className="text-center">
-                            <div className="w-12 h-12 bg-purple-500 rounded-xl mx-auto mb-3 flex items-center justify-center">
-                              <span className="text-white font-bold text-xl">99%</span>
-                            </div>
-                            <h4 className="font-bold text-purple-700 dark:text-purple-300 mb-1">Match Rate</h4>
-                            <p className="text-sm text-purple-600 dark:text-purple-400">Accuracy</p>
-                          </div>
-                        </div>
-                        
-                        <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 p-6 rounded-2xl border border-amber-200 dark:border-amber-800">
-                          <div className="text-center">
-                            <div className="w-12 h-12 bg-amber-500 rounded-xl mx-auto mb-3 flex items-center justify-center">
-                              <span className="text-white font-bold text-xl">24/7</span>
-                            </div>
-                            <h4 className="font-bold text-amber-700 dark:text-amber-300 mb-1">Monitoring</h4>
-                            <p className="text-sm text-amber-600 dark:text-amber-400">Never miss out</p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {!canFetchJobs() && (
-                        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/40 dark:to-blue-950/40 p-6 rounded-2xl border border-indigo-200 dark:border-indigo-800 mb-6">
-                          <div className="flex items-center gap-3 justify-center">
-                            <RefreshCw className="h-5 w-5 text-indigo-500 animate-spin" />
-                            <p className="text-indigo-700 dark:text-indigo-400 font-medium">
-                              🤖 Our AI is currently processing millions of new job postings across thousands of job boards. 
-                              This ensures you get the absolute freshest and most relevant opportunities!
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <Button
-                      onClick={handleTargetedJobFetch}
-                      disabled={scrapingLoading || !selectedResume || !canFetchJobs() || limits.hasReachedLimit}
-                      size="lg"
-                      className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 hover:from-purple-700 hover:via-pink-700 hover:to-red-700 text-white font-bold px-16 py-6 text-xl rounded-full disabled:opacity-50 min-w-[400px] shadow-2xl transform transition-all duration-300 hover:scale-105"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-                      
-                      {scrapingLoading ? (
-                        <>
-                          <RefreshCw className="h-7 w-7 mr-4 animate-spin" />
-                          🚀 Scanning The Internet For Your Jobs...
-                        </>
-                      ) : limits.hasReachedLimit ? (
-                        <>
-                          <Lock className="h-7 w-7 mr-4" />
-                          {subscription.tier === "free" ? "🔓 Upgrade For More Fetches" : "Fetch Limit Reached"}
-                        </>
-                      ) : (
-                        <>
-                          <Target className="h-7 w-7 mr-4" />
-                          {!canFetchJobs() ? '⏳ AI Processing Jobs...' : '🎯 Find My Perfect Jobs Now'}
-                        </>
-                      )}
-                    </Button>
+            <Card className="relative overflow-hidden border-2 border-gradient-to-r from-purple-200 to-pink-200 dark:from-purple-800 dark:to-pink-800 hover:shadow-2xl transition-all duration-300 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30"></div>
+              <CardContent className="relative p-8 text-center">
+                <div className="mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl mx-auto flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
+                    <Target className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Perfect Fit Matching
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  Our AI only shows you jobs you're genuinely qualified for, dramatically 
+                  increasing your chances of getting hired.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* The Transformation */}
+          <div className="relative">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-indigo-950/40 dark:via-purple-950/40 dark:to-pink-950/40 border-2 border-indigo-200 dark:border-indigo-800">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-400/20 via-transparent to-transparent"></div>
+              <CardContent className="relative p-12">
+                <div className="text-center max-w-4xl mx-auto">
+                  <div className="inline-flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full px-8 py-3 mb-8">
+                    <TrendingUp className="h-6 w-6 text-white" />
+                    <span className="text-white font-bold text-xl">GAME CHANGER</span>
                   </div>
                   
-                  <div className="mt-8 flex flex-wrap items-center justify-center gap-8 text-purple-600 dark:text-purple-400">
-                    <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 dark:border-purple-800">
-                      <Zap className="h-4 w-4 text-yellow-500" />
-                      <span className="font-medium">Freshest Jobs (Updated Hourly)</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 dark:border-purple-800">
-                      <Target className="h-4 w-4 text-green-500" />
-                      <span className="font-medium">100% Personal & Private</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 dark:border-purple-800">
-                      <Crown className="h-4 w-4 text-amber-500" />
-                      <span className="font-medium">
-                        {selectedResume ? `${selectedResume.industry} Focused` : 'Select Resume First'}
-                      </span>
-                    </div>
-                    {subscription.tier === "premium" && (
-                      <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 dark:border-purple-800">
-                        <RefreshCw className="h-4 w-4 text-blue-500" />
-                        <span className="font-medium text-blue-600 dark:text-blue-400">
-                          {limits.limit - limits.used} Premium Fetches Left
-                        </span>
-                      </div>
-                    )}
+                  <h2 className="text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    This Will Transform Everything
+                  </h2>
+                  
+                  <div className="space-y-6 text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                    <p className="text-xl">
+                      🎯 <span className="font-bold">No more applying to hundreds of irrelevant jobs.</span> 
+                      Our AI ensures every job matches your exact skills and experience.
+                    </p>
+                    
+                    <p className="text-xl">
+                      ⚡ <span className="font-bold">Dramatically increase your success rate.</span> 
+                      When jobs are truly hiring and you're genuinely qualified, your chances skyrocket.
+                    </p>
+                    
+                    <p className="text-xl">
+                      🚀 <span className="font-bold">Get there first.</span> 
+                      Real-time job discovery means you apply before the competition even knows the job exists.
+                    </p>
+                  </div>
+                  
+                  <div className="mt-12 p-8 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-2xl border border-purple-200 dark:border-purple-800">
+                    <p className="text-2xl font-bold text-purple-700 dark:text-purple-300 mb-4">
+                      The Promise We're Making
+                    </p>
+                    <p className="text-xl text-gray-600 dark:text-gray-400">
+                      This platform will only show you jobs you're <span className="font-bold text-green-600 dark:text-green-400">actually qualified for</span> 
+                      from companies that are <span className="font-bold text-blue-600 dark:text-blue-400">actively hiring right now</span>.
+                    </p>
                   </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
+          </div>
 
-              {/* Quality work notice */}
-              <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
-                  <Target className="h-5 w-5" />
-                  <span className="font-medium">Premium Job Matching:</span>
-                  <span className="text-sm">
-                    Our AI scans thousands of job boards daily to find the perfect matches for your skills and experience. Each job is carefully analyzed for compatibility with your resume.
-                  </span>
-                </div>
-              </div>
-
-              {/* Job Stats */}
-              {!loading && !matchingLoading && (
-                <div className="mb-4 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                  <div className="flex items-center gap-2">
-                    <Target className="h-4 w-4" />
-                    <span>Showing {selectedResume ? matchedJobs.length : totalJobs} of your personal jobs with the most latest postings</span>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => { refetch(); reanalyzeJobs(); }}>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh
-                  </Button>
-                </div>
-              )}
-
-              {/* Job Content */}
-              {loading || matchingLoading ? (
-                <div className="text-center py-8">
-                  <div className="text-gray-600 dark:text-gray-400">Loading your personal job matches...</div>
-                </div>
-              ) : selectedResume ? (
-                <div className="space-y-8">
-                  {matchedJobs.length > 0 ? (
-                    hasPremiumAccess ? (
-                      <div className="grid gap-8">
-                         {matchedJobs.map((jobMatch) => (
-                           <EnhancedJobMatchCard 
-                             key={jobMatch.job.id} 
-                             jobMatch={jobMatch} 
-                             selectedResumeContent={selectedResume.resume_content}
-                             onJobApplication={handleJobApplication}
-                           />
-                         ))}
-                      </div>
-                    ) : (
-                      <RestrictedJobView jobs={matchedJobs.map(match => match.job)} tier={subscription.tier} />
-                    )
-                  ) : (
-                    <div className="text-center py-8">
-                      <div className="text-gray-600 dark:text-gray-400 mb-4">
-                        No personal job matches found. Click "Fetch My Job Matches" above to get fresh job listings!
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : totalJobs > 0 ? (
-                <div className="space-y-6">
-                  <div className="grid gap-6">
-                    {hasPremiumAccess ? (
-                      allJobs.map((job) => (
-                        <Card key={job.id} className="hover:shadow-lg transition-shadow">
-                          <CardHeader>
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <CardTitle className="text-xl mb-2">{job.title}</CardTitle>
-                                <CardDescription className="text-base font-medium text-blue-600 dark:text-blue-400">
-                                  {job.company}
-                                </CardDescription>
-                              </div>
-                              <Badge variant="secondary">{job.type}</Badge>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-4 w-4" />
-                                {job.location}
-                              </div>
-                              {job.salary && (
-                                <div className="flex items-center gap-1">
-                                  <DollarSign className="h-4 w-4" />
-                                  {job.salary}
-                                </div>
-                              )}
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                {format(new Date(job.posted_date), 'MMM d, yyyy')}
-                              </div>
-                            </div>
-                            
-                            <p className="text-gray-700 dark:text-gray-300 mb-4">
-                              {job.description}
-                            </p>
-                            
-                            <div className="flex gap-2">
-                              {job.external_url ? (
-                                <Button asChild className="flex-1 sm:flex-none">
-                                  <a href={job.external_url} target="_blank" rel="noopener noreferrer">
-                                    Apply Now
-                                    <ExternalLink className="ml-2 h-4 w-4" />
-                                  </a>
-                                </Button>
-                              ) : (
-                                <Button className="flex-1 sm:flex-none">
-                                  Apply Now
-                                </Button>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))
-                    ) : (
-                      <RestrictedJobView jobs={allJobs} tier={subscription.tier} />
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="text-gray-600 dark:text-gray-400">
-                    No personal jobs found. Select a resume above and click "Fetch My Job Matches" to get started!
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-600 dark:text-gray-400">
-                Please sign in to access your personal job matching features.
+          {/* Coming Soon CTA */}
+          <div className="text-center py-16">
+            <div className="inline-block p-1 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-3xl shadow-2xl">
+              <div className="bg-white dark:bg-gray-900 rounded-3xl px-12 py-10">
+                <h3 className="text-3xl font-bold mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Get Ready for the Revolution
+                </h3>
+                <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+                  We're putting the finishing touches on technology that will change how job searching works forever. 
+                  Stay tuned for the launch that will transform your career.
+                </p>
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-12 py-6 text-xl rounded-full shadow-2xl transform transition-all duration-300 hover:scale-105"
+                  disabled
+                >
+                  <Calendar className="h-6 w-6 mr-3" />
+                  Coming Soon
+                  <ArrowRight className="h-6 w-6 ml-3" />
+                </Button>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
