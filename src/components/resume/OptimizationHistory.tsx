@@ -42,7 +42,7 @@ export const OptimizationHistory = ({ userId }: { userId: string | undefined }) 
         <SheetHeader className="p-6 pb-2">
           <SheetTitle>Optimization History</SheetTitle>
         </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-5rem)] px-6">
+        <div className={`h-[calc(100vh-5rem)] px-6 overflow-y-auto ${isMobile ? 'mobile-scroll-hidden' : 'custom-scrollbar'}`}>
           <div className="space-y-4 pb-6 pr-2">
             {optimizationHistory.length === 0 ? (
               <div className="text-center py-10">
@@ -63,7 +63,7 @@ export const OptimizationHistory = ({ userId }: { userId: string | undefined }) 
                     {/* Job Description Preview */}
                     <div>
                       <h3 className="text-sm font-medium text-gray-700 mb-1">Job Description</h3>
-                      <div className="text-sm bg-gray-50 p-3 rounded-md max-h-40 overflow-y-auto break-words">
+                      <div className="text-sm bg-gray-50 p-3 rounded-md max-h-40 overflow-y-auto break-words mobile-scroll-hidden">
                         {item.job_description || "No job description provided"}
                       </div>
                     </div>
@@ -71,7 +71,7 @@ export const OptimizationHistory = ({ userId }: { userId: string | undefined }) 
                     {/* Optimized Resume Preview */}
                     <div>
                       <h3 className="text-sm font-medium text-gray-700 mb-1">Optimized Resume</h3>
-                      <div className="text-sm bg-gray-50 p-3 rounded-md max-h-60 overflow-y-auto break-words">
+                      <div className="text-sm bg-gray-50 p-3 rounded-md max-h-60 overflow-y-auto break-words mobile-scroll-hidden">
                         {item.optimized_resume || "No optimized resume available"}
                       </div>
                     </div>
@@ -85,7 +85,7 @@ export const OptimizationHistory = ({ userId }: { userId: string | undefined }) 
               ))
             )}
           </div>
-        </ScrollArea>
+        </div>
       </SheetContent>
     </Sheet>
   );
