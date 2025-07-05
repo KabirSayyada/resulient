@@ -21,7 +21,7 @@ export default function Jobs() {
             <div className="max-w-4xl mx-auto">
               <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-3 mb-8">
                 <Sparkles className="h-5 w-5 text-yellow-300 animate-pulse" />
-                <span className="text-white font-bold text-lg">AI-POWERED MATCHING</span>
+                <span className="text-white font-bold text-lg">REVOLUTIONARY TECHNOLOGY</span>
                 <Sparkles className="h-5 w-5 text-yellow-300 animate-pulse" />
               </div>
               
@@ -35,7 +35,7 @@ export default function Jobs() {
               
               <p className="text-2xl text-white/95 max-w-4xl mx-auto mb-12 leading-relaxed">
                 We're building the <span className="font-bold text-yellow-300">first-of-its-kind</span> AI-powered job matching platform 
-                that will <span className="font-bold text-orange-300">completely transform</span> how you find and apply to jobs.
+                that will <span className="font-bold text-orange-300">completely transform</span> how you find and apply to jobs forever.
               </p>
               
               <div className="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full px-8 py-4 shadow-2xl">
@@ -51,13 +51,13 @@ export default function Jobs() {
           {/* Revolutionary Features */}
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4 text-lg px-6 py-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30">
-              🚀 Advanced Job Matching
+              🚀 World's First Technology
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent mb-6">
               What Makes This Revolutionary
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              This advanced job matching platform will change how you search for opportunities.
+              We're not just another job board. We're creating technology that has never existed before.
             </p>
           </div>
 
@@ -172,7 +172,7 @@ export default function Jobs() {
                   Get Ready for the Revolution
                 </h3>
                 <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-                  We're putting the finishing touches on technology that will change how job searching works. 
+                  We're putting the finishing touches on technology that will change how job searching works forever. 
                   Stay tuned for the launch that will transform your career.
                 </p>
                 <Button 

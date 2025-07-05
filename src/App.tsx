@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
@@ -26,10 +27,8 @@ import BlogCategory from "@/pages/BlogCategory";
 import BlogAdmin from "@/pages/BlogAdmin";
 import { Sitemap } from "@/components/blog/Sitemap";
 import { AuthProvider } from "@/hooks/useAuth";
-import { useJobsNotification } from "@/hooks/useJobsNotification";
 
 function App() {
-  useJobsNotification();
   return (
     <ThemeProvider>
       <AuthProvider>
