@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle, Star, Clock, TrendingUp, Users, Shield, Award, Target, Rocket, Menu, X, Zap, Diamond, Globe } from "lucide-react";
+import { ArrowRight, CheckCircle, Star, Clock, TrendingUp, Users, Shield, Award, Target, Rocket, Menu, X, Zap, Diamond } from "lucide-react";
 import { LegalFooter } from "@/components/layout/LegalFooter";
 import { Helmet } from "react-helmet-async";
 import { useReferralTracking } from "@/hooks/useReferralTracking";
@@ -347,84 +348,6 @@ const LandingPage = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* NEW: Exciting Job Match Feature Section */}
-        <section className="py-20 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 relative overflow-hidden">
-          <div className="absolute inset-0 bg-black/10"></div>
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -top-20 -right-20 w-40 h-40 bg-white/20 rounded-full blur-2xl animate-pulse"></div>
-            <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-white/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          </div>
-          
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-3 mb-8 animate-fade-in">
-                <Zap className="h-5 w-5 text-yellow-300 animate-pulse" />
-                <span className="text-white font-bold text-lg">COMING SOON</span>
-                <Zap className="h-5 w-5 text-yellow-300 animate-pulse" />
-              </div>
-              
-              <h2 className="text-5xl sm:text-6xl font-extrabold text-white mb-8 animate-fade-in">
-                Revolutionary Job Matching
-                <span className="block text-4xl sm:text-5xl mt-2 bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                  Is Almost Here
-                </span>
-              </h2>
-              
-              <p className="text-2xl text-emerald-100 max-w-4xl mx-auto mb-12 leading-relaxed animate-fade-in">
-                Imagine never applying to another irrelevant job again. Our AI scans <span className="font-bold text-yellow-300">10,000+ job boards</span> 
-                and finds <span className="font-bold text-orange-300">millions of fresh opportunities</span> - but only shows you the ones 
-                where you're a <span className="font-bold text-white">perfect match</span>.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 mb-16">
-              <div className="text-center group animate-fade-in">
-                <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl mx-auto mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Target className="h-10 w-10 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-4">Perfect Matches Only</h3>
-                <p className="text-emerald-100 leading-relaxed">
-                  No more wasting time on jobs you're not qualified for. Every opportunity is hand-picked by AI for YOUR skills.
-                </p>
-              </div>
-              
-              <div className="text-center group animate-fade-in delay-300">
-                <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl mx-auto mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Globe className="h-10 w-10 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-4">Massive Job Coverage</h3>
-                <p className="text-emerald-100 leading-relaxed">
-                  We search everywhere - from major job boards to hidden company pages - so you never miss the perfect opportunity.
-                </p>
-              </div>
-              
-              <div className="text-center group animate-fade-in delay-500">
-                <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl mx-auto mb-6 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <TrendingUp className="h-10 w-10 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-4">5x Higher Success Rate</h3>
-                <p className="text-emerald-100 leading-relaxed">
-                  When you only apply to jobs you're truly qualified for, your interview rate skyrockets. It's simple math.
-                </p>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <Link 
-                to="/jobs" 
-                className="group inline-flex items-center justify-center px-12 py-5 text-xl font-bold rounded-full bg-white text-emerald-600 hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-white/25"
-              >
-                <Rocket className="h-6 w-6 mr-3 group-hover:animate-pulse" />
-                See What's Coming
-                <ArrowRight className="h-6 w-6 ml-3 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <p className="text-emerald-100 mt-4 text-lg">
-                Get a sneak peek at the future of job searching
-              </p>
             </div>
           </div>
         </section>
