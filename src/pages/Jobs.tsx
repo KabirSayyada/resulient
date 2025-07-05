@@ -1,15 +1,22 @@
 
-import { MainNavigation } from "@/components/resume/MainNavigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Target, Zap, Search, Globe, Calendar, TrendingUp, ArrowRight, Crown, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Jobs() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
       <div className="container mx-auto px-4 py-8">
-        <MainNavigation />
+        {/* Simple Navigation Header */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center">
+            <Link to="/" className="text-2xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
+              ← Back to Home
+            </Link>
+          </div>
+        </div>
         
         {/* Hero Section */}
         <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl shadow-2xl mb-8">
