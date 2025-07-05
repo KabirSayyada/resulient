@@ -16,11 +16,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const savedTheme = localStorage.getItem("theme") as Theme;
       if (savedTheme) return savedTheme;
       
-      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        return "dark";
-      }
+      // Default to dark mode instead of checking system preference
+      return "dark";
     }
-    return "light";
+    return "dark"; // Default to dark for SSR
   });
 
   useEffect(() => {
