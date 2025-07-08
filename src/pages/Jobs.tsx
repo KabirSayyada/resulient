@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -356,7 +355,7 @@ export default function Jobs() {
                       onClick={handleTargetedJobFetch}
                       disabled={scrapingLoading || !selectedResume || !canFetchJobs() || limits.hasReachedLimit}
                       size="lg"
-                      className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 hover:from-purple-700 hover:via-pink-700 hover:to-red-700 text-white font-bold px-16 py-6 text-xl rounded-full disabled:opacity-50 min-w-[400px] shadow-2xl transform transition-all duration-300 hover:scale-105"
+                      className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 hover:from-purple-700 hover:via-pink-700 hover:to-red-700 text-white font-bold px-8 sm:px-16 py-6 text-lg sm:text-xl rounded-full disabled:opacity-50 w-full sm:w-auto shadow-2xl transform transition-all duration-300 hover:scale-105"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
                       
@@ -379,25 +378,25 @@ export default function Jobs() {
                     </Button>
                   </div>
                   
-                  <div className="mt-8 flex flex-wrap items-center justify-center gap-8 text-purple-600 dark:text-purple-400">
+                  <div className="mt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-purple-600 dark:text-purple-400">
                     <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 dark:border-purple-800">
                       <Zap className="h-4 w-4 text-yellow-500" />
-                      <span className="font-medium">Freshest Jobs (Updated Hourly)</span>
+                      <span className="font-medium text-sm">Freshest Jobs (Updated Hourly)</span>
                     </div>
                     <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 dark:border-purple-800">
                       <Target className="h-4 w-4 text-green-500" />
-                      <span className="font-medium">100% Personal & Private</span>
+                      <span className="font-medium text-sm">100% Personal & Private</span>
                     </div>
                     <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 dark:border-purple-800">
                       <Crown className="h-4 w-4 text-amber-500" />
-                      <span className="font-medium">
+                      <span className="font-medium text-sm">
                         {selectedResume ? `${selectedResume.industry} Focused` : 'Select Resume First'}
                       </span>
                     </div>
                     {subscription.tier === "premium" && (
                       <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 dark:border-purple-800">
                         <RefreshCw className="h-4 w-4 text-blue-500" />
-                        <span className="font-medium text-blue-600 dark:text-blue-400">
+                        <span className="font-medium text-blue-600 dark:text-blue-400 text-sm">
                           {limits.limit - limits.used} Premium Fetches Left
                         </span>
                       </div>
