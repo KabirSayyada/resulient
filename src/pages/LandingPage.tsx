@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle, Star, Clock, TrendingUp, Users, Shield, Award, Target, Rocket, Menu, X, Zap, Diamond, ExternalLink } from "lucide-react";
+import { ArrowRight, CheckCircle, Star, Clock, TrendingUp, Users, Shield, Award, Target, Rocket, Menu, X, Zap, Diamond, ExternalLink, Search, MapPin, Briefcase, Filter } from "lucide-react";
 import { LegalFooter } from "@/components/layout/LegalFooter";
 import { Helmet } from "react-helmet-async";
 import { useReferralTracking } from "@/hooks/useReferralTracking";
@@ -248,28 +248,60 @@ const LandingPage = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center relative">
             <div className="space-y-8 animate-fade-in">
               <div className="space-y-6">
+                <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-950 dark:to-emerald-950 border border-green-200 dark:border-green-800 rounded-full text-green-800 dark:text-green-300 text-sm font-medium mb-4">
+                  <Briefcase className="h-4 w-4 mr-2" />
+                  Smart Job Matching Now Live!
+                </div>
+                
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-gray-900 dark:text-white leading-tight">
-                  Land Your
+                  Stop Endless
                   <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 animate-pulse">
-                    Dream Job
+                    Job Hunting
                   </span>
-                  <span className="block text-4xl sm:text-5xl lg:text-6xl mt-2">5x Faster</span>
+                  <span className="block text-4xl sm:text-5xl lg:text-6xl mt-2">Start Getting Hired</span>
                 </h1>
                 
                 <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-2xl leading-relaxed">
-                  Transform your job search from <span className="font-bold text-red-500">months of rejection</span> to 
-                  <span className="font-bold text-green-600"> multiple interview offers</span> in weeks. 
-                  Our AI doesn't just beat ATS systems—it creates resumes that make recruiters excited to meet you.
+                  No more scrolling through hundreds of irrelevant jobs. Resulient's AI finds your perfect matches, 
+                  optimizes your resume, and delivers <span className="font-bold text-green-600">interview invitations</span> directly to you.
                 </p>
+
+                {/* New Feature Highlights */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+                  <div className="flex items-center space-x-3 p-3 bg-white/80 dark:bg-gray-800/80 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
+                      <Search className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">Smart Job Discovery</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">AI finds your perfect matches</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3 p-3 bg-white/80 dark:bg-gray-800/80 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                      <Target className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">94% Match Accuracy</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">Only relevant opportunities</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/auth" className="group inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-full shadow-2xl text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-700 hover:via-purple-700 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 transform transition-all duration-300 hover:scale-105 hover:shadow-indigo-500/25">
-                  Start Getting Interviews
+                  Find My Dream Jobs
                   <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link to="/jobs" className="group inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-full border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white focus:outline-none focus:ring-4 focus:ring-indigo-500/50 transform transition-all duration-300 hover:scale-105">
+                  Browse Job Matches
+                  <Briefcase className="ml-3 h-6 w-6 group-hover:scale-110 transition-transform" />
                 </Link>
               </div>
 
+              {/* Testimonials */}
               <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-8 pt-4">
                 <div className="flex items-center">
                   <div className="flex -space-x-2">
@@ -305,78 +337,164 @@ const LandingPage = () => {
             </div>
 
             <div className="relative animate-fade-in">
-              {/* Floating cards showcasing features */}
+              {/* Enhanced floating cards showcasing job matching */}
               <div className="relative">
                 <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500/20 to-purple-600/20 rounded-3xl blur-2xl"></div>
                 <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl shadow-2xl overflow-hidden">
-                  <div className="p-8">
+                  <div className="p-6">
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
-                          <Target className="h-6 w-6 text-white" />
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center">
+                          <Search className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-gray-900 dark:text-white">ATS Score</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">Real-time analysis</p>
+                          <h3 className="font-bold text-gray-900 dark:text-white">Job Matches Found</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Personalized for you</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-3xl font-bold text-green-600">94%</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">Optimized</div>
+                        <div className="text-2xl font-bold text-blue-600">127</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">This week</div>
                       </div>
                     </div>
                     
-                    <div className="space-y-4">
+                    {/* Job Match Cards */}
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
-                        <span className="text-sm font-medium text-green-800 dark:text-green-300">Keywords Match</span>
-                        <span className="text-sm font-bold text-green-600">92%</span>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-white text-xs font-bold">G</div>
+                          <div>
+                            <p className="font-medium text-green-800 dark:text-green-300 text-sm">Senior Software Engineer</p>
+                            <p className="text-xs text-green-600 dark:text-green-400">Google • $180k-220k</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-sm font-bold text-green-600">94%</span>
+                          <p className="text-xs text-green-500">Perfect Match</p>
+                        </div>
                       </div>
+                      
                       <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <span className="text-sm font-medium text-blue-800 dark:text-blue-300">Format Score</span>
-                        <span className="text-sm font-bold text-blue-600">98%</span>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white text-xs font-bold">M</div>
+                          <div>
+                            <p className="font-medium text-blue-800 dark:text-blue-300 text-sm">Product Manager</p>
+                            <p className="text-xs text-blue-600 dark:text-blue-400">Meta • $160k-190k</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-sm font-bold text-blue-600">89%</span>
+                          <p className="text-xs text-blue-500">Great Match</p>
+                        </div>
                       </div>
+                      
                       <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800">
-                        <span className="text-sm font-medium text-purple-800 dark:text-purple-300">Impact Score</span>
-                        <span className="text-sm font-bold text-purple-600">91%</span>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white text-xs font-bold">A</div>
+                          <div>
+                            <p className="font-medium text-purple-800 dark:text-purple-300 text-sm">Data Scientist</p>
+                            <p className="text-xs text-purple-600 dark:text-purple-400">Apple • $170k-200k</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-sm font-bold text-purple-600">87%</span>
+                          <p className="text-xs text-purple-500">Good Match</p>
+                        </div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-4 text-white">
+                  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 text-white">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-semibold">Interview Prediction</p>
-                        <p className="text-sm opacity-90">Based on current optimization</p>
+                        <p className="font-semibold">Time Saved This Month</p>
+                        <p className="text-sm opacity-90">No more endless scrolling</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold">87%</div>
-                        <div className="text-sm opacity-90">Success Rate</div>
+                        <div className="text-2xl font-bold">47 hours</div>
+                        <div className="text-sm opacity-90">Focus on interviews</div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
               
-              {/* Floating stats */}
+              {/* Updated floating stats */}
               <div className="absolute -top-6 -left-6 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 animate-pulse">
                 <div className="flex items-center space-x-3">
-                  <TrendingUp className="h-8 w-8 text-green-500" />
+                  <MapPin className="h-8 w-8 text-green-500" />
                   <div>
-                    <div className="text-2xl font-bold text-green-600">5x</div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">More Interviews</div>
+                    <div className="text-2xl font-bold text-green-600">127</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Jobs Found</div>
                   </div>
                 </div>
               </div>
               
               <div className="absolute -bottom-6 -right-6 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 animate-pulse delay-300">
                 <div className="flex items-center space-x-3">
-                  <Clock className="h-8 w-8 text-blue-500" />
+                  <Filter className="h-8 w-8 text-blue-500" />
                   <div>
-                    <div className="text-2xl font-bold text-blue-600">2 weeks</div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">To Interview</div>
+                    <div className="text-2xl font-bold text-blue-600">94%</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Match Rate</div>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* New Job Matching Benefits Section */}
+        <section className="py-20 bg-white dark:bg-gray-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl mb-6">
+                Why Waste Time on Irrelevant Jobs?
+              </h2>
+              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                Traditional job hunting is broken. Spend hours scrolling through thousands of mismatched positions, 
+                or let Resulient's AI deliver your dream opportunities directly to you.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
+              <div className="space-y-8">
+                <div className="relative">
+                  <div className="absolute -inset-2 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-2xl blur-xl"></div>
+                  <div className="relative bg-red-50 dark:bg-red-950/30 p-8 rounded-2xl border-2 border-red-200 dark:border-red-800">
+                    <h3 className="text-2xl font-bold text-red-800 dark:text-red-300 mb-4">The Old Way (Exhausting)</h3>
+                    <ul className="space-y-3 text-red-700 dark:text-red-400">
+                      <li className="flex items-center"><X className="h-5 w-5 mr-3 text-red-500" />Hours scrolling through job boards</li>
+                      <li className="flex items-center"><X className="h-5 w-5 mr-3 text-red-500" />Applying to irrelevant positions</li>
+                      <li className="flex items-center"><X className="h-5 w-5 mr-3 text-red-500" />Generic resume for every job</li>
+                      <li className="flex items-center"><X className="h-5 w-5 mr-3 text-red-500" />2% response rate if you're lucky</li>
+                      <li className="flex items-center"><X className="h-5 w-5 mr-3 text-red-500" />Months of rejection and frustration</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-8">
+                <div className="relative">
+                  <div className="absolute -inset-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl blur-xl"></div>
+                  <div className="relative bg-green-50 dark:bg-green-950/30 p-8 rounded-2xl border-2 border-green-200 dark:border-green-800">
+                    <h3 className="text-2xl font-bold text-green-800 dark:text-green-300 mb-4">The Resulient Way (Effortless)</h3>
+                    <ul className="space-y-3 text-green-700 dark:text-green-400">
+                      <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-3 text-green-500" />AI finds perfect job matches for you</li>
+                      <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-3 text-green-500" />Resume optimized for each position</li>
+                      <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-3 text-green-500" />94% relevance score for every match</li>
+                      <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-3 text-green-500" />5x higher interview invitation rate</li>
+                      <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-3 text-green-500" />Dream job offers in weeks, not months</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <Link to="/jobs" className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-full shadow-2xl text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-green-500/50 transform transition-all duration-300 hover:scale-105">
+                See My Job Matches Now
+                <Search className="ml-3 h-6 w-6" />
+              </Link>
             </div>
           </div>
         </section>
@@ -418,32 +536,32 @@ const LandingPage = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl mb-6">
-                The Complete Interview-Winning System
+                The Complete Career Acceleration System
               </h2>
               <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                We don't just optimize resumes—we engineer interview opportunities through proven psychological and technical strategies.
+                Beyond resume optimization—we've built the entire infrastructure to get you hired faster than ever before.
               </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-12">
               {[
                 {
-                  icon: <Zap className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />,
-                  title: "ATS Domination",
-                  description: "Our advanced algorithms ensure your resume not only passes every ATS filter but ranks at the top of recruiter searches, guaranteeing human eyes see your application.",
-                  features: ["98% ATS pass rate", "Keyword optimization", "Format perfection"]
+                  icon: <Search className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />,
+                  title: "Smart Job Discovery",
+                  description: "Our AI continuously monitors thousands of job postings, instantly identifying opportunities that match your skills, experience, and career goals—no more manual searching required.",
+                  features: ["Real-time job monitoring", "94% match accuracy", "Personalized filtering"]
                 },
                 {
                   icon: <Target className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />,
-                  title: "Psychological Impact",
-                  description: "We craft compelling narratives that trigger recruiter psychology, making them think 'I MUST interview this person' within the critical first 6 seconds of review.",
-                  features: ["Story-driven content", "Impact metrics", "Achievement highlighting"]
+                  title: "Resume Perfection",
+                  description: "Each resume is custom-optimized for every job application, ensuring maximum ATS compatibility while creating compelling narratives that make recruiters excited to interview you.",
+                  features: ["Job-specific optimization", "ATS mastery", "Psychological impact"]
                 },
                 {
                   icon: <Rocket className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />,
-                  title: "Interview Acceleration",
-                  description: "Strategic positioning that addresses employer pain points directly, making you the obvious solution they've been searching for, leading to faster interview invitations.",
-                  features: ["Need-based positioning", "Gap analysis", "Solution framing"]
+                  title: "Interview Pipeline",
+                  description: "Transform from applications into interviews with strategic positioning that addresses employer needs directly, creating an irresistible candidate profile that stands out from the crowd.",
+                  features: ["5x more interviews", "Strategic positioning", "Accelerated hiring"]
                 }
               ].map((feature, i) => (
                 <div key={i} className="group relative">
