@@ -22,7 +22,7 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent, onJobApp
   const { job, matchScore, detailedScoring, hasApplied, appliedAt } = jobMatch;
 
   const handleApplyClick = async () => {
-    if (hasApplied || !onJobApplication) return;
+    if (!onJobApplication) return;
     
     const success = await onJobApplication(job.id, job.external_url || undefined);
     if (success && job.external_url) {
@@ -459,23 +459,26 @@ export function EnhancedJobMatchCard({ jobMatch, selectedResumeContent, onJobApp
 
         {/* Action buttons */}
         <div className="flex gap-3">
-          {hasApplied ? (
-            <Button 
-              disabled 
-              className="flex-1 sm:flex-none bg-gray-400 text-gray-600 cursor-not-allowed"
-            >
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Already Applied
-            </Button>
-          ) : (
-            <Button 
-              onClick={handleApplyClick}
-              className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-            >
-              <ExternalLink className="mr-2 h-4 w-4" />
-              Apply Now
-            </Button>
-          )}
+          <Button 
+            onClick={handleApplyClick}
+            className={`flex-1 sm:flex-none ${
+              hasApplied 
+                ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700" 
+                : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            }`}
+          >
+            {hasApplied ? (
+              <>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Applied - Apply Again
+              </>
+            ) : (
+              <>
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Apply Now
+              </>
+            )}
+          </Button>
         </div>
       </CardContent>
     </Card>
