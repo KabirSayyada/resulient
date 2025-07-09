@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle, Star, Clock, TrendingUp, Users, Shield, Award, Target, Rocket, Menu, X, Zap, Diamond, ExternalLink, Search, Building, MapPin, DollarSign, Database, Brain, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle, Star, Clock, TrendingUp, Users, Shield, Award, Target, Rocket, Menu, X, Zap, Diamond, Search, Building, MapPin, DollarSign, Database, Brain, Sparkles } from "lucide-react";
 import { LegalFooter } from "@/components/layout/LegalFooter";
 import { Helmet } from "react-helmet-async";
 import { useReferralTracking } from "@/hooks/useReferralTracking";
@@ -215,38 +215,8 @@ const LandingPage = () => {
           </div>
         </header>
 
-        {/* Product Hunt Banner */}
-        <div className="fixed top-16 left-0 right-0 z-40 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white shadow-lg">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-center py-3 text-center relative">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <Rocket className="h-4 w-4 text-white" />
-                </div>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                  <span className="font-bold text-sm sm:text-base">
-                    🚀 We're LIVE on Product Hunt!
-                  </span>
-                  <span className="text-xs sm:text-sm opacity-90">
-                    Help us reach #1 today
-                  </span>
-                </div>
-                <a
-                  href="https://www.producthunt.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:scale-105"
-                >
-                  Vote Now
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Enhanced Hero Section */}
-        <section className="pt-44 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative overflow-hidden">
+        <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative overflow-hidden">
           {/* Background decorative elements */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-600/20 rounded-full blur-3xl"></div>
@@ -552,7 +522,7 @@ const LandingPage = () => {
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-16">
-              <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-6">
+              <h2 className="text-4xl font-extrabold text-white mb-6">
                 Why Job Seekers Choose Resulient
               </h2>
               <p className="text-xl text-indigo-100 max-w-3xl mx-auto">
