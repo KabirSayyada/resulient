@@ -1,6 +1,7 @@
 
 import { ParsedContact } from "@/types/resumeStructure";
 import { EMAIL_REGEX, PHONE_REGEX, LINKEDIN_REGEX } from './constants';
+import { extractLocationFromText, formatLocationForDisplay } from './locationExtractor';
 
 export function couldBeName(line: string): boolean {
   // Check if line could be a person's name
@@ -41,7 +42,7 @@ export function extractContactInfo(lines: string[]): ParsedContact {
   const contact: ParsedContact = {};
   let potentialNames: string[] = [];
   
-  console.log('=== Starting contact extraction ===');
+  console.log('=== Starting enhanced contact extraction ===');
   console.log('Input lines:', lines);
   
   for (let i = 0; i < lines.length; i++) {
@@ -71,14 +72,24 @@ export function extractContactInfo(lines: string[]): ParsedContact {
       console.log('✓ Found LinkedIn:', linkedinMatch[0]);
     }
     
-    // Extract address (lines with state abbreviations, zip codes, or common address words)
+    // Enhanced location extraction using the new location extractor
+    if (!contact.address) {
+      const extractedLocation = extractLocationFromText(line);
+      if (extractedLocation && extractedLocation.confidence > 70) {
+        contact.address = formatLocationForDisplay(extractedLocation);
+        console.log('✓ Found location:', contact.address);
+        continue;
+      }
+    }
+    
+    // Fallback: Extract address (lines with state abbreviations, zip codes, or common address words)
     if (!contact.address && (
       /\b[A-Z]{2}\s+\d{5}/.test(line) || 
       /\d{5}/.test(line) ||
       /\b(Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd)\b/i.test(line)
     )) {
       contact.address = line;
-      console.log('✓ Found address:', line);
+      console.log('✓ Found address (fallback):', line);
       continue;
     }
     
@@ -105,6 +116,15 @@ export function extractContactInfo(lines: string[]): ParsedContact {
         if (partLinkedinMatch && !contact.linkedin) {
           contact.linkedin = partLinkedinMatch[0];
           console.log('  ✓ Found LinkedIn in multi-part:', partLinkedinMatch[0]);
+        }
+        
+        // Check for location in parts
+        if (!contact.address) {
+          const partLocation = extractLocationFromText(part);
+          if (partLocation && partLocation.confidence > 60) {
+            contact.address = formatLocationForDisplay(partLocation);
+            console.log('  ✓ Found location in multi-part:', contact.address);
+          }
         }
         
         // Check if remaining part could be a name

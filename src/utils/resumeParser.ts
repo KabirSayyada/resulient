@@ -7,9 +7,10 @@ import { parseEducation } from './resume/educationParser';
 import { parseSkills } from './resume/skillsParser';
 import { parseProjects } from './resume/projectsParser';
 import { parseCertifications } from './resume/certificationsParser';
+import { extractLocationFromResumeContent, formatLocationForDisplay } from './resume/locationExtractor';
 
 export function parseResumeContent(content: string): ParsedResume {
-  console.log('=== STARTING RESUME PARSING ===');
+  console.log('=== STARTING ENHANCED RESUME PARSING ===');
   console.log('Raw content length:', content.length);
   console.log('First 300 characters:', content.substring(0, 300));
   
@@ -41,6 +42,16 @@ export function parseResumeContent(content: string): ParsedResume {
   resume.contact = extractedContact;
   console.log('=== EXTRACTED CONTACT RESULT ===');
   console.log(extractedContact);
+
+  // Enhanced location extraction - try multiple strategies if no location found in contact
+  if (!resume.contact.address) {
+    console.log('=== NO ADDRESS IN CONTACT - TRYING ENHANCED LOCATION EXTRACTION ===');
+    const locationResult = extractLocationFromResumeContent(content);
+    if (locationResult) {
+      resume.contact.address = formatLocationForDisplay(locationResult);
+      console.log('✓ Enhanced location extraction found:', resume.contact.address);
+    }
+  }
 
   let currentSection = '';
   let sectionContent: string[] = [];
@@ -138,6 +149,33 @@ export function parseResumeContent(content: string): ParsedResume {
         console.log(`Aggressive fallback: Using "${line}" as name`);
         resume.contact.name = line;
         break;
+      }
+    }
+  }
+
+  // Final location fallback - check if we still don't have a location
+  if (!resume.contact.address) {
+    console.log('=== FINAL LOCATION FALLBACK ===');
+    
+    // Look through work experience for locations
+    if (resume.workExperience && resume.workExperience.length > 0) {
+      for (const exp of resume.workExperience) {
+        if (exp.location) {
+          resume.contact.address = exp.location;
+          console.log(`✓ Using work experience location: ${exp.location}`);
+          break;
+        }
+      }
+    }
+    
+    // Look through education for locations
+    if (!resume.contact.address && resume.education && resume.education.length > 0) {
+      for (const edu of resume.education) {
+        if (edu.location) {
+          resume.contact.address = edu.location;
+          console.log(`✓ Using education location: ${edu.location}`);
+          break;
+        }
       }
     }
   }
