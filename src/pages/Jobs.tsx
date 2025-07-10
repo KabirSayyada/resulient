@@ -56,6 +56,44 @@ export default function Jobs() {
     return hoursLeft;
   };
 
+  // Enhanced location extraction helper function
+  const extractLocationFromResume = (resumeContent: string): string => {
+    try {
+      // First try to parse as JSON (structured resume data)
+      const resumeData = JSON.parse(resumeContent);
+      
+      // Try various possible location fields in structured data
+      if (resumeData.personalInfo?.location) {
+        return resumeData.personalInfo.location;
+      } else if (resumeData.personalInfo?.city && resumeData.personalInfo?.state) {
+        return `${resumeData.personalInfo.city}, ${resumeData.personalInfo.state}`;
+      } else if (resumeData.contact?.location) {
+        return resumeData.contact.location;
+      } else if (resumeData.contact?.address) {
+        return resumeData.contact.address;
+      } else if (resumeData.location) {
+        return resumeData.location;
+      } else if (resumeData.workExperience && resumeData.workExperience.length > 0) {
+        // Try to get location from most recent work experience
+        const mostRecentJob = resumeData.workExperience[0];
+        if (mostRecentJob.location) {
+          return mostRecentJob.location;
+        }
+      }
+    } catch (error) {
+      console.log('Could not parse resume content for location, using text extraction');
+    }
+    
+    // Fallback to text-based location extraction using the utility
+    const { extractLocationFromResumeContent, formatLocationForDisplay } = require('@/utils/resume/locationExtractor');
+    const locationResult = extractLocationFromResumeContent(resumeContent);
+    if (locationResult) {
+      return formatLocationForDisplay(locationResult);
+    }
+    
+    return 'United States'; // Default fallback
+  };
+
   const handleTargetedJobFetch = async () => {
     if (!selectedResume || !user) {
       console.error('Cannot fetch jobs: no resume selected or user not authenticated');
@@ -76,35 +114,10 @@ export default function Jobs() {
     try {
       const jobTitle = selectedResume.industry || 'software engineer';
       
-      // Extract location from resume data if available
-      let location = 'United States'; // Default fallback
+      // Enhanced location extraction from resume data
+      const location = extractLocationFromResume(selectedResume.resume_content);
       
-      if (selectedResume.resume_content) {
-        try {
-          const resumeData = JSON.parse(selectedResume.resume_content);
-          
-          // Try to extract location from various possible fields in resume
-          if (resumeData.personalInfo?.location) {
-            location = resumeData.personalInfo.location;
-          } else if (resumeData.personalInfo?.city && resumeData.personalInfo?.state) {
-            location = `${resumeData.personalInfo.city}, ${resumeData.personalInfo.state}`;
-          } else if (resumeData.contact?.location) {
-            location = resumeData.contact.location;
-          } else if (resumeData.location) {
-            location = resumeData.location;
-          } else if (resumeData.workExperience && resumeData.workExperience.length > 0) {
-            // Try to get location from most recent work experience
-            const mostRecentJob = resumeData.workExperience[0];
-            if (mostRecentJob.location) {
-              location = mostRecentJob.location;
-            }
-          }
-        } catch (error) {
-          console.log('Could not parse resume content for location, using default');
-        }
-      }
-      
-      console.log(`Fetching jobs for ${jobTitle} in ${location}`);
+      console.log(`Fetching jobs for ${jobTitle} in ${location} (extracted from resume)`);
       
       await scrapeJobs({
         query: jobTitle,
@@ -156,7 +169,7 @@ export default function Jobs() {
             <div className="max-w-4xl mx-auto">
               <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
                 <Zap className="h-4 w-4 text-yellow-300" />
-                <span className="text-white font-medium text-sm">AI-Powered Job Matching</span>
+                <span className="text-white font-medium text-sm">AI-Powered Job Matching with Location Intelligence</span>
               </div>
               
               <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
@@ -169,7 +182,7 @@ export default function Jobs() {
               <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8 leading-relaxed">
                 We scour <span className="font-bold text-yellow-300">every single job board</span> across the internet, 
                 analyze <span className="font-bold text-yellow-300">millions of opportunities</span>, and use advanced AI 
-                to find jobs that perfectly match your skills, experience, and career goals.
+                to find jobs that perfectly match your skills, experience, and <span className="font-bold text-green-300">location preferences</span>.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center text-white/80">
@@ -184,8 +197,8 @@ export default function Jobs() {
                 </div>
                 <div className="hidden sm:block w-1 h-1 bg-white/40 rounded-full"></div>
                 <div className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-300" />
-                  <span className="font-medium">10,000+ Job Boards</span>
+                  <MapPin className="h-5 w-5 text-purple-300" />
+                  <span className="font-medium">Location-Smart Matching</span>
                 </div>
               </div>
             </div>
@@ -216,7 +229,7 @@ export default function Jobs() {
                             Experience The Ultimate Job Matching Platform
                           </h3>
                           <p className="text-amber-700 dark:text-amber-400 mt-1">
-                            The most advanced AI job matching technology in the world
+                            The most advanced AI job matching technology with location intelligence
                           </p>
                         </div>
                       </div>
@@ -224,7 +237,7 @@ export default function Jobs() {
                       <div className="bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-2xl p-6 mb-6">
                         <p className="text-amber-800 dark:text-amber-300 text-lg leading-relaxed mb-4">
                           🚀 We're giving you <span className="font-bold text-orange-600">1 FREE premium job fetch</span> so you can experience 
-                          what makes us the #1 job matching platform. After that, unlock unlimited access to find your dream job faster than ever!
+                          what makes us the #1 job matching platform with smart location filtering!
                         </p>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -283,7 +296,7 @@ export default function Jobs() {
                           AI Job Discovery Engine
                         </h3>
                         <p className="text-xl text-purple-600 dark:text-purple-400 font-medium">
-                          The most advanced job matching technology ever created
+                          Now with intelligent location-based matching
                         </p>
                       </div>
                     </div>
@@ -291,10 +304,21 @@ export default function Jobs() {
                     <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm rounded-2xl p-8 mb-8">
                       <p className="text-2xl text-purple-800 dark:text-purple-300 leading-relaxed mb-6">
                         {selectedResume 
-                          ? `🎯 Ready to find perfect ${selectedResume.industry} opportunities just for you!`
-                          : '🔍 Select your resume above to unlock personalized job discovery'
+                          ? `🎯 Ready to find perfect ${selectedResume.industry} opportunities based on your location preferences!`
+                          : '🔍 Select your resume above to unlock personalized job discovery with location intelligence'
                         }
                       </p>
+                      
+                      {selectedResume && (
+                        <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl p-4 mb-6">
+                          <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                            <MapPin className="h-5 w-5" />
+                            <span className="font-medium">
+                              Location detected from resume: {extractLocationFromResume(selectedResume.resume_content)}
+                            </span>
+                          </div>
+                        </div>
+                      )}
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 p-6 rounded-2xl border border-blue-200 dark:border-blue-800">
@@ -330,10 +354,10 @@ export default function Jobs() {
                         <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 p-6 rounded-2xl border border-amber-200 dark:border-amber-800">
                           <div className="text-center">
                             <div className="w-12 h-12 bg-amber-500 rounded-xl mx-auto mb-3 flex items-center justify-center">
-                              <span className="text-white font-bold text-xl">24/7</span>
+                              <MapPin className="h-6 w-6 text-white" />
                             </div>
-                            <h4 className="font-bold text-amber-700 dark:text-amber-300 mb-1">Monitoring</h4>
-                            <p className="text-sm text-amber-600 dark:text-amber-400">Never miss out</p>
+                            <h4 className="font-bold text-amber-700 dark:text-amber-300 mb-1">Location</h4>
+                            <p className="text-sm text-amber-600 dark:text-amber-400">Smart matching</p>
                           </div>
                         </div>
                       </div>
@@ -388,11 +412,17 @@ export default function Jobs() {
                       <span className="font-medium text-sm">100% Personal & Private</span>
                     </div>
                     <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 dark:border-purple-800">
-                      <Crown className="h-4 w-4 text-amber-500" />
-                      <span className="font-medium text-sm">
-                        {selectedResume ? `${selectedResume.industry} Focused` : 'Select Resume First'}
-                      </span>
+                      <MapPin className="h-4 w-4 text-blue-500" />
+                      <span className="font-medium text-sm">Location-Smart Matching</span>
                     </div>
+                    {selectedResume && (
+                      <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 dark:border-purple-800">
+                        <Crown className="h-4 w-4 text-amber-500" />
+                        <span className="font-medium text-sm">
+                          {selectedResume.industry} + {extractLocationFromResume(selectedResume.resume_content)} Focused
+                        </span>
+                      </div>
+                    )}
                     {subscription.tier === "premium" && (
                       <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 dark:border-purple-800">
                         <RefreshCw className="h-4 w-4 text-blue-500" />
@@ -411,7 +441,7 @@ export default function Jobs() {
                   <Target className="h-5 w-5" />
                   <span className="font-medium">Premium Job Matching:</span>
                   <span className="text-sm">
-                    Our AI scans thousands of job boards daily to find the perfect matches for your skills and experience. Each job is carefully analyzed for compatibility with your resume.
+                    Our AI scans thousands of job boards daily to find the perfect matches for your skills, experience, and location. Each job is carefully analyzed for compatibility with your resume.
                   </span>
                 </div>
               </div>
