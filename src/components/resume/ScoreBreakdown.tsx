@@ -1,8 +1,9 @@
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Trophy, Star, TrendingUp, List, BarChart, BookOpen, Award, Medal } from "lucide-react";
+import { Trophy, Star, TrendingUp, List, BarChart, BookOpen, Award, Medal, Plus, Sparkles } from "lucide-react";
 import { ScoreData } from "@/types/resume";
+import { SuggestedSkills } from "./components/SuggestedSkills";
 
 export const ScoreBreakdown = ({ scoreData }: { scoreData: ScoreData }) => {
   // Helper function to calculate normalized percentage (0-100) for display purposes
@@ -213,23 +214,26 @@ export const ScoreBreakdown = ({ scoreData }: { scoreData: ScoreData }) => {
         </Card>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <h3 className="font-medium mb-3">Suggested Skills to Add</h3>
-          {scoreData.suggestedSkills.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {scoreData.suggestedSkills.map((skill, index) => (
-                <span 
-                  key={index} 
-                  className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm"
-                >
-                  {skill}
-                </span>
-              ))}
+      <Card className="border-2 border-blue-200/60 dark:border-blue-800/60 bg-gradient-to-br from-blue-50/80 via-indigo-50/60 to-purple-50/80 dark:from-blue-950/50 dark:via-indigo-950/40 dark:to-purple-950/50 shadow-lg hover:shadow-xl transition-all duration-300">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-lg">
+              <Sparkles className="h-5 w-5 text-white" />
             </div>
-          ) : (
-            <p className="text-gray-500">No additional skills suggested.</p>
-          )}
+            <div>
+              <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-700 to-indigo-700 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                Recommended Skills to Add
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Adding these skills could significantly boost your resume score
+              </p>
+            </div>
+          </div>
+          
+          <SuggestedSkills 
+            skills={scoreData.suggestedSkills} 
+            variant="enhanced"
+          />
         </CardContent>
       </Card>
 
