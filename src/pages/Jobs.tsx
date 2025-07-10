@@ -12,6 +12,7 @@ import { RestrictedJobView } from "@/components/jobs/RestrictedJobView";
 import { useAuth } from "@/hooks/useAuth";
 import { useJobScraper } from "@/hooks/useJobScraper";
 import { useSubscription } from "@/hooks/useSubscription";
+import { extractLocationFromResumeContent, formatLocationForDisplay } from "@/utils/resume/locationExtractor";
 import { format } from "date-fns";
 import { MainNavigation } from "@/components/resume/MainNavigation";
 
@@ -85,7 +86,6 @@ export default function Jobs() {
     }
     
     // Fallback to text-based location extraction using the utility
-    const { extractLocationFromResumeContent, formatLocationForDisplay } = require('@/utils/resume/locationExtractor');
     const locationResult = extractLocationFromResumeContent(resumeContent);
     if (locationResult) {
       return formatLocationForDisplay(locationResult);
