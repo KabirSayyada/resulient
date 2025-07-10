@@ -161,14 +161,12 @@ export function MainNavigation() {
             {user ? (
               <UserMenu />
             ) : (
-              <NavigationMenuLink asChild>
-                <Link
-                  to="/auth"
-                  className={navigationMenuTriggerStyle()}
-                >
-                  Sign In
-                </Link>
-              </NavigationMenuLink>
+              <Link
+                to="/auth"
+                className={navigationMenuTriggerStyle()}
+              >
+                Sign In
+              </Link>
             )}
           </div>
         </div>
