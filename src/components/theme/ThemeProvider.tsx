@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 type Theme = "light" | "dark";
 
@@ -11,16 +12,28 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  const isLandingPage = location.pathname === "/";
+  
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== "undefined") {
       const savedTheme = localStorage.getItem("theme") as Theme;
       if (savedTheme) return savedTheme;
       
-      // Default to dark mode instead of checking system preference
-      return "dark";
+      // Default to light mode for landing page, dark mode for other pages
+      return isLandingPage ? "light" : "dark";
     }
-    return "dark"; // Default to dark for SSR
+    return isLandingPage ? "light" : "dark"; // Default for SSR
   });
+
+  // Update theme when route changes if no saved preference
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (!savedTheme) {
+      const defaultTheme = isLandingPage ? "light" : "dark";
+      setTheme(defaultTheme);
+    }
+  }, [isLandingPage]);
 
   useEffect(() => {
     const root = window.document.documentElement;
