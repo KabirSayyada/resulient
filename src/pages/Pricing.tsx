@@ -57,7 +57,7 @@ const pricingTiers: PricingTier[] = [
   {
     name: "Premium",
     description: "For serious job seekers",
-    monthlyPrice: 9.95,
+    monthlyPrice: 10.00,
     yearlyPrice: 99.95,
     features: [
       { text: "Unlimited Resume Scorings", included: true },
@@ -80,7 +80,7 @@ const pricingTiers: PricingTier[] = [
   {
     name: "Platinum",
     description: "Maximum flexibility and power",
-    monthlyPrice: 17.95,
+    monthlyPrice: 25.00,
     yearlyPrice: 149.95,
     features: [
       { text: "Unlimited Resume Scorings", included: true },
