@@ -4,7 +4,7 @@ project_id = "zllrplxlewqyipxxpetl"
 [auth]
 enabled = true
 email_signup_enabled = true
-email_confirmation_enabled = false
+email_confirmation_enabled = true
 email_double_confirm_changes_enabled = false
 
 [auth.email]
