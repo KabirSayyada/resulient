@@ -18,8 +18,8 @@ export const useJobFetchLimits = () => {
   const { toast } = useToast();
   const [limits, setLimits] = useState<JobFetchLimits>({
     used: 0,
-    limit: 1,
-    hasReachedLimit: false,
+    limit: 0,
+    hasReachedLimit: true,
     canFetch: false
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -38,23 +38,25 @@ export const useJobFetchLimits = () => {
       });
 
       // Set limits based on subscription tier
-      let limit = 1; // Free tier - 1 lifetime fetch
-      let canFetch = true;
+      let limit = 0; // Free tier - no job fetches
+      let canFetch = false;
 
       if (subscription.tier === "premium") {
         limit = 20; // Premium - 20 fetches total
+        canFetch = true;
       } else if (subscription.tier === "platinum") {
         limit = -1; // Platinum - unlimited
+        canFetch = true;
       }
 
       const used = fetchCount || 0;
       const hasReachedLimit = limit !== -1 && used >= limit;
 
-      // For non-premium/platinum users, they can only access if they haven't used their limit
+      // Free tier users cannot fetch jobs
       if (subscription.tier === "free") {
-        canFetch = !hasReachedLimit;
+        canFetch = false;
       } else {
-        canFetch = true; // Premium and Platinum can always access (but may have fetch limits)
+        canFetch = !hasReachedLimit;
       }
 
       setLimits({
@@ -88,7 +90,7 @@ export const useJobFetchLimits = () => {
     if (subscription.tier === "free") {
       toast({
         title: "Upgrade Required",
-        description: "You've used your free job fetch. Upgrade to Premium for 20 fetches or Platinum for unlimited access.",
+        description: "Job fetching is available for Premium (20 fetches) and Platinum (unlimited) subscribers only.",
         variant: "destructive",
       });
     } else if (subscription.tier === "premium") {

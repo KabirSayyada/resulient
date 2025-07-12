@@ -15,6 +15,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { extractLocationFromResumeContent, formatLocationForDisplay } from "@/utils/resume/locationExtractor";
 import { format } from "date-fns";
 import { MainNavigation } from "@/components/resume/MainNavigation";
+import { LocationFilter } from "@/components/jobs/LocationFilter";
 
 export default function Jobs() {
   const [filters] = useState<JobFilters>({
@@ -23,6 +24,8 @@ export default function Jobs() {
     jobType: '',
     salaryRange: ''
   });
+
+  const [customLocation, setCustomLocation] = useState<string>("");
 
   const { user } = useAuth();
   const { subscription } = useSubscription();
@@ -100,8 +103,8 @@ export default function Jobs() {
       return;
     }
 
-    // Check subscription limits
-    if (limits.hasReachedLimit) {
+    // Check subscription limits - free tier cannot fetch
+    if (subscription.tier === "free" || limits.hasReachedLimit) {
       showUpgradeMessage();
       return;
     }
@@ -114,10 +117,10 @@ export default function Jobs() {
     try {
       const jobTitle = selectedResume.industry || 'software engineer';
       
-      // Enhanced location extraction from resume data
-      const location = extractLocationFromResume(selectedResume.resume_content);
+      // Use custom location if provided, otherwise extract from resume
+      const location = customLocation || extractLocationFromResume(selectedResume.resume_content);
       
-      console.log(`Fetching jobs for ${jobTitle} in ${location} (extracted from resume)`);
+      console.log(`Fetching jobs for ${jobTitle} in ${location} ${customLocation ? '(custom location)' : '(extracted from resume)'}`);
       
       await scrapeJobs({
         query: jobTitle,
@@ -208,8 +211,8 @@ export default function Jobs() {
         <div className="max-w-6xl mx-auto">
           {user ? (
             <div className="space-y-6">
-              {/* Enhanced Subscription Experience Notice */}
-              {!hasPremiumAccess && (
+              {/* Enhanced Subscription Experience Notice for Free Users */}
+              {subscription.tier === "free" && (
                 <div className="relative overflow-hidden mb-8">
                   <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 via-orange-400/20 to-red-400/20 rounded-3xl"></div>
                   <div className="relative p-8 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 dark:from-amber-950/30 dark:via-orange-950/30 dark:to-red-950/30 border-2 border-gradient-to-r from-amber-200 to-orange-200 dark:from-amber-800 dark:to-orange-800 rounded-3xl shadow-2xl">
@@ -226,35 +229,26 @@ export default function Jobs() {
                         </div>
                         <div>
                           <h3 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                            Experience The Ultimate Job Matching Platform
+                            Unlock AI Job Matching
                           </h3>
                           <p className="text-amber-700 dark:text-amber-400 mt-1">
-                            The most advanced AI job matching technology with location intelligence
+                            Job fetching requires a Premium or Platinum subscription
                           </p>
                         </div>
                       </div>
                       
                       <div className="bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-2xl p-6 mb-6">
                         <p className="text-amber-800 dark:text-amber-300 text-lg leading-relaxed mb-4">
-                          🚀 We're giving you <span className="font-bold text-orange-600">1 FREE premium job fetch</span> so you can experience 
-                          what makes us the #1 job matching platform with smart location filtering!
+                          🚀 Experience our advanced AI job matching with location intelligence by upgrading to Premium or Platinum!
                         </p>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 p-4 rounded-xl border border-blue-200 dark:border-blue-800">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                              <span className="font-bold text-blue-700 dark:text-blue-300">FREE TIER</span>
-                            </div>
-                            <p className="text-sm text-blue-600 dark:text-blue-400">1 fetch + 3 visible results</p>
-                          </div>
-                          
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 p-4 rounded-xl border border-purple-200 dark:border-purple-800">
                             <div className="flex items-center gap-2 mb-2">
                               <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                               <span className="font-bold text-purple-700 dark:text-purple-300">PREMIUM</span>
                             </div>
-                            <p className="text-sm text-purple-600 dark:text-purple-400">20 fetches + unlimited access</p>
+                            <p className="text-sm text-purple-600 dark:text-purple-400">20 job fetches + unlimited access</p>
                           </div>
                           
                           <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 p-4 rounded-xl border border-emerald-200 dark:border-emerald-800">
@@ -262,7 +256,7 @@ export default function Jobs() {
                               <Zap className="h-3 w-3 text-emerald-500" />
                               <span className="font-bold text-emerald-700 dark:text-emerald-300">PLATINUM</span>
                             </div>
-                            <p className="text-sm text-emerald-600 dark:text-emerald-400">Unlimited everything</p>
+                            <p className="text-sm text-emerald-600 dark:text-emerald-400">Unlimited job fetches</p>
                           </div>
                         </div>
                       </div>
@@ -276,6 +270,15 @@ export default function Jobs() {
                 onResumeSelected={handleResumeSelection}
                 selectedResumeId={selectedResume?.id}
               />
+
+              {/* Location Filter - Only show for premium/platinum users */}
+              {hasPremiumAccess && selectedResume && (
+                <LocationFilter
+                  onLocationChange={setCustomLocation}
+                  defaultLocation={customLocation}
+                  disabled={scrapingLoading || !canFetchJobs()}
+                />
+              )}
 
               {/* AI-Powered Job Fetch Section */}
               <div className="relative overflow-hidden mb-8">
@@ -303,18 +306,21 @@ export default function Jobs() {
                     
                     <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm rounded-2xl p-8 mb-8">
                       <p className="text-2xl text-purple-800 dark:text-purple-300 leading-relaxed mb-6">
-                        {selectedResume 
-                          ? `🎯 Ready to find perfect ${selectedResume.industry} opportunities based on your location preferences!`
-                          : '🔍 Select your resume above to unlock personalized job discovery with location intelligence'
+                        {subscription.tier === "free" 
+                          ? '🔒 Job fetching requires Premium or Platinum subscription'
+                          : selectedResume 
+                            ? `🎯 Ready to find perfect ${selectedResume.industry} opportunities!`
+                            : '🔍 Select your resume above to unlock personalized job discovery'
                         }
                       </p>
                       
-                      {selectedResume && (
+                      {selectedResume && hasPremiumAccess && (
                         <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl p-4 mb-6">
                           <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
                             <MapPin className="h-5 w-5" />
                             <span className="font-medium">
-                              Location detected from resume: {extractLocationFromResume(selectedResume.resume_content)}
+                              Target location: {customLocation || extractLocationFromResume(selectedResume.resume_content)}
+                              {customLocation ? " (custom)" : " (from resume)"}
                             </span>
                           </div>
                         </div>
@@ -362,7 +368,7 @@ export default function Jobs() {
                         </div>
                       </div>
                       
-                      {!canFetchJobs() && (
+                      {!canFetchJobs() && hasPremiumAccess && (
                         <div className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/40 dark:to-blue-950/40 p-6 rounded-2xl border border-indigo-200 dark:border-indigo-800 mb-6">
                           <div className="flex items-center gap-3 justify-center">
                             <RefreshCw className="h-5 w-5 text-indigo-500 animate-spin" />
@@ -377,7 +383,7 @@ export default function Jobs() {
                     
                     <Button
                       onClick={handleTargetedJobFetch}
-                      disabled={scrapingLoading || !selectedResume || !canFetchJobs() || limits.hasReachedLimit}
+                      disabled={scrapingLoading || !selectedResume || !canFetchJobs() || subscription.tier === "free"}
                       size="lg"
                       className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 hover:from-purple-700 hover:via-pink-700 hover:to-red-700 text-white font-bold px-8 sm:px-16 py-6 text-lg sm:text-xl rounded-full disabled:opacity-50 w-full sm:w-auto shadow-2xl transform transition-all duration-300 hover:scale-105"
                     >
@@ -388,10 +394,15 @@ export default function Jobs() {
                           <RefreshCw className="h-7 w-7 mr-4 animate-spin" />
                           🚀 Scanning The Internet For Your Jobs...
                         </>
+                      ) : subscription.tier === "free" ? (
+                        <>
+                          <Lock className="h-7 w-7 mr-4" />
+                          🔓 Upgrade to Access Job Fetching
+                        </>
                       ) : limits.hasReachedLimit ? (
                         <>
                           <Lock className="h-7 w-7 mr-4" />
-                          {subscription.tier === "free" ? "🔓 Upgrade For More Fetches" : "Fetch Limit Reached"}
+                          Fetch Limit Reached - Upgrade for More
                         </>
                       ) : (
                         <>
