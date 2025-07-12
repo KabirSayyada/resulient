@@ -16,7 +16,7 @@ export const useUsageLimits = () => {
   const { subscription } = useSubscription();
   const { toast } = useToast();
   const [usage, setUsage] = useState<UsageLimits>({
-    resumeScorings: { used: 0, limit: 1, hasReachedLimit: false },
+    resumeScorings: { used: 0, limit: 3, hasReachedLimit: false }, // Updated to 3
     resumeOptimizations: { used: 0, limit: 1, hasReachedLimit: false },
     resumeBuilding: { used: 0, limit: 1, hasReachedLimit: false }
   });
@@ -32,12 +32,19 @@ export const useUsageLimits = () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // Get daily resume scorings
-      const { count: scoringCount } = await supabase
-        .from("resume_scores")
-        .select("id", { count: 'exact', head: true })
-        .eq("user_id", user.id)
-        .gte("created_at", today.toISOString());
+      // Get TOTAL resume scorings (not daily) for free tier
+      let scoringCount = 0;
+      if (subscription.tier === "free") {
+        // For free tier, count all resume scorings ever
+        const { count } = await supabase
+          .from("resume_scores")
+          .select("id", { count: 'exact', head: true })
+          .eq("user_id", user.id);
+        scoringCount = count || 0;
+      } else {
+        // For paid tiers, we don't need to count since they have unlimited
+        scoringCount = 0;
+      }
 
       // Get daily resume optimizations
       const { count: optimizationCount } = await supabase
@@ -54,16 +61,16 @@ export const useUsageLimits = () => {
 
       // Set limits based on subscription tier
       const limits = {
-        resumeScorings: subscription.tier === "free" ? 1 : -1, // Changed from 2 to 1 for free tier
+        resumeScorings: subscription.tier === "free" ? 3 : -1, // 3 total for free, unlimited for paid
         resumeOptimizations: subscription.tier === "free" ? 1 : -1, // unlimited for paid
         resumeBuilding: subscription.tier === "free" ? 1 : -1 // unlimited for paid
       };
 
       setUsage({
         resumeScorings: {
-          used: scoringCount || 0,
+          used: scoringCount,
           limit: limits.resumeScorings,
-          hasReachedLimit: limits.resumeScorings !== -1 && (scoringCount || 0) >= limits.resumeScorings
+          hasReachedLimit: limits.resumeScorings !== -1 && scoringCount >= limits.resumeScorings
         },
         resumeOptimizations: {
           used: optimizationCount || 0,
@@ -93,8 +100,8 @@ export const useUsageLimits = () => {
 
   const showLimitReachedMessage = (featureType: string) => {
     toast({
-      title: "Daily Limit Reached",
-      description: `You've reached your daily limit for ${featureType}. Upgrade to Premium or Platinum for unlimited access.`,
+      title: "Limit Reached",
+      description: `You've used all your ${featureType} credits. Upgrade to Premium or Platinum for unlimited access.`,
       variant: "destructive",
     });
   };

@@ -270,7 +270,7 @@ const ResumeScoring = () => {
                       <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-700/50 rounded-2xl shadow-lg">
                         <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                         <span className="font-semibold text-amber-700 dark:text-amber-300">
-                          Free tier: {hasScored ? 1 : usage.resumeScorings.used}/1 analysis used
+                          Free tier: {usage.resumeScorings.used}/3 analyses used
                         </span>
                       </div>
                     )}
@@ -286,7 +286,7 @@ const ResumeScoring = () => {
                 <UseSubscriptionAlert 
                   subscriptionTier={subscription.tier} 
                   requiredTier="premium" 
-                  message="You've reached your daily limit for resume scoring. Free users can perform 1 resume scoring per day. Upgrade to Premium or Platinum for unlimited usage."
+                  message="You've used all 3 of your free resume analyses. Upgrade to Premium or Platinum for unlimited usage and advanced features."
                 />
               </div>
             )}

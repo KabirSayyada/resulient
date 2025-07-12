@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -43,11 +42,28 @@ export const useResumeScoring = (userId: string | undefined) => {
     if (!userId) return false;
     
     try {
-      // Get today's date at midnight
+      // For free tier (limit of 3), check total count, not daily
+      if (limitCount === 3) {
+        // Count ALL scorings done by this user ever
+        const { count, error } = await supabase
+          .from("resume_scores")
+          .select("id", { count: 'exact', head: false })
+          .eq("user_id", userId)
+          .eq("scoring_mode", "resumeOnly");
+        
+        if (error) throw error;
+        
+        // Check if total count is less than limit
+        return (count || 0) < limitCount;
+      }
+      
+      // If limit is -1, it means unlimited (paid tiers)
+      if (limitCount === -1) return true;
+      
+      // For other limits, use daily check (shouldn't happen with current setup)
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
-      // Count scorings done today
       const { count, error } = await supabase
         .from("resume_scores")
         .select("id", { count: 'exact', head: false })
@@ -57,10 +73,6 @@ export const useResumeScoring = (userId: string | undefined) => {
       
       if (error) throw error;
       
-      // If limit is -1, it means unlimited
-      if (limitCount === -1) return true;
-      
-      // Otherwise check if count is less than limit
       return (count || 0) < limitCount;
     } catch (error) {
       console.error("Error checking daily limits:", error);

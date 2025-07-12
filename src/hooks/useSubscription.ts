@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -252,7 +251,7 @@ function getTierLimits(tier: SubscriptionTier): SubscriptionLimits {
     case "free":
     default:
       return {
-        resumeScorings: 2, // Updated from 3 to 2
+        resumeScorings: 3, // Updated to 3 total uses
         resumeOptimizations: 1, // Updated from 2 to 1
         reportDownloads: 0,
       };
