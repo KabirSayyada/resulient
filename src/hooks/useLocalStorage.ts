@@ -13,6 +13,11 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T)
       const item = window.localStorage.getItem(key);
       
       // Parse stored json or if none return initialValue
+      // For theme specifically, default to light if no saved preference
+      if (key === 'theme' && !item) {
+        return 'light' as T;
+      }
+      
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
       // If error also return initialValue
