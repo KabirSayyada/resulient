@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -75,6 +74,7 @@ const ProfileEdit = () => {
     
     toast({
       title: "Profile Updated",
+      description: "Let's analyze your resume!"
     });
     
     setProfile({
@@ -86,7 +86,7 @@ const ProfileEdit = () => {
       show_avatar_on_scorecard: showAvatar,
     });
     
-    navigate("/");
+    navigate("/resume-scoring");
   };
 
   return (

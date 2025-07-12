@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,15 +63,15 @@ export default function ProfileSetup() {
 
     toast({
       title: "Profile Created!",
-      description: "Welcome to ATS Resume Optimizer."
+      description: "Welcome to ATS Resume Optimizer. Let's analyze your resume!"
     });
     
     // Set profile created flag to show guided tour
     setProfileCreated(true);
     
-    // Navigate to home page after a delay to allow guided tour to show
+    // Navigate to resume scoring page after a delay to allow guided tour to show
     setTimeout(() => {
-      navigate("/");
+      navigate("/resume-scoring");
     }, 500);
   };
 
