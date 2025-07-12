@@ -1,7 +1,7 @@
-
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
+import { useUserProfile } from "./useUserProfile";
 
 type AuthContextValue = {
   session: Session | null;
@@ -9,6 +9,7 @@ type AuthContextValue = {
   loading: boolean;
   signOut: () => Promise<void>;
   isAdmin: () => boolean;
+  profileComplete: boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -24,6 +25,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { profile, loading: profileLoading } = useUserProfile(user?.id);
+  const [profileComplete, setProfileComplete] = useState(false);
+
+  // Check if profile is complete
+  useEffect(() => {
+    if (!profileLoading && user) {
+      const isComplete = profile?.first_name && 
+                        profile?.last_name && 
+                        profile?.job_title;
+      setProfileComplete(!!isComplete);
+      
+      // Redirect to profile edit if incomplete and not already there
+      if (!isComplete && !window.location.pathname.includes('/profile-edit') && !window.location.pathname.includes('/profile-setup')) {
+        window.location.href = '/profile-edit';
+      }
+    }
+  }, [profile, profileLoading, user]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -154,7 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signOut, isAdmin }}>
+    <AuthContext.Provider value={{ session, user, loading, signOut, isAdmin, profileComplete }}>
       {children}
     </AuthContext.Provider>
   );

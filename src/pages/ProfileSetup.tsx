@@ -26,6 +26,16 @@ export default function ProfileSetup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!firstName.trim() || !lastName.trim() || !jobTitle.trim()) {
+      toast({
+        title: "Required Fields Missing",
+        description: "Please fill in your first name, last name, and job title.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setSubmitting(true);
 
     const { error } = await supabase
@@ -35,7 +45,7 @@ export default function ProfileSetup() {
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         avatar_url: avatar,
-        job_title: jobTitle,
+        job_title: jobTitle.trim(),
         show_avatar_on_scorecard: showAvatar,
       })
       .eq("id", user.id);
@@ -80,7 +90,7 @@ export default function ProfileSetup() {
           <div className="flex gap-2">
             <div className="flex-1">
               <label htmlFor="firstName" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                First Name
+                First Name *
               </label>
               <Input
                 id="firstName"
@@ -93,7 +103,7 @@ export default function ProfileSetup() {
             </div>
             <div className="flex-1">
               <label htmlFor="lastName" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                Last Name
+                Last Name *
               </label>
               <Input
                 id="lastName"
@@ -106,15 +116,19 @@ export default function ProfileSetup() {
           </div>
           <div>
             <label htmlFor="jobTitle" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
-              Job Title (optional)
+              Job Title *
             </label>
             <Input
               id="jobTitle"
               value={jobTitle}
               onChange={e => setJobTitle(e.target.value)}
               placeholder="E.g. Product Designer"
+              required
               disabled={submitting}
             />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              We use your job title to score your resume against thousands of people with the same title who are your competition.
+            </p>
           </div>
           <div>
             <label className="font-semibold text-gray-700 dark:text-gray-300 mb-1 block">Photo (optional)</label>

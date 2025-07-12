@@ -37,6 +37,16 @@ const ProfileEdit = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!firstName.trim() || !lastName.trim() || !jobTitle.trim()) {
+      toast({
+        title: "Required Fields Missing",
+        description: "Please fill in your first name, last name, and job title.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setSubmitting(true);
 
     const { error } = await supabase
@@ -46,7 +56,7 @@ const ProfileEdit = () => {
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         avatar_url: avatar,
-        job_title: jobTitle,
+        job_title: jobTitle.trim(),
         show_avatar_on_scorecard: showAvatar,
       })
       .eq("id", user.id);
@@ -85,12 +95,15 @@ const ProfileEdit = () => {
         <UserMenuWithTheme />
       </div>
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-100 dark:border-gray-700">
-        <h2 className="text-2xl font-bold mb-1 text-indigo-700 dark:text-indigo-400 text-center">Edit Your Profile</h2>
+        <h2 className="text-2xl font-bold mb-1 text-indigo-700 dark:text-indigo-400 text-center">Complete Your Profile</h2>
+        <p className="text-sm text-center text-gray-500 dark:text-gray-400 mb-4">
+          Please complete all required fields to continue using Resulient.
+        </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex gap-2">
             <div className="flex-1">
               <label htmlFor="firstName" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                First Name
+                First Name *
               </label>
               <Input
                 id="firstName"
@@ -102,7 +115,7 @@ const ProfileEdit = () => {
             </div>
             <div className="flex-1">
               <label htmlFor="lastName" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                Last Name
+                Last Name *
               </label>
               <Input
                 id="lastName"
@@ -115,15 +128,19 @@ const ProfileEdit = () => {
           </div>
           <div>
             <label htmlFor="jobTitle" className="block font-semibold text-gray-700 dark:text-gray-300 mb-1">
-              Job Title (optional)
+              Job Title *
             </label>
             <Input
               id="jobTitle"
               value={jobTitle}
               onChange={e => setJobTitle(e.target.value)}
               placeholder="E.g. Product Designer"
+              required
               disabled={submitting}
             />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              We use your job title to score your resume against thousands of people with the same title who are your competition.
+            </p>
           </div>
           <div>
             <label className="font-semibold text-gray-700 dark:text-gray-300 mb-1 block">Avatar (optional)</label>
@@ -147,7 +164,7 @@ const ProfileEdit = () => {
             className="w-full flex items-center justify-center"
             disabled={submitting}
           >
-            {submitting ? "Saving..." : "Update Profile"}
+            {submitting ? "Saving..." : "Complete Profile"}
           </Button>
         </form>
         <div className="mt-6 text-xs text-center text-gray-400 dark:text-gray-500">

@@ -2,6 +2,8 @@
 import { FileUploadSection } from "./FileUploadSection";
 import { Button } from "@/components/ui/button";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
+import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
 
 interface ResumeScoringFormProps {
   scoringMode: "resumeOnly";
@@ -20,6 +22,7 @@ export const ResumeScoringForm = ({
   onScore,
   disableButton
 }: ResumeScoringFormProps) => {
+  const { profileComplete } = useAuth();
   const wordCount = resumeContent.trim().split(/\s+/).length;
   const isResumeTooLong = wordCount > 800;
 
@@ -30,6 +33,12 @@ export const ResumeScoringForm = ({
         setResumeContent={setResumeContent}
       />
       
+      {!profileComplete && (
+        <div className="text-orange-600 dark:text-orange-400 mt-2 font-medium border-l-4 border-orange-400 dark:border-orange-500 pl-2 bg-orange-50 dark:bg-orange-900/20 p-2 rounded">
+          Please <Link to="/profile-edit" className="underline font-semibold">complete your profile</Link> with your first name, last name, and job title before scoring your resume.
+        </div>
+      )}
+      
       {isResumeTooLong && (
         <div className="text-red-600 dark:text-red-400 mt-2 font-medium border-l-4 border-red-400 dark:border-red-500 pl-2 bg-red-50 dark:bg-red-900/20 p-2 rounded">
           Your resume is too long ({wordCount} words). Please shorten it to 800 words or less for optimal scoring.
@@ -39,7 +48,7 @@ export const ResumeScoringForm = ({
       <div className="flex justify-center">
         <Button
           onClick={onScore}
-          disabled={isScoring || !resumeContent || isResumeTooLong || disableButton}
+          disabled={isScoring || !resumeContent || isResumeTooLong || disableButton || !profileComplete}
           className="px-10 py-3 text-lg font-bold rounded-full shadow transition-all bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isScoring ? "Analyzing..." : "🕹️ Score My Resume"}
