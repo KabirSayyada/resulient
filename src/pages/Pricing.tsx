@@ -38,8 +38,9 @@ const pricingTiers: PricingTier[] = [
     monthlyPrice: null,
     yearlyPrice: null,
     features: [
-      { text: "1 Resume Scoring Daily", included: true },
+      { text: "3 Resume Scorings Lifetime", included: true },
       { text: "1 Resume Optimization Daily", included: true },
+      { text: "1 Resume Building Lifetime", included: true },
       { text: "1 Job Fetch Lifetime (3 visible results)", included: true },
       { text: "Detailed Reports (View Only)", included: true },
       { text: "Daily Reset of Credits", included: true },
@@ -58,7 +59,7 @@ const pricingTiers: PricingTier[] = [
     name: "Premium",
     description: "For serious job seekers",
     monthlyPrice: 10.00,
-    yearlyPrice: 99.95,
+    yearlyPrice: 100.00,
     features: [
       { text: "Unlimited Resume Scorings", included: true },
       { text: "Unlimited Resume Optimizations", included: true },
@@ -81,7 +82,7 @@ const pricingTiers: PricingTier[] = [
     name: "Platinum",
     description: "Maximum flexibility and power",
     monthlyPrice: 25.00,
-    yearlyPrice: 149.95,
+    yearlyPrice: 250.00,
     features: [
       { text: "Unlimited Resume Scorings", included: true },
       { text: "Unlimited Resume Optimizations", included: true },
