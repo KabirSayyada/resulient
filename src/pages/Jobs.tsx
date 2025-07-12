@@ -118,13 +118,13 @@ export default function Jobs() {
       const jobTitle = selectedResume.industry || 'software engineer';
       
       // Use custom location if provided, otherwise extract from resume
-      const location = customLocation || extractLocationFromResume(selectedResume.resume_content);
+      const targetLocation = customLocation || extractLocationFromResume(selectedResume.resume_content);
       
-      console.log(`Fetching jobs for ${jobTitle} in ${location} ${customLocation ? '(custom location)' : '(extracted from resume)'}`);
+      console.log(`Fetching jobs for ${jobTitle} in ${targetLocation} ${customLocation ? '(custom location)' : '(extracted from resume)'}`);
       
       await scrapeJobs({
         query: jobTitle,
-        location: location,
+        location: targetLocation,
         employment_types: 'FULLTIME',
         num_pages: 5,
         date_posted: '3days',
@@ -320,7 +320,7 @@ export default function Jobs() {
                             <MapPin className="h-5 w-5" />
                             <span className="font-medium">
                               Target location: {customLocation || extractLocationFromResume(selectedResume.resume_content)}
-                              {customLocation ? " (custom)" : " (from resume)"}
+                              {customLocation ? " (selected preference)" : " (from resume)"}
                             </span>
                           </div>
                         </div>

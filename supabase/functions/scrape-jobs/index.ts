@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -103,7 +102,7 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const searchParams: JobSearchParams = {
       query: body.query || 'software engineer',
-      location: body.location || 'United States',
+      location: body.location || 'United States', // Now properly uses the passed location
       employment_types: body.employment_types || 'FULLTIME',
       num_pages: Math.min(body.num_pages || 5, 10), // Default to 5 pages, max 10 for high volume
       date_posted: body.date_posted || 'week',
@@ -115,7 +114,9 @@ serve(async (req) => {
       throw new Error('User ID is required for job scraping');
     }
 
+    // Log the location being used for debugging
     console.log('User-specific search parameters:', searchParams);
+    console.log('Using location for job search:', searchParams.location);
 
     // Build URL for JSearch API
     const baseUrl = 'https://jsearch.p.rapidapi.com/search';
@@ -128,7 +129,7 @@ serve(async (req) => {
       }
     });
 
-    console.log(`🚀 Fetching personalized jobs from JSearch API (${searchParams.num_pages} pages) for user: ${searchParams.user_id}...`);
+    console.log(`🚀 Fetching personalized jobs from JSearch API (${searchParams.num_pages} pages) for user: ${searchParams.user_id} in location: ${searchParams.location}...`);
     
     // Fetch jobs from JSearch API
     const response = await fetch(url.toString(), {
@@ -146,14 +147,15 @@ serve(async (req) => {
     }
 
     const jsearchData: JSearchResponse = await response.json();
-    console.log(`🎯 Found ${jsearchData.data?.length || 0} jobs from JSearch API for user: ${searchParams.user_id}`);
+    console.log(`🎯 Found ${jsearchData.data?.length || 0} jobs from JSearch API for user: ${searchParams.user_id} in ${searchParams.location}`);
 
     if (!jsearchData.data || jsearchData.data.length === 0) {
       return new Response(
         JSON.stringify({ 
-          message: 'No jobs found for the given criteria',
+          message: `No jobs found for the given criteria in ${searchParams.location}`,
           count: 0,
-          jobs: []
+          jobs: [],
+          searchLocation: searchParams.location
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -241,7 +243,7 @@ serve(async (req) => {
       job.external_job_id && !existingJobIds.has(job.external_job_id)
     );
 
-    console.log(`✅ Inserting ${newJobs.length} new jobs for user: ${searchParams.user_id} (${transformedJobs.length - newJobs.length} duplicates filtered)`);
+    console.log(`✅ Inserting ${newJobs.length} new jobs for user: ${searchParams.user_id} (${transformedJobs.length - newJobs.length} duplicates filtered) from ${searchParams.location}`);
 
     // Insert jobs into database
     const { data: insertedJobs, error: insertError } = await supabase
@@ -254,18 +256,19 @@ serve(async (req) => {
       throw new Error(`Failed to insert jobs: ${insertError.message}`);
     }
 
-    console.log(`🎉 Successfully inserted ${insertedJobs?.length || 0} jobs for user: ${searchParams.user_id}`);
+    console.log(`🎉 Successfully inserted ${insertedJobs?.length || 0} jobs for user: ${searchParams.user_id} from ${searchParams.location}`);
 
     return new Response(
       JSON.stringify({
-        message: `🚀 SUCCESS: Scraped and stored ${insertedJobs?.length || 0} personalized jobs from ${searchParams.num_pages} pages!`,
+        message: `🚀 SUCCESS: Scraped and stored ${insertedJobs?.length || 0} personalized jobs from ${searchParams.num_pages} pages in ${searchParams.location}!`,
         count: insertedJobs?.length || 0,
         totalScraped: transformedJobs.length,
         duplicatesFiltered: transformedJobs.length - newJobs.length,
         jobs: insertedJobs,
         searchParams,
         pagesRequested: searchParams.num_pages,
-        userId: searchParams.user_id
+        userId: searchParams.user_id,
+        searchLocation: searchParams.location
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
