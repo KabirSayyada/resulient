@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
@@ -28,16 +29,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { profile, loading: profileLoading } = useUserProfile(user?.id);
   const [profileComplete, setProfileComplete] = useState(false);
 
-  // Check if profile is complete
+  // Check if profile is complete - only redirect if required fields are missing
   useEffect(() => {
     if (!profileLoading && user) {
-      const isComplete = profile?.first_name && 
-                        profile?.last_name && 
-                        profile?.job_title;
+      const hasFirstName = profile?.first_name && profile.first_name.trim().length > 0;
+      const hasLastName = profile?.last_name && profile.last_name.trim().length > 0;
+      const hasJobTitle = profile?.job_title && profile.job_title.trim().length > 0;
+      
+      const isComplete = hasFirstName && hasLastName && hasJobTitle;
       setProfileComplete(!!isComplete);
       
-      // Redirect to profile edit if incomplete and not already there
-      if (!isComplete && !window.location.pathname.includes('/profile-edit') && !window.location.pathname.includes('/profile-setup')) {
+      // Only redirect if required fields are actually missing and not already on profile pages
+      if (!isComplete && 
+          !window.location.pathname.includes('/profile-edit') && 
+          !window.location.pathname.includes('/profile-setup')) {
         window.location.href = '/profile-edit';
       }
     }
