@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -102,7 +103,7 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const searchParams: JobSearchParams = {
       query: body.query || 'software engineer',
-      location: body.location || 'United States', // Now properly uses the passed location
+      location: body.location || 'United States', // This will now properly use the location from LocationFilter
       employment_types: body.employment_types || 'FULLTIME',
       num_pages: Math.min(body.num_pages || 5, 10), // Default to 5 pages, max 10 for high volume
       date_posted: body.date_posted || 'week',
@@ -116,7 +117,7 @@ serve(async (req) => {
 
     // Log the location being used for debugging
     console.log('User-specific search parameters:', searchParams);
-    console.log('Using location for job search:', searchParams.location);
+    console.log('📍 LOCATION FILTER: Searching for jobs in:', searchParams.location);
 
     // Build URL for JSearch API
     const baseUrl = 'https://jsearch.p.rapidapi.com/search';
@@ -130,6 +131,7 @@ serve(async (req) => {
     });
 
     console.log(`🚀 Fetching personalized jobs from JSearch API (${searchParams.num_pages} pages) for user: ${searchParams.user_id} in location: ${searchParams.location}...`);
+    console.log(`🔗 API URL: ${url.toString()}`);
     
     // Fetch jobs from JSearch API
     const response = await fetch(url.toString(), {

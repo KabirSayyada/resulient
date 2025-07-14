@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Search, Globe } from "lucide-react";
+import { MapPin, Search, Globe, Check } from "lucide-react";
 
 interface LocationFilterProps {
   onLocationChange: (location: string) => void;
@@ -40,6 +40,8 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
   const [selectedCountry, setSelectedCountry] = useState('US');
   const [city, setCity] = useState('');
   const [useCustomLocation, setUseCustomLocation] = useState(false);
+  const [isLocationApplied, setIsLocationApplied] = useState(false);
+  const [appliedLocation, setAppliedLocation] = useState('');
 
   const handleLocationSubmit = () => {
     let locationString = '';
@@ -56,14 +58,20 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
     
     console.log('Setting job search location to:', locationString);
     onLocationChange(locationString);
+    setIsLocationApplied(true);
+    setAppliedLocation(locationString);
   };
 
   const handleLocationClear = () => {
     setCity('');
     setSelectedCountry('US');
     setUseCustomLocation(false);
+    setIsLocationApplied(false);
+    setAppliedLocation('');
     onLocationChange('');
   };
+
+  const selectedCountryName = COUNTRIES.find(c => c.code === selectedCountry)?.name || 'United States';
 
   return (
     <Card className="mb-4">
@@ -81,7 +89,7 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
               Target Country
             </Label>
             <Select value={selectedCountry} onValueChange={setSelectedCountry} disabled={disabled}>
-              <SelectTrigger>
+              <SelectTrigger className={`${isLocationApplied ? 'border-green-500 bg-green-50 dark:bg-green-950/30' : ''}`}>
                 <SelectValue placeholder="Select a country" />
               </SelectTrigger>
               <SelectContent>
@@ -92,6 +100,12 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
                 ))}
               </SelectContent>
             </Select>
+            {isLocationApplied && (
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
+                <Check className="h-4 w-4" />
+                <span>Selected: {selectedCountryName}</span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -110,12 +124,21 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
             </div>
             
             {useCustomLocation && (
-              <Input
-                placeholder="e.g., New York, London, Remote"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                disabled={disabled}
-              />
+              <div className="space-y-2">
+                <Input
+                  placeholder="e.g., New York, London, Remote"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  disabled={disabled}
+                  className={`${isLocationApplied ? 'border-green-500 bg-green-50 dark:bg-green-950/30' : ''}`}
+                />
+                {isLocationApplied && city && (
+                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
+                    <Check className="h-4 w-4" />
+                    <span>Selected: {city}, {selectedCountryName}</span>
+                  </div>
+                )}
+              </div>
             )}
             
             <p className="text-xs text-gray-500">
@@ -132,17 +155,30 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
             </div>
           </div>
           
+          {isLocationApplied && (
+            <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-3">
+              <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                <Check className="h-4 w-4" />
+                <span className="font-medium">Location Applied: {appliedLocation}</span>
+              </div>
+              <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                This location will be used for your next job fetch
+              </p>
+            </div>
+          )}
+          
           <div className="flex gap-2">
             <Button 
               onClick={handleLocationSubmit} 
               variant="outline" 
               size="sm"
               disabled={disabled}
+              className={`${isLocationApplied ? 'bg-green-600 text-white hover:bg-green-700' : ''}`}
             >
               <Search className="h-4 w-4 mr-1" />
-              Apply Location Filter
+              {isLocationApplied ? 'Location Applied' : 'Apply Location Filter'}
             </Button>
-            {(selectedCountry !== 'US' || city || useCustomLocation) && (
+            {(selectedCountry !== 'US' || city || useCustomLocation || isLocationApplied) && (
               <Button 
                 onClick={handleLocationClear} 
                 variant="ghost" 
