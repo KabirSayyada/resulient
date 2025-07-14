@@ -25,7 +25,7 @@ export default function Jobs() {
     salaryRange: ''
   });
 
-  const [customLocation, setCustomLocation] = useState<string>("");
+  const [customLocation, setCustomLocation] = useState<string>("US"); // Default to US ISO code
 
   const { user } = useAuth();
   const { subscription } = useSubscription();
@@ -60,43 +60,6 @@ export default function Jobs() {
     return hoursLeft;
   };
 
-  // Enhanced location extraction helper function
-  const extractLocationFromResume = (resumeContent: string): string => {
-    try {
-      // First try to parse as JSON (structured resume data)
-      const resumeData = JSON.parse(resumeContent);
-      
-      // Try various possible location fields in structured data
-      if (resumeData.personalInfo?.location) {
-        return resumeData.personalInfo.location;
-      } else if (resumeData.personalInfo?.city && resumeData.personalInfo?.state) {
-        return `${resumeData.personalInfo.city}, ${resumeData.personalInfo.state}`;
-      } else if (resumeData.contact?.location) {
-        return resumeData.contact.location;
-      } else if (resumeData.contact?.address) {
-        return resumeData.contact.address;
-      } else if (resumeData.location) {
-        return resumeData.location;
-      } else if (resumeData.workExperience && resumeData.workExperience.length > 0) {
-        // Try to get location from most recent work experience
-        const mostRecentJob = resumeData.workExperience[0];
-        if (mostRecentJob.location) {
-          return mostRecentJob.location;
-        }
-      }
-    } catch (error) {
-      console.log('Could not parse resume content for location, using text extraction');
-    }
-    
-    // Fallback to text-based location extraction using the utility
-    const locationResult = extractLocationFromResumeContent(resumeContent);
-    if (locationResult) {
-      return formatLocationForDisplay(locationResult);
-    }
-    
-    return 'United States'; // Default fallback
-  };
-
   const handleTargetedJobFetch = async () => {
     if (!selectedResume || !user) {
       console.error('Cannot fetch jobs: no resume selected or user not authenticated');
@@ -117,10 +80,11 @@ export default function Jobs() {
     try {
       const jobTitle = selectedResume.industry || 'software engineer';
       
-      // Use custom location if provided, otherwise extract from resume
-      const targetLocation = customLocation || extractLocationFromResume(selectedResume.resume_content);
+      // Always use the custom location from the filter, never extract from resume
+      const targetLocation = customLocation || 'US';
       
-      console.log(`Fetching jobs for ${jobTitle} in ${targetLocation} ${customLocation ? '(custom location)' : '(extracted from resume)'}`);
+      console.log(`🎯 Fetching jobs for ${jobTitle} in ${targetLocation} (using location filter only)`);
+      console.log(`📍 Location source: Filter selection (ISO format)`);
       
       await scrapeJobs({
         query: jobTitle,
@@ -271,14 +235,12 @@ export default function Jobs() {
                 selectedResumeId={selectedResume?.id}
               />
 
-              {/* Location Filter - Only show for premium/platinum users */}
-              {hasPremiumAccess && selectedResume && (
-                <LocationFilter
-                  onLocationChange={setCustomLocation}
-                  defaultLocation={customLocation}
-                  disabled={scrapingLoading || !canFetchJobs()}
-                />
-              )}
+              {/* Location Filter - Show for all users but require premium for fetching */}
+              <LocationFilter
+                onLocationChange={setCustomLocation}
+                defaultLocation={customLocation}
+                disabled={scrapingLoading || !canFetchJobs()}
+              />
 
               {/* AI-Powered Job Fetch Section */}
               <div className="relative overflow-hidden mb-8">
@@ -319,8 +281,7 @@ export default function Jobs() {
                           <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
                             <MapPin className="h-5 w-5" />
                             <span className="font-medium">
-                              Target location: {customLocation || extractLocationFromResume(selectedResume.resume_content)}
-                              {customLocation ? " (selected preference)" : " (from resume)"}
+                              Target location: {customLocation} (selected in location filter)
                             </span>
                           </div>
                         </div>
@@ -430,7 +391,7 @@ export default function Jobs() {
                       <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-200 dark:border-purple-800">
                         <Crown className="h-4 w-4 text-amber-500" />
                         <span className="font-medium text-sm">
-                          {selectedResume.industry} + {extractLocationFromResume(selectedResume.resume_content)} Focused
+                          {selectedResume.industry} + {customLocation} Focused
                         </span>
                       </div>
                     )}

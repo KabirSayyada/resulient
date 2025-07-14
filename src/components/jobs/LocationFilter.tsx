@@ -14,26 +14,26 @@ interface LocationFilterProps {
 }
 
 const COUNTRIES = [
-  { code: 'US', name: 'United States' },
-  { code: 'CA', name: 'Canada' },
-  { code: 'GB', name: 'United Kingdom' },
-  { code: 'AU', name: 'Australia' },
-  { code: 'DE', name: 'Germany' },
-  { code: 'FR', name: 'France' },
-  { code: 'NL', name: 'Netherlands' },
-  { code: 'SE', name: 'Sweden' },
-  { code: 'NO', name: 'Norway' },
-  { code: 'DK', name: 'Denmark' },
-  { code: 'CH', name: 'Switzerland' },
-  { code: 'IE', name: 'Ireland' },
-  { code: 'SG', name: 'Singapore' },
-  { code: 'JP', name: 'Japan' },
-  { code: 'IN', name: 'India' },
-  { code: 'BR', name: 'Brazil' },
-  { code: 'MX', name: 'Mexico' },
-  { code: 'ES', name: 'Spain' },
-  { code: 'IT', name: 'Italy' },
-  { code: 'PL', name: 'Poland' }
+  { code: 'US', name: 'United States', iso: 'US' },
+  { code: 'CA', name: 'Canada', iso: 'CA' },
+  { code: 'GB', name: 'United Kingdom', iso: 'GB' },
+  { code: 'AU', name: 'Australia', iso: 'AU' },
+  { code: 'DE', name: 'Germany', iso: 'DE' },
+  { code: 'FR', name: 'France', iso: 'FR' },
+  { code: 'NL', name: 'Netherlands', iso: 'NL' },
+  { code: 'SE', name: 'Sweden', iso: 'SE' },
+  { code: 'NO', name: 'Norway', iso: 'NO' },
+  { code: 'DK', name: 'Denmark', iso: 'DK' },
+  { code: 'CH', name: 'Switzerland', iso: 'CH' },
+  { code: 'IE', name: 'Ireland', iso: 'IE' },
+  { code: 'SG', name: 'Singapore', iso: 'SG' },
+  { code: 'JP', name: 'Japan', iso: 'JP' },
+  { code: 'IN', name: 'India', iso: 'IN' },
+  { code: 'BR', name: 'Brazil', iso: 'BR' },
+  { code: 'MX', name: 'Mexico', iso: 'MX' },
+  { code: 'ES', name: 'Spain', iso: 'ES' },
+  { code: 'IT', name: 'Italy', iso: 'IT' },
+  { code: 'PL', name: 'Poland', iso: 'PL' }
 ];
 
 export function LocationFilter({ onLocationChange, defaultLocation = "", disabled = false }: LocationFilterProps) {
@@ -47,16 +47,18 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
     let locationString = '';
     
     if (useCustomLocation && city.trim()) {
-      // Use custom city with selected country
+      // Use city with ISO country code for better API compatibility
       const country = COUNTRIES.find(c => c.code === selectedCountry);
-      locationString = `${city.trim()}, ${country?.name || 'United States'}`;
-    } else if (!useCustomLocation) {
-      // Use just the country
+      locationString = `${city.trim()}, ${country?.iso || 'US'}`;
+    } else {
+      // Use just the ISO country code
       const country = COUNTRIES.find(c => c.code === selectedCountry);
-      locationString = country?.name || 'United States';
+      locationString = country?.iso || 'US';
     }
     
-    console.log('Setting job search location to:', locationString);
+    console.log('🌍 Setting job search location to:', locationString);
+    console.log('🎯 Using ISO format for JSearch API compatibility');
+    
     onLocationChange(locationString);
     setIsLocationApplied(true);
     setAppliedLocation(locationString);
@@ -68,7 +70,7 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
     setUseCustomLocation(false);
     setIsLocationApplied(false);
     setAppliedLocation('');
-    onLocationChange('');
+    onLocationChange('US'); // Default to US
   };
 
   const selectedCountryName = COUNTRIES.find(c => c.code === selectedCountry)?.name || 'United States';
@@ -95,7 +97,7 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
               <SelectContent>
                 {COUNTRIES.map((country) => (
                   <SelectItem key={country.code} value={country.code}>
-                    {country.name}
+                    {country.name} ({country.iso})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -103,7 +105,7 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
             {isLocationApplied && (
               <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
                 <Check className="h-4 w-4" />
-                <span>Selected: {selectedCountryName}</span>
+                <span>Applied: {selectedCountryName} ({appliedLocation})</span>
               </div>
             )}
           </div>
@@ -126,7 +128,7 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
             {useCustomLocation && (
               <div className="space-y-2">
                 <Input
-                  placeholder="e.g., New York, London, Remote"
+                  placeholder="e.g., London, Berlin, Tokyo"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   disabled={disabled}
@@ -135,7 +137,7 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
                 {isLocationApplied && city && (
                   <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
                     <Check className="h-4 w-4" />
-                    <span>Selected: {city}, {selectedCountryName}</span>
+                    <span>Applied: {city}, {selectedCountryName}</span>
                   </div>
                 )}
               </div>
@@ -143,14 +145,14 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
             
             <p className="text-xs text-gray-500">
               {useCustomLocation 
-                ? "Jobs will be searched in the specified city/region within the selected country"
-                : "Jobs will be searched throughout the selected country"
+                ? `Jobs will be searched in the specified city within ${selectedCountryName} using ISO code format`
+                : `Jobs will be searched throughout ${selectedCountryName} using ISO code format`
               }
             </p>
             
             <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mt-3">
               <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">
-                📊 We use your job title to score your resume against thousands of people with the same title in your target location - they are your competition!
+                📍 Using ISO country codes for better job search accuracy across international job boards
               </p>
             </div>
           </div>
