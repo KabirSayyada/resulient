@@ -64,8 +64,19 @@ export function useJobScraper() {
       return;
     }
 
-    // Removed cooldown check for testing purposes
-    console.log('🚀 Starting job scrape without cooldown check');
+    // Check user-specific cooldown
+    if (lastScrapeTime) {
+      const tenHoursAgo = new Date(Date.now() - 10 * 60 * 60 * 1000);
+      if (new Date(lastScrapeTime) > tenHoursAgo) {
+        const hoursLeft = Math.ceil((new Date(lastScrapeTime).getTime() + (10 * 60 * 60 * 1000) - Date.now()) / (60 * 60 * 1000));
+        toast({
+          title: "Please Wait",
+          description: `You can fetch jobs again in ${hoursLeft} hour${hoursLeft !== 1 ? 's' : ''}`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
 
     setLoading(true);
     setUserData({ loading: true });
