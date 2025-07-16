@@ -14,26 +14,26 @@ interface LocationFilterProps {
 }
 
 const COUNTRIES = [
-  { code: 'US', name: 'United States', iso: 'US' },
-  { code: 'CA', name: 'Canada', iso: 'CA' },
-  { code: 'GB', name: 'United Kingdom', iso: 'GB' },
-  { code: 'AU', name: 'Australia', iso: 'AU' },
-  { code: 'DE', name: 'Germany', iso: 'DE' },
-  { code: 'FR', name: 'France', iso: 'FR' },
-  { code: 'NL', name: 'Netherlands', iso: 'NL' },
-  { code: 'SE', name: 'Sweden', iso: 'SE' },
-  { code: 'NO', name: 'Norway', iso: 'NO' },
-  { code: 'DK', name: 'Denmark', iso: 'DK' },
-  { code: 'CH', name: 'Switzerland', iso: 'CH' },
-  { code: 'IE', name: 'Ireland', iso: 'IE' },
-  { code: 'SG', name: 'Singapore', iso: 'SG' },
-  { code: 'JP', name: 'Japan', iso: 'JP' },
-  { code: 'IN', name: 'India', iso: 'IN' },
-  { code: 'BR', name: 'Brazil', iso: 'BR' },
-  { code: 'MX', name: 'Mexico', iso: 'MX' },
-  { code: 'ES', name: 'Spain', iso: 'ES' },
-  { code: 'IT', name: 'Italy', iso: 'IT' },
-  { code: 'PL', name: 'Poland', iso: 'PL' }
+  { code: 'US', name: 'United States', iso: 'us' },
+  { code: 'CA', name: 'Canada', iso: 'ca' },
+  { code: 'GB', name: 'United Kingdom', iso: 'uk' },
+  { code: 'AU', name: 'Australia', iso: 'au' },
+  { code: 'DE', name: 'Germany', iso: 'de' },
+  { code: 'FR', name: 'France', iso: 'fr' },
+  { code: 'NL', name: 'Netherlands', iso: 'nl' },
+  { code: 'SE', name: 'Sweden', iso: 'se' },
+  { code: 'NO', name: 'Norway', iso: 'no' },
+  { code: 'DK', name: 'Denmark', iso: 'dk' },
+  { code: 'CH', name: 'Switzerland', iso: 'ch' },
+  { code: 'IE', name: 'Ireland', iso: 'ie' },
+  { code: 'SG', name: 'Singapore', iso: 'sg' },
+  { code: 'JP', name: 'Japan', iso: 'jp' },
+  { code: 'IN', name: 'India', iso: 'in' },
+  { code: 'BR', name: 'Brazil', iso: 'br' },
+  { code: 'MX', name: 'Mexico', iso: 'mx' },
+  { code: 'ES', name: 'Spain', iso: 'es' },
+  { code: 'IT', name: 'Italy', iso: 'it' },
+  { code: 'PL', name: 'Poland', iso: 'pl' }
 ];
 
 export function LocationFilter({ onLocationChange, defaultLocation = "", disabled = false }: LocationFilterProps) {
@@ -47,17 +47,17 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
     let locationString = '';
     
     if (useCustomLocation && city.trim()) {
-      // Use city with ISO country code for better API compatibility
+      // Send in format "city,countryIso" for JSearch API
       const country = COUNTRIES.find(c => c.code === selectedCountry);
-      locationString = `${city.trim()}, ${country?.iso || 'US'}`;
+      locationString = `${city.trim()},${country?.iso || 'us'}`;
     } else {
-      // Use just the ISO country code
+      // Use just the lowercase ISO country code
       const country = COUNTRIES.find(c => c.code === selectedCountry);
-      locationString = country?.iso || 'US';
+      locationString = country?.iso || 'us';
     }
     
     console.log('🌍 Setting job search location to:', locationString);
-    console.log('🎯 Using ISO format for JSearch API compatibility');
+    console.log('🎯 Using JSearch API format: lowercase ISO codes');
     
     onLocationChange(locationString);
     setIsLocationApplied(true);
@@ -70,7 +70,7 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
     setUseCustomLocation(false);
     setIsLocationApplied(false);
     setAppliedLocation('');
-    onLocationChange('US'); // Default to US
+    onLocationChange('us'); // Default to lowercase 'us'
   };
 
   const selectedCountryName = COUNTRIES.find(c => c.code === selectedCountry)?.name || 'United States';
@@ -145,8 +145,8 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
             
             <p className="text-xs text-gray-500">
               {useCustomLocation 
-                ? `Jobs will be searched in the specified city within ${selectedCountryName} using ISO code format`
-                : `Jobs will be searched throughout ${selectedCountryName} using ISO code format`
+                ? `Jobs will be searched in the specified city within ${selectedCountryName} using JSearch format`
+                : `Jobs will be searched throughout ${selectedCountryName} using JSearch format`
               }
             </p>
             

@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -13,7 +14,7 @@ interface JobSearchParams {
   job_requirements?: string;
   num_pages?: number;
   date_posted?: string;
-  user_id?: string; // Add user_id parameter
+  user_id?: string;
 }
 
 interface JSearchJob {
@@ -86,7 +87,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🌍 Starting location-specific job scraping request...');
+    console.log('🌍 Starting JSearch API job scraping with proper location formatting...');
     
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -102,7 +103,7 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const searchParams: JobSearchParams = {
       query: body.query || 'software engineer',
-      location: body.location || 'US', // Default to US ISO code
+      location: body.location || 'us', // Default to lowercase 'us'
       employment_types: body.employment_types || 'FULLTIME',
       num_pages: Math.min(body.num_pages || 5, 10),
       date_posted: body.date_posted || 'week',
@@ -114,59 +115,47 @@ serve(async (req) => {
       throw new Error('User ID is required for job scraping');
     }
 
-    // Enhanced location parameter formatting for JSearch API
-    let formattedLocation = searchParams.location;
-    
-    // Map common ISO codes to JSearch-friendly formats
-    const locationMap: Record<string, string> = {
-      'US': 'United States',
-      'CA': 'Canada', 
-      'GB': 'United Kingdom',
-      'AU': 'Australia',
-      'DE': 'Germany',
-      'FR': 'France',
-      'NL': 'Netherlands',
-      'SE': 'Sweden',
-      'NO': 'Norway',
-      'DK': 'Denmark',
-      'CH': 'Switzerland',
-      'IE': 'Ireland',
-      'SG': 'Singapore',
-      'JP': 'Japan',
-      'IN': 'India',
-      'BR': 'Brazil',
-      'MX': 'Mexico',
-      'ES': 'Spain',
-      'IT': 'Italy',
-      'PL': 'Poland'
-    };
-
-    // If location contains a comma (city, country format), use as-is
-    // Otherwise, try to map ISO code to full country name
-    if (!formattedLocation.includes(',') && locationMap[formattedLocation]) {
-      formattedLocation = locationMap[formattedLocation];
-    }
-
-    console.log('📍 ORIGINAL LOCATION:', searchParams.location);
-    console.log('🎯 FORMATTED LOCATION FOR JSEARCH:', formattedLocation);
+    console.log('📍 ORIGINAL LOCATION PARAMETER:', searchParams.location);
     console.log('👤 USER ID:', searchParams.user_id);
 
-    // Build URL for JSearch API with enhanced location parameter
+    // Parse location parameter to handle city + country format
+    let query = searchParams.query;
+    let countryCode = searchParams.location;
+
+    // Check if location contains a city (format: "city,countrycode")
+    if (searchParams.location.includes(',')) {
+      const [city, country] = searchParams.location.split(',');
+      // Format query to include city using JSearch syntax: "query+in+CityName"
+      query = `${searchParams.query}+in+${city.trim()}`;
+      countryCode = country.trim().toLowerCase();
+      console.log('🏙️ CITY SEARCH DETECTED');
+      console.log('🔍 MODIFIED QUERY:', query);
+      console.log('🌍 COUNTRY CODE:', countryCode);
+    } else {
+      // Just country search, ensure lowercase
+      countryCode = searchParams.location.toLowerCase();
+      console.log('🌍 COUNTRY-ONLY SEARCH');
+      console.log('🌍 COUNTRY CODE:', countryCode);
+    }
+
+    // Build URL for JSearch API with correct parameters
     const baseUrl = 'https://jsearch.p.rapidapi.com/search';
     const url = new URL(baseUrl);
     
-    // Add search parameters with formatted location
-    url.searchParams.append('query', searchParams.query);
+    // Add search parameters using JSearch format
+    url.searchParams.append('query', query);
     url.searchParams.append('page', '1');
     url.searchParams.append('num_pages', searchParams.num_pages.toString());
     url.searchParams.append('date_posted', searchParams.date_posted);
     url.searchParams.append('employment_types', searchParams.employment_types);
     
-    // Use the formatted location for better API compatibility
-    url.searchParams.append('country', formattedLocation);
+    // Use lowercase country code as per JSearch API requirements
+    url.searchParams.append('country', countryCode);
     
     console.log(`🚀 Fetching jobs from JSearch API for user: ${searchParams.user_id}`);
     console.log(`🔗 API URL: ${url.toString()}`);
+    console.log(`📋 Query parameter: "${query}"`);
+    console.log(`🌍 Country parameter: "${countryCode}"`);
     
     // Fetch jobs from JSearch API
     const response = await fetch(url.toString(), {
@@ -187,14 +176,15 @@ serve(async (req) => {
     console.log(`✅ JSearch API Response - Found ${jsearchData.data?.length || 0} jobs`);
 
     if (!jsearchData.data || jsearchData.data.length === 0) {
-      console.log(`❌ No jobs found for location: ${formattedLocation}`);
+      console.log(`❌ No jobs found for location: ${searchParams.location}`);
       return new Response(
         JSON.stringify({ 
-          message: `No jobs found for the given criteria in ${formattedLocation}`,
+          message: `No jobs found for the given criteria in ${searchParams.location}`,
           count: 0,
           jobs: [],
-          searchLocation: formattedLocation,
-          originalLocation: searchParams.location
+          searchLocation: searchParams.location,
+          searchQuery: query,
+          searchCountry: countryCode
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -234,10 +224,9 @@ serve(async (req) => {
       // Enhanced tag extraction from skills and highlights
       const tags = [];
       if (job.job_required_skills) {
-        tags.push(...job.job_required_skills.slice(0, 6)); // More skills for better matching
+        tags.push(...job.job_required_skills.slice(0, 6));
       }
       if (job.job_highlights?.Qualifications) {
-        // Extract key qualifications as tags
         job.job_highlights.Qualifications.slice(0, 4).forEach(qual => {
           const match = qual.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b/g);
           if (match) tags.push(...match.slice(0, 2));
@@ -304,11 +293,11 @@ serve(async (req) => {
       throw new Error(`Failed to insert jobs: ${insertError.message}`);
     }
 
-    console.log(`🎉 SUCCESS: Job fetch completed for location ${formattedLocation} (original: ${searchParams.location})`);
+    console.log(`🎉 SUCCESS: Job fetch completed for location ${searchParams.location}`);
 
     return new Response(
       JSON.stringify({
-        message: `🚀 SUCCESS: Scraped and stored ${insertedJobs?.length || 0} jobs from ${formattedLocation}!`,
+        message: `🚀 SUCCESS: Scraped and stored ${insertedJobs?.length || 0} jobs from ${searchParams.location}!`,
         count: insertedJobs?.length || 0,
         totalScraped: transformedJobs.length,
         duplicatesFiltered: transformedJobs.length - newJobs.length,
@@ -316,8 +305,9 @@ serve(async (req) => {
         searchParams,
         pagesRequested: searchParams.num_pages,
         userId: searchParams.user_id,
-        searchLocation: formattedLocation,
-        originalLocation: searchParams.location
+        searchLocation: searchParams.location,
+        searchQuery: query,
+        searchCountry: countryCode
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

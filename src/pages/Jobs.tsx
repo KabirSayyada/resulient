@@ -25,7 +25,7 @@ export default function Jobs() {
     salaryRange: ''
   });
 
-  const [customLocation, setCustomLocation] = useState<string>("US"); // Default to US ISO code
+  const [customLocation, setCustomLocation] = useState<string>("us"); // Default to lowercase "us"
 
   const { user } = useAuth();
   const { subscription } = useSubscription();
@@ -80,11 +80,11 @@ export default function Jobs() {
     try {
       const jobTitle = selectedResume.industry || 'software engineer';
       
-      // Always use the custom location from the filter, never extract from resume
-      const targetLocation = customLocation || 'US';
+      // Use the custom location from the filter (now in proper JSearch format)
+      const targetLocation = customLocation || 'us';
       
-      console.log(`🎯 Fetching jobs for ${jobTitle} in ${targetLocation} (using location filter only)`);
-      console.log(`📍 Location source: Filter selection (ISO format)`);
+      console.log(`🎯 Fetching jobs for ${jobTitle} in ${targetLocation} (using JSearch format)`);
+      console.log(`📍 Location source: Filter selection (lowercase ISO format)`);
       
       await scrapeJobs({
         query: jobTitle,
