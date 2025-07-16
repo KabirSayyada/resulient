@@ -44,20 +44,9 @@ export default function Jobs() {
   // Check if user has premium access (premium or platinum)
   const hasPremiumAccess = subscription.tier === "premium" || subscription.tier === "platinum";
 
+  // Removed cooldown functionality for testing
   const canFetchJobs = () => {
-    if (!lastScrapeTime) return true;
-    const tenHoursAgo = new Date(Date.now() - 10 * 60 * 60 * 1000);
-    return new Date(lastScrapeTime) < tenHoursAgo;
-  };
-
-  const getTimeUntilNextFetch = () => {
-    if (!lastScrapeTime) return null;
-    const nextFetchTime = new Date(lastScrapeTime).getTime() + (10 * 60 * 60 * 1000);
-    const now = Date.now();
-    if (nextFetchTime <= now) return null;
-    
-    const hoursLeft = Math.ceil((nextFetchTime - now) / (60 * 60 * 1000));
-    return hoursLeft;
+    return true; // Always allow fetching for testing
   };
 
   const handleTargetedJobFetch = async () => {
@@ -69,11 +58,6 @@ export default function Jobs() {
     // Check subscription limits - free tier cannot fetch
     if (subscription.tier === "free" || limits.hasReachedLimit) {
       showUpgradeMessage();
-      return;
-    }
-
-    if (!canFetchJobs()) {
-      console.error('Cannot fetch jobs: cooldown active');
       return;
     }
 
@@ -121,8 +105,6 @@ export default function Jobs() {
       </div>
     );
   }
-
-  const hoursUntilNextFetch = getTimeUntilNextFetch();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
@@ -239,7 +221,7 @@ export default function Jobs() {
               <LocationFilter
                 onLocationChange={setCustomLocation}
                 defaultLocation={customLocation}
-                disabled={scrapingLoading || !canFetchJobs()}
+                disabled={scrapingLoading}
               />
 
               {/* AI-Powered Job Fetch Section */}
@@ -287,6 +269,7 @@ export default function Jobs() {
                         </div>
                       )}
                       
+                      
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 p-6 rounded-2xl border border-blue-200 dark:border-blue-800">
                           <div className="text-center">
@@ -328,23 +311,11 @@ export default function Jobs() {
                           </div>
                         </div>
                       </div>
-                      
-                      {!canFetchJobs() && hasPremiumAccess && (
-                        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/40 dark:to-blue-950/40 p-6 rounded-2xl border border-indigo-200 dark:border-indigo-800 mb-6">
-                          <div className="flex items-center gap-3 justify-center">
-                            <RefreshCw className="h-5 w-5 text-indigo-500 animate-spin" />
-                            <p className="text-indigo-700 dark:text-indigo-400 font-medium">
-                              🤖 Our AI is currently processing millions of new job postings across thousands of job boards. 
-                              This ensures you get the absolute freshest and most relevant opportunities!
-                            </p>
-                          </div>
-                        </div>
-                      )}
                     </div>
                     
                     <Button
                       onClick={handleTargetedJobFetch}
-                      disabled={scrapingLoading || !selectedResume || !canFetchJobs() || subscription.tier === "free"}
+                      disabled={scrapingLoading || !selectedResume || subscription.tier === "free"}
                       size="lg"
                       className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 hover:from-purple-700 hover:via-pink-700 hover:to-red-700 text-white font-bold px-8 sm:px-16 py-6 text-lg sm:text-xl rounded-full disabled:opacity-50 w-full sm:w-auto shadow-2xl transform transition-all duration-300 hover:scale-105"
                     >
@@ -368,7 +339,7 @@ export default function Jobs() {
                       ) : (
                         <>
                           <Target className="h-7 w-7 mr-4" />
-                          {!canFetchJobs() ? '⏳ AI Processing Jobs...' : '🎯 Find My Perfect Jobs Now'}
+                          🎯 Find My Perfect Jobs Now
                         </>
                       )}
                     </Button>
@@ -407,6 +378,7 @@ export default function Jobs() {
                 </div>
               </div>
 
+              
               {/* Quality work notice */}
               <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                 <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
