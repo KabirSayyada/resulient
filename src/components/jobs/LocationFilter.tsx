@@ -16,24 +16,7 @@ interface LocationFilterProps {
 const COUNTRIES = [
   { code: 'US', name: 'United States', iso: 'us' },
   { code: 'CA', name: 'Canada', iso: 'ca' },
-  { code: 'GB', name: 'United Kingdom', iso: 'uk' },
-  { code: 'AU', name: 'Australia', iso: 'au' },
-  { code: 'DE', name: 'Germany', iso: 'de' },
-  { code: 'FR', name: 'France', iso: 'fr' },
-  { code: 'NL', name: 'Netherlands', iso: 'nl' },
-  { code: 'SE', name: 'Sweden', iso: 'se' },
-  { code: 'NO', name: 'Norway', iso: 'no' },
-  { code: 'DK', name: 'Denmark', iso: 'dk' },
-  { code: 'CH', name: 'Switzerland', iso: 'ch' },
-  { code: 'IE', name: 'Ireland', iso: 'ie' },
-  { code: 'SG', name: 'Singapore', iso: 'sg' },
-  { code: 'JP', name: 'Japan', iso: 'jp' },
-  { code: 'IN', name: 'India', iso: 'in' },
-  { code: 'BR', name: 'Brazil', iso: 'br' },
-  { code: 'MX', name: 'Mexico', iso: 'mx' },
-  { code: 'ES', name: 'Spain', iso: 'es' },
-  { code: 'IT', name: 'Italy', iso: 'it' },
-  { code: 'PL', name: 'Poland', iso: 'pl' }
+  { code: 'GB', name: 'United Kingdom', iso: 'uk' }
 ];
 
 export function LocationFilter({ onLocationChange, defaultLocation = "", disabled = false }: LocationFilterProps) {
@@ -128,7 +111,7 @@ export function LocationFilter({ onLocationChange, defaultLocation = "", disable
             {useCustomLocation && (
               <div className="space-y-2">
                 <Input
-                  placeholder="e.g., London, Berlin, Tokyo"
+                  placeholder="e.g., London, New York, Toronto"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   disabled={disabled}
