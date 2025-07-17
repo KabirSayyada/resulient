@@ -9,7 +9,6 @@ import { TemplateSelector } from './TemplateSelector';
 import { ParsedResume } from '@/types/resumeStructure';
 import { getTemplateById } from '@/data/resumeTemplates';
 import { ProfessionalClassicTemplate } from './templates/ProfessionalClassicTemplate';
-import { generateResumePDFFromContent } from '@/utils/resumePdfGenerator';
 
 interface ResumeTemplateModalProps {
   isOpen: boolean;
@@ -54,8 +53,8 @@ export const ResumeTemplateModal: React.FC<ResumeTemplateModalProps> = ({
         setWarnings(validation.warnings);
 
         if (validation.isValid) {
-          const htmlContent = templateInstance.renderHTML(resume);
-          const success = generateResumePDFFromContent(htmlContent, `resume-${template.metadata.name.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+          const filename = `resume-${template.metadata.name.toLowerCase().replace(/\s+/g, '-')}.pdf`;
+          const success = await templateInstance.renderPDF(resume, filename);
           
           if (!success) {
             throw new Error('Failed to generate PDF');
