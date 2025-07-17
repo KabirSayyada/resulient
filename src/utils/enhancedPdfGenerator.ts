@@ -198,7 +198,7 @@ export class EnhancedPDFGenerator {
           imgHeight
         );
       } else {
-        // Multi-page handling
+        // Multi-page handling - Fixed the argument count issue
         let yPosition = opts.margins.top;
         let sourceY = 0;
         const maxPageHeight = pageHeight - opts.margins.top - opts.margins.bottom;
@@ -215,17 +215,14 @@ export class EnhancedPDFGenerator {
             (maxPageHeight / imgHeight) * canvas.height
           );
           
+          // Fixed: Removed the extra arguments that were causing the error
           pdf.addImage(
             imgData,
             'PNG',
             opts.margins.left,
             yPosition,
             imgWidth,
-            (pageCanvasHeight / canvas.height) * imgHeight,
-            undefined,
-            'FAST',
-            0,
-            -sourceY
+            (pageCanvasHeight / canvas.height) * imgHeight
           );
           
           sourceY += pageCanvasHeight;
