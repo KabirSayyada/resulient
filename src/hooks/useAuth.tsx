@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { profile, loading: profileLoading } = useUserProfile(user?.id);
   const [profileComplete, setProfileComplete] = useState(false);
 
-  // Check if profile is complete - only redirect if required fields are missing
+  // Check if profile is complete - no redirection, just status tracking
   useEffect(() => {
     if (!profileLoading && user) {
       const hasFirstName = profile?.first_name && profile.first_name.trim().length > 0;
@@ -38,13 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       const isComplete = hasFirstName && hasLastName && hasJobTitle;
       setProfileComplete(!!isComplete);
-      
-      // Only redirect if required fields are actually missing and not already on profile pages
-      if (!isComplete && 
-          !window.location.pathname.includes('/profile-edit') && 
-          !window.location.pathname.includes('/profile-setup')) {
-        window.location.href = '/profile-edit';
-      }
     }
   }, [profile, profileLoading, user]);
 
