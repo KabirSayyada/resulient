@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 
 export async function generateModernTemplatePDF(
@@ -15,27 +16,27 @@ export async function generateModernTemplatePDF(
 
     const pageWidth = 595.28;
     const pageHeight = 841.89;
-    const margin = 40; // Reduced margin
+    const margin = 40;
     const contentWidth = pageWidth - (margin * 2);
-    const lineHeight = 12; // Reduced from 16 to 12
+    const lineHeight = 14; // Increased from 12 to 14
     
-    let currentY = margin + 15; // Reduced from 20
+    let currentY = margin + 15;
 
     // Parse the text content into structured sections
     const sections = parseResumeContent(textContent);
     
-    // Add modern header background - reduced height
+    // Add modern header background
     pdf.setFillColor(52, 73, 94); // Dark blue-gray
-    pdf.rect(0, 0, pageWidth, 100, 'F'); // Reduced from 120 to 100
+    pdf.rect(0, 0, pageWidth, 100, 'F');
     
     // Render each section with modern styling
     for (const section of sections) {
       currentY = renderModernSection(pdf, section, currentY, margin, contentWidth, pageWidth, pageHeight, lineHeight);
       
       // Add page break if needed
-      if (currentY > pageHeight - 80) { // Reduced from 100
+      if (currentY > pageHeight - 80) {
         pdf.addPage();
-        currentY = margin + 15; // Reduced from 20
+        currentY = margin + 15;
       }
     }
 
@@ -209,54 +210,54 @@ function renderModernSection(
     case 'name':
       // Name in header area with white text
       pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(22); // Reduced from 24
+      pdf.setFontSize(22);
       pdf.setTextColor(255, 255, 255); // White text
       
       const nameLines = pdf.splitTextToSize(section.content, contentWidth - 40);
       for (const line of nameLines) {
-        pdf.text(line, margin + 20, 40); // Reduced from 50
+        pdf.text(line, margin + 20, 40);
       }
       
-      currentY = 110; // Reduced from 140 to match new header height
+      currentY = 110;
       break;
 
     case 'contact':
       // Contact info in header area with light text, formatted on separate lines
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10); // Reduced from 11
+      pdf.setFontSize(10);
       pdf.setTextColor(236, 240, 241); // Light gray
       
       // Parse contact information and display each piece on a separate line
       const contactInfo = parseContactInfo(section.content);
-      let contactY = 60; // Reduced from 70
+      let contactY = 60;
       
       for (const info of contactInfo) {
         if (info.trim()) {
           pdf.text(info.trim(), margin + 20, contactY);
-          contactY += 10; // Reduced from 12
+          contactY += 12; // Increased from 10 to 12
         }
       }
       break;
 
     case 'section_header':
-      // Modern section headers with accent color - reduced spacing
-      currentY += 8; // Reduced from 15
+      // Modern section headers with accent color
+      currentY += 10; // Increased from 8
       
       // Add accent line
       pdf.setFillColor(231, 76, 60); // Red accent
-      pdf.rect(margin, currentY - 3, 25, 2, 'F'); // Smaller accent line
+      pdf.rect(margin, currentY - 3, 25, 2, 'F');
       
       pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(12); // Reduced from 14
+      pdf.setFontSize(12);
       pdf.setTextColor(52, 73, 94); // Dark blue-gray
       
       const headerLines = pdf.splitTextToSize(section.content.toUpperCase(), contentWidth - 40);
       for (const line of headerLines) {
-        pdf.text(line, margin + 35, currentY + 6); // Reduced from 40 and 8
+        pdf.text(line, margin + 35, currentY + 6);
         currentY += lineHeight;
       }
       
-      currentY += 4; // Reduced from 8
+      currentY += 6; // Increased from 4
       break;
 
     case 'content':
@@ -266,10 +267,10 @@ function renderModernSection(
       const isJobTitle = section.content.includes('|') && !section.content.includes('@');
       
       if (isJobTitle) {
-        pdf.setFontSize(11); // Reduced from 12
+        pdf.setFontSize(11);
         pdf.setTextColor(52, 73, 94); // Dark blue-gray
       } else {
-        pdf.setFontSize(9); // Reduced from 10
+        pdf.setFontSize(9);
         pdf.setTextColor(85, 85, 85); // Medium gray
       }
       
@@ -300,7 +301,7 @@ function renderModernSection(
           for (const line of lines) {
             if (currentY > pageHeight - margin) {
               pdf.addPage();
-              currentY = margin + 15; // Reduced from 20
+              currentY = margin + 15;
             }
             
             pdf.text(line, margin + 20, currentY);
@@ -312,18 +313,18 @@ function renderModernSection(
       }
       
       if (isJobTitle) {
-        currentY += 2; // Reduced from 5
+        currentY += 3; // Increased from 2
       }
       break;
 
     case 'bullet':
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(9); // Reduced from 10
+      pdf.setFontSize(9);
       pdf.setTextColor(85, 85, 85);
       
       // Modern bullet point
       pdf.setFillColor(231, 76, 60); // Red accent
-      pdf.circle(margin + 25, currentY - 2, 1.5, 'F'); // Smaller bullet
+      pdf.circle(margin + 25, currentY - 2, 1.5, 'F');
       
       // Process bullet content with markdown
       const bulletParts = processModernText(section.content);
@@ -338,7 +339,7 @@ function renderModernSection(
       for (let i = 0; i < bulletLines.length; i++) {
         if (currentY > pageHeight - margin) {
           pdf.addPage();
-          currentY = margin + 15; // Reduced from 20
+          currentY = margin + 15;
         }
         
         // Handle mixed formatting within the line
@@ -394,11 +395,11 @@ function renderModernSection(
         }
       }
       
-      currentY += lineHeight + 1; // Reduced from 3
+      currentY += lineHeight + 2; // Increased from 1
       break;
 
     case 'separator':
-      currentY += 6; // Reduced from 10
+      currentY += 8; // Increased from 6
       break;
 
     default:
