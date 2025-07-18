@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 
 export async function generateModernTemplatePDF(
@@ -65,14 +66,19 @@ function parseResumeContent(textContent: string): ModernResumeSection[] {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     
-    if (!line) {
-      sections.push({ type: 'separator', content: '' });
+    // Skip empty lines and markdown code block markers
+    if (!line || line === '```' || line.startsWith('```')) {
+      if (line) {
+        sections.push({ type: 'separator', content: '' });
+      }
       continue;
     }
 
     // Detect name (first substantial line that's not a section header or contact info)
     if (!foundName && !line.includes('@') && !line.includes('|') && !line.match(/^\d/) && 
-        !line.match(/^[=\-]{3,}$/) && line.length > 2 && !line.startsWith('•') && !line.startsWith('-')) {
+        !line.match(/^[=\-]{3,}$/) && line.length > 2 && !line.startsWith('•') && !line.startsWith('-') &&
+        !line.toLowerCase().includes('phone') && !line.toLowerCase().includes('email') &&
+        !line.toLowerCase().includes('linkedin') && !line.toLowerCase().includes('address')) {
       // Check if next line is not an underline (which would make this a section header)
       const nextLine = i + 1 < lines.length ? lines[i + 1].trim() : '';
       const isHeader = nextLine.match(/^[=\-]{3,}$/);
