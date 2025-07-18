@@ -125,36 +125,40 @@ class TextStructuredPDFGenerator {
     const contact: ResumeContact = {};
     const lines = content.split('\n').filter(line => line.trim());
     
-    // First line is typically the name
-    if (lines[0]) {
-      contact.name = lines[0].trim();
+    console.log('Parsing contact info from lines:', lines);
+    
+    // Look for name in the first few lines
+    for (let i = 0; i < Math.min(3, lines.length); i++) {
+      const line = lines[i].trim();
+      // Skip lines that look like contact info
+      if (!line.includes('@') && !line.match(/\d{3}/) && !line.includes('linkedin') && line.length > 2) {
+        contact.name = line;
+        break;
+      }
     }
 
-    // Parse contact details from remaining lines
-    const contactText = lines.slice(1).join(' ');
+    // Parse contact details from all lines
+    const allText = lines.join(' ');
     
     // Extract email
-    const emailMatch = contactText.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+    const emailMatch = allText.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
     if (emailMatch) contact.email = emailMatch[1];
 
     // Extract phone
-    const phoneMatch = contactText.match(/(\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/);
+    const phoneMatch = allText.match(/(\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/);
     if (phoneMatch) contact.phone = phoneMatch[1];
 
     // Extract LinkedIn
-    const linkedinMatch = contactText.match(/(linkedin\.com\/in\/[^\s|]+)/i);
+    const linkedinMatch = allText.match(/(linkedin\.com\/in\/[^\s|]+)/i);
     if (linkedinMatch) contact.linkedin = linkedinMatch[1];
 
-    // Extract website/portfolio
-    const websiteMatch = contactText.match(/((?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s|]*)?)/);
-    if (websiteMatch && !websiteMatch[1].includes('linkedin') && !websiteMatch[1].includes('@')) {
-      contact.website = websiteMatch[1];
-    }
-
+    console.log('Parsed contact info:', contact);
     return contact;
   }
 
   private parseResumeContent(content: string): any {
+    console.log('Starting to parse resume content...');
+    
     const sections = {
       contact: {} as ResumeContact,
       summary: '',
@@ -167,25 +171,37 @@ class TextStructuredPDFGenerator {
     };
 
     const lines = content.split('\n').map(line => line.trim()).filter(line => line);
+    console.log('Total lines to process:', lines.length);
+    
     let currentSection = '';
     let headerProcessed = false;
+    let currentExperience: ResumeExperience | null = null;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const upperLine = line.toUpperCase();
 
+      console.log(`Processing line ${i}: "${line}"`);
+
       // Check for section headers
       if (this.isSectionHeader(upperLine)) {
         currentSection = this.getSectionType(upperLine);
+        console.log(`Found section header: ${currentSection}`);
+        
+        // Save current experience if we're leaving experience section
+        if (currentExperience && currentSection !== 'experience') {
+          sections.experience.push(currentExperience);
+          currentExperience = null;
+        }
         continue;
       }
 
-      // Process header (contact info)
+      // Process header (contact info) - take first 5 lines if no section identified yet
       if (!headerProcessed && !currentSection) {
-        if (!sections.contact.name) {
-          sections.contact = this.parseContactInfo(lines.slice(0, Math.min(5, lines.length)).join('\n'));
-          headerProcessed = true;
-        }
+        const headerLines = lines.slice(0, Math.min(5, lines.length));
+        sections.contact = this.parseContactInfo(headerLines.join('\n'));
+        headerProcessed = true;
+        console.log('Header processed, contact info:', sections.contact);
         continue;
       }
 
@@ -194,90 +210,113 @@ class TextStructuredPDFGenerator {
       }
 
       // Process content based on section
-      if (currentSection) {
-        this.processContentBySection(line, currentSection, sections);
+      if (currentSection === 'experience') {
+        this.processExperience(line, sections.experience, currentExperience);
+        if (sections.experience.length > 0) {
+          currentExperience = sections.experience[sections.experience.length - 1];
+        }
+      } else if (currentSection === 'education') {
+        this.processEducation(line, sections.education);
+      } else if (currentSection) {
+        // For other sections, accumulate content
+        if (sections[currentSection] !== undefined) {
+          if (typeof sections[currentSection] === 'string') {
+            sections[currentSection] += (sections[currentSection] ? '\n' : '') + line;
+          }
+        }
       }
     }
 
+    // Save final experience if exists
+    if (currentExperience) {
+      sections.experience.push(currentExperience);
+    }
+
+    console.log('Final parsed sections:', sections);
     return sections;
   }
 
   private isSectionHeader(line: string): boolean {
     const headers = [
-      'PROFESSIONAL SUMMARY', 'SUMMARY', 'OBJECTIVE',
-      'PROFESSIONAL EXPERIENCE', 'WORK EXPERIENCE', 'EXPERIENCE',
-      'TECHNICAL SKILLS', 'SKILLS', 'CORE COMPETENCIES',
-      'EDUCATION', 'ACADEMIC BACKGROUND',
-      'PROJECTS', 'KEY PROJECTS',
-      'CERTIFICATIONS', 'CERTIFICATES',
-      'ACHIEVEMENTS', 'ACCOMPLISHMENTS'
+      'PROFESSIONAL SUMMARY', 'SUMMARY', 'OBJECTIVE', 'PROFILE',
+      'PROFESSIONAL EXPERIENCE', 'WORK EXPERIENCE', 'EXPERIENCE', 'EMPLOYMENT',
+      'TECHNICAL SKILLS', 'SKILLS', 'CORE COMPETENCIES', 'COMPETENCIES',
+      'EDUCATION', 'ACADEMIC BACKGROUND', 'QUALIFICATIONS',
+      'PROJECTS', 'KEY PROJECTS', 'NOTABLE PROJECTS',
+      'CERTIFICATIONS', 'CERTIFICATES', 'CERTIFICATION',
+      'ACHIEVEMENTS', 'ACCOMPLISHMENTS', 'AWARDS'
     ];
-    return headers.some(header => line.includes(header)) && line.length < 60;
+    
+    // Check if line contains any header keywords and is reasonably short
+    return headers.some(header => line.includes(header)) && line.length < 100;
   }
 
   private getSectionType(line: string): string {
-    if (line.includes('SUMMARY') || line.includes('OBJECTIVE')) return 'summary';
-    if (line.includes('EXPERIENCE')) return 'experience';
+    if (line.includes('SUMMARY') || line.includes('OBJECTIVE') || line.includes('PROFILE')) return 'summary';
+    if (line.includes('EXPERIENCE') || line.includes('EMPLOYMENT')) return 'experience';
     if (line.includes('SKILLS') || line.includes('COMPETENCIES')) return 'skills';
-    if (line.includes('EDUCATION')) return 'education';
+    if (line.includes('EDUCATION') || line.includes('ACADEMIC') || line.includes('QUALIFICATIONS')) return 'education';
     if (line.includes('PROJECTS')) return 'projects';
     if (line.includes('CERTIFICATIONS') || line.includes('CERTIFICATES')) return 'certifications';
-    if (line.includes('ACHIEVEMENTS') || line.includes('ACCOMPLISHMENTS')) return 'achievements';
+    if (line.includes('ACHIEVEMENTS') || line.includes('ACCOMPLISHMENTS') || line.includes('AWARDS')) return 'achievements';
     return 'summary';
   }
 
-  private processContentBySection(line: string, section: string, sections: any): void {
-    if (section === 'experience') {
-      this.processExperience(line, sections.experience);
-    } else if (section === 'education') {
-      this.processEducation(line, sections.education);
-    } else {
-      // For other sections, accumulate content
-      if (sections[section]) {
-        sections[section] += (sections[section] ? '\n' : '') + line;
-      }
-    }
-  }
-
-  private processExperience(line: string, experiences: ResumeExperience[]): void {
-    // Check if this is a job title line
+  private processExperience(line: string, experiences: ResumeExperience[], currentExperience: ResumeExperience | null): void {
+    // Check if this is a job title line (contains common separators)
     if (this.isJobTitleLine(line)) {
       const exp = this.parseJobTitle(line);
       experiences.push(exp);
-    } else if (line.match(/\d{4}/) && experiences.length > 0) {
-      // Date/location line
+      console.log('Added new experience:', exp);
+    } 
+    // Check if this looks like a date/location line
+    else if (line.match(/\d{4}/) && experiences.length > 0) {
       const lastExp = experiences[experiences.length - 1];
       const parts = line.split('|').map(p => p.trim());
       if (parts[0]) lastExp.dates = parts[0];
       if (parts[1]) lastExp.location = parts[1];
-    } else if (line.startsWith('•') || line.startsWith('-')) {
-      // Responsibility
-      if (experiences.length > 0) {
-        experiences[experiences.length - 1].responsibilities.push(
-          line.replace(/^[•\-]\s*/, '')
-        );
+      console.log('Updated experience with dates/location:', lastExp);
+    } 
+    // Check if this is a responsibility bullet point
+    else if ((line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) && experiences.length > 0) {
+      const responsibility = line.replace(/^[•\-*]\s*/, '').trim();
+      experiences[experiences.length - 1].responsibilities.push(responsibility);
+      console.log('Added responsibility:', responsibility);
+    }
+    // Check if this looks like a company/location line without bullet
+    else if (experiences.length > 0 && !line.startsWith('•') && !line.startsWith('-') && line.length > 10) {
+      const lastExp = experiences[experiences.length - 1];
+      if (!lastExp.company && line.length < 100) {
+        lastExp.company = line;
+        console.log('Updated company name:', line);
+      } else if (line.length < 200) {
+        // Treat as responsibility without bullet
+        lastExp.responsibilities.push(line);
+        console.log('Added responsibility (no bullet):', line);
       }
     }
   }
 
   private processEducation(line: string, education: ResumeEducation[]): void {
-    if (line.includes('-') || line.toLowerCase().includes('university') || line.toLowerCase().includes('college')) {
+    if (line.includes('-') || line.toLowerCase().includes('university') || 
+        line.toLowerCase().includes('college') || line.toLowerCase().includes('degree')) {
       const parts = line.split('-').map(p => p.trim());
       education.push({
         degree: parts[0] || line,
         institution: parts[1] || '',
         date: ''
       });
+      console.log('Added education:', education[education.length - 1]);
     } else if (line.match(/\d{4}/) && education.length > 0) {
       education[education.length - 1].date = line;
+      console.log('Updated education date:', line);
     }
   }
 
   private isJobTitleLine(line: string): boolean {
-    return (line.includes(' - ') || line.includes(' at ')) && 
-           !line.startsWith('•') && 
-           line.length > 10 && 
-           line.length < 150;
+    return (line.includes(' - ') || line.includes(' at ') || line.includes(' | ')) && 
+           !line.startsWith('•') && !line.startsWith('-') && !line.startsWith('*') &&
+           line.length > 10 && line.length < 150;
   }
 
   private parseJobTitle(line: string): ResumeExperience {
@@ -295,8 +334,7 @@ class TextStructuredPDFGenerator {
     }
 
     if (!position) {
-      position = line;
-      company = '';
+      position = line.trim();
     }
 
     return {
@@ -309,6 +347,8 @@ class TextStructuredPDFGenerator {
   }
 
   private renderHeader(contact: ResumeContact): void {
+    console.log('Rendering header with contact:', contact);
+    
     // Name - large and centered
     if (contact.name) {
       this.addTextLine(contact.name, 18, 'bold', '#1f2937', 'center', 8);
@@ -329,8 +369,10 @@ class TextStructuredPDFGenerator {
   }
 
   private renderSection(title: string, content: string, isList: boolean = false): void {
-    if (!content) return;
+    if (!content || !content.trim()) return;
 
+    console.log(`Rendering section: ${title}`);
+    
     this.currentY += 5;
     this.addTextLine(title.toUpperCase(), 12, 'bold', '#1f2937', 'left', 5);
 
@@ -347,6 +389,8 @@ class TextStructuredPDFGenerator {
   private renderExperience(experiences: ResumeExperience[]): void {
     if (experiences.length === 0) return;
 
+    console.log(`Rendering ${experiences.length} experiences`);
+    
     this.currentY += 5;
     this.addTextLine('PROFESSIONAL EXPERIENCE', 12, 'bold', '#1f2937', 'left', 5);
 
@@ -378,6 +422,8 @@ class TextStructuredPDFGenerator {
   private renderEducation(education: ResumeEducation[]): void {
     if (education.length === 0) return;
 
+    console.log(`Rendering ${education.length} education entries`);
+    
     this.currentY += 5;
     this.addTextLine('EDUCATION', 12, 'bold', '#1f2937', 'left', 5);
 
@@ -393,42 +439,47 @@ class TextStructuredPDFGenerator {
 
   public generatePDF(content: string, filename: string): boolean {
     try {
-      console.log('Generating text-structured PDF...');
+      console.log('Generating text-structured PDF with content length:', content.length);
+      
+      if (!content || content.trim().length === 0) {
+        console.error('No content provided for PDF generation');
+        return false;
+      }
       
       const sections = this.parseResumeContent(content);
 
-      // Render header
+      // Always render header, even if minimal
       this.renderHeader(sections.contact);
 
-      // Render summary
-      if (sections.summary) {
-        this.renderSection('Professional Summary', sections.summary);
-      }
+      // If we don't have structured sections, render the raw content
+      if (!sections.summary && sections.experience.length === 0 && !sections.skills && sections.education.length === 0) {
+        console.log('No structured sections found, rendering raw content');
+        this.renderSection('Resume Content', content);
+      } else {
+        // Render structured sections
+        if (sections.summary) {
+          this.renderSection('Professional Summary', sections.summary);
+        }
 
-      // Render experience
-      this.renderExperience(sections.experience);
+        this.renderExperience(sections.experience);
 
-      // Render skills
-      if (sections.skills) {
-        this.renderSection('Technical Skills', sections.skills);
-      }
+        if (sections.skills) {
+          this.renderSection('Technical Skills', sections.skills);
+        }
 
-      // Render education
-      this.renderEducation(sections.education);
+        this.renderEducation(sections.education);
 
-      // Render projects
-      if (sections.projects) {
-        this.renderSection('Projects', sections.projects, true);
-      }
+        if (sections.projects) {
+          this.renderSection('Projects', sections.projects, true);
+        }
 
-      // Render certifications
-      if (sections.certifications) {
-        this.renderSection('Certifications', sections.certifications, true);
-      }
+        if (sections.certifications) {
+          this.renderSection('Certifications', sections.certifications, true);
+        }
 
-      // Render achievements
-      if (sections.achievements) {
-        this.renderSection('Achievements', sections.achievements, true);
+        if (sections.achievements) {
+          this.renderSection('Achievements', sections.achievements, true);
+        }
       }
 
       console.log('Text-structured PDF generation completed');
@@ -447,6 +498,7 @@ export async function generateTextStructuredPDF(
   filename: string = 'text-structured-resume.pdf'
 ): Promise<boolean> {
   try {
+    console.log('Starting text-structured PDF generation...');
     const generator = new TextStructuredPDFGenerator();
     return generator.generatePDF(resumeContent, filename);
   } catch (error) {
