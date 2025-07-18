@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
@@ -57,10 +58,10 @@ const ATSResumeBuilder = () => {
   };
 
   const features = [
-    { icon: Brain, text: "AI-Powered", color: "from-purple-500 to-indigo-600" },
-    { icon: Shield, text: "ATS-Optimized", color: "from-emerald-500 to-teal-600" },
-    { icon: Zap, text: "Lightning Fast", color: "from-yellow-500 to-orange-600" },
-    { icon: Target, text: "Job-Targeted", color: "from-rose-500 to-pink-600" }
+    { icon: Brain, text: "AI-Powered", color: "from-purple-400 to-indigo-500" },
+    { icon: Shield, text: "ATS-Optimized", color: "from-emerald-400 to-teal-500" },
+    { icon: Zap, text: "Lightning Fast", color: "from-yellow-400 to-orange-500" },
+    { icon: Target, text: "Job-Targeted", color: "from-rose-400 to-pink-500" }
   ];
 
   return (
@@ -90,68 +91,94 @@ const ATSResumeBuilder = () => {
 
         <div className="relative z-10 py-2 sm:py-6 px-2 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
-            {/* Header Section - Mobile optimized */}
-            <div className="flex flex-col gap-2 sm:gap-6 mb-3 sm:mb-8">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-                <div className="flex items-center gap-1 sm:gap-4">
+            {/* Enhanced Header Section */}
+            <div className="flex flex-col gap-4 sm:gap-8 mb-6 sm:mb-12">
+              {/* Top Navigation Bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-4">
                   <Link to="/" className="flex items-center group">
                     <span className="font-brand text-xl sm:text-2xl md:text-4xl lg:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-600 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none group-hover:scale-105 transition-transform duration-300">
                       Resulient
                     </span>
                   </Link>
-                  <div className="flex flex-col gap-1 sm:gap-2">
-                    <Badge className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 px-2 py-1 text-xs font-semibold">
-                      <Brain className="h-3 w-3 mr-1" />
-                      ATS Resume Builder
-                    </Badge>
-                  </div>
                 </div>
                 
-                <div className="flex items-center gap-1 sm:gap-4 justify-between sm:justify-end">
+                <div className="flex items-center gap-2 sm:gap-4 justify-between sm:justify-end">
                   <SubscriptionTierIndicator variant="badge" size="sm" />
                   <UserMenuWithTheme />
                 </div>
               </div>
-            </div>
 
-            {/* Hero Info Section - Mobile optimized */}
-            <div className="relative mb-3 sm:mb-8">
-              <Card className="bg-gradient-to-br from-white/90 via-emerald-50/50 to-blue-50/50 dark:from-slate-900/90 dark:via-slate-800/50 dark:to-slate-900/50 border-2 border-emerald-200/60 dark:border-emerald-800/40 shadow-2xl backdrop-blur-sm">
-                <CardContent className="p-3 sm:p-6 lg:p-8">
-                  <div className="text-center space-y-2 sm:space-y-6">
-                    <h1 className="text-lg sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-800 via-emerald-700 to-blue-700 dark:from-slate-100 dark:via-emerald-300 dark:to-blue-300 bg-clip-text text-transparent leading-tight">
-                      Build Your Perfect ATS Resume
-                    </h1>
-                    
-                    <p className="text-xs sm:text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed px-1 sm:px-2">
-                      Create a professional, ATS-optimized resume in minutes using our AI-powered builder. 
-                      Simply describe yourself in natural language, and we'll craft the perfect resume format.
-                    </p>
-
-                    {/* Feature Pills - Mobile optimized */}
-                    <div className="flex flex-wrap justify-center gap-1 sm:gap-3 mt-3 sm:mt-8">
-                      {features.map((feature, index) => (
-                        <div 
-                          key={index}
-                          className={`flex items-center gap-1 px-2 sm:px-6 py-1.5 sm:py-3 bg-gradient-to-r ${feature.color} text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-default`}
-                        >
-                          <feature.icon className="h-3 w-3 sm:h-5 sm:w-5" />
-                          <span className="font-semibold text-xs sm:text-base">{feature.text}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {subscription.tier === "free" && (
-                      <div className="mt-2 sm:mt-6 p-2 sm:p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl mx-1 sm:mx-0">
-                        <div className="flex items-center justify-center gap-1 sm:gap-2 text-amber-700 dark:text-amber-300 font-semibold text-xs sm:text-base">
-                          <Target className="h-3 w-3 sm:h-5 sm:w-5" />
-                          Free tier: {usage.resumeBuilding.used}/{usage.resumeBuilding.limit} resume builds used
-                        </div>
-                      </div>
-                    )}
+              {/* Enhanced Hero Section */}
+              <div className="relative">
+                <Card className="relative overflow-hidden bg-gradient-to-br from-white/95 via-emerald-50/60 to-blue-50/60 dark:from-slate-900/95 dark:via-emerald-950/30 dark:to-blue-950/30 border-0 shadow-2xl backdrop-blur-sm">
+                  {/* Subtle animated background */}
+                  <div className="absolute inset-0 opacity-30">
+                    <div className="absolute top-0 left-1/4 w-32 h-32 bg-gradient-to-br from-emerald-300/40 to-transparent rounded-full blur-2xl animate-pulse delay-300"></div>
+                    <div className="absolute bottom-0 right-1/4 w-24 h-24 bg-gradient-to-tl from-blue-300/40 to-transparent rounded-full blur-2xl animate-pulse delay-700"></div>
                   </div>
-                </CardContent>
-              </Card>
+                  
+                  <CardContent className="relative z-10 p-6 sm:p-8 lg:p-12">
+                    <div className="text-center space-y-6 sm:space-y-8">
+                      {/* Main Title with Badge */}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-center gap-3 mb-4">
+                          <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-xl">
+                            <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                          </div>
+                          <Badge className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-0 shadow-lg px-4 py-2 text-sm font-semibold">
+                            <Sparkles className="h-4 w-4 mr-1" />
+                            ATS Resume Builder
+                          </Badge>
+                        </div>
+                        
+                        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-slate-800 via-emerald-700 to-blue-700 dark:from-slate-100 dark:via-emerald-300 dark:to-blue-300 bg-clip-text text-transparent leading-tight">
+                          Build Your Perfect
+                          <br />
+                          <span className="text-emerald-600 dark:text-emerald-400">ATS Resume</span>
+                        </h1>
+                      </div>
+                      
+                      {/* Enhanced Description */}
+                      <div className="max-w-3xl mx-auto space-y-4">
+                        <p className="text-base sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                          Create a professional, ATS-optimized resume in minutes using our AI-powered builder.
+                        </p>
+                        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 leading-relaxed">
+                          Simply describe yourself in natural language, and we'll craft the perfect resume format that beats applicant tracking systems.
+                        </p>
+                      </div>
+
+                      {/* Softened Feature Pills */}
+                      <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-8">
+                        {features.map((feature, index) => (
+                          <div 
+                            key={index}
+                            className="group relative"
+                          >
+                            <div className="flex items-center gap-2 px-4 py-2.5 bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 hover:scale-102 cursor-default backdrop-blur-sm">
+                              <feature.icon className={`h-4 w-4 bg-gradient-to-r ${feature.color} bg-clip-text text-transparent group-hover:animate-pulse`} />
+                              <span className="font-medium text-slate-700 dark:text-slate-300 text-sm">{feature.text}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Usage Statistics */}
+                      {subscription.tier === "free" && (
+                        <div className="mt-8 p-4 sm:p-6 bg-gradient-to-r from-amber-50/80 to-orange-50/80 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/60 dark:border-amber-800/50 rounded-2xl backdrop-blur-sm">
+                          <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300 font-semibold">
+                            <Target className="h-5 w-5" />
+                            <span className="text-sm sm:text-base">
+                              Free tier: {usage.resumeBuilding.used}/{usage.resumeBuilding.limit} resume builds used
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
 
             {usage.resumeBuilding.hasReachedLimit && subscription.tier === "free" && (
