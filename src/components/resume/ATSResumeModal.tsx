@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Download, Sparkles, Palette } from "lucide-react";
+import { FileText, Download, Sparkles, Palette, Layout } from "lucide-react";
 
 interface ATSResumeModalProps {
   isOpen: boolean;
@@ -12,6 +12,7 @@ interface ATSResumeModalProps {
   onDownloadTXT: () => void;
   onDownloadPDF: () => void;
   onDownloadTextBasedPDF: () => void;
+  onDownloadModernTemplate: () => void;
 }
 
 export const ATSResumeModal = ({ 
@@ -20,7 +21,8 @@ export const ATSResumeModal = ({
   resumeData, 
   onDownloadTXT, 
   onDownloadPDF,
-  onDownloadTextBasedPDF
+  onDownloadTextBasedPDF,
+  onDownloadModernTemplate
 }: ATSResumeModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -35,7 +37,7 @@ export const ATSResumeModal = ({
                 Your ATS-Optimized Resume
               </span>
             </div>
-            <div className="flex gap-2 sm:gap-3 w-full sm:w-auto justify-end">
+            <div className="flex gap-1 sm:gap-2 w-full sm:w-auto justify-end flex-wrap">
               <Button 
                 onClick={onDownloadTXT}
                 size="sm"
@@ -59,7 +61,15 @@ export const ATSResumeModal = ({
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold text-xs sm:text-sm px-2 sm:px-3"
               >
                 <Palette className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                Styled PDF
+                Styled
+              </Button>
+              <Button 
+                onClick={onDownloadModernTemplate}
+                size="sm"
+                className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold text-xs sm:text-sm px-2 sm:px-3"
+              >
+                <Layout className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                Modern
               </Button>
             </div>
           </DialogTitle>

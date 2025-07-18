@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ATSResumeData } from "@/types/atsResume";
 import { generateTextFormattedPDF } from "@/utils/textFormattedPdfGenerator";
 import { generateTextBasedPDF } from "@/utils/textBasedPdfGenerator";
+import { generateModernTemplatePDF } from "@/utils/modernTemplateGenerator";
 
 export const useATSResumeBuilder = (userId?: string) => {
   const [resumeData, setResumeData] = useState<string>("");
@@ -136,12 +137,40 @@ export const useATSResumeBuilder = (userId?: string) => {
     }
   };
 
+  const downloadModernTemplatePDF = async () => {
+    if (!resumeData) return;
+
+    toast({
+      title: "Generating Modern Template PDF...",
+      description: "Creating your modern template resume, please wait.",
+    });
+
+    const success = await generateModernTemplatePDF(
+      resumeData,
+      'modern-template-resume.pdf'
+    );
+
+    if (success) {
+      toast({
+        title: "Modern Template PDF Downloaded!",
+        description: "Your modern template resume has been downloaded successfully.",
+      });
+    } else {
+      toast({
+        title: "PDF Generation Failed",
+        description: "Failed to generate modern template PDF. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return {
     resumeData,
     isGenerating,
     generateResume,
     downloadResume,
     downloadResumePDF,
-    downloadTextBasedPDF
+    downloadTextBasedPDF,
+    downloadModernTemplatePDF
   };
 };
