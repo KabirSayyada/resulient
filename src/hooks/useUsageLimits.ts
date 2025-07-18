@@ -1,115 +1,116 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useSubscription } from "@/hooks/useSubscription";
 
-interface UsageLimit {
-  used: number;
-  limit: number;
-  hasReachedLimit: boolean;
-}
-
-interface Usage {
-  resumeScoring: UsageLimit;
-  resumeOptimization: UsageLimit;
-  resumeBuilding: UsageLimit;
-  reportDownloads: UsageLimit;
+interface UsageLimits {
+  resumeScorings: { used: number; limit: number; hasReachedLimit: boolean };
+  resumeOptimizations: { used: number; limit: number; hasReachedLimit: boolean };
+  resumeBuilding: { used: number; limit: number; hasReachedLimit: boolean };
 }
 
 export const useUsageLimits = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const { subscription } = useSubscription();
-  
-  const [usage, setUsage] = useState<Usage>({
-    resumeScoring: { used: 0, limit: 0, hasReachedLimit: true },
-    resumeOptimization: { used: 0, limit: 0, hasReachedLimit: true },
-    resumeBuilding: { used: 0, limit: 0, hasReachedLimit: true }, // No free resume building
-    reportDownloads: { used: 0, limit: 0, hasReachedLimit: true }
+  const { toast } = useToast();
+  const [usage, setUsage] = useState<UsageLimits>({
+    resumeScorings: { used: 0, limit: 3, hasReachedLimit: false }, // Updated to 3
+    resumeOptimizations: { used: 0, limit: 1, hasReachedLimit: false },
+    resumeBuilding: { used: 0, limit: 1, hasReachedLimit: false }
   });
+  const [isLoading, setIsLoading] = useState(true);
 
-  const checkUsage = useCallback(async () => {
-    if (!user) return;
+  const checkUsage = async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      // Get current usage counts
-      const today = new Date().toISOString().split('T')[0];
-      
-      const { data: usageData, error } = await supabase
-        .from('user_usage')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('date', today)
-        .maybeSingle();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-      if (error) {
-        console.error('Error fetching usage:', error);
-        return;
+      // Get TOTAL resume scorings (not daily) for free tier
+      let scoringCount = 0;
+      if (subscription.tier === "free") {
+        // For free tier, count all resume scorings ever
+        const { count } = await supabase
+          .from("resume_scores")
+          .select("id", { count: 'exact', head: true })
+          .eq("user_id", user.id);
+        scoringCount = count || 0;
+      } else {
+        // For paid tiers, we don't need to count since they have unlimited
+        scoringCount = 0;
       }
 
-      const currentUsage = usageData || {
-        resume_scorings: 0,
-        resume_optimizations: 0,
-        resume_building: 0,
-        report_downloads: 0
-      };
+      // Get daily resume optimizations
+      const { count: optimizationCount } = await supabase
+        .from("resume_optimizations")
+        .select("id", { count: 'exact', head: true })
+        .eq("user_id", user.id)
+        .gte("created_at", today.toISOString());
+
+      // Get lifetime resume building count using the usage tracking table
+      const { data: buildingData } = await supabase.rpc('get_user_total_usage_count', {
+        p_user_id: user.id,
+        p_feature_type: 'resume_building'
+      });
 
       // Set limits based on subscription tier
-      const limits = subscription.limits;
+      const limits = {
+        resumeScorings: subscription.tier === "free" ? 3 : -1, // 3 total for free, unlimited for paid
+        resumeOptimizations: subscription.tier === "free" ? 1 : -1, // unlimited for paid
+        resumeBuilding: subscription.tier === "free" ? 1 : -1 // unlimited for paid
+      };
 
       setUsage({
-        resumeScoring: {
-          used: currentUsage.resume_scorings || 0,
+        resumeScorings: {
+          used: scoringCount,
           limit: limits.resumeScorings,
-          hasReachedLimit: limits.resumeScorings !== -1 && (currentUsage.resume_scorings || 0) >= limits.resumeScorings
+          hasReachedLimit: limits.resumeScorings !== -1 && scoringCount >= limits.resumeScorings
         },
-        resumeOptimization: {
-          used: currentUsage.resume_optimizations || 0,
+        resumeOptimizations: {
+          used: optimizationCount || 0,
           limit: limits.resumeOptimizations,
-          hasReachedLimit: limits.resumeOptimizations !== -1 && (currentUsage.resume_optimizations || 0) >= limits.resumeOptimizations
+          hasReachedLimit: limits.resumeOptimizations !== -1 && (optimizationCount || 0) >= limits.resumeOptimizations
         },
         resumeBuilding: {
-          used: currentUsage.resume_building || 0,
-          limit: 0, // No free resume building
-          hasReachedLimit: subscription.tier === "free" // Always reached for free users
-        },
-        reportDownloads: {
-          used: currentUsage.report_downloads || 0,
-          limit: limits.reportDownloads,
-          hasReachedLimit: limits.reportDownloads !== -1 && (currentUsage.report_downloads || 0) >= limits.reportDownloads
+          used: buildingData || 0,
+          limit: limits.resumeBuilding,
+          hasReachedLimit: limits.resumeBuilding !== -1 && (buildingData || 0) >= limits.resumeBuilding
         }
       });
     } catch (error) {
-      console.error('Error checking usage:', error);
+      console.error("Error checking usage limits:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [user, subscription.limits, subscription.tier]);
+  };
 
   useEffect(() => {
     checkUsage();
-  }, [checkUsage]);
+  }, [user, subscription.tier]);
+
+  const incrementUsage = async (featureType: 'resumeScorings' | 'resumeOptimizations' | 'resumeBuilding') => {
+    await checkUsage(); // Refresh usage after action
+  };
 
   const showLimitReachedMessage = (featureType: string) => {
-    const featureMap: { [key: string]: string } = {
-      "resume scoring": "resume scoring",
-      "resume optimization": "resume optimization", 
-      "resume building": "resume building",
-      "report downloads": "report downloads"
-    };
-
-    const feature = featureMap[featureType] || featureType;
-    
     toast({
-      title: "Subscription Required",
-      description: `${feature.charAt(0).toUpperCase() + feature.slice(1)} requires a Premium or Platinum subscription. Upgrade now to access this feature.`,
+      title: "Limit Reached",
+      description: `You've used all your ${featureType} credits. Upgrade to Premium or Platinum for unlimited access.`,
       variant: "destructive",
     });
   };
 
   return {
     usage,
+    isLoading,
     checkUsage,
+    incrementUsage,
     showLimitReachedMessage
   };
 };
