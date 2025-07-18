@@ -6,7 +6,6 @@ import { generateTextFormattedPDF } from "@/utils/textFormattedPdfGenerator";
 import { generateTextBasedPDF } from "@/utils/textBasedPdfGenerator";
 import { generateModernTemplatePDF } from "@/utils/modernTemplateGenerator";
 import { generateFreshTemplatePDF } from "@/utils/freshTemplatePdfGenerator";
-import { generateProfessionalTemplatePDF } from "@/utils/professionalTemplatePdfGenerator";
 
 export const useATSResumeBuilder = (userId?: string) => {
   const [resumeData, setResumeData] = useState<string>("");
@@ -192,33 +191,6 @@ export const useATSResumeBuilder = (userId?: string) => {
     }
   };
 
-  const downloadProfessionalTemplatePDF = async () => {
-    if (!resumeData) return;
-
-    toast({
-      title: "Generating Professional Template PDF...",
-      description: "Creating your professional design resume, please wait.",
-    });
-
-    const success = await generateProfessionalTemplatePDF(
-      resumeData,
-      'professional-template-resume.pdf'
-    );
-
-    if (success) {
-      toast({
-        title: "Professional Template PDF Downloaded!",
-        description: "Your professional design resume has been downloaded successfully.",
-      });
-    } else {
-      toast({
-        title: "PDF Generation Failed",
-        description: "Failed to generate professional template PDF. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
   return {
     resumeData,
     isGenerating,
@@ -227,7 +199,6 @@ export const useATSResumeBuilder = (userId?: string) => {
     downloadResumePDF,
     downloadTextBasedPDF,
     downloadModernTemplatePDF,
-    downloadFreshTemplatePDF,
-    downloadProfessionalTemplatePDF
+    downloadFreshTemplatePDF
   };
 };

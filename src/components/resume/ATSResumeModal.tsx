@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Download, Sparkles, Palette, Layout, Zap, Building } from "lucide-react";
+import { FileText, Download, Sparkles, Palette, Layout, Zap } from "lucide-react";
 
 interface ATSResumeModalProps {
   isOpen: boolean;
@@ -14,7 +14,6 @@ interface ATSResumeModalProps {
   onDownloadTextBasedPDF: () => void;
   onDownloadModernTemplate: () => void;
   onDownloadFreshTemplate: () => void;
-  onDownloadProfessionalTemplate: () => void;
 }
 
 export const ATSResumeModal = ({ 
@@ -25,8 +24,7 @@ export const ATSResumeModal = ({
   onDownloadPDF,
   onDownloadTextBasedPDF,
   onDownloadModernTemplate,
-  onDownloadFreshTemplate,
-  onDownloadProfessionalTemplate
+  onDownloadFreshTemplate
 }: ATSResumeModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -82,14 +80,6 @@ export const ATSResumeModal = ({
               >
                 <Zap className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 Fresh
-              </Button>
-              <Button 
-                onClick={onDownloadProfessionalTemplate}
-                size="sm"
-                className="bg-gradient-to-r from-slate-600 to-gray-700 hover:from-slate-700 hover:to-gray-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold text-xs sm:text-sm px-2 sm:px-3"
-              >
-                <Building className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                Pro
               </Button>
             </div>
           </DialogTitle>
