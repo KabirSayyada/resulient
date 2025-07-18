@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
@@ -38,15 +39,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const isComplete = hasFirstName && hasLastName && hasJobTitle;
       setProfileComplete(!!isComplete);
       
-      // Only redirect if any of the required fields are missing and not already on profile pages
+      // Only redirect if required fields are actually missing and not already on profile pages
       if (!isComplete && 
           !window.location.pathname.includes('/profile-edit') && 
           !window.location.pathname.includes('/profile-setup')) {
-        console.log('Profile incomplete, redirecting to profile edit. Missing:', {
-          firstName: !hasFirstName,
-          lastName: !hasLastName,
-          jobTitle: !hasJobTitle
-        });
         window.location.href = '/profile-edit';
       }
     }
