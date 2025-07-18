@@ -16,23 +16,23 @@ export async function generateTextBasedPDF(
 
     const pageWidth = 595.28;
     const pageHeight = 841.89;
-    const margin = 50;
+    const margin = 40;
     const contentWidth = pageWidth - (margin * 2);
-    const lineHeight = 16;
+    const lineHeight = 12;
     
-    let currentY = margin + 20;
+    let currentY = margin + 10;
 
     // Parse the text content into structured sections
     const sections = parseTextContent(textContent);
     
     // Render each section with different styling
     for (const section of sections) {
-      currentY = renderSection(pdf, section, currentY, margin, contentWidth, pageWidth, pageHeight);
+      currentY = renderSection(pdf, section, currentY, margin, contentWidth, pageWidth, pageHeight, lineHeight);
       
       // Add page break if needed
-      if (currentY > pageHeight - 100) {
+      if (currentY > pageHeight - 60) {
         pdf.addPage();
-        currentY = margin + 20;
+        currentY = margin + 10;
       }
     }
 
@@ -93,6 +93,41 @@ function parseTextContent(textContent: string): ResumeSection[] {
   return sections;
 }
 
+function processMarkdownText(text: string): { text: string; isBold: boolean }[] {
+  const parts: { text: string; isBold: boolean }[] = [];
+  const regex = /(\*\*[^*]+\*\*)/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    // Add text before the bold part
+    if (match.index > lastIndex) {
+      parts.push({
+        text: text.slice(lastIndex, match.index),
+        isBold: false
+      });
+    }
+    
+    // Add the bold part (remove the ** markers)
+    parts.push({
+      text: match[1].replace(/\*\*/g, ''),
+      isBold: true
+    });
+    
+    lastIndex = match.index + match[1].length;
+  }
+  
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push({
+      text: text.slice(lastIndex),
+      isBold: false
+    });
+  }
+  
+  return parts.length > 0 ? parts : [{ text, isBold: false }];
+}
+
 function renderSection(
   pdf: jsPDF, 
   section: ResumeSection, 
@@ -100,77 +135,120 @@ function renderSection(
   margin: number, 
   contentWidth: number,
   pageWidth: number,
-  pageHeight: number
+  pageHeight: number,
+  lineHeight: number
 ): number {
-  const lineHeight = 16;
   
   switch (section.type) {
     case 'header':
       // Section headers with blue background and white text
       pdf.setFillColor(59, 130, 246); // Blue-500
-      pdf.rect(margin, currentY - 15, contentWidth, 25, 'F');
+      pdf.rect(margin, currentY - 12, contentWidth, 18, 'F');
       
       pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(14);
+      pdf.setFontSize(10);
       pdf.setTextColor(255, 255, 255); // White text
       
-      const headerLines = pdf.splitTextToSize(section.content.toUpperCase(), contentWidth - 20);
+      const headerLines = pdf.splitTextToSize(section.content.toUpperCase(), contentWidth - 16);
       for (const line of headerLines) {
-        pdf.text(line, margin + 10, currentY);
+        pdf.text(line, margin + 8, currentY);
         currentY += lineHeight;
       }
       
-      currentY += 10; // Extra spacing after headers
+      currentY += 6; // Extra spacing after headers
       break;
 
     case 'content':
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(11);
-      pdf.setTextColor(51, 51, 51); // Dark gray
+      const contentParts = processMarkdownText(section.content);
+      let xPosition = margin;
       
       // Check if it's contact info or dates (make it smaller and lighter)
-      if (section.content.includes('@') || section.content.includes('|') || section.content.match(/\d{4}/)) {
-        pdf.setFontSize(10);
+      const isContactOrDate = section.content.includes('@') || section.content.includes('|') || section.content.match(/\d{4}/);
+      
+      if (isContactOrDate) {
+        pdf.setFontSize(9);
         pdf.setTextColor(107, 114, 128); // Gray-500
+      } else {
+        pdf.setFontSize(10);
+        pdf.setTextColor(51, 51, 51); // Dark gray
       }
       
-      const contentLines = pdf.splitTextToSize(section.content, contentWidth);
-      for (const line of contentLines) {
-        if (currentY > pageHeight - margin) {
-          pdf.addPage();
-          currentY = margin + 20;
+      for (const part of contentParts) {
+        if (part.isBold) {
+          pdf.setFont('helvetica', 'bold');
+        } else {
+          pdf.setFont('helvetica', 'normal');
         }
-        pdf.text(line, margin, currentY);
-        currentY += lineHeight;
+        
+        const textWidth = pdf.getTextWidth(part.text);
+        
+        // Check if we need to wrap to next line
+        if (xPosition + textWidth > margin + contentWidth && xPosition > margin) {
+          currentY += lineHeight;
+          xPosition = margin;
+          
+          if (currentY > pageHeight - margin) {
+            pdf.addPage();
+            currentY = margin + 10;
+          }
+        }
+        
+        pdf.text(part.text, xPosition, currentY);
+        xPosition += textWidth;
       }
+      
+      currentY += lineHeight;
       
       // Add spacing after contact info or dates
-      if (section.content.includes('@') || section.content.includes('|')) {
-        currentY += 5;
+      if (isContactOrDate) {
+        currentY += 3;
       }
       break;
 
     case 'bullet':
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(11);
+      pdf.setFontSize(10);
       pdf.setTextColor(51, 51, 51);
       
-      // Add bullet point with indentation
-      const bulletText = `• ${section.content}`;
-      const bulletLines = pdf.splitTextToSize(bulletText, contentWidth - 20);
+      // Process markdown in bullet content
+      const bulletParts = processMarkdownText(section.content);
       
-      for (const line of bulletLines) {
-        if (currentY > pageHeight - margin) {
-          pdf.addPage();
-          currentY = margin + 20;
+      // Add bullet point
+      pdf.text('•', margin + 12, currentY);
+      
+      let bulletXPosition = margin + 20;
+      
+      for (const part of bulletParts) {
+        if (part.isBold) {
+          pdf.setFont('helvetica', 'bold');
+        } else {
+          pdf.setFont('helvetica', 'normal');
         }
-        pdf.text(line, margin + 15, currentY);
-        currentY += lineHeight;
+        
+        const lines = pdf.splitTextToSize(part.text, contentWidth - 20);
+        
+        for (let i = 0; i < lines.length; i++) {
+          if (currentY > pageHeight - margin) {
+            pdf.addPage();
+            currentY = margin + 10;
+          }
+          
+          pdf.text(lines[i], bulletXPosition, currentY);
+          
+          if (i < lines.length - 1) {
+            currentY += lineHeight;
+            bulletXPosition = margin + 20; // Maintain indentation for wrapped lines
+          }
+        }
+        
+        bulletXPosition += pdf.getTextWidth(lines[lines.length - 1]);
       }
+      
+      currentY += lineHeight;
       break;
 
     case 'separator':
-      currentY += 8; // Add space for separators
+      currentY += 4; // Add space for separators
       break;
 
     default:
