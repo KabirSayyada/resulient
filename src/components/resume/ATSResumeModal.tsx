@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Download, Sparkles, X } from "lucide-react";
+import { FileText, Download, Sparkles, Palette } from "lucide-react";
 
 interface ATSResumeModalProps {
   isOpen: boolean;
@@ -11,6 +11,7 @@ interface ATSResumeModalProps {
   resumeData: string;
   onDownloadTXT: () => void;
   onDownloadPDF: () => void;
+  onDownloadTextBasedPDF: () => void;
 }
 
 export const ATSResumeModal = ({ 
@@ -18,7 +19,8 @@ export const ATSResumeModal = ({
   onClose, 
   resumeData, 
   onDownloadTXT, 
-  onDownloadPDF 
+  onDownloadPDF,
+  onDownloadTextBasedPDF
 }: ATSResumeModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -51,6 +53,14 @@ export const ATSResumeModal = ({
                 <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 PDF
               </Button>
+              <Button 
+                onClick={onDownloadTextBasedPDF}
+                size="sm"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold text-xs sm:text-sm px-2 sm:px-3"
+              >
+                <Palette className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                Styled PDF
+              </Button>
             </div>
           </DialogTitle>
         </DialogHeader>
@@ -64,7 +74,7 @@ export const ATSResumeModal = ({
               </div>
               <div>
                 <h4 className="font-semibold text-emerald-800 dark:text-emerald-200 text-sm sm:text-base">Resume Generated Successfully</h4>
-                <p className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400">ATS-optimized and ready to download</p>
+                <p className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400">ATS-optimized and ready to download in multiple formats</p>
               </div>
             </div>
             <Badge className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-0 shadow-lg px-2 sm:px-3 py-1 text-xs">

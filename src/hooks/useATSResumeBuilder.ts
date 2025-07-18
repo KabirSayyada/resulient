@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ATSResumeData } from "@/types/atsResume";
 import { generateTextFormattedPDF } from "@/utils/textFormattedPdfGenerator";
+import { generateTextBasedPDF } from "@/utils/textBasedPdfGenerator";
 
 export const useATSResumeBuilder = (userId?: string) => {
   const [resumeData, setResumeData] = useState<string>("");
@@ -107,11 +109,39 @@ export const useATSResumeBuilder = (userId?: string) => {
     }
   };
 
+  const downloadTextBasedPDF = async () => {
+    if (!resumeData) return;
+
+    toast({
+      title: "Generating Text-Based PDF...",
+      description: "Creating your stylized PDF resume, please wait.",
+    });
+
+    const success = await generateTextBasedPDF(
+      resumeData,
+      'text-based-resume.pdf'
+    );
+
+    if (success) {
+      toast({
+        title: "Text-Based PDF Downloaded!",
+        description: "Your stylized PDF resume has been downloaded successfully.",
+      });
+    } else {
+      toast({
+        title: "PDF Generation Failed",
+        description: "Failed to generate text-based PDF. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return {
     resumeData,
     isGenerating,
     generateResume,
     downloadResume,
-    downloadResumePDF
+    downloadResumePDF,
+    downloadTextBasedPDF
   };
 };
