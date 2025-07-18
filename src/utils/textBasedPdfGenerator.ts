@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 
 export async function generateTextBasedPDF(
@@ -18,9 +17,9 @@ export async function generateTextBasedPDF(
     const pageHeight = 841.89;
     const margin = 40;
     const contentWidth = pageWidth - (margin * 2);
-    const lineHeight = 12;
+    const lineHeight = 14; // Increased from 12
     
-    let currentY = margin + 10;
+    let currentY = margin + 15; // Increased initial spacing
 
     // Parse the text content into structured sections
     const sections = parseTextContent(textContent);
@@ -30,9 +29,9 @@ export async function generateTextBasedPDF(
       currentY = renderSection(pdf, section, currentY, margin, contentWidth, pageWidth, pageHeight, lineHeight);
       
       // Add page break if needed
-      if (currentY > pageHeight - 60) {
+      if (currentY > pageHeight - 80) { // Increased bottom margin
         pdf.addPage();
-        currentY = margin + 10;
+        currentY = margin + 15;
       }
     }
 
@@ -143,7 +142,7 @@ function renderSection(
     case 'header':
       // Section headers with blue background and white text
       pdf.setFillColor(59, 130, 246); // Blue-500
-      pdf.rect(margin, currentY - 12, contentWidth, 18, 'F');
+      pdf.rect(margin, currentY - 14, contentWidth, 22, 'F'); // Increased height
       
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(10);
@@ -155,7 +154,7 @@ function renderSection(
         currentY += lineHeight;
       }
       
-      currentY += 6; // Extra spacing after headers
+      currentY += 10; // Increased spacing after headers
       break;
 
     case 'content':
@@ -189,7 +188,7 @@ function renderSection(
           
           if (currentY > pageHeight - margin) {
             pdf.addPage();
-            currentY = margin + 10;
+            currentY = margin + 15;
           }
         }
         
@@ -201,7 +200,7 @@ function renderSection(
       
       // Add spacing after contact info or dates
       if (isContactOrDate) {
-        currentY += 3;
+        currentY += 6; // Increased spacing
       }
       break;
 
@@ -216,7 +215,7 @@ function renderSection(
       // Add bullet point
       pdf.text('•', margin + 12, currentY);
       
-      let bulletXPosition = margin + 20;
+      let bulletXPosition = margin + 24; // Increased indentation
       
       for (const part of bulletParts) {
         if (part.isBold) {
@@ -225,30 +224,30 @@ function renderSection(
           pdf.setFont('helvetica', 'normal');
         }
         
-        const lines = pdf.splitTextToSize(part.text, contentWidth - 20);
+        const lines = pdf.splitTextToSize(part.text, contentWidth - 24);
         
         for (let i = 0; i < lines.length; i++) {
           if (currentY > pageHeight - margin) {
             pdf.addPage();
-            currentY = margin + 10;
+            currentY = margin + 15;
           }
           
           pdf.text(lines[i], bulletXPosition, currentY);
           
           if (i < lines.length - 1) {
             currentY += lineHeight;
-            bulletXPosition = margin + 20; // Maintain indentation for wrapped lines
+            bulletXPosition = margin + 24; // Maintain increased indentation for wrapped lines
           }
         }
         
         bulletXPosition += pdf.getTextWidth(lines[lines.length - 1]);
       }
       
-      currentY += lineHeight;
+      currentY += lineHeight + 2; // Added extra spacing between bullet points
       break;
 
     case 'separator':
-      currentY += 4; // Add space for separators
+      currentY += 8; // Increased spacing for separators
       break;
 
     default:
