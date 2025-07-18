@@ -33,29 +33,6 @@ interface PricingTier {
 
 const pricingTiers: PricingTier[] = [
   {
-    name: "Free",
-    description: "Perfect for trying out Resulient",
-    monthlyPrice: null,
-    yearlyPrice: null,
-    features: [
-      { text: "3 Resume Scorings Lifetime", included: true },
-      { text: "1 Resume Optimization Daily", included: true },
-      { text: "1 Resume Building Lifetime", included: true },
-      { text: "1 Job Fetch Lifetime (3 visible results)", included: true },
-      { text: "Detailed Reports (View Only)", included: true },
-      { text: "Daily Reset of Credits", included: true },
-      { text: "Basic Support", included: true },
-      { text: "Report Downloads", included: false },
-      { text: "Full Job Match Results", included: false },
-      { text: "Unlimited Optimizations", included: false },
-    ],
-    badge: "Free Forever",
-    productId: {
-      monthly: null,
-      yearly: null
-    }
-  },
-  {
     name: "Premium",
     description: "For serious job seekers",
     monthlyPrice: 10.00,
@@ -125,12 +102,6 @@ const PricingPage = () => {
       const productId = billingCycle === 'yearly' ? tier.productId.yearly : tier.productId.monthly;
       
       if (!productId) {
-        if (tier.name === "Free") {
-          toast({
-            title: "Free Tier",
-            description: "You're already on the free tier. No purchase necessary.",
-          });
-        }
         setLoadingTier(null);
         return;
       }
@@ -177,7 +148,7 @@ const PricingPage = () => {
             Investment in Your Career
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Getting your dream job shouldn't be a dream. We're changing that by making professional resume optimization accessible to everyone. Start with our free tier or unlock unlimited potential with our premium plans.
+            Getting your dream job shouldn't be a dream. We're changing that by making professional resume optimization accessible to everyone. Choose the plan that fits your career goals.
           </p>
           
           {isCurrentSubscriber && (
@@ -228,7 +199,7 @@ const PricingPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 max-w-4xl mx-auto">
           {pricingTiers.map((tier) => (
             <Card key={tier.name} className={`relative ${
               tier.popular 
@@ -244,24 +215,18 @@ const PricingPage = () => {
                 <h3 className="text-2xl font-bold dark:text-white">{tier.name}</h3>
                 <p className="text-gray-600 dark:text-gray-300 mt-2">{tier.description}</p>
                 <div className="mt-4">
-                  {tier.monthlyPrice ? (
-                    <>
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="text-4xl font-bold dark:text-white">
-                          ${billingCycle === 'yearly' ? tier.yearlyPrice : tier.monthlyPrice}
-                        </span>
-                        <span className="text-gray-600 dark:text-gray-300">
-                          {billingCycle === 'yearly' ? "/year" : "/month"}
-                        </span>
-                      </div>
-                      {billingCycle === 'yearly' && (
-                        <div className="text-sm text-green-600 dark:text-green-400 mt-1">
-                          Save ${Math.round(tier.monthlyPrice! * 12 - tier.yearlyPrice!)} per year
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <span className="text-4xl font-bold dark:text-white">Free</span>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-4xl font-bold dark:text-white">
+                      ${billingCycle === 'yearly' ? tier.yearlyPrice : tier.monthlyPrice}
+                    </span>
+                    <span className="text-gray-600 dark:text-gray-300">
+                      {billingCycle === 'yearly' ? "/year" : "/month"}
+                    </span>
+                  </div>
+                  {billingCycle === 'yearly' && (
+                    <div className="text-sm text-green-600 dark:text-green-400 mt-1">
+                      Save ${Math.round(tier.monthlyPrice! * 12 - tier.yearlyPrice!)} per year
+                    </div>
                   )}
                 </div>
               </CardHeader>
@@ -297,9 +262,7 @@ const PricingPage = () => {
                   ) : subscription.tier === tier.name.toLowerCase() && subscription.tier !== "free" ? (
                     "Current Plan"
                   ) : (
-                    <>
-                      {tier.monthlyPrice ? 'Get Started' : 'Try for Free'}
-                    </>
+                    "Get Started"
                   )}
                 </Button>
               </CardFooter>
@@ -390,10 +353,10 @@ const PricingPage = () => {
         </div>
 
         <div className="text-center max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold mb-4 dark:text-white">Still not convinced?</h2>
+          <h2 className="text-2xl font-bold mb-4 dark:text-white">Ready to get started?</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Start with our free tier and experience the power of Resulient. No credit card required. 
-            If you don't find value in our service, you won't pay a dime.
+            Choose the plan that best fits your career goals and start transforming your job search today. 
+            All plans come with expert support and proven results.
           </p>
           <Button asChild variant="outline">
             <Link to="/auth">Start Your Journey</Link>
