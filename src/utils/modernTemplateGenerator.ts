@@ -18,7 +18,7 @@ export async function generateModernTemplatePDF(
     const pageHeight = 841.89;
     const margin = 40;
     const contentWidth = pageWidth - (margin * 2);
-    const lineHeight = 14; // Increased from 12 to 14
+    const lineHeight = 12;
     
     let currentY = margin + 15;
 
@@ -234,14 +234,14 @@ function renderModernSection(
       for (const info of contactInfo) {
         if (info.trim()) {
           pdf.text(info.trim(), margin + 20, contactY);
-          contactY += 12; // Increased from 10 to 12
+          contactY += 10;
         }
       }
       break;
 
     case 'section_header':
       // Modern section headers with accent color
-      currentY += 10; // Increased from 8
+      currentY += 8;
       
       // Add accent line
       pdf.setFillColor(231, 76, 60); // Red accent
@@ -257,7 +257,7 @@ function renderModernSection(
         currentY += lineHeight;
       }
       
-      currentY += 6; // Increased from 4
+      currentY += 4;
       break;
 
     case 'content':
@@ -313,7 +313,7 @@ function renderModernSection(
       }
       
       if (isJobTitle) {
-        currentY += 3; // Increased from 2
+        currentY += 2;
       }
       break;
 
@@ -395,11 +395,11 @@ function renderModernSection(
         }
       }
       
-      currentY += lineHeight + 2; // Increased from 1
+      currentY += lineHeight + 1;
       break;
 
     case 'separator':
-      currentY += 8; // Increased from 6
+      currentY += 6;
       break;
 
     default:
