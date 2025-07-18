@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 
 export async function generateModernTemplatePDF(
@@ -60,7 +59,8 @@ interface ModernResumeSection {
 function parseResumeContent(textContent: string): ModernResumeSection[] {
   const lines = textContent.split('\n');
   const sections: ModernResumeSection[] = [];
-  let isFirstSection = true;
+  let foundName = false;
+  let foundContact = false;
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -70,16 +70,43 @@ function parseResumeContent(textContent: string): ModernResumeSection[] {
       continue;
     }
 
-    // Detect name (usually the first non-empty line)
-    if (isFirstSection && !line.includes('@') && !line.includes('|') && !line.match(/^\d/)) {
-      sections.push({ type: 'name', content: line });
-      isFirstSection = false;
-      continue;
+    // Detect name (first substantial line that's not a section header or contact info)
+    if (!foundName && !line.includes('@') && !line.includes('|') && !line.match(/^\d/) && 
+        !line.match(/^[=\-]{3,}$/) && line.length > 2 && !line.startsWith('•') && !line.startsWith('-')) {
+      // Check if next line is not an underline (which would make this a section header)
+      const nextLine = i + 1 < lines.length ? lines[i + 1].trim() : '';
+      const isHeader = nextLine.match(/^[=\-]{3,}$/);
+      
+      if (!isHeader) {
+        sections.push({ type: 'name', content: line });
+        foundName = true;
+        continue;
+      }
     }
 
-    // Detect contact info (contains email, phone, or has | separators)
-    if (line.includes('@') || line.includes('|') || line.match(/\(\d{3}\)/)) {
+    // Detect contact info (contains email, phone, location, or has | separators)
+    if (foundName && !foundContact && (line.includes('@') || line.includes('|') || 
+        line.match(/\(\d{3}\)/) || line.match(/\d{3}-\d{3}-\d{4}/) || 
+        line.toLowerCase().includes('phone') || line.toLowerCase().includes('email') ||
+        line.toLowerCase().includes('linkedin') || line.toLowerCase().includes('address'))) {
       sections.push({ type: 'contact', content: line });
+      
+      // Check if the next few lines are also contact-related
+      let j = i + 1;
+      while (j < lines.length && j < i + 3) {
+        const nextContactLine = lines[j].trim();
+        if (nextContactLine && (nextContactLine.includes('@') || nextContactLine.includes('|') || 
+            nextContactLine.match(/\(\d{3}\)/) || nextContactLine.match(/\d{3}-\d{3}-\d{4}/) ||
+            nextContactLine.toLowerCase().includes('phone') || nextContactLine.toLowerCase().includes('email') ||
+            nextContactLine.toLowerCase().includes('linkedin') || nextContactLine.toLowerCase().includes('address'))) {
+          sections.push({ type: 'contact', content: nextContactLine });
+          i = j;
+        } else {
+          break;
+        }
+        j++;
+      }
+      foundContact = true;
       continue;
     }
 
@@ -189,14 +216,20 @@ function renderModernSection(
       break;
 
     case 'contact':
-      // Contact info in header area with light text
+      // Contact info in header area with light text, formatted on separate lines
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(11);
       pdf.setTextColor(236, 240, 241); // Light gray
       
-      const contactLines = pdf.splitTextToSize(section.content, contentWidth - 40);
-      for (const line of contactLines) {
-        pdf.text(line, margin + 20, 80);
+      // Parse contact information and display each piece on a separate line
+      const contactInfo = parseContactInfo(section.content);
+      let contactY = 70;
+      
+      for (const info of contactInfo) {
+        if (info.trim()) {
+          pdf.text(info.trim(), margin + 20, contactY);
+          contactY += 12;
+        }
       }
       break;
 
@@ -368,4 +401,25 @@ function renderModernSection(
   }
   
   return currentY;
+}
+
+function parseContactInfo(contactLine: string): string[] {
+  // Split contact information by common separators
+  const separators = [' | ', '|', ' • ', '•', ' - ', '  '];
+  let contactParts = [contactLine];
+  
+  for (const separator of separators) {
+    const newParts: string[] = [];
+    for (const part of contactParts) {
+      if (part.includes(separator)) {
+        newParts.push(...part.split(separator));
+      } else {
+        newParts.push(part);
+      }
+    }
+    contactParts = newParts;
+  }
+  
+  // Filter out empty parts and return
+  return contactParts.filter(part => part.trim().length > 0);
 }
