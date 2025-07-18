@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Download, Sparkles, X, FileType } from "lucide-react";
+import { FileText, Download, Sparkles, X } from "lucide-react";
 
 interface ATSResumeModalProps {
   isOpen: boolean;
@@ -11,7 +11,6 @@ interface ATSResumeModalProps {
   resumeData: string;
   onDownloadTXT: () => void;
   onDownloadPDF: () => void;
-  onDownloadTextStructuredPDF: () => void;
 }
 
 export const ATSResumeModal = ({ 
@@ -19,8 +18,7 @@ export const ATSResumeModal = ({
   onClose, 
   resumeData, 
   onDownloadTXT, 
-  onDownloadPDF,
-  onDownloadTextStructuredPDF
+  onDownloadPDF 
 }: ATSResumeModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -35,7 +33,7 @@ export const ATSResumeModal = ({
                 Your ATS-Optimized Resume
               </span>
             </div>
-            <div className="flex gap-2 sm:gap-3 w-full sm:w-auto justify-end flex-wrap">
+            <div className="flex gap-2 sm:gap-3 w-full sm:w-auto justify-end">
               <Button 
                 onClick={onDownloadTXT}
                 size="sm"
@@ -53,14 +51,6 @@ export const ATSResumeModal = ({
                 <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 PDF
               </Button>
-              <Button 
-                onClick={onDownloadTextStructuredPDF}
-                size="sm"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold text-xs sm:text-sm px-2 sm:px-3"
-              >
-                <FileType className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                Structured
-              </Button>
             </div>
           </DialogTitle>
         </DialogHeader>
@@ -74,38 +64,13 @@ export const ATSResumeModal = ({
               </div>
               <div>
                 <h4 className="font-semibold text-emerald-800 dark:text-emerald-200 text-sm sm:text-base">Resume Generated Successfully</h4>
-                <p className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400">ATS-optimized and ready to download in multiple formats</p>
+                <p className="text-xs sm:text-sm text-emerald-600 dark:text-emerald-400">ATS-optimized and ready to download</p>
               </div>
             </div>
             <Badge className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-0 shadow-lg px-2 sm:px-3 py-1 text-xs">
               <FileText className="h-3 w-3 mr-1" />
               Ready
             </Badge>
-          </div>
-
-          {/* Download format info */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-lg">
-              <div className="flex items-center gap-2 mb-1">
-                <FileText className="h-4 w-4 text-emerald-600" />
-                <span className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">TXT Format</span>
-              </div>
-              <p className="text-xs text-emerald-600 dark:text-emerald-400">Plain text for maximum compatibility</p>
-            </div>
-            <div className="p-3 bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-800/50 rounded-lg">
-              <div className="flex items-center gap-2 mb-1">
-                <Download className="h-4 w-4 text-teal-600" />
-                <span className="text-sm font-semibold text-teal-800 dark:text-teal-200">Standard PDF</span>
-              </div>
-              <p className="text-xs text-teal-600 dark:text-teal-400">Traditional formatted PDF layout</p>
-            </div>
-            <div className="p-3 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/50 rounded-lg">
-              <div className="flex items-center gap-2 mb-1">
-                <FileType className="h-4 w-4 text-purple-600" />
-                <span className="text-sm font-semibold text-purple-800 dark:text-purple-200">Text-Structured PDF</span>
-              </div>
-              <p className="text-xs text-purple-600 dark:text-purple-400">Clean text positioning with optimal spacing</p>
-            </div>
           </div>
 
           {/* Resume content */}
