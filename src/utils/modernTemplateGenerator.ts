@@ -65,26 +65,46 @@ function parseResumeContent(textContent: string): ModernResumeSection[] {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     
-    if (!line) {
-      sections.push({ type: 'separator', content: '' });
+    // Skip empty lines and markdown code block markers
+    if (!line || line === '```') {
+      if (line !== '```') {
+        sections.push({ type: 'separator', content: '' });
+      }
       continue;
     }
 
-    // Detect name (first substantial line that's not a section header or contact info)
-    if (!foundName && !line.includes('@') && !line.includes('|') && !line.match(/^\d/) && 
-        !line.match(/^[=\-]{3,}$/) && line.length > 2 && !line.startsWith('•') && !line.startsWith('-')) {
-      // Check if next line is not an underline (which would make this a section header)
-      const nextLine = i + 1 < lines.length ? lines[i + 1].trim() : '';
-      const isHeader = nextLine.match(/^[=\-]{3,}$/);
+    // Detect name - prioritize finding it early, skip obvious non-name content
+    if (!foundName) {
+      // Skip obvious section headers, contact info, and formatting
+      const isContactInfo = line.includes('@') || line.includes('|') || line.match(/\(\d{3}\)/) || line.match(/\d{3}-\d{3}-\d{4}/) || 
+                           line.toLowerCase().includes('phone') || line.toLowerCase().includes('email') ||
+                           line.toLowerCase().includes('linkedin') || line.toLowerCase().includes('address');
       
-      if (!isHeader) {
+      const isFormattingMarker = line.match(/^[=\-]{3,}$/) || line.startsWith('•') || line.startsWith('-') || line.startsWith('*');
+      
+      // Check if next line is a section header underline
+      const nextLine = i + 1 < lines.length ? lines[i + 1].trim() : '';
+      const isHeaderWithUnderline = nextLine.match(/^[=\-]{3,}$/);
+      
+      // Look for common section headers to skip
+      const commonSectionHeaders = [
+        'summary', 'objective', 'experience', 'education', 'skills', 'certifications', 
+        'projects', 'achievements', 'awards', 'professional summary', 'work experience',
+        'employment history', 'technical skills', 'core competencies'
+      ];
+      const isSectionHeader = commonSectionHeaders.some(header => 
+        line.toLowerCase().includes(header.toLowerCase())
+      );
+      
+      // If it's a substantial line that's not contact info, formatting, or a section header
+      if (line.length > 2 && !isContactInfo && !isFormattingMarker && !isHeaderWithUnderline && !isSectionHeader) {
         sections.push({ type: 'name', content: line });
         foundName = true;
         continue;
       }
     }
 
-    // Detect contact info (contains email, phone, location, or has | separators)
+    // Detect contact info (after name is found)
     if (foundName && !foundContact && (line.includes('@') || line.includes('|') || 
         line.match(/\(\d{3}\)/) || line.match(/\d{3}-\d{3}-\d{4}/) || 
         line.toLowerCase().includes('phone') || line.toLowerCase().includes('email') ||
