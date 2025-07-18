@@ -115,6 +115,7 @@ serve(async (req) => {
     )
   } catch (error) {
     console.error("Error verifying subscription:", error)
+    
     return new Response(
       JSON.stringify({ 
         error: error.message,
@@ -154,8 +155,8 @@ function getDailyLimits(tier: string) {
     case "free":
     default:
       return {
-        resumeScorings: 0, // Changed from 3 to 0 - no free resume scoring
-        resumeOptimizations: 1,
+        resumeScorings: 0, // No free resume scoring
+        resumeOptimizations: 0, // No free resume optimization
         reportDownloads: 0,
       }
   }

@@ -58,6 +58,9 @@ const Index = () => {
   const { callFunction, loading: functionLoading, error: functionError } = useSupabaseFunction();
   const { saveOptimization } = useResumeOptimizationHistory(user?.id);
 
+  // Check if user has subscription access (no free tier for resume optimization)
+  const hasSubscription = subscription.tier === "premium" || subscription.tier === "platinum";
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/");
@@ -121,7 +124,7 @@ const Index = () => {
   };
 
   const handleOptimizeResume = async () => {
-    if (usage.resumeOptimizations.hasReachedLimit) {
+    if (!hasSubscription) {
       showLimitReachedMessage("resume optimization");
       return;
     }
@@ -303,7 +306,7 @@ const Index = () => {
               
               {subscription.tier === "free" && (
                 <div className="mt-2 sm:mt-4 inline-flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-semibold text-orange-700 dark:text-orange-400 bg-orange-100/80 dark:bg-orange-900/30 px-2 sm:px-4 py-1 sm:py-2 rounded-full">
-                  <span>Free tier: {usage.resumeOptimizations.used}/{usage.resumeOptimizations.limit} resume optimizations used today</span>
+                  <span>Subscription required for resume optimization</span>
                 </div>
               )}
               
@@ -320,12 +323,12 @@ const Index = () => {
             </div>
           </div>
 
-          {usage.resumeOptimizations.hasReachedLimit && subscription.tier === "free" && (
+          {!hasSubscription && subscription.tier === "free" && (
             <div className="mb-3 sm:mb-6">
               <UseSubscriptionAlert 
                 subscriptionTier={subscription.tier} 
                 requiredTier="premium" 
-                message="You've reached your daily limit for resume optimization. Free users can optimize 1 resume per day. Upgrade to Premium or Platinum for unlimited optimization."
+                message="Resume optimization requires a Premium or Platinum subscription. Upgrade now for unlimited resume optimization and advanced ATS features."
               />
             </div>
           )}
@@ -394,7 +397,7 @@ const Index = () => {
               <div className="flex justify-center">
                 <Button 
                   onClick={handleOptimizeResume} 
-                  disabled={isOptimizing || !resumeContent || !jobDescription || (usage.resumeOptimizations.hasReachedLimit && subscription.tier === "free")}
+                  disabled={isOptimizing || !resumeContent || !jobDescription || !hasSubscription}
                   className={`w-full sm:w-auto px-4 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold rounded-xl sm:rounded-2xl shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl group ${
                     subscription.tier === "premium" 
                       ? "bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600" 
@@ -404,7 +407,7 @@ const Index = () => {
                   }`}
                 >
                   <Zap className="h-5 w-5 sm:h-6 sm:w-6 mr-2 group-hover:animate-pulse" />
-                  {isOptimizing ? "✨ Optimizing..." : "🚀 Optimize Resume"}
+                  {isOptimizing ? "✨ Optimizing..." : hasSubscription ? "🚀 Optimize Resume" : "🔒 Upgrade to Optimize"}
                 </Button>
               </div>
               

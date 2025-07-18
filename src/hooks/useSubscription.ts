@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,8 +35,8 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
     isLoading: true,
     expiresAt: null,
     limits: {
-      resumeScorings: 0, // Changed from 2 to 0 - no free resume scoring
-      resumeOptimizations: 1,
+      resumeScorings: 0, // No free resume scoring
+      resumeOptimizations: 0, // No free resume optimization
       reportDownloads: 0,
     }
   });
@@ -251,8 +252,8 @@ function getTierLimits(tier: SubscriptionTier): SubscriptionLimits {
     case "free":
     default:
       return {
-        resumeScorings: 0, // Changed from 3 to 0 - no free resume scoring
-        resumeOptimizations: 1,
+        resumeScorings: 0, // No free resume scoring
+        resumeOptimizations: 0, // No free resume optimization
         reportDownloads: 0,
       };
   }
