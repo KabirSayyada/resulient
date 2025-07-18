@@ -123,10 +123,10 @@ const ResumeScoring = () => {
   const showUpgradeAlert = subscription.tier === "free";
 
   const features = [
-    { icon: Brain, text: "AI Analysis", color: "from-emerald-500 to-teal-600", description: "Advanced machine learning" },
-    { icon: BarChart3, text: "Industry Insights", color: "from-blue-500 to-indigo-600", description: "Compare against thousands" },
-    { icon: Shield, text: "ATS Compatible", color: "from-purple-500 to-pink-600", description: "Optimized for systems" },
-    { icon: Target, text: "Job Optimized", color: "from-orange-500 to-red-600", description: "Tailored recommendations" }
+    { icon: Brain, text: "AI Analysis", color: "from-emerald-400 to-teal-500", description: "Advanced machine learning" },
+    { icon: BarChart3, text: "Industry Insights", color: "from-blue-400 to-indigo-500", description: "Compare against thousands" },
+    { icon: Shield, text: "ATS Compatible", color: "from-purple-400 to-pink-500", description: "Optimized for systems" },
+    { icon: Target, text: "Job Optimized", color: "from-orange-400 to-red-500", description: "Tailored recommendations" }
   ];
 
   const stats = [
@@ -259,18 +259,18 @@ const ResumeScoring = () => {
                       ))}
                     </div>
 
-                    {/* Enhanced Feature Pills */}
-                    <div className="flex flex-wrap justify-center gap-4">
+                    {/* Softened Feature Pills */}
+                    <div className="flex flex-wrap justify-center gap-3">
                       {features.map((feature, index) => (
                         <div 
                           key={index}
                           className="group relative"
                         >
-                          <div className={`flex items-center gap-3 px-6 py-4 bg-gradient-to-r ${feature.color} text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-default backdrop-blur-sm`}>
-                            <feature.icon className="h-5 w-5 group-hover:animate-pulse" />
+                          <div className="flex items-center gap-2 px-4 py-2.5 bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 hover:scale-102 cursor-default backdrop-blur-sm">
+                            <feature.icon className={`h-4 w-4 bg-gradient-to-r ${feature.color} bg-clip-text text-transparent group-hover:animate-pulse`} />
                             <div className="text-left">
-                              <div className="font-semibold">{feature.text}</div>
-                              <div className="text-xs opacity-90">{feature.description}</div>
+                              <div className="font-medium text-slate-700 dark:text-slate-300 text-sm">{feature.text}</div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400 opacity-80">{feature.description}</div>
                             </div>
                           </div>
                         </div>
