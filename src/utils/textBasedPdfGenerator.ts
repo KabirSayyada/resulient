@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 
 export async function generateTextBasedPDF(
@@ -159,7 +160,6 @@ function renderSection(
 
     case 'content':
       const contentParts = processMarkdownText(section.content);
-      let xPosition = margin;
       
       // Check if it's contact info or dates (make it smaller and lighter)
       const isContactOrDate = section.content.includes('@') || section.content.includes('|') || section.content.match(/\d{4}/);
@@ -172,31 +172,39 @@ function renderSection(
         pdf.setTextColor(51, 51, 51); // Dark gray
       }
       
-      for (const part of contentParts) {
-        if (part.isBold) {
-          pdf.setFont('helvetica', 'bold');
-        } else {
-          pdf.setFont('helvetica', 'normal');
-        }
-        
-        const textWidth = pdf.getTextWidth(part.text);
-        
-        // Check if we need to wrap to next line
-        if (xPosition + textWidth > margin + contentWidth && xPosition > margin) {
-          currentY += lineHeight;
-          xPosition = margin;
-          
-          if (currentY > pageHeight - margin) {
-            pdf.addPage();
-            currentY = margin + 15;
-          }
-        }
-        
-        pdf.text(part.text, xPosition, currentY);
-        xPosition += textWidth;
-      }
+      // Handle multi-line content properly
+      let currentText = '';
+      let isBoldText = false;
       
-      currentY += lineHeight;
+      for (let i = 0; i < contentParts.length; i++) {
+        const part = contentParts[i];
+        currentText += part.text;
+        
+        // If this is the last part or the next part has different formatting, render the accumulated text
+        if (i === contentParts.length - 1 || contentParts[i + 1].isBold !== part.isBold) {
+          if (part.isBold) {
+            pdf.setFont('helvetica', 'bold');
+          } else {
+            pdf.setFont('helvetica', 'normal');
+          }
+          
+          // Split text into lines that fit within the content width
+          const lines = pdf.splitTextToSize(currentText, contentWidth);
+          
+          for (const line of lines) {
+            if (currentY > pageHeight - margin) {
+              pdf.addPage();
+              currentY = margin + 15;
+            }
+            
+            pdf.text(line, margin, currentY);
+            currentY += lineHeight;
+          }
+          
+          // Reset for next part
+          currentText = '';
+        }
+      }
       
       // Add spacing after contact info or dates
       if (isContactOrDate) {
@@ -215,32 +223,72 @@ function renderSection(
       // Add bullet point
       pdf.text('•', margin + 12, currentY);
       
-      let bulletXPosition = margin + 24; // Increased indentation
-      
+      // Handle bullet content with proper text wrapping
+      let bulletText = '';
       for (const part of bulletParts) {
-        if (part.isBold) {
-          pdf.setFont('helvetica', 'bold');
+        bulletText += part.text;
+      }
+      
+      // Split bullet text into lines that fit within the available width
+      const bulletLines = pdf.splitTextToSize(bulletText, contentWidth - 24);
+      
+      for (let i = 0; i < bulletLines.length; i++) {
+        if (currentY > pageHeight - margin) {
+          pdf.addPage();
+          currentY = margin + 15;
+        }
+        
+        // Check if any part of this line should be bold
+        let lineText = bulletLines[i];
+        let hasBoldContent = false;
+        
+        for (const part of bulletParts) {
+          if (part.isBold && lineText.includes(part.text)) {
+            hasBoldContent = true;
+            break;
+          }
+        }
+        
+        if (hasBoldContent) {
+          // Handle mixed formatting within the line
+          let xPosition = margin + 24;
+          let remainingText = lineText;
+          
+          for (const part of bulletParts) {
+            if (remainingText.includes(part.text)) {
+              const beforeText = remainingText.substring(0, remainingText.indexOf(part.text));
+              
+              if (beforeText) {
+                pdf.setFont('helvetica', 'normal');
+                pdf.text(beforeText, xPosition, currentY);
+                xPosition += pdf.getTextWidth(beforeText);
+              }
+              
+              if (part.isBold) {
+                pdf.setFont('helvetica', 'bold');
+              } else {
+                pdf.setFont('helvetica', 'normal');
+              }
+              
+              pdf.text(part.text, xPosition, currentY);
+              xPosition += pdf.getTextWidth(part.text);
+              
+              remainingText = remainingText.substring(remainingText.indexOf(part.text) + part.text.length);
+            }
+          }
+          
+          if (remainingText) {
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(remainingText, xPosition, currentY);
+          }
         } else {
           pdf.setFont('helvetica', 'normal');
+          pdf.text(lineText, margin + 24, currentY);
         }
         
-        const lines = pdf.splitTextToSize(part.text, contentWidth - 24);
-        
-        for (let i = 0; i < lines.length; i++) {
-          if (currentY > pageHeight - margin) {
-            pdf.addPage();
-            currentY = margin + 15;
-          }
-          
-          pdf.text(lines[i], bulletXPosition, currentY);
-          
-          if (i < lines.length - 1) {
-            currentY += lineHeight;
-            bulletXPosition = margin + 24; // Maintain increased indentation for wrapped lines
-          }
+        if (i < bulletLines.length - 1) {
+          currentY += lineHeight;
         }
-        
-        bulletXPosition += pdf.getTextWidth(lines[lines.length - 1]);
       }
       
       currentY += lineHeight + 2; // Added extra spacing between bullet points
