@@ -1,10 +1,10 @@
+
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ATSResumeData } from "@/types/atsResume";
 import { generateTextFormattedPDF } from "@/utils/textFormattedPdfGenerator";
 import { generateTextBasedPDF } from "@/utils/textBasedPdfGenerator";
-import { generateModernTemplatePDF } from "@/utils/modernTemplateGenerator";
 import { generateFreshTemplatePDF } from "@/utils/freshTemplatePdfGenerator";
 
 export const useATSResumeBuilder = (userId?: string) => {
@@ -137,33 +137,6 @@ export const useATSResumeBuilder = (userId?: string) => {
     }
   };
 
-  const downloadModernTemplatePDF = async () => {
-    if (!resumeData) return;
-
-    toast({
-      title: "Generating Modern Template PDF...",
-      description: "Creating your modern template resume, please wait.",
-    });
-
-    const success = await generateModernTemplatePDF(
-      resumeData,
-      'modern-template-resume.pdf'
-    );
-
-    if (success) {
-      toast({
-        title: "Modern Template PDF Downloaded!",
-        description: "Your modern template resume has been downloaded successfully.",
-      });
-    } else {
-      toast({
-        title: "PDF Generation Failed",
-        description: "Failed to generate modern template PDF. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
   const downloadFreshTemplatePDF = async () => {
     if (!resumeData) return;
 
@@ -198,7 +171,6 @@ export const useATSResumeBuilder = (userId?: string) => {
     downloadResume,
     downloadResumePDF,
     downloadTextBasedPDF,
-    downloadModernTemplatePDF,
     downloadFreshTemplatePDF
   };
 };

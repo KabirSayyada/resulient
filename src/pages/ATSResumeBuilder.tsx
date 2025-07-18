@@ -21,7 +21,7 @@ const ATSResumeBuilder = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { resumeData, isGenerating, generateResume, downloadResume, downloadResumePDF, downloadTextBasedPDF, downloadModernTemplatePDF, downloadFreshTemplatePDF } = useATSResumeBuilder(user?.id);
+  const { resumeData, isGenerating, generateResume, downloadResume, downloadResumePDF, downloadTextBasedPDF, downloadFreshTemplatePDF } = useATSResumeBuilder(user?.id);
   const { subscription } = useSubscription();
   const { usage, checkUsage, showLimitReachedMessage } = useUsageLimits();
 
@@ -78,7 +78,6 @@ const ATSResumeBuilder = () => {
         onDownloadTXT={downloadResume}
         onDownloadPDF={downloadResumePDF}
         onDownloadTextBasedPDF={downloadTextBasedPDF}
-        onDownloadModernTemplate={downloadModernTemplatePDF}
         onDownloadFreshTemplate={downloadFreshTemplatePDF}
       />
       
