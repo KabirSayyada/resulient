@@ -34,8 +34,8 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
     isLoading: true,
     expiresAt: null,
     limits: {
-      resumeScorings: 2, // Updated to 2 for free tier
-      resumeOptimizations: 1, // Updated to 1 for free tier
+      resumeScorings: 0, // Changed from 2 to 0 - no free resume scoring
+      resumeOptimizations: 1,
       reportDownloads: 0,
     }
   });
@@ -251,8 +251,8 @@ function getTierLimits(tier: SubscriptionTier): SubscriptionLimits {
     case "free":
     default:
       return {
-        resumeScorings: 3, // Updated to 3 total uses
-        resumeOptimizations: 1, // Updated from 2 to 1
+        resumeScorings: 0, // Changed from 3 to 0 - no free resume scoring
+        resumeOptimizations: 1,
         reportDownloads: 0,
       };
   }

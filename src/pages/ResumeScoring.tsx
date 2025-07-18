@@ -18,7 +18,6 @@ import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
 import { GuidedTour } from "@/components/onboarding/GuidedTour";
 import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
 import { SubscriptionTierIndicator } from "@/components/subscription/SubscriptionTierIndicator";
-import { useUsageLimits } from "@/hooks/useUsageLimits";
 import { Badge } from "@/components/ui/badge";
 
 const ResumeScoring = () => {
@@ -26,11 +25,12 @@ const ResumeScoring = () => {
   const navigate = useNavigate();
   const [resumeContent, setResumeContent] = useState("");
   const [activeTab, setActiveTab] = useState("current");
-  const [hasScored, setHasScored] = useState(false);
   const [showScoreModal, setShowScoreModal] = useState(false);
   const { scoreData, scoreHistory, setScoreHistory, isScoring, hasReachedLimit, handleScoreResume } = useResumeScoring(user?.id);
   const { subscription } = useSubscription();
-  const { usage, showLimitReachedMessage, checkUsage } = useUsageLimits();
+
+  // Check if user has subscription access (no free tier for resume scoring)
+  const hasSubscription = subscription.tier === "premium" || subscription.tier === "platinum";
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -39,18 +39,6 @@ const ResumeScoring = () => {
       fetchScoreHistory();
     }
   }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (scoreData && subscription.tier === "free") {
-      setHasScored(true);
-    }
-  }, [scoreData, subscription.tier]);
-
-  useEffect(() => {
-    if (usage.resumeScorings.used === 0 && subscription.tier === "free") {
-      setHasScored(false);
-    }
-  }, [usage.resumeScorings.used, subscription.tier]);
 
   const fetchScoreHistory = async () => {
     try {
@@ -126,25 +114,12 @@ const ResumeScoring = () => {
   }
 
   const onScore = async () => {
-    if (usage.resumeScorings.hasReachedLimit || (subscription.tier === "free" && hasScored)) {
-      showLimitReachedMessage("resume scoring");
-      return;
-    }
-
     setShowScoreModal(true);
-    
-    const dailyLimit = subscription.limits.resumeScorings;
-    await handleScoreResume(resumeContent, dailyLimit);
-    
-    if (subscription.tier === "free") {
-      setHasScored(true);
-    }
-    
-    await checkUsage();
+    await handleScoreResume(resumeContent, hasSubscription);
   };
 
-  const showUpgradeAlert = (usage.resumeScorings.hasReachedLimit || hasScored) && subscription.tier === "free";
-  const isButtonDisabled = usage.resumeScorings.hasReachedLimit || (subscription.tier === "free" && hasScored);
+  // Always show upgrade alert for free users
+  const showUpgradeAlert = subscription.tier === "free";
 
   const features = [
     { icon: TrendingUp, text: "AI Analysis", color: "from-emerald-500 to-teal-600" },
@@ -267,10 +242,10 @@ const ResumeScoring = () => {
                         </span>
                       </div>
                     ) : (
-                      <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-700/50 rounded-2xl shadow-lg">
-                        <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                        <span className="font-semibold text-amber-700 dark:text-amber-300">
-                          Free tier: {usage.resumeScorings.used}/3 analyses used
+                      <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-red-50 to-purple-50 dark:from-red-950/30 dark:to-purple-950/30 border border-red-200 dark:border-red-700/50 rounded-2xl shadow-lg">
+                        <Clock className="h-5 w-5 text-red-600 dark:text-red-400" />
+                        <span className="font-semibold text-red-700 dark:text-red-300">
+                          Subscription required for resume analysis
                         </span>
                       </div>
                     )}
@@ -286,7 +261,7 @@ const ResumeScoring = () => {
                 <UseSubscriptionAlert 
                   subscriptionTier={subscription.tier} 
                   requiredTier="premium" 
-                  message="You've used all 3 of your free resume analyses. Upgrade to Premium or Platinum for unlimited usage and advanced features."
+                  message="Resume analysis requires a Premium or Platinum subscription. Upgrade now for unlimited resume scoring and advanced career insights."
                 />
               </div>
             )}
@@ -336,7 +311,8 @@ const ResumeScoring = () => {
                         setResumeContent={setResumeContent}
                         isScoring={isScoring}
                         onScore={onScore}
-                        disableButton={isButtonDisabled}
+                        disableButton={!hasSubscription}
+                        hasSubscription={hasSubscription}
                       />
                     </CardContent>
                   </Card>
@@ -363,12 +339,14 @@ const ResumeScoring = () => {
                             No Analysis History
                           </h3>
                           <p className="text-lg text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">
-                            You haven't analyzed any resumes yet. Start by uploading your resume to get detailed, 
-                            actionable feedback and track your progress over time.
+                            You haven't analyzed any resumes yet. {hasSubscription ? 
+                              "Start by uploading your resume to get detailed, actionable feedback and track your progress over time." :
+                              "Upgrade to Premium or Platinum to unlock resume analysis and track your progress over time."
+                            }
                           </p>
                           <Badge variant="outline" className="mt-6 border-indigo-300 text-indigo-600 dark:border-indigo-700 dark:text-indigo-400 px-4 py-2">
                             <TrendingUp className="h-4 w-4 mr-2" />
-                            Ready to get started
+                            {hasSubscription ? "Ready to get started" : "Subscription required"}
                           </Badge>
                         </div>
                       </CardContent>

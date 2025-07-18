@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1"
 
@@ -153,8 +154,8 @@ function getDailyLimits(tier: string) {
     case "free":
     default:
       return {
-        resumeScorings: 3, // Updated to 3 total uses (not daily)
-        resumeOptimizations: 1, // Updated from 2 to 1
+        resumeScorings: 0, // Changed from 3 to 0 - no free resume scoring
+        resumeOptimizations: 1,
         reportDownloads: 0,
       }
   }

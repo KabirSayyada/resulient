@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -38,47 +39,7 @@ export const useResumeScoring = (userId: string | undefined) => {
   const { toast } = useToast();
   const { callFunction } = useSupabaseFunction();
 
-  const checkDailyLimits = async (limitCount: number): Promise<boolean> => {
-    if (!userId) return false;
-    
-    try {
-      // For free tier (limit of 3), check total count, not daily
-      if (limitCount === 3) {
-        // Count ALL scorings done by this user ever
-        const { count, error } = await supabase
-          .from("resume_scores")
-          .select("id", { count: 'exact', head: false })
-          .eq("user_id", userId)
-          .eq("scoring_mode", "resumeOnly");
-        
-        if (error) throw error;
-        
-        // Check if total count is less than limit
-        return (count || 0) < limitCount;
-      }
-      
-      // If limit is -1, it means unlimited (paid tiers)
-      if (limitCount === -1) return true;
-      
-      // For other limits, use daily check (shouldn't happen with current setup)
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const { count, error } = await supabase
-        .from("resume_scores")
-        .select("id", { count: 'exact', head: false })
-        .eq("user_id", userId)
-        .eq("scoring_mode", "resumeOnly")
-        .gte("created_at", today.toISOString());
-      
-      if (error) throw error;
-      
-      return (count || 0) < limitCount;
-    } catch (error) {
-      console.error("Error checking daily limits:", error);
-      return false;
-    }
-  };
+  // Removed checkDailyLimits function since free users have no access
 
   const findExistingScore = async (content: string) => {
     if (!userId) return null;
@@ -109,11 +70,22 @@ export const useResumeScoring = (userId: string | undefined) => {
     }
   };
 
-  const handleScoreResume = async (resumeContent: string, limitCount: number) => {
+  const handleScoreResume = async (resumeContent: string, hasSubscription: boolean) => {
     if (!resumeContent) {
       toast({
         title: "Missing Content",
         description: "Please upload or paste your resume content.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if user has subscription access - no free tier access
+    if (!hasSubscription) {
+      setHasReachedLimit(true);
+      toast({
+        title: "Subscription Required",
+        description: "Resume scoring requires a Premium or Platinum subscription. Please upgrade to continue.",
         variant: "destructive",
       });
       return;
@@ -156,19 +128,6 @@ export const useResumeScoring = (userId: string | undefined) => {
           description: "We found existing results for this resume.",
         });
         
-        return;
-      }
-      
-      // Check if user has reached their daily limit
-      const hasAccess = await checkDailyLimits(limitCount);
-      
-      if (!hasAccess) {
-        setHasReachedLimit(true);
-        toast({
-          title: "Daily Limit Reached",
-          description: "You've reached your daily limit for resume scoring. Upgrade your plan for unlimited access.",
-          variant: "destructive",
-        });
         return;
       }
       
@@ -294,7 +253,6 @@ export const useResumeScoring = (userId: string | undefined) => {
     setScoreHistory,
     isScoring,
     hasReachedLimit,
-    handleScoreResume,
-    checkDailyLimits
+    handleScoreResume
   };
 };

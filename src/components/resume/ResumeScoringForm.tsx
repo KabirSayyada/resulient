@@ -13,6 +13,7 @@ interface ResumeScoringFormProps {
   isScoring: boolean;
   onScore: () => void;
   disableButton?: boolean;
+  hasSubscription: boolean;
 }
 
 export const ResumeScoringForm = ({
@@ -20,7 +21,8 @@ export const ResumeScoringForm = ({
   setResumeContent,
   isScoring,
   onScore,
-  disableButton
+  disableButton,
+  hasSubscription
 }: ResumeScoringFormProps) => {
   const { profileComplete } = useAuth();
   const wordCount = resumeContent.trim().split(/\s+/).length;
@@ -38,6 +40,12 @@ export const ResumeScoringForm = ({
           Please <Link to="/profile-edit" className="underline font-semibold">complete your profile</Link> with your first name, last name, and job title before scoring your resume.
         </div>
       )}
+
+      {!hasSubscription && (
+        <div className="text-purple-600 dark:text-purple-400 mt-2 font-medium border-l-4 border-purple-400 dark:border-purple-500 pl-2 bg-purple-50 dark:bg-purple-900/20 p-2 rounded">
+          Resume scoring requires a Premium or Platinum subscription. <Link to="/pricing" className="underline font-semibold">Upgrade now</Link> to unlock unlimited resume analysis.
+        </div>
+      )}
       
       {isResumeTooLong && (
         <div className="text-red-600 dark:text-red-400 mt-2 font-medium border-l-4 border-red-400 dark:border-red-500 pl-2 bg-red-50 dark:bg-red-900/20 p-2 rounded">
@@ -48,10 +56,10 @@ export const ResumeScoringForm = ({
       <div className="flex justify-center">
         <Button
           onClick={onScore}
-          disabled={isScoring || !resumeContent || isResumeTooLong || disableButton || !profileComplete}
+          disabled={isScoring || !resumeContent || isResumeTooLong || disableButton || !profileComplete || !hasSubscription}
           className="px-10 py-3 text-lg font-bold rounded-full shadow transition-all bg-gradient-to-r from-fuchsia-500 to-indigo-400 hover:from-fuchsia-600 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isScoring ? "Analyzing..." : "🕹️ Score My Resume"}
+          {isScoring ? "Analyzing..." : hasSubscription ? "🕹️ Score My Resume" : "Upgrade to Score Resume"}
         </Button>
       </div>
       
