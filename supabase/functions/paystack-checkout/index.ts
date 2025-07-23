@@ -85,7 +85,9 @@ serve(async (req) => {
       )
     }
 
-    // Initialize Paystack transaction
+    console.log("Initializing Paystack payment with secret key:", paystackSecretKey ? "Key present" : "Key missing")
+
+    // Initialize Paystack transaction with correct authorization format
     const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
@@ -116,6 +118,8 @@ serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       )
     }
+
+    console.log("Paystack payment initialized successfully")
 
     return new Response(
       JSON.stringify({
