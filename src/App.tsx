@@ -1,83 +1,87 @@
 
-import { Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import Index from "@/pages/Index";
-import LandingPage from "@/pages/LandingPage";
-import Auth from "@/pages/Auth";
-import NotFound from "@/pages/NotFound";
-import ResumeScoring from "@/pages/ResumeScoring";
-import ATSResumeBuilder from "@/pages/ATSResumeBuilder";
-import ProfileSetup from "@/pages/ProfileSetup";
-import ProfileEdit from "@/pages/ProfileEdit";
-import TermsOfService from "@/pages/TermsOfService";
-import PrivacyPolicy from "@/pages/PrivacyPolicy";
-import RefundPolicy from "@/pages/RefundPolicy";
-import Legal from "@/pages/Legal";
-import Pricing from "@/pages/Pricing";
-import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
-import SubscriptionDetails from "@/pages/SubscriptionDetails";
-import ReferralProgram from "@/pages/ReferralProgram";
-import Jobs from "@/pages/Jobs";
-// Blog imports
-import Blog from "@/pages/Blog";
-import BlogPost from "@/pages/BlogPost";
-import BlogCategory from "@/pages/BlogCategory";
-import BlogAdmin from "@/pages/BlogAdmin";
-import { Sitemap } from "@/components/blog/Sitemap";
-import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { JobMatchPopup } from "@/components/onboarding/JobMatchPopup";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { Helmet, HelmetProvider } from "react-helmet-async";
+import Index from "./pages/Index";
+import Auth from "./pages/Auth";
+import ResumeScoring from "./pages/ResumeScoring";
+import ATSResumeBuilder from "./pages/ATSResumeBuilder";
+import Jobs from "./pages/Jobs";
+import Pricing from "./pages/Pricing";
+import PaystackCheckout from "./pages/PaystackCheckout";
+import SubscriptionSuccess from "./pages/SubscriptionSuccess";
+import SubscriptionDetails from "./pages/SubscriptionDetails";
+import ProfileSetup from "./pages/ProfileSetup";
+import ProfileEdit from "./pages/ProfileEdit";
+import ReferralProgram from "./pages/ReferralProgram";
+import IndustryLeaderboard from "./pages/IndustryLeaderboard";
+import LandingPage from "./pages/LandingPage";
+import NotFound from "./pages/NotFound";
+import Legal from "./pages/Legal";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import RefundPolicy from "./pages/RefundPolicy";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import BlogCategory from "./pages/BlogCategory";
+import BlogAdmin from "./pages/BlogAdmin";
 
-function AppContent() {
-  const { user } = useAuth();
-
-  return (
-    <>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/resume-builder" element={<ATSResumeBuilder />} />
-        <Route path="/resume-optimization" element={<Index />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/profile-setup" element={<ProfileSetup />} />
-        <Route path="/profile-edit" element={<ProfileEdit />} />
-        <Route path="/resume-scoring" element={<ResumeScoring />} />
-        <Route path="/ats-resume-builder" element={<ATSResumeBuilder />} />
-        <Route path="/jobs" element={<Jobs />} />
-        <Route path="/terms" element={<TermsOfService />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/refund-policy" element={<RefundPolicy />} />
-        <Route path="/legal" element={<Legal />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/subscription-success" element={<SubscriptionSuccess />} />
-        <Route path="/subscription" element={<SubscriptionDetails />} />
-        <Route path="/referrals" element={<ReferralProgram />} />
-        {/* Blog routes */}
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/:slug" element={<BlogPost />} />
-        <Route path="/blog/category/:category" element={<BlogCategory />} />
-        <Route path="/blog/admin" element={<BlogAdmin />} />
-        {/* SEO routes */}
-        <Route path="/sitemap.xml" element={<Sitemap />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      
-      {/* Show job match popup only for authenticated users */}
-      {user && <JobMatchPopup />}
-      
-      <Toaster />
-      <Sonner />
-    </>
-  );
-}
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Helmet>
+              <title>Resulient - AI-Powered Resume Optimization</title>
+              <meta name="description" content="Optimize your resume with AI-powered insights, get detailed scoring, and improve your job application success rate." />
+            </Helmet>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/landing" element={<LandingPage />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/resume-scoring" element={<ResumeScoring />} />
+                <Route path="/ats-resume-builder" element={<ATSResumeBuilder />} />
+                <Route path="/jobs" element={<Jobs />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/checkout" element={<PaystackCheckout />} />
+                <Route path="/subscription-success" element={<SubscriptionSuccess />} />
+                <Route path="/subscription-details" element={<SubscriptionDetails />} />
+                <Route path="/profile-setup" element={<ProfileSetup />} />
+                <Route path="/profile-edit" element={<ProfileEdit />} />
+                <Route path="/referrals" element={<ReferralProgram />} />
+                <Route path="/leaderboard" element={<IndustryLeaderboard />} />
+                <Route path="/legal" element={<Legal />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/refund-policy" element={<RefundPolicy />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/category/:categorySlug" element={<BlogCategory />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/blog-admin" element={<BlogAdmin />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 

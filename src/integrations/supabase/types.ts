@@ -358,6 +358,60 @@ export type Database = {
         }
         Relationships: []
       }
+      paystack_transactions: {
+        Row: {
+          amount: number
+          authorization_code: string | null
+          billing_cycle: string
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json | null
+          paystack_transaction_id: string | null
+          product_id: string
+          reference: string
+          status: string
+          subscription_tier: string
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          amount: number
+          authorization_code?: string | null
+          billing_cycle: string
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          paystack_transaction_id?: string | null
+          product_id: string
+          reference: string
+          status?: string
+          subscription_tier: string
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          amount?: number
+          authorization_code?: string | null
+          billing_cycle?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          paystack_transaction_id?: string | null
+          product_id?: string
+          reference?: string
+          status?: string
+          subscription_tier?: string
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -658,6 +712,8 @@ export type Database = {
           gumroad_subscription_id: string | null
           id: string
           last_webhook_event: string | null
+          payment_provider: string | null
+          paystack_reference: string | null
           start_date: string
           status: string
           subscription_tier: string
@@ -673,6 +729,8 @@ export type Database = {
           gumroad_subscription_id?: string | null
           id?: string
           last_webhook_event?: string | null
+          payment_provider?: string | null
+          paystack_reference?: string | null
           start_date?: string
           status: string
           subscription_tier: string
@@ -688,6 +746,8 @@ export type Database = {
           gumroad_subscription_id?: string | null
           id?: string
           last_webhook_event?: string | null
+          payment_provider?: string | null
+          paystack_reference?: string | null
           start_date?: string
           status?: string
           subscription_tier?: string

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -194,10 +193,12 @@ export function useSubscription(requiredTier?: SubscriptionTier) {
     try {
       setSubscription(prev => ({ ...prev, isLoading: true }));
       
+      // Use Paystack for new checkouts
       const response = await supabase.functions.invoke<{
         checkoutUrl: string;
-        price: number;
-      }>('gumroad-checkout', {
+        reference: string;
+        amount: number;
+      }>('paystack-checkout', {
         body: { productId }
       });
 
