@@ -16,7 +16,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== "undefined") {
-      const savedTheme = localStorage.getItem("theme") as Theme;
+      const savedTheme = localStorage.getItem("vite-ui-theme") as Theme;
       if (savedTheme) return savedTheme;
       
       // Default to light mode for all pages
@@ -27,7 +27,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Update theme when route changes if no saved preference
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
+    const savedTheme = localStorage.getItem("vite-ui-theme");
     if (!savedTheme) {
       setTheme("light");
     }
@@ -37,7 +37,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme);
-    localStorage.setItem("theme", theme);
+    localStorage.setItem("vite-ui-theme", theme);
   }, [theme]);
 
   const toggleTheme = () => {

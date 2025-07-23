@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1"
-import { createHash } from "https://deno.land/std@0.168.0/hash/mod.ts"
+import * as crypto from "https://deno.land/std@0.168.0/crypto/mod.ts"
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || ""
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
@@ -18,9 +18,14 @@ serve(async (req) => {
     const signature = req.headers.get("x-paystack-signature")
 
     // Verify webhook signature
-    const hash = createHash("sha512")
-    hash.update(body)
-    const expectedSignature = hash.toString("hex")
+    const encoder = new TextEncoder()
+    const data = encoder.encode(body)
+    const hashBuffer = await crypto.subtle.digest(
+      "SHA-512",
+      data
+    )
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    const expectedSignature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 
     if (signature !== expectedSignature) {
       console.error("Invalid webhook signature")
