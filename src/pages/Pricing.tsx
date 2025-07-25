@@ -1,278 +1,374 @@
-
-import { Link } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Check, Crown, Diamond, Star, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Check, CheckCircle, Loader2, Star } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { LegalFooter } from "@/components/layout/LegalFooter";
-import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
-import { SubscriptionTierIndicator } from "@/components/subscription/SubscriptionTierIndicator";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const Pricing = () => {
-  const { subscription } = useSubscription();
+interface PricingFeature {
+  text: string;
+  included: boolean;
+}
 
-  const plans = [
-    {
-      name: "Free",
-      price: "₦0",
-      description: "Perfect for getting started",
-      icon: <Star className="h-6 w-6" />,
-      features: [
-        "Resume scoring (view only)",
-        "Basic optimization tips",
-        "Limited daily usage",
-        "Community support"
-      ],
-      buttonText: "Current Plan",
-      buttonVariant: "outline" as const,
-      popular: false,
-      tier: "free" as const,
-      disabled: true
-    },
-    {
-      name: "Premium",
-      price: "₦20,000",
-      yearlyPrice: "₦200,000",
-      description: "For serious job seekers",
-      icon: <Diamond className="h-6 w-6 text-blue-500" />,
-      features: [
-        "Unlimited resume scorings",
-        "Unlimited resume optimizations",
-        "10 report downloads daily",
-        "Priority support",
-        "Industry benchmarking",
-        "ATS optimization"
-      ],
-      buttonText: "Choose Premium",
-      buttonVariant: "default" as const,
-      popular: true,
-      tier: "premium" as const,
-      monthlyProduct: "premium-monthly",
-      yearlyProduct: "premium-yearly"
-    },
-    {
-      name: "Platinum",
-      price: "₦50,000",
-      yearlyPrice: "₦500,000",
-      description: "For career professionals",
-      icon: <Crown className="h-6 w-6 text-purple-500" />,
-      features: [
-        "Everything in Premium",
-        "Unlimited report downloads",
-        "Resume comparison tool",
-        "Early access to features",
-        "1-on-1 career consultation",
-        "Custom resume templates"
-      ],
-      buttonText: "Choose Platinum",
-      buttonVariant: "default" as const,
-      popular: false,
-      tier: "platinum" as const,
-      monthlyProduct: "platinum-monthly",
-      yearlyProduct: "platinum-yearly"
+interface PricingTier {
+  name: string;
+  description: string;
+  monthlyPrice: number | null;
+  yearlyPrice: number | null;
+  features: PricingFeature[];
+  badge?: string;
+  popular?: boolean;
+  productId: {
+    monthly: string | null;
+    yearly: string | null;
+  };
+}
+
+const pricingTiers: PricingTier[] = [
+  {
+    name: "Premium",
+    description: "For serious job seekers",
+    monthlyPrice: 10.00,
+    yearlyPrice: 100.00,
+    features: [
+      { text: "Unlimited Resume Scorings", included: true },
+      { text: "Unlimited Resume Optimizations", included: true },
+      { text: "Unlimited Resume Building", included: true },
+      { text: "20 Job Fetches with Full Results", included: true },
+      { text: "10 Report Downloads Daily", included: true },
+      { text: "Priority Support", included: true },
+      { text: "All Free Features", included: true },
+      { text: "Advanced Analytics", included: true },
+      { text: "Resume Comparison", included: false },
+    ],
+    badge: "Most Popular",
+    popular: true,
+    productId: {
+      monthly: "premium-monthly",
+      yearly: "premium-yearly"
     }
-  ];
+  },
+  {
+    name: "Platinum",
+    description: "Maximum flexibility and power",
+    monthlyPrice: 25.00,
+    yearlyPrice: 250.00,
+    features: [
+      { text: "Unlimited Resume Scorings", included: true },
+      { text: "Unlimited Resume Optimizations", included: true },
+      { text: "Unlimited Resume Building", included: true },
+      { text: "Unlimited Job Fetches", included: true },
+      { text: "Unlimited Report Downloads", included: true },
+      { text: "Resume Comparison Tool", included: true },
+      { text: "Priority Support", included: true },
+      { text: "All Premium Features", included: true },
+      { text: "Advanced Analytics", included: true },
+      { text: "Early Access to New Features", included: true },
+    ],
+    badge: "Best Value",
+    productId: {
+      monthly: "platinum-monthly",
+      yearly: "platinum-yearly"
+    }
+  }
+];
 
-  const getCurrentPlanButton = (plan: typeof plans[0]) => {
-    if (plan.tier === "free") {
-      return (
-        <Button variant="outline" className="w-full" disabled>
-          Current Plan
-        </Button>
-      );
+const PricingPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { subscription, checkout } = useSubscription();
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly'); // Changed default to 'monthly'
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
+
+  const handlePurchase = async (tier: PricingTier) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in or create an account to subscribe.",
+      });
+      navigate("/auth");
+      return;
     }
 
-    if (subscription.tier === plan.tier) {
-      return (
-        <Button variant="outline" className="w-full" disabled>
-          Current Plan
-        </Button>
-      );
-    }
+    try {
+      setLoadingTier(tier.name);
+      const productId = billingCycle === 'yearly' ? tier.productId.yearly : tier.productId.monthly;
+      
+      if (!productId) {
+        setLoadingTier(null);
+        return;
+      }
 
-    return (
-      <div className="space-y-2">
-        <Button asChild className="w-full bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600">
-          <Link to={`/checkout?product=${plan.monthlyProduct}`}>
-            {plan.buttonText} Monthly
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-        <Button asChild variant="outline" className="w-full">
-          <Link to={`/checkout?product=${plan.yearlyProduct}`}>
-            {plan.buttonText} Yearly (Save 17%)
-          </Link>
-        </Button>
-      </div>
-    );
+      const checkoutData = await checkout(productId);
+      
+      if (checkoutData?.checkoutUrl) {
+        // Success - redirect to Gumroad
+        window.location.href = checkoutData.checkoutUrl;
+      } else {
+        toast({
+          title: "Checkout Error",
+          description: "Unable to start checkout process. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Purchase error:", error);
+      toast({
+        title: "Payment Error",
+        description: "There was a problem initiating checkout. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingTier(null);
+    }
   };
 
+  // Determine if user is already on a paid plan
+  const isCurrentSubscriber = subscription.tier !== "free" && !subscription.isLoading;
+  const currentTierName = subscription.tier === "premium" ? "Premium" : subscription.tier === "platinum" ? "Platinum" : "Free";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950 dark:to-blue-950">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Link to="/" className="flex items-center">
-              <span className="font-brand text-3xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-yellow-400 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none">
-                Resulient
-              </span>
-            </Link>
-            <Badge className="rounded-full px-3 py-1 text-xs sm:text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 shadow border border-indigo-200 dark:border-indigo-700 animate-fade-in whitespace-nowrap">
-              Pricing
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <SubscriptionTierIndicator variant="badge" size="sm" />
-            <UserMenuWithTheme />
-          </div>
-        </div>
-
-        {/* Pricing Section */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950 dark:via-indigo-950 dark:to-purple-950 px-4 py-12">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Choose Your Plan
+          <span className="font-brand text-4xl sm:text-5xl font-extrabold text-transparent bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-yellow-400 bg-clip-text animate-fade-in drop-shadow-lg tracking-tight select-none inline-block mb-6">
+            Resulient
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-gray-100 mb-4">
+            Investment in Your Career
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Unlock your career potential with our AI-powered resume optimization tools
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            Getting your dream job shouldn't be a dream. We're changing that by making professional resume optimization accessible to everyone. Choose the plan that fits your career goals.
           </p>
+          
+          {isCurrentSubscriber && (
+            <div className="mt-6 inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-full shadow-sm border border-green-300 dark:border-green-700">
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <span className="font-medium text-green-800 dark:text-green-300">
+                You're currently on the <span className="font-bold">{currentTierName} Plan</span>
+              </span>
+            </div>
+          )}
+          
+          {/* Tabs for billing cycle selection, with monthly as default */}
+          <div className="mt-8">
+            <Tabs 
+              defaultValue="monthly" 
+              value={billingCycle}
+              onValueChange={(value) => setBillingCycle(value as 'monthly' | 'yearly')}
+              className="max-w-xs mx-auto"
+            >
+              <TabsList className="grid grid-cols-2 w-full">
+                <TabsTrigger value="monthly" className="relative px-6">
+                  Monthly
+                </TabsTrigger>
+                <TabsTrigger value="yearly" className="relative px-6">
+                  Yearly
+                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">Save 20%</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
 
-        {/* Plans Grid */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
-          {plans.map((plan) => (
-            <Card 
-              key={plan.name} 
-              className={`relative overflow-hidden transition-all duration-300 hover:shadow-2xl ${
-                plan.popular 
-                  ? 'ring-2 ring-indigo-500 dark:ring-indigo-400 scale-105' 
-                  : 'hover:scale-105'
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-indigo-500 to-blue-500 text-white text-sm font-semibold py-2 px-4 text-center">
-                  Most Popular
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-indigo-100 dark:border-indigo-900">
+            <Star className="h-8 w-8 text-yellow-500 mb-3" />
+            <h3 className="text-lg font-semibold mb-2 dark:text-white">Stand Out</h3>
+            <p className="text-gray-600 dark:text-gray-300">Get noticed by both ATS systems and human recruiters with our optimized resumes.</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-indigo-100 dark:border-indigo-900">
+            <CheckCircle className="h-8 w-8 text-green-500 mb-3" />
+            <h3 className="text-lg font-semibold mb-2 dark:text-white">Proven Results</h3>
+            <p className="text-gray-600 dark:text-gray-300">Our users report higher interview rates and faster job placements.</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-indigo-100 dark:border-indigo-900">
+            <Star className="h-8 w-8 text-purple-500 mb-3" />
+            <h3 className="text-lg font-semibold mb-2 dark:text-white">Expert Guidance</h3>
+            <p className="text-gray-600 dark:text-gray-300">Get detailed insights and suggestions from our advanced AI system.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 max-w-4xl mx-auto">
+          {pricingTiers.map((tier) => (
+            <Card key={tier.name} className={`relative ${
+              tier.popular 
+                ? 'border-2 border-indigo-500 shadow-xl dark:border-indigo-400' 
+                : 'border border-gray-200 dark:border-gray-700 shadow-md'
+            }`}>
+              {tier.badge && (
+                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-purple-500">
+                  {tier.badge}
+                </Badge>
               )}
-              
-              <CardHeader className={`text-center ${plan.popular ? 'pt-12' : 'pt-6'}`}>
-                <div className="flex justify-center mb-4">
-                  <div className={`p-3 rounded-full ${
-                    plan.name === 'Premium' ? 'bg-blue-100 dark:bg-blue-900' :
-                    plan.name === 'Platinum' ? 'bg-purple-100 dark:bg-purple-900' :
-                    'bg-gray-100 dark:bg-gray-800'
-                  }`}>
-                    {plan.icon}
-                  </div>
-                </div>
-                <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-400">
-                  {plan.description}
-                </CardDescription>
+              <CardHeader className="text-center pt-8">
+                <h3 className="text-2xl font-bold dark:text-white">{tier.name}</h3>
+                <p className="text-gray-600 dark:text-gray-300 mt-2">{tier.description}</p>
                 <div className="mt-4">
-                  <div className="text-4xl font-bold text-gray-900 dark:text-gray-100">
-                    {plan.price}
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-4xl font-bold dark:text-white">
+                      ${billingCycle === 'yearly' ? tier.yearlyPrice : tier.monthlyPrice}
+                    </span>
+                    <span className="text-gray-600 dark:text-gray-300">
+                      {billingCycle === 'yearly' ? "/year" : "/month"}
+                    </span>
                   </div>
-                  {plan.yearlyPrice && (
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      or {plan.yearlyPrice}/year
+                  {billingCycle === 'yearly' && (
+                    <div className="text-sm text-green-600 dark:text-green-400 mt-1">
+                      Save ${Math.round(tier.monthlyPrice! * 12 - tier.yearlyPrice!)} per year
                     </div>
                   )}
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    per month
-                  </div>
                 </div>
               </CardHeader>
-              
-              <CardContent className="space-y-4">
+              <CardContent className="pt-4">
                 <ul className="space-y-3">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start space-x-3">
-                      <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">{feature}</span>
+                  {tier.features.map((feature, index) => (
+                    <li key={index} className="flex items-center gap-3">
+                      <Check className={`h-5 w-5 ${
+                        feature.included ? 'text-green-500' : 'text-gray-300 dark:text-gray-600'
+                      }`} />
+                      <span className={feature.included ? 'text-gray-700 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500'}>
+                        {feature.text}
+                      </span>
                     </li>
                   ))}
                 </ul>
               </CardContent>
-              
-              <CardFooter className="pt-0">
-                {getCurrentPlanButton(plan)}
+              <CardFooter>
+                <Button
+                  onClick={() => handlePurchase(tier)}
+                  disabled={loadingTier === tier.name || (subscription.tier === tier.name.toLowerCase() && subscription.tier !== "free")}
+                  className={`w-full ${
+                    tier.popular
+                      ? 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600'
+                      : ''
+                  }`}
+                >
+                  {loadingTier === tier.name ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : subscription.tier === tier.name.toLowerCase() && subscription.tier !== "free" ? (
+                    "Current Plan"
+                  ) : (
+                    "Get Started"
+                  )}
+                </Button>
               </CardFooter>
             </Card>
           ))}
         </div>
 
-        {/* Features Comparison */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-xl mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Feature Comparison</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="text-left py-4 font-semibold">Features</th>
-                  <th className="text-center py-4 font-semibold">Free</th>
-                  <th className="text-center py-4 font-semibold">Premium</th>
-                  <th className="text-center py-4 font-semibold">Platinum</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                <tr>
-                  <td className="py-4">Resume Scoring</td>
-                  <td className="text-center py-4">View Only</td>
-                  <td className="text-center py-4"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
-                  <td className="text-center py-4"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
-                </tr>
-                <tr>
-                  <td className="py-4">Resume Optimization</td>
-                  <td className="text-center py-4">Limited</td>
-                  <td className="text-center py-4"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
-                  <td className="text-center py-4"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
-                </tr>
-                <tr>
-                  <td className="py-4">Report Downloads</td>
-                  <td className="text-center py-4">-</td>
-                  <td className="text-center py-4">10/day</td>
-                  <td className="text-center py-4">Unlimited</td>
-                </tr>
-                <tr>
-                  <td className="py-4">Resume Comparison</td>
-                  <td className="text-center py-4">-</td>
-                  <td className="text-center py-4">-</td>
-                  <td className="text-center py-4"><Check className="h-5 w-5 text-green-500 mx-auto" /></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <div className="max-w-3xl mx-auto mt-20 mb-12">
+          <h2 className="text-3xl font-bold text-center mb-8 dark:text-white">Frequently Asked Questions</h2>
+          <Accordion type="single" collapsible className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <AccordionItem value="item-1">
+              <AccordionTrigger>What happens when I reach my daily limit on the free tier?</AccordionTrigger>
+              <AccordionContent>
+                Your daily limits reset at midnight UTC. Until then, you can continue viewing your previous results and reports, but you'll need to wait for the reset to perform new scans or optimizations.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-2">
+              <AccordionTrigger>How does the job matching feature work?</AccordionTrigger>
+              <AccordionContent>
+                Our AI scans thousands of job boards to find personalized matches based on your resume. Free users get 1 lifetime fetch showing 3 results. Premium users get 20 fetches with full results, while Platinum users enjoy unlimited access.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-3">
+              <AccordionTrigger>Can I switch between monthly and yearly billing?</AccordionTrigger>
+              <AccordionContent>
+                Yes! You can switch between monthly and yearly billing at any time. If you switch to yearly, you'll immediately benefit from the discounted rate. If you switch to monthly, the change will take effect at your next billing cycle.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-4">
+              <AccordionTrigger>What payment methods do you accept?</AccordionTrigger>
+              <AccordionContent>
+                We accept all major credit cards (Visa, MasterCard, American Express) and PayPal. All payments are processed securely through our payment processor.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-5">
+              <AccordionTrigger>Is there a difference in features between monthly and yearly subscriptions?</AccordionTrigger>
+              <AccordionContent>
+                No, you get exactly the same features whether you choose monthly or yearly billing. The only difference is that yearly subscribers enjoy significant savings on their subscription cost.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-6">
+              <AccordionTrigger>Can I cancel my subscription at any time?</AccordionTrigger>
+              <AccordionContent>
+                Yes, you can cancel your subscription at any time. Your access will continue until the end of your current billing period. We don't offer refunds for partial months, but you can check our refund policy for more details.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-7">
+              <AccordionTrigger>What happens to my saved reports if I downgrade to the free tier?</AccordionTrigger>
+              <AccordionContent>
+                Your previously generated reports remain accessible, but download capabilities will be limited to free tier restrictions. We recommend downloading any important reports before downgrading.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-8">
+              <AccordionTrigger>Do you offer refunds if I'm not satisfied?</AccordionTrigger>
+              <AccordionContent>
+                Yes, we offer a satisfaction guarantee. If you're not happy with our service, you can request a refund within 14 days of your subscription purchase. Please refer to our refund policy for detailed information.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-9">
+              <AccordionTrigger>Can I share my account with others?</AccordionTrigger>
+              <AccordionContent>
+                No, accounts are for individual use only. Each user should have their own account to maintain the quality of service and ensure proper tracking of usage limits.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-10">
+              <AccordionTrigger>How do I get started with the free tier?</AccordionTrigger>
+              <AccordionContent>
+                Simply sign up for an account - no credit card required! You'll immediately have access to all free tier features, including daily resume scoring and optimization, plus one lifetime job fetch to experience our matching system.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-11">
+              <AccordionTrigger>What support options are available?</AccordionTrigger>
+              <AccordionContent>
+                Free tier users receive basic email support. Premium and Platinum subscribers enjoy priority support with faster response times and access to advanced troubleshooting assistance.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
 
-        {/* FAQ Section */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-8">Frequently Asked Questions</h2>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto text-left">
-            <div>
-              <h3 className="font-semibold mb-2">Can I cancel anytime?</h3>
-              <p className="text-gray-600 dark:text-gray-400">Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your billing period.</p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Do you offer refunds?</h3>
-              <p className="text-gray-600 dark:text-gray-400">We offer a 7-day money-back guarantee for all paid plans if you're not satisfied.</p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Is my payment secure?</h3>
-              <p className="text-gray-600 dark:text-gray-400">Yes, all payments are processed securely through Paystack with industry-standard encryption.</p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Can I upgrade or downgrade?</h3>
-              <p className="text-gray-600 dark:text-gray-400">You can upgrade or downgrade your plan at any time from your account settings.</p>
-            </div>
-          </div>
+        <div className="text-center max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold mb-4 dark:text-white">Ready to get started?</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
+            Choose the plan that best fits your career goals and start transforming your job search today. 
+            All plans come with expert support and proven results.
+          </p>
+          <Button asChild variant="outline">
+            <Link to="/auth">Start Your Journey</Link>
+          </Button>
         </div>
 
-        <LegalFooter />
+        <div className="mt-16">
+          <LegalFooter />
+        </div>
       </div>
     </div>
   );
 };
 
-export default Pricing;
+export default PricingPage;
