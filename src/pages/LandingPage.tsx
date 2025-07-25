@@ -168,7 +168,7 @@ const LandingPage = () => {
                   Login
                 </Link>
                 <Link to="/auth" className="ml-2 inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-full shadow-2xl text-white bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25">
-                  Start Free Trial
+                  Get Started
                 </Link>
               </div>
 
@@ -215,7 +215,7 @@ const LandingPage = () => {
                     className="inline-flex items-center justify-center px-4 py-3 border border-transparent text-sm font-bold rounded-full shadow-lg text-white bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300 mx-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Start Free Trial
+                    Get Started
                   </Link>
                 </div>
               </div>
