@@ -6,17 +6,28 @@ import { ATSResumeData } from "@/types/atsResume";
 import { generateTextFormattedPDF } from "@/utils/textFormattedPdfGenerator";
 import { generateTextBasedPDF } from "@/utils/textBasedPdfGenerator";
 import { generateFreshTemplatePDF } from "@/utils/freshTemplatePdfGenerator";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export const useATSResumeBuilder = (userId?: string) => {
   const [resumeData, setResumeData] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+  const { subscription } = useSubscription();
 
   const generateResume = async (formData: ATSResumeData) => {
     if (!userId) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to generate your resume.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (subscription.tier === "free") {
+      toast({
+        title: "Subscription Required",
+        description: "Resume building requires a Premium or Platinum subscription.",
         variant: "destructive"
       });
       return;

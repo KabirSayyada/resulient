@@ -43,7 +43,7 @@ const ATSResumeBuilder = () => {
   }
 
   const handleGenerate = async (formData: any) => {
-    if (usage.resumeBuilding.hasReachedLimit) {
+    if (subscription.tier === "free") {
       showLimitReachedMessage("resume building");
       return;
     }
@@ -163,30 +163,18 @@ const ATSResumeBuilder = () => {
                           </div>
                         ))}
                       </div>
-
-                      {/* Usage Statistics */}
-                      {subscription.tier === "free" && (
-                        <div className="mt-8 p-4 sm:p-6 bg-gradient-to-r from-amber-50/80 to-orange-50/80 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/60 dark:border-amber-800/50 rounded-2xl backdrop-blur-sm">
-                          <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300 font-semibold">
-                            <Target className="h-5 w-5" />
-                            <span className="text-sm sm:text-base">
-                              Free tier: {usage.resumeBuilding.used}/{usage.resumeBuilding.limit} resume builds used
-                            </span>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </CardContent>
                 </Card>
               </div>
             </div>
 
-            {usage.resumeBuilding.hasReachedLimit && subscription.tier === "free" && (
+            {subscription.tier === "free" && (
               <div className="mb-3 sm:mb-8">
                 <UseSubscriptionAlert 
                   subscriptionTier={subscription.tier} 
                   requiredTier="premium" 
-                  message="You've reached your lifetime limit for resume building. Free users can build 1 resume. Upgrade to Premium or Platinum for unlimited resume building."
+                  message="Resume building requires a Premium or Platinum subscription. Upgrade now to start building unlimited professional resumes."
                 />
               </div>
             )}
@@ -216,7 +204,7 @@ const ATSResumeBuilder = () => {
                   <ATSResumeForm 
                     onGenerate={handleGenerate}
                     isGenerating={isGenerating}
-                    disabled={usage.resumeBuilding.hasReachedLimit && subscription.tier === "free"}
+                    disabled={subscription.tier === "free"}
                   />
                 </CardContent>
               </Card>
