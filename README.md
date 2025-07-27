@@ -1,5 +1,3 @@
-pppr8_DWP9L4xgVaeL4hmfoSagDVWttR3D1ha2NYl7Ekkk
-
 # Welcome to your Lovable project
 
 ## Project info
