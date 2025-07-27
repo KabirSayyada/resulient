@@ -1,5 +1,3 @@
-tttttsk-proj-zwNc90SSLQyyb1gIXGxWKwIw0QB9q4x5-Y_RcLifZrgUbBUowulFiheqeqLyBzRfMmUFDpQZ2HT3BlbkFJ7bUFsk9-Pp7jyBUn52H6QFLsL5-aK-VRMQHRV-jF_g8vPiZfZqGOP0vugcFARmIQy6X2w_704Attttt
-
 # Welcome to your Lovable project
 
 ## Project info
