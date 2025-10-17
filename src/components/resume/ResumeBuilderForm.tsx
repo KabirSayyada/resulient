@@ -55,7 +55,8 @@ export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData, e
   const [searchParams] = useSearchParams();
   const [enhancedFields, setEnhancedFields] = useState<string[]>([]);
   
-  const [formData, setFormData] = useState<ResumeData>(existingData || {
+  // Default structure to ensure all fields exist
+  const defaultData: ResumeData = {
     personalInfo: {
       name: "",
       email: "",
@@ -66,7 +67,26 @@ export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData, e
     skills: [""],
     achievements: [{ title: "", description: "" }],
     education: [{ institution: "", degree: "", field: "", year: "" }]
-  });
+  };
+
+  // Merge existing data with default structure to prevent undefined errors
+  const initialData: ResumeData = existingData ? {
+    personalInfo: { ...defaultData.personalInfo, ...(existingData.personalInfo || {}) },
+    workExperience: existingData.workExperience && existingData.workExperience.length > 0 
+      ? existingData.workExperience 
+      : defaultData.workExperience,
+    skills: existingData.skills && existingData.skills.length > 0 
+      ? existingData.skills 
+      : defaultData.skills,
+    achievements: existingData.achievements && existingData.achievements.length > 0 
+      ? existingData.achievements 
+      : defaultData.achievements,
+    education: existingData.education && existingData.education.length > 0 
+      ? existingData.education 
+      : defaultData.education
+  } : defaultData;
+  
+  const [formData, setFormData] = useState<ResumeData>(initialData);
 
   // Check if we're in enhancement mode
   useEffect(() => {
@@ -88,10 +108,25 @@ export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData, e
     }
   }, [searchParams, existingData, toast]);
 
-  // Update form data when existing data changes
+  // Update form data when existing data changes - with proper merging
   useEffect(() => {
     if (existingData) {
-      setFormData(existingData);
+      const mergedData: ResumeData = {
+        personalInfo: { ...defaultData.personalInfo, ...(existingData.personalInfo || {}) },
+        workExperience: existingData.workExperience && existingData.workExperience.length > 0 
+          ? existingData.workExperience 
+          : defaultData.workExperience,
+        skills: existingData.skills && existingData.skills.length > 0 
+          ? existingData.skills 
+          : defaultData.skills,
+        achievements: existingData.achievements && existingData.achievements.length > 0 
+          ? existingData.achievements 
+          : defaultData.achievements,
+        education: existingData.education && existingData.education.length > 0 
+          ? existingData.education 
+          : defaultData.education
+      };
+      setFormData(mergedData);
     }
   }, [existingData]);
 
