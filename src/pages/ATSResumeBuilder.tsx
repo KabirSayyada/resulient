@@ -15,7 +15,7 @@ import { useATSResumeBuilder } from "@/hooks/useATSResumeBuilder";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
 import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
-import { OptimizationAnimation } from "@/components/resume/OptimizationAnimation";
+import { AutoLoadAnimation } from "@/components/resume/AutoLoadAnimation";
 import { Badge } from "@/components/ui/badge";
 
 const ATSResumeBuilder = () => {
@@ -66,13 +66,11 @@ const ATSResumeBuilder = () => {
 
   return (
     <>
-      <OptimizationAnimation 
-        isOptimizing={isGenerating} 
-        onComplete={() => setIsModalOpen(true)} 
-        mode="ats-building"
+      <AutoLoadAnimation 
+        isLoading={isGenerating}
       />
       
-      <ATSResumeModal 
+      <ATSResumeModal
         isOpen={isModalOpen && !!resumeData}
         onClose={() => setIsModalOpen(false)}
         resumeData={resumeData || ""}

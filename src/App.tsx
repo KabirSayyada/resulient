@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import Index from "@/pages/Index";
 import LandingPage from "@/pages/LandingPage";
 import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
@@ -19,7 +18,6 @@ import Pricing from "@/pages/Pricing";
 import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
 import SubscriptionDetails from "@/pages/SubscriptionDetails";
 import ReferralProgram from "@/pages/ReferralProgram";
-import Jobs from "@/pages/Jobs";
 // Blog imports
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
@@ -27,23 +25,18 @@ import BlogCategory from "@/pages/BlogCategory";
 import BlogAdmin from "@/pages/BlogAdmin";
 import { Sitemap } from "@/components/blog/Sitemap";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { JobMatchPopup } from "@/components/onboarding/JobMatchPopup";
 
 function AppContent() {
-  const { user } = useAuth();
-
   return (
     <>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/resume-builder" element={<ATSResumeBuilder />} />
-        <Route path="/resume-optimization" element={<Index />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/profile-setup" element={<ProfileSetup />} />
         <Route path="/profile-edit" element={<ProfileEdit />} />
         <Route path="/resume-scoring" element={<ResumeScoring />} />
         <Route path="/ats-resume-builder" element={<ATSResumeBuilder />} />
-        <Route path="/jobs" element={<Jobs />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
@@ -61,9 +54,6 @@ function AppContent() {
         <Route path="/sitemap.xml" element={<Sitemap />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      
-      {/* Show job match popup only for authenticated users */}
-      {user && <JobMatchPopup />}
       
       <Toaster />
       <Sonner />

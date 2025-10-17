@@ -64,20 +64,6 @@ export function MainNavigation() {
                   >
                     Resume Score
                   </Link>
-                  <Link
-                    to="/resume-optimization"
-                    className="text-center py-3 px-4 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors font-medium"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Resume Optimization
-                  </Link>
-                  <Link
-                    to="/jobs"
-                    className="text-center py-3 px-4 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors font-medium"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Job Listings
-                  </Link>
                   {!user && (
                     <Link
                       to="/auth"
@@ -118,26 +104,6 @@ export function MainNavigation() {
                     className={navigationMenuTriggerStyle()}
                   >
                     Resume Score
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Link
-                    to="/resume-optimization"
-                    className={navigationMenuTriggerStyle()}
-                  >
-                    Resume Optimization
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Link
-                    to="/jobs"
-                    className={navigationMenuTriggerStyle()}
-                  >
-                    Job Listings
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>

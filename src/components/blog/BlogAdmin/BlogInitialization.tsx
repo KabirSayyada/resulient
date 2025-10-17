@@ -5,7 +5,6 @@ import { useState } from "react";
 import { initializeBlogContent } from "@/utils/blogInitializer";
 import { createAtsBlogPost } from "@/data/createAtsBlogPost";
 import { createCareerBlogPost } from "@/utils/createCareerBlogPost";
-import { createJobSearchPost } from "@/utils/createJobSearchPost";
 import { createResumeATSTipsPost, createResumeCommonMistakesPost, createAllResumeTipsPosts } from "@/utils/createResumeTipsPosts";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,7 +15,6 @@ export function BlogInitialization() {
   const [isLoadingDefault, setIsLoadingDefault] = useState(false);
   const [isLoadingAts, setIsLoadingAts] = useState(false);
   const [isLoadingCareer, setIsLoadingCareer] = useState(false);
-  const [isLoadingJobSearch, setIsLoadingJobSearch] = useState(false);
   const [isLoadingResumeTips1, setIsLoadingResumeTips1] = useState(false);
   const [isLoadingResumeTips2, setIsLoadingResumeTips2] = useState(false);
   const [isLoadingAllResumeTips, setIsLoadingAllResumeTips] = useState(false);
@@ -116,41 +114,6 @@ export function BlogInitialization() {
     }
   };
 
-  const handleCreateJobSearchPost = async () => {
-    if (!user?.id) {
-      toast({
-        title: "Authentication Required",
-        description: "You must be logged in to create a blog post",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsLoadingJobSearch(true);
-    try {
-      const result = await createJobSearchPost(user.id);
-      if (result) {
-        toast({
-          title: "Success",
-          description: "Job search strategy post created successfully",
-        });
-      } else {
-        toast({
-          title: "Note",
-          description: "Job search strategy post already exists",
-        });
-      }
-    } catch (error) {
-      console.error("Error creating job search post:", error);
-      toast({
-        title: "Error",
-        description: "Failed to create job search post",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingJobSearch(false);
-    }
-  };
 
   const handleCreateResumeATSTipsPost = async () => {
     if (!user?.id) {
@@ -278,7 +241,6 @@ export function BlogInitialization() {
       const results = await Promise.all([
         createAtsBlogPost(userId),
         createCareerBlogPost(userId),
-        createJobSearchPost(userId),
         createResumeATSTipsPost(userId),
         createResumeCommonMistakesPost(userId)
       ]);
@@ -335,7 +297,7 @@ export function BlogInitialization() {
               </p>
               <Button 
                 onClick={handleCreateAllPosts} 
-                disabled={isLoadingAll || isLoadingAts || isLoadingCareer || isLoadingJobSearch || isLoadingResumeTips1 || isLoadingResumeTips2 || isLoadingAllResumeTips}
+                disabled={isLoadingAll || isLoadingAts || isLoadingCareer || isLoadingResumeTips1 || isLoadingResumeTips2 || isLoadingAllResumeTips}
                 variant="secondary"
                 className="w-full"
               >
@@ -398,16 +360,6 @@ export function BlogInitialization() {
                   className="w-full"
                 >
                   {isLoadingCareer ? "Creating..." : "Create Career Post"}
-                </Button>
-              </div>
-              <div className="mt-2">
-                <Button 
-                  onClick={handleCreateJobSearchPost} 
-                  disabled={isLoadingJobSearch || isLoadingAll}
-                  variant="outline"
-                  className="w-full"
-                >
-                  {isLoadingJobSearch ? "Creating..." : "Create Job Search Post"}
                 </Button>
               </div>
             </div>

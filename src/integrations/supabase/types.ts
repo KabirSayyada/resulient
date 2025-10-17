@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -251,113 +251,6 @@ export type Database = {
           },
         ]
       }
-      job_applications: {
-        Row: {
-          application_status: string
-          applied_at: string
-          created_at: string
-          external_application_url: string | null
-          id: string
-          job_id: string
-          notes: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          application_status?: string
-          applied_at?: string
-          created_at?: string
-          external_application_url?: string | null
-          id?: string
-          job_id: string
-          notes?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          application_status?: string
-          applied_at?: string
-          created_at?: string
-          external_application_url?: string | null
-          id?: string
-          job_id?: string
-          notes?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "job_applications_job_id_fkey"
-            columns: ["job_id"]
-            isOneToOne: false
-            referencedRelation: "jobs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      jobs: {
-        Row: {
-          company: string
-          created_at: string
-          description: string
-          expires_at: string | null
-          external_job_id: string | null
-          external_url: string | null
-          id: string
-          is_active: boolean
-          location: string
-          posted_date: string
-          requirements: string | null
-          salary: string | null
-          source: string | null
-          tags: string[] | null
-          title: string
-          type: string
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          company: string
-          created_at?: string
-          description: string
-          expires_at?: string | null
-          external_job_id?: string | null
-          external_url?: string | null
-          id?: string
-          is_active?: boolean
-          location: string
-          posted_date?: string
-          requirements?: string | null
-          salary?: string | null
-          source?: string | null
-          tags?: string[] | null
-          title: string
-          type?: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          company?: string
-          created_at?: string
-          description?: string
-          expires_at?: string | null
-          external_job_id?: string | null
-          external_url?: string | null
-          id?: string
-          is_active?: boolean
-          location?: string
-          posted_date?: string
-          requirements?: string | null
-          salary?: string | null
-          source?: string | null
-          tags?: string[] | null
-          title?: string
-          type?: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -474,51 +367,6 @@ export type Database = {
           referrer_user_id?: string
           status?: string
           subscription_purchase_id?: string | null
-        }
-        Relationships: []
-      }
-      resume_optimizations: {
-        Row: {
-          ats_score: number | null
-          created_at: string
-          id: string
-          job_description: string
-          keyword_score: number | null
-          optimized_resume: string
-          original_resume: string
-          overall_score: number | null
-          qualification_gaps: Json | null
-          structure_score: number | null
-          suggestions: string[] | null
-          user_id: string
-        }
-        Insert: {
-          ats_score?: number | null
-          created_at?: string
-          id?: string
-          job_description: string
-          keyword_score?: number | null
-          optimized_resume: string
-          original_resume: string
-          overall_score?: number | null
-          qualification_gaps?: Json | null
-          structure_score?: number | null
-          suggestions?: string[] | null
-          user_id: string
-        }
-        Update: {
-          ats_score?: number | null
-          created_at?: string
-          id?: string
-          job_description?: string
-          keyword_score?: number | null
-          optimized_resume?: string
-          original_resume?: string
-          overall_score?: number | null
-          qualification_gaps?: Json | null
-          structure_score?: number | null
-          suggestions?: string[] | null
-          user_id?: string
         }
         Relationships: []
       }
@@ -658,6 +506,8 @@ export type Database = {
           gumroad_subscription_id: string | null
           id: string
           last_webhook_event: string | null
+          payment_provider: string | null
+          paystack_reference: string | null
           start_date: string
           status: string
           subscription_tier: string
@@ -673,6 +523,8 @@ export type Database = {
           gumroad_subscription_id?: string | null
           id?: string
           last_webhook_event?: string | null
+          payment_provider?: string | null
+          paystack_reference?: string | null
           start_date?: string
           status: string
           subscription_tier: string
@@ -688,6 +540,8 @@ export type Database = {
           gumroad_subscription_id?: string | null
           id?: string
           last_webhook_event?: string | null
+          payment_provider?: string | null
+          paystack_reference?: string | null
           start_date?: string
           status?: string
           subscription_tier?: string
@@ -775,19 +629,19 @@ export type Database = {
         Returns: undefined
       }
       get_user_total_usage_count: {
-        Args: { p_user_id: string; p_feature_type: string }
+        Args: { p_feature_type: string; p_user_id: string }
         Returns: number
       }
       get_user_usage_count: {
-        Args: { p_user_id: string; p_feature_type: string; p_date?: string }
+        Args: { p_date?: string; p_feature_type: string; p_user_id: string }
         Returns: number
       }
       increment_user_usage: {
-        Args: { p_user_id: string; p_feature_type: string }
+        Args: { p_feature_type: string; p_user_id: string }
         Returns: number
       }
       user_has_active_subscription: {
-        Args: { user_uuid: string; tier?: string }
+        Args: { tier?: string; user_uuid: string }
         Returns: boolean
       }
     }

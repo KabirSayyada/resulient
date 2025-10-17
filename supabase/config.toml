@@ -22,15 +22,6 @@ verify_jwt = false
 [functions.gumroad-webhook]
 verify_jwt = false
 
-[functions.auto-scrape-jobs]
-verify_jwt = false
-
-[functions.scrape-jobs]
-verify_jwt = true
-
-[functions.optimize-resume]
-verify_jwt = true
-
 [functions.parse-ats-resume]
 verify_jwt = true
 
