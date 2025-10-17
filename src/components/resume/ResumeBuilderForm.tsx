@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,6 +51,8 @@ interface ResumeBuilderFormProps {
 
 export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData }: ResumeBuilderFormProps) => {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const [enhancedFields, setEnhancedFields] = useState<string[]>([]);
   
   const [formData, setFormData] = useState<ResumeData>(existingData || {
     personalInfo: {
@@ -63,6 +66,33 @@ export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData }:
     achievements: [{ title: "", description: "" }],
     education: [{ institution: "", degree: "", field: "", year: "" }]
   });
+
+  // Check if we're in enhancement mode
+  useEffect(() => {
+    const isEnhanced = searchParams.get('enhanced') === 'true';
+    if (isEnhanced && existingData) {
+      // Mark recently added fields
+      const newFields: string[] = [];
+      if (existingData.skills.length > 0) newFields.push('skills');
+      if (existingData.achievements.some(a => a.title || a.description)) newFields.push('achievements');
+      setEnhancedFields(newFields);
+      
+      // Show success message
+      setTimeout(() => {
+        toast({
+          title: "✨ Enhancements Applied!",
+          description: "Your resume has been enhanced with AI suggestions. Review and customize as needed.",
+        });
+      }, 500);
+    }
+  }, [searchParams, existingData]);
+
+  // Update form data when existing data changes
+  useEffect(() => {
+    if (existingData) {
+      setFormData(existingData);
+    }
+  }, [existingData]);
 
   const handlePersonalInfoChange = (field: keyof ResumeData['personalInfo'], value: string) => {
     setFormData(prev => ({
@@ -346,7 +376,11 @@ export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData }:
       </Card>
 
       {/* Skills */}
-      <Card className="bg-gradient-to-br from-purple-50/80 via-white to-fuchsia-50/80 dark:from-purple-950/30 dark:via-background dark:to-fuchsia-950/30 border-2 border-purple-200/60 dark:border-purple-800/60 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <Card className={`bg-gradient-to-br from-purple-50/80 via-white to-fuchsia-50/80 dark:from-purple-950/30 dark:via-background dark:to-fuchsia-950/30 border-2 shadow-xl hover:shadow-2xl transition-all duration-300 ${
+        enhancedFields.includes('skills') 
+          ? 'border-indigo-400 dark:border-indigo-600 ring-4 ring-indigo-200/50 dark:ring-indigo-800/50' 
+          : 'border-purple-200/60 dark:border-purple-800/60'
+      }`}>
         <CardHeader className="pb-6">
           <CardTitle className="flex items-center gap-3 text-xl font-bold">
             <div className="p-3 bg-gradient-to-r from-purple-500 to-fuchsia-600 rounded-xl shadow-lg">
@@ -355,6 +389,12 @@ export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData }:
             <span className="bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
               Skills
             </span>
+            {enhancedFields.includes('skills') && (
+              <Badge className="ml-auto bg-gradient-to-r from-indigo-500 to-purple-500 text-white gap-1">
+                <Sparkles className="h-3 w-3" />
+                AI Enhanced
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -464,7 +504,11 @@ export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData }:
       </Card>
 
       {/* Achievements */}
-      <Card className="bg-gradient-to-br from-rose-50/80 via-white to-pink-50/80 dark:from-rose-950/30 dark:via-background dark:to-pink-950/30 border-2 border-rose-200/60 dark:border-rose-800/60 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <Card className={`bg-gradient-to-br from-rose-50/80 via-white to-pink-50/80 dark:from-rose-950/30 dark:via-background dark:to-pink-950/30 border-2 shadow-xl hover:shadow-2xl transition-all duration-300 ${
+        enhancedFields.includes('achievements') 
+          ? 'border-indigo-400 dark:border-indigo-600 ring-4 ring-indigo-200/50 dark:ring-indigo-800/50' 
+          : 'border-rose-200/60 dark:border-rose-800/60'
+      }`}>
         <CardHeader className="pb-6">
           <CardTitle className="flex items-center gap-3 text-xl font-bold">
             <div className="p-3 bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl shadow-lg">
@@ -473,6 +517,12 @@ export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData }:
             <span className="bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
               Achievements & Awards
             </span>
+            {enhancedFields.includes('achievements') && (
+              <Badge className="ml-auto bg-gradient-to-r from-indigo-500 to-purple-500 text-white gap-1">
+                <Sparkles className="h-3 w-3" />
+                AI Enhanced
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">

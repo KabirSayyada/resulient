@@ -10,6 +10,7 @@ import { FullReportPdfTemplate } from './components/FullReportPdfTemplate';
 import { VisibleReportContent } from './components/VisibleReportContent';
 import { DownloadReportSection } from './components/DownloadReportSection';
 import { ResumeScoreAnimations } from './components/ResumeScoreAnimations';
+import { ApplySuggestionsButton } from './ApplySuggestionsButton';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ScoreResultSectionProps {
@@ -68,7 +69,15 @@ export const ScoreResultSection = ({ scoreData }: ScoreResultSectionProps) => {
                 </div>
               </div>
               
-              <CardContent className="px-2 sm:px-6 pb-3 sm:pb-6">
+              <CardContent className="px-2 sm:px-6 pb-3 sm:pb-6 space-y-4">
+                {/* Apply Suggestions CTA */}
+                <div className="flex justify-center">
+                  <ApplySuggestionsButton 
+                    scoreData={scoreData} 
+                    size="lg"
+                  />
+                </div>
+                
                 <ResumeActions 
                   scoreCardRef={scoreCardRef} 
                   completeReportRef={completeReportRef} 

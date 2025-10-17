@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { BadgeCheck, X, Plus, Star, TrendingUp, Zap } from "lucide-react";
+import { BadgeCheck, X, Plus, Star, TrendingUp, Zap, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { useResumeBuilder } from "@/hooks/useResumeBuilder";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 interface SuggestedSkillsProps {
   skills: string[];
@@ -19,6 +23,70 @@ export const SuggestedSkills = ({
   selectedSkills = [],
   variant = 'default'
 }: SuggestedSkillsProps) => {
+  const navigate = useNavigate();
+  const { resumeData, saveResumeData } = useResumeBuilder();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [localSelectedSkills, setLocalSelectedSkills] = useState<string[]>([]);
+
+  const handleAddSelectedSkills = async () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+
+    if (localSelectedSkills.length === 0) {
+      toast({
+        title: "No skills selected",
+        description: "Please select at least one skill to add.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const currentResume = resumeData || {
+        personalInfo: { name: "", email: "", phone: "", location: "" },
+        workExperience: [{ company: "", position: "", location: "", startYear: "", endYear: "", description: "" }],
+        skills: [""],
+        achievements: [{ title: "", description: "" }],
+        education: [{ institution: "", degree: "", field: "", year: "" }]
+      };
+
+      const existingSkills = currentResume.skills.map(s => s.toLowerCase().trim());
+      const newSkills = localSelectedSkills.filter(
+        skill => !existingSkills.includes(skill.toLowerCase().trim())
+      );
+
+      const updatedResume = {
+        ...currentResume,
+        skills: [...currentResume.skills.filter(s => s.trim()), ...newSkills]
+      };
+
+      await saveResumeData(updatedResume);
+      
+      toast({
+        title: "✨ Skills Added!",
+        description: `Added ${newSkills.length} skill${newSkills.length > 1 ? 's' : ''} to your resume.`,
+      });
+
+      navigate("/ats-resume-builder?enhanced=true");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add skills. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const toggleSkillSelection = (skill: string) => {
+    setLocalSelectedSkills(prev => 
+      prev.includes(skill) 
+        ? prev.filter(s => s !== skill)
+        : [...prev, skill]
+    );
+  };
   if (!skills || skills.length === 0) {
     return (
       <div className="text-gray-500 dark:text-gray-400 italic text-center p-6 bg-gray-50/50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
@@ -71,24 +139,22 @@ export const SuggestedSkills = ({
                       </span>
                     </div>
                     
-                    {selectable && onSelect && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`h-7 w-7 p-0 rounded-full transition-all duration-200 ${
-                          isSelected
-                            ? 'hover:bg-indigo-200 dark:hover:bg-indigo-800'
-                            : 'hover:bg-blue-100 dark:hover:bg-blue-900'
-                        }`}
-                        onClick={() => onSelect(skill)}
-                      >
-                        {isSelected ? (
-                          <X className="h-3 w-3 text-indigo-700 dark:text-indigo-300" />
-                        ) : (
-                          <Plus className="h-3 w-3 text-blue-700 dark:text-blue-300" />
-                        )}
-                      </Button>
-                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-7 w-7 p-0 rounded-full transition-all duration-200 ${
+                        isSelected
+                          ? 'hover:bg-indigo-200 dark:hover:bg-indigo-800'
+                          : 'hover:bg-blue-100 dark:hover:bg-blue-900'
+                      }`}
+                      onClick={() => selectable && onSelect ? onSelect(skill) : toggleSkillSelection(skill)}
+                    >
+                      {isSelected ? (
+                        <X className="h-3 w-3 text-indigo-700 dark:text-indigo-300" />
+                      ) : (
+                        <Plus className="h-3 w-3 text-blue-700 dark:text-blue-300" />
+                      )}
+                    </Button>
                   </div>
                   
                   {/* Skill impact indicator */}
@@ -104,8 +170,8 @@ export const SuggestedSkills = ({
           })}
         </div>
         
-        {/* Summary footer */}
-        <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg border border-blue-200/50 dark:border-blue-800/50">
+        {/* Summary footer with Add Button */}
+        <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg border border-blue-200/50 dark:border-blue-800/50 space-y-3">
           <div className="flex items-center justify-between text-sm">
             <span className="text-blue-700 dark:text-blue-300 font-medium">
               {skills.length} skill{skills.length !== 1 ? 's' : ''} recommended
@@ -115,6 +181,17 @@ export const SuggestedSkills = ({
               Score boost potential
             </Badge>
           </div>
+          
+          {localSelectedSkills.length > 0 && (
+            <Button 
+              onClick={handleAddSelectedSkills}
+              className="w-full gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+              size="sm"
+            >
+              <Sparkles className="h-4 w-4" />
+              Add Selected Skills ({localSelectedSkills.length})
+            </Button>
+          )}
         </div>
       </div>
     );
