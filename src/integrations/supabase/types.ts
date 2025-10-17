@@ -474,27 +474,41 @@ export type Database = {
       }
       user_resume_data: {
         Row: {
+          applied_from_score_id: string | null
           created_at: string
+          enhancements: Json | null
           id: string
           resume_data: Json
           updated_at: string
           user_id: string
         }
         Insert: {
+          applied_from_score_id?: string | null
           created_at?: string
+          enhancements?: Json | null
           id?: string
           resume_data: Json
           updated_at?: string
           user_id: string
         }
         Update: {
+          applied_from_score_id?: string | null
           created_at?: string
+          enhancements?: Json | null
           id?: string
           resume_data?: Json
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_resume_data_applied_from_score_id_fkey"
+            columns: ["applied_from_score_id"]
+            isOneToOne: false
+            referencedRelation: "resume_scores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_subscriptions: {
         Row: {
