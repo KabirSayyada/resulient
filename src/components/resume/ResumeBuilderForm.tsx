@@ -72,10 +72,10 @@ export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData, e
   useEffect(() => {
     const isEnhanced = searchParams.get('enhanced') === 'true';
     if (isEnhanced && existingData) {
-      // Mark recently added fields
+      // Mark recently added fields with proper null checks
       const newFields: string[] = [];
-      if (existingData.skills.length > 0) newFields.push('skills');
-      if (existingData.achievements.some(a => a.title || a.description)) newFields.push('achievements');
+      if (existingData.skills && existingData.skills.length > 0) newFields.push('skills');
+      if (existingData.achievements && existingData.achievements.some(a => a.title || a.description)) newFields.push('achievements');
       setEnhancedFields(newFields);
       
       // Show success message
@@ -86,7 +86,7 @@ export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData, e
         });
       }, 500);
     }
-  }, [searchParams, existingData]);
+  }, [searchParams, existingData, toast]);
 
   // Update form data when existing data changes
   useEffect(() => {
