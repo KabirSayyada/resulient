@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScoreData } from "@/types/resume";
 import { useResumeEnhancer } from "@/hooks/useResumeEnhancer";
-import { useResumeBuilder } from "@/hooks/useResumeBuilder";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Sparkles, TrendingUp, Target, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -29,8 +29,7 @@ export const EnhancementPreviewModal = ({
 }: EnhancementPreviewModalProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { applyAllEnhancements, parseScoringSuggestions } = useResumeEnhancer();
-  const { resumeData, saveResumeData } = useResumeBuilder();
+  const { parseScoringSuggestions, parseAndEnhanceResume } = useResumeEnhancer();
   const [isApplying, setIsApplying] = useState(false);
 
   const summary = parseScoringSuggestions(scoreData);
@@ -39,18 +38,38 @@ export const EnhancementPreviewModal = ({
     setIsApplying(true);
     
     try {
-      const enhancedResume = applyAllEnhancements(scoreData, resumeData);
-      await saveResumeData(enhancedResume);
+      // Parse original resume and apply enhancements
+      const { enhanced, enhancements } = await parseAndEnhanceResume(scoreData.id, scoreData);
       
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      // Save to database with enhancement metadata
+      const { error: saveError } = await supabase
+        .from('user_resume_data')
+        .upsert({
+          user_id: user.id,
+          resume_data: enhanced as any,
+          enhancements: enhancements as any,
+          applied_from_score_id: scoreData.id,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (saveError) throw saveError;
+
       toast({
         title: "✨ Enhancements Applied!",
-        description: `Added ${summary.totalChanges} improvements to your resume.`,
+        description: `Your resume has been populated with original content and AI improvements.`,
       });
       
       // Navigate to resume builder with enhancement flag
       navigate(`/ats-resume-builder?enhanced=true&score_id=${scoreData.id}`);
       onClose();
     } catch (error) {
+      console.error('Enhancement error:', error);
       toast({
         title: "Error",
         description: "Failed to apply enhancements. Please try again.",

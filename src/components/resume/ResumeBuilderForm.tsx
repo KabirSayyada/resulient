@@ -47,9 +47,10 @@ interface ResumeBuilderFormProps {
   onSubmit: (data: ResumeData) => void;
   isLoading?: boolean;
   existingData?: ResumeData | null;
+  enhancements?: any;
 }
 
-export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData }: ResumeBuilderFormProps) => {
+export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData, enhancements }: ResumeBuilderFormProps) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [enhancedFields, setEnhancedFields] = useState<string[]>([]);
@@ -398,27 +399,45 @@ export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData }:
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {formData.skills.map((skill, index) => (
-            <div key={index} className="flex gap-3">
-              <Input
-                placeholder="e.g., JavaScript, Project Management, Communication"
-                value={skill}
-                onChange={(e) => handleSkillChange(index, e.target.value)}
-                className="h-12 bg-white dark:bg-background border-2 border-purple-200 dark:border-purple-800 focus:border-purple-500 dark:focus:border-purple-400 rounded-xl"
-              />
-              {formData.skills.length > 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeSkill(index)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 px-3"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          ))}
+          {formData.skills.map((skill, index) => {
+            const isAIAdded = enhancements?.addedSkills?.some(
+              (s: string) => s.toLowerCase().trim() === skill.toLowerCase().trim()
+            );
+            
+            return (
+              <div key={index} className="flex gap-3 items-center">
+                <div className="flex-1 relative">
+                  <Input
+                    placeholder="e.g., JavaScript, Project Management, Communication"
+                    value={skill}
+                    onChange={(e) => handleSkillChange(index, e.target.value)}
+                    className={`h-12 bg-white dark:bg-background border-2 rounded-xl pr-28 ${
+                      isAIAdded 
+                        ? 'border-emerald-300 dark:border-emerald-700 bg-emerald-50/30 dark:bg-emerald-950/20' 
+                        : 'border-purple-200 dark:border-purple-800'
+                    } focus:border-purple-500 dark:focus:border-purple-400`}
+                  />
+                  {isAIAdded && (
+                    <Badge className="absolute right-2 top-1/2 -translate-y-1/2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 gap-1 pointer-events-none">
+                      <Sparkles className="h-3 w-3" />
+                      AI Added
+                    </Badge>
+                  )}
+                </div>
+                {formData.skills.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeSkill(index)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 px-3"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            );
+          })}
           
           <Button 
             type="button" 
@@ -526,38 +545,56 @@ export const ResumeBuilderForm = ({ onSubmit, isLoading = false, existingData }:
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {formData.achievements.map((achievement, index) => (
-            <div key={index} className="border-2 border-rose-200/60 dark:border-rose-800/60 rounded-2xl p-6 space-y-4 bg-white/60 dark:bg-background/40 shadow-lg">
-              <div className="flex justify-between items-center">
-                <h4 className="font-bold text-lg text-rose-800 dark:text-rose-200">Achievement #{index + 1}</h4>
-                {formData.achievements.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeAchievement(index)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                )}
+          {formData.achievements.map((achievement, index) => {
+            const isAIAdded = enhancements?.addedAchievements?.some(
+              (a: any) => a.description.toLowerCase().trim() === achievement.description.toLowerCase().trim()
+            );
+            
+            return (
+              <div key={index} className={`border-2 rounded-2xl p-6 space-y-4 shadow-lg ${
+                isAIAdded 
+                  ? 'border-emerald-300 dark:border-emerald-700 bg-emerald-50/30 dark:bg-emerald-950/20' 
+                  : 'border-rose-200/60 dark:border-rose-800/60 bg-white/60 dark:bg-background/40'
+              }`}>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-lg text-rose-800 dark:text-rose-200">Achievement #{index + 1}</h4>
+                    {isAIAdded && (
+                      <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 gap-1">
+                        <Sparkles className="h-3 w-3" />
+                        AI Suggested
+                      </Badge>
+                    )}
+                  </div>
+                  {formData.achievements.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeAchievement(index)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                
+                <Input
+                  placeholder="Achievement Title"
+                  value={achievement.title}
+                  onChange={(e) => handleAchievementChange(index, 'title', e.target.value)}
+                  className="h-12 bg-white dark:bg-background border-2 border-rose-200 dark:border-rose-800 focus:border-rose-500 dark:focus:border-rose-400 rounded-xl"
+                />
+                
+                <Textarea
+                  placeholder="Describe your achievement..."
+                  value={achievement.description}
+                  onChange={(e) => handleAchievementChange(index, 'description', e.target.value)}
+                  className="min-h-[80px] bg-white dark:bg-background border-2 border-rose-200 dark:border-rose-800 focus:border-rose-500 dark:focus:border-rose-400 rounded-xl resize-none"
+                />
               </div>
-              
-              <Input
-                placeholder="Achievement Title"
-                value={achievement.title}
-                onChange={(e) => handleAchievementChange(index, 'title', e.target.value)}
-                className="h-12 bg-white dark:bg-background border-2 border-rose-200 dark:border-rose-800 focus:border-rose-500 dark:focus:border-rose-400 rounded-xl"
-              />
-              
-              <Textarea
-                placeholder="Describe your achievement..."
-                value={achievement.description}
-                onChange={(e) => handleAchievementChange(index, 'description', e.target.value)}
-                className="min-h-[80px] bg-white dark:bg-background border-2 border-rose-200 dark:border-rose-800 focus:border-rose-500 dark:focus:border-rose-400 rounded-xl resize-none"
-              />
-            </div>
-          ))}
+            );
+          })}
           
           <Button 
             type="button" 

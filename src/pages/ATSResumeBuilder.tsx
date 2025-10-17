@@ -1,7 +1,6 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Sparkles, FileText, Download, Zap, Target, Brain, Shield } from "lucide-react";
@@ -11,20 +10,28 @@ import { UserMenuWithTheme } from "@/components/theme/UserMenuWithTheme";
 import { SubscriptionTierIndicator } from "@/components/subscription/SubscriptionTierIndicator";
 import { ATSResumeForm } from "@/components/resume/ATSResumeForm";
 import { ATSResumeModal } from "@/components/resume/ATSResumeModal";
+import { ResumeBuilderForm } from "@/components/resume/ResumeBuilderForm";
 import { useATSResumeBuilder } from "@/hooks/useATSResumeBuilder";
+import { useResumeBuilder } from "@/hooks/useResumeBuilder";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useUsageLimits } from "@/hooks/useUsageLimits";
 import { UseSubscriptionAlert } from "@/components/subscription/UseSubscriptionAlert";
 import { AutoLoadAnimation } from "@/components/resume/AutoLoadAnimation";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 const ATSResumeBuilder = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { resumeData, isGenerating, generateResume, downloadResume, downloadResumePDF, downloadTextBasedPDF, downloadFreshTemplatePDF } = useATSResumeBuilder(user?.id);
+  const { resumeData: builderResumeData, enhancements, loading: builderLoading, saveResumeData } = useResumeBuilder(user?.id);
   const { subscription } = useSubscription();
   const { usage, checkUsage, showLimitReachedMessage } = useUsageLimits();
+  
+  const isEnhancedMode = searchParams.get('enhanced') === 'true';
 
   if (!authLoading && !user) {
     navigate("/auth");
@@ -54,6 +61,22 @@ const ATSResumeBuilder = () => {
     // Open modal when resume is generated
     if (!isGenerating) {
       setIsModalOpen(true);
+    }
+  };
+
+  const handleManualSubmit = async (data: any) => {
+    try {
+      await saveResumeData(data);
+      toast({
+        title: "Resume Saved",
+        description: "Your resume has been saved successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save resume. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -199,11 +222,20 @@ const ATSResumeBuilder = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-                  <ATSResumeForm 
-                    onGenerate={handleGenerate}
-                    isGenerating={isGenerating}
-                    disabled={subscription.tier === "free"}
-                  />
+                  {isEnhancedMode ? (
+                    <ResumeBuilderForm
+                      onSubmit={handleManualSubmit}
+                      isLoading={false}
+                      existingData={builderResumeData}
+                      enhancements={enhancements}
+                    />
+                  ) : (
+                    <ATSResumeForm 
+                      onGenerate={handleGenerate}
+                      isGenerating={isGenerating}
+                      disabled={subscription.tier === "free"}
+                    />
+                  )}
                 </CardContent>
               </Card>
             </div>

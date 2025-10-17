@@ -6,6 +6,7 @@ import { ResumeData } from "@/components/resume/ResumeBuilderForm";
 
 export const useResumeBuilder = (userId?: string) => {
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
+  const [enhancements, setEnhancements] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -22,10 +23,10 @@ export const useResumeBuilder = (userId?: string) => {
     
     setLoading(true);
     try {
-      // Direct table access to get user resume data
+      // Load resume data with enhancement metadata
       const { data, error } = await supabase
         .from('user_resume_data')
-        .select('resume_data')
+        .select('resume_data, enhancements, applied_from_score_id')
         .eq('user_id', userId)
         .maybeSingle();
 
@@ -36,6 +37,7 @@ export const useResumeBuilder = (userId?: string) => {
 
       if (data) {
         setResumeData(data.resume_data as unknown as ResumeData);
+        setEnhancements(data.enhancements);
       }
     } catch (error) {
       console.error('Error loading resume data:', error);
@@ -151,6 +153,7 @@ export const useResumeBuilder = (userId?: string) => {
 
   return {
     resumeData,
+    enhancements,
     loading,
     saving,
     saveResumeData,

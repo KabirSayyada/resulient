@@ -1,5 +1,8 @@
 import { ScoreData } from "@/types/resume";
 import { ResumeData } from "@/components/resume/ResumeBuilderForm";
+import { supabase } from "@/integrations/supabase/client";
+import { parseATSResumeText } from "@/utils/parseATSResumeText";
+import { convertParsedResumeToBuilderFormat, identifyEnhancements } from "@/utils/resumeDataConverter";
 
 export interface EnhancementSummary {
   skillsToAdd: string[];
@@ -114,11 +117,58 @@ export const useResumeEnhancer = () => {
     return summary;
   };
 
+  /**
+   * Parse original resume from score record and merge with AI enhancements
+   */
+  const parseAndEnhanceResume = async (scoreId: string, scoreData: ScoreData) => {
+    try {
+      // 1. Fetch the score record to get original resume content
+      const { data: scoreRecord, error } = await supabase
+        .from('resume_scores')
+        .select('resume_content')
+        .eq('id', scoreId)
+        .single();
+
+      if (error) throw error;
+
+      // 2. Parse the original resume text into structured format
+      const parsedResume = parseATSResumeText(scoreRecord.resume_content);
+      const originalResumeData = convertParsedResumeToBuilderFormat(parsedResume);
+
+      // 3. Apply AI enhancements to the original data
+      const enhancedResumeData = applyAllEnhancements(scoreData, originalResumeData);
+
+      // 4. Identify what was enhanced for visual indicators
+      const enhancements = identifyEnhancements(originalResumeData, enhancedResumeData);
+
+      return {
+        original: originalResumeData,
+        enhanced: enhancedResumeData,
+        enhancements
+      };
+    } catch (error) {
+      console.error('Error parsing and enhancing resume:', error);
+      // Fallback: just apply enhancements to empty resume
+      const enhancedResume = applyAllEnhancements(scoreData, null);
+      return {
+        original: null,
+        enhanced: enhancedResume,
+        enhancements: {
+          addedSkills: enhancedResume.skills,
+          addedAchievements: enhancedResume.achievements,
+          originalSkills: [],
+          originalAchievements: []
+        }
+      };
+    }
+  };
+
   return {
     parseScoringSuggestions,
     applySkillsToResume,
     enhanceAchievements,
     applyAllEnhancements,
-    generatePreviewSummary
+    generatePreviewSummary,
+    parseAndEnhanceResume
   };
 };
