@@ -8,6 +8,7 @@ import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
 import ResumeScoring from "@/pages/ResumeScoring";
 import ATSResumeBuilder from "@/pages/ATSResumeBuilder";
+import ATSResumeBuilderNew from "@/pages/ATSResumeBuilderNew";
 import ProfileSetup from "@/pages/ProfileSetup";
 import ProfileEdit from "@/pages/ProfileEdit";
 import TermsOfService from "@/pages/TermsOfService";
@@ -31,12 +32,13 @@ function AppContent() {
     <>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/resume-builder" element={<ATSResumeBuilder />} />
+        <Route path="/resume-builder" element={<ATSResumeBuilderNew />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/profile-setup" element={<ProfileSetup />} />
         <Route path="/profile-edit" element={<ProfileEdit />} />
         <Route path="/resume-scoring" element={<ResumeScoring />} />
-        <Route path="/ats-resume-builder" element={<ATSResumeBuilder />} />
+        <Route path="/ats-resume-builder" element={<ATSResumeBuilderNew />} />
+        <Route path="/ats-resume-builder-old" element={<ATSResumeBuilder />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
