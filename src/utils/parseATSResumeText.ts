@@ -157,7 +157,10 @@ function parseWorkExperience(resume: ParsedResume, content: string[]) {
         currentExp = {
           position: parts[0].trim(),
           company: parts[1].trim(),
-          responsibilities: []
+          responsibilities: [],
+          startDate: '',
+          endDate: '',
+          location: ''
         };
         
         // Look for dates in the line
@@ -170,7 +173,10 @@ function parseWorkExperience(resume: ParsedResume, content: string[]) {
         currentExp = {
           position: line,
           company: '',
-          responsibilities: []
+          responsibilities: [],
+          startDate: '',
+          endDate: '',
+          location: ''
         };
       }
     }

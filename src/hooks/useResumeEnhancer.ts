@@ -129,14 +129,27 @@ export const useResumeEnhancer = () => {
         .eq('id', scoreId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching score record:', error);
+        throw error;
+      }
+
+      if (!scoreRecord || !scoreRecord.resume_content) {
+        console.error('No resume content found in score record');
+        throw new Error('Resume content not found');
+      }
 
       // 2. Parse the original resume text into structured format
+      console.log('Parsing resume text...');
       const parsedResume = parseATSResumeText(scoreRecord.resume_content);
+      console.log('Parsed resume:', parsedResume);
+      
       const originalResumeData = convertParsedResumeToBuilderFormat(parsedResume);
+      console.log('Converted to builder format:', originalResumeData);
 
       // 3. Apply AI enhancements to the original data
       const enhancedResumeData = applyAllEnhancements(scoreData, originalResumeData);
+      console.log('Enhanced resume data:', enhancedResumeData);
 
       // 4. Identify what was enhanced for visual indicators
       const enhancements = identifyEnhancements(originalResumeData, enhancedResumeData);
@@ -148,14 +161,16 @@ export const useResumeEnhancer = () => {
       };
     } catch (error) {
       console.error('Error parsing and enhancing resume:', error);
+      console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+      
       // Fallback: just apply enhancements to empty resume
       const enhancedResume = applyAllEnhancements(scoreData, null);
       return {
         original: null,
         enhanced: enhancedResume,
         enhancements: {
-          addedSkills: enhancedResume.skills,
-          addedAchievements: enhancedResume.achievements,
+          addedSkills: enhancedResume.skills || [],
+          addedAchievements: enhancedResume.achievements || [],
           originalSkills: [],
           originalAchievements: []
         }

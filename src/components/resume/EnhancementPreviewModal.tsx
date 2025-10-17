@@ -39,7 +39,16 @@ export const EnhancementPreviewModal = ({
     
     try {
       // Parse original resume and apply enhancements
+      console.log('Starting enhancement process for score:', scoreData.id);
       const { enhanced, enhancements } = await parseAndEnhanceResume(scoreData.id, scoreData);
+      
+      // Validate enhanced data structure
+      if (!enhanced || !enhanced.personalInfo || !Array.isArray(enhanced.workExperience)) {
+        console.error('Invalid enhanced resume structure:', enhanced);
+        throw new Error('Invalid resume data structure after enhancement');
+      }
+      
+      console.log('Enhancement successful, saving to database...');
       
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
@@ -58,7 +67,12 @@ export const EnhancementPreviewModal = ({
           onConflict: 'user_id'
         });
 
-      if (saveError) throw saveError;
+      if (saveError) {
+        console.error('Database save error:', saveError);
+        throw saveError;
+      }
+
+      console.log('Successfully saved to database');
 
       toast({
         title: "✨ Enhancements Applied!",
@@ -70,9 +84,12 @@ export const EnhancementPreviewModal = ({
       onClose();
     } catch (error) {
       console.error('Enhancement error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Error details:', errorMessage);
+      
       toast({
         title: "Error",
-        description: "Failed to apply enhancements. Please try again.",
+        description: `Failed to apply enhancements: ${errorMessage}`,
         variant: "destructive"
       });
     } finally {
