@@ -122,6 +122,13 @@ export const useResumeEnhancer = () => {
    */
   const parseAndEnhanceResume = async (scoreId: string, scoreData: ScoreData) => {
     try {
+      // Validate UUID format
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(scoreId)) {
+        console.error('Invalid UUID format:', scoreId);
+        throw new Error(`Invalid score ID format: ${scoreId}`);
+      }
+      
       // 1. Fetch the score record to get original resume content
       const { data: scoreRecord, error } = await supabase
         .from('resume_scores')
@@ -131,7 +138,7 @@ export const useResumeEnhancer = () => {
 
       if (error) {
         console.error('Error fetching score record:', error);
-        throw error;
+        throw new Error(`Database error: ${error.message}`);
       }
 
       if (!scoreRecord || !scoreRecord.resume_content) {

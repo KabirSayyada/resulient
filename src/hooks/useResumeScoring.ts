@@ -168,7 +168,7 @@ export const useResumeScoring = (userId: string | undefined) => {
       
       try {
         // Store ALL score fields in the database with proper field mapping
-        const { error } = await supabase
+        const { data: insertedScore, error } = await supabase
           .from("resume_scores")
           .insert({
             user_id: userId,
@@ -190,11 +190,21 @@ export const useResumeScoring = (userId: string | undefined) => {
             job_description: '',
             ats_readiness: 0,
             scoring_mode: "resumeOnly"
-          });
+          })
+          .select()
+          .single();
         
         if (error) {
           console.error("Error saving score:", error);
           throw error;
+        }
+        
+        // Update the scoreData with the real database UUID
+        if (insertedScore?.id) {
+          console.log('Score saved with real UUID:', insertedScore.id);
+          newScoreData.id = insertedScore.id;
+          setScoreData({ ...newScoreData, id: insertedScore.id });
+          setScoreHistory([{ ...newScoreData, id: insertedScore.id }, ...scoreHistory]);
         }
       } catch (dbError) {
         console.error("Database error when saving score:", dbError);

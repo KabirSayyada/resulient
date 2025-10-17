@@ -38,9 +38,41 @@ export const EnhancementPreviewModal = ({
     setIsApplying(true);
     
     try {
+      // Validate and resolve the score ID if needed
+      let validScoreId = scoreData.id;
+      
+      if (scoreData.id.startsWith('newly-generated-')) {
+        console.log('Detected temporary ID, resolving to real UUID...');
+        
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("User not authenticated");
+        
+        // Find the real score ID by matching resume content and user
+        const { data: scores, error: fetchError } = await supabase
+          .from('resume_scores')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('scoring_mode', 'resumeOnly')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        if (fetchError) {
+          console.error('Error fetching real score ID:', fetchError);
+          throw fetchError;
+        }
+        
+        if (scores && scores.length > 0) {
+          validScoreId = scores[0].id;
+          console.log('Resolved to real UUID:', validScoreId);
+        } else {
+          throw new Error('Could not find score in database');
+        }
+      }
+      
       // Parse original resume and apply enhancements
-      console.log('Starting enhancement process for score:', scoreData.id);
-      const { enhanced, enhancements } = await parseAndEnhanceResume(scoreData.id, scoreData);
+      console.log('Starting enhancement process for score:', validScoreId);
+      const { enhanced, enhancements } = await parseAndEnhanceResume(validScoreId, scoreData);
       
       // Validate enhanced data structure
       if (!enhanced || !enhanced.personalInfo || !Array.isArray(enhanced.workExperience)) {
@@ -54,14 +86,14 @@ export const EnhancementPreviewModal = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
-      // Save to database with enhancement metadata
+      // Save to database with enhancement metadata (use validScoreId)
       const { error: saveError } = await supabase
         .from('user_resume_data')
         .upsert({
           user_id: user.id,
           resume_data: enhanced as any,
           enhancements: enhancements as any,
-          applied_from_score_id: scoreData.id,
+          applied_from_score_id: validScoreId,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id'
@@ -79,8 +111,8 @@ export const EnhancementPreviewModal = ({
         description: `Your resume has been populated with original content and AI improvements.`,
       });
       
-      // Navigate to resume builder with enhancement flag
-      navigate(`/ats-resume-builder?enhanced=true&score_id=${scoreData.id}`);
+      // Navigate to resume builder with enhancement flag (use validScoreId)
+      navigate(`/ats-resume-builder?enhanced=true&score_id=${validScoreId}`);
       onClose();
     } catch (error) {
       console.error('Enhancement error:', error);
