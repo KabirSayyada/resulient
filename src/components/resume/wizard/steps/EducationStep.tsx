@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 
 export const EducationStep = () => {
-  const { formData, updateFormData } = useWizard();
+  const { formData, updateFormData, goToNextStep } = useWizard();
   const [education, setEducation] = useState<string[]>(formData.education || []);
   const [currentEdu, setCurrentEdu] = useState("");
 
@@ -28,10 +28,12 @@ export const EducationStep = () => {
 
   const handleNext = () => {
     updateFormData({ education });
+    goToNextStep();
   };
 
   const handleSkip = () => {
     updateFormData({ education: [] });
+    goToNextStep();
   };
 
   return (

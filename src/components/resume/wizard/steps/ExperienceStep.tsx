@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 
 export const ExperienceStep = () => {
-  const { formData, updateFormData } = useWizard();
+  const { formData, updateFormData, goToNextStep } = useWizard();
   const [experiences, setExperiences] = useState<string[]>(formData.workExperience || []);
   const [currentExp, setCurrentExp] = useState("");
 
@@ -28,6 +28,7 @@ export const ExperienceStep = () => {
 
   const handleNext = () => {
     updateFormData({ workExperience: experiences });
+    goToNextStep();
   };
 
   const isValid = experiences.length > 0;

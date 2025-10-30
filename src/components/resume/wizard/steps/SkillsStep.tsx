@@ -9,12 +9,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const SkillsStep = () => {
-  const { formData, updateFormData } = useWizard();
+  const { formData, updateFormData, goToNextStep } = useWizard();
   const [skills, setSkills] = useState(formData.skills || "");
   const [achievements, setAchievements] = useState(formData.achievements || "");
 
   const handleNext = () => {
     updateFormData({ skills, achievements });
+    goToNextStep();
   };
 
   const isValid = skills.trim().length > 10;

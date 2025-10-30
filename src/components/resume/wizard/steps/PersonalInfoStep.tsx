@@ -8,7 +8,7 @@ import { User, Lightbulb } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const PersonalInfoStep = () => {
-  const { formData, updateFormData } = useWizard();
+  const { formData, updateFormData, goToNextStep } = useWizard();
   const [localData, setLocalData] = useState(formData.personalInfo || "");
   const [characterCount, setCharacterCount] = useState(0);
 
@@ -18,6 +18,7 @@ export const PersonalInfoStep = () => {
 
   const handleNext = () => {
     updateFormData({ personalInfo: localData });
+    goToNextStep();
   };
 
   const isValid = localData.trim().length > 20;
